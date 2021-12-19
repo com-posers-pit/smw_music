@@ -1,0 +1,1 @@
+"""SMW Music Package Tests."""

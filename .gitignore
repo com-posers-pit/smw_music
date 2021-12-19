@@ -1,0 +1,5 @@
+.*.sw?
+.coverage
+.tox/
+__pycache__
+/report.html

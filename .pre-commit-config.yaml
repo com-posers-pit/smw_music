@@ -1,0 +1,40 @@
+# Hook ordering from https://codecalamity.com/pre-commit-check-yourself-before-you-wreck-yourself/
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.0.1
+    hooks:
+      # Identify invalid files
+      - id: check-ast
+      - id: check-yaml
+      - id: check-toml
+
+      # git checks
+      - id: check-added-large-files
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: forbid-new-submodules
+
+      # Python checks
+      - id: check-docstring-first
+      - id: debug-statements
+      - id: fix-byte-order-marker
+      - id: fix-encoding-pragma
+        args: [--remove]
+
+      # Other checks
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+
+  - repo: https://github.com/psf/black
+    rev: 21.12b0
+    hooks:
+      - id: black
+
+  - repo: https://github.com/tox-dev/tox-ini-fmt
+    rev: 0.5.1
+    hooks:
+      - id: tox-ini-fmt
