@@ -4,7 +4,7 @@
 # Standard Library imports
 ###############################################################################
 
-from typing import Dict, List
+from typing import Dict, List, Union
 
 ###############################################################################
 # Library imports
@@ -12,6 +12,21 @@ from typing import Dict, List
 
 import music21  # type: ignore
 
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+# Music XML uses 4 for a whole note, 5 for a half note, etc.  AMK uses 1 for a
+# whole note, 2 for a half note, etc.
+_MUSIC_XML_DURATION = {
+    4: 1,
+    5: 2,
+    6: 4,
+    7: 8,
+    8: 16,
+    9: 32,
+}
 
 ###############################################################################
 # API class definitions
@@ -30,20 +45,9 @@ class Note:
 
     @classmethod
     def from_music_xml(cls, elem: music21.note.Note) -> "Note":
-        # Music XML uses 4 for a whole note, 5 for a half note, etc.
-        # AMK uses 1 for a whole note, 2 for a half note, etc.
-        music_xml_duration = {
-            4: 1,
-            5: 2,
-            6: 4,
-            7: 8,
-            8: 16,
-            9: 32,
-        }
-
         return cls(
             elem.name.lower().replace("#", "+"),
-            music_xml_duration[elem.duration.ordinal],
+            _MUSIC_XML_DURATION[elem.duration.ordinal],
             elem.octave,
         )
 
@@ -57,8 +61,32 @@ class Note:
 ###############################################################################
 
 
+class Rest:
+    ###########################################################################
+
+    def __init__(self, duration: int):
+        self.duration = duration
+
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(cls, elem: music21.note.Rest) -> "Rest":
+        return cls(_MUSIC_XML_DURATION[elem.duration.ordinal])
+
+    ###########################################################################
+
+    @property
+    def amk(self) -> str:
+        return f"r{self.duration}"
+
+
+###############################################################################
+
+
 class Song:
-    def __init__(self, metadata: Dict[str, str], notes: List[Note]):
+    def __init__(
+        self, metadata: Dict[str, str], notes: List[Union[Note, Rest]]
+    ):
         self.title = metadata["title"]
         self.composer = metadata["composer"]
         self.bpm = int(metadata["bpm"])
@@ -69,7 +97,7 @@ class Song:
     @classmethod
     def from_music_xml(cls, fname: str) -> "Song":
         metadata = {}
-        notes = []
+        notes: List[Union[Note, Rest]] = []
         for elem in music21.converter.parseFile(fname):
             if isinstance(elem, music21.metadata.Metadata):
                 metadata["composer"] = elem.composer
@@ -80,6 +108,8 @@ class Song:
                         metadata["bpm"] = subelem.getQuarterBPM()
                     if isinstance(subelem, music21.note.Note):
                         notes.append(Note.from_music_xml(subelem))
+                    if isinstance(subelem, music21.note.Rest):
+                        notes.append(Rest.from_music_xml(subelem))
 
         return cls(metadata, notes)
 

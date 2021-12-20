@@ -1,6 +1,9 @@
 [tool.bandit]
 exclude_dirs = ["tests"]
 
+[tool.black]
+line-length = 79
+
 [tool.poetry]
 name = "smw_music"
 version = "0.1.0"
