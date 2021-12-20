@@ -1,7 +1,18 @@
+"""Utilities for handling Music XML conversions."""
+
 import music21  # type: ignore
 
 
 def convert(fname: str, ofname: str):
+    """Convert a Music XML file to an AMK text file.
+
+    Arguments
+    ---------
+    fname: str
+        Input Music XML file name (compressed or uncompressed)
+    ofname: str
+        Output AMK text file name
+    """
     duration_map = {
         4: 1,
         5: 2,
@@ -16,18 +27,18 @@ def convert(fname: str, ofname: str):
     notes = []
     note_str = []
 
-    for s in stream:
-        if isinstance(s, music21.metadata.Metadata):
-            composer = s.composer
-            title = s.title
-        elif isinstance(s, music21.stream.Part):
-            for el in s.flatten():
-                if isinstance(el, music21.tempo.MetronomeMark):
-                    tempo = el.getQuarterBPM()
+    for elem in stream:
+        if isinstance(elem, music21.metadata.Metadata):
+            composer = elem.composer
+            title = elem.title
+        elif isinstance(elem, music21.stream.Part):
+            for subelem in elem.flatten():
+                if isinstance(subelem, music21.tempo.MetronomeMark):
+                    tempo = subelem.getQuarterBPM()
                     spc_tempo = int(tempo * 256 / 625)
 
-                if isinstance(el, music21.note.Note):
-                    notes.append(el)
+                if isinstance(subelem, music21.note.Note):
+                    notes.append(subelem)
 
     for note in notes:
         octave = note.octave
@@ -46,5 +57,5 @@ def convert(fname: str, ofname: str):
     spc.append("@9 v150 o5")
     spc.append(" ".join(note_str))
 
-    with open(ofname, "w") as fobj:
+    with open(ofname, "w", encoding="ascii") as fobj:
         print("\r\n".join(spc), end="\r\n", file=fobj)
