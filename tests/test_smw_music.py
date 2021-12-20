@@ -55,7 +55,7 @@ def test_smb_castle(constants):
         fname = test_dir / "src" / fname
 
         with tempfile.NamedTemporaryFile("r") as fobj:
-            music_xml.convert(fname, fobj.name)
+            music_xml.Song.from_music_xml(fname).to_amk(fobj.name)
             written = fobj.readlines()
 
         assert target == written
