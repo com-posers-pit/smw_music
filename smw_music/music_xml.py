@@ -85,24 +85,26 @@ class Rest:
 
 class Song:
     def __init__(
-        self, metadata: Dict[str, str], notes: List[Union[Note, Rest]]
+        self, metadata: Dict[str, str], parts: List[List[Union[Note, Rest]]]
     ):
         self.title = metadata["title"]
         self.composer = metadata["composer"]
         self.bpm = int(metadata["bpm"])
-        self.notes = notes
+        self.parts = parts
 
     ###########################################################################
 
     @classmethod
     def from_music_xml(cls, fname: str) -> "Song":
         metadata = {}
-        notes: List[Union[Note, Rest]] = []
+        parts: List[List[Union[Note, Rest]]] = []
         for elem in music21.converter.parseFile(fname):
             if isinstance(elem, music21.metadata.Metadata):
                 metadata["composer"] = elem.composer
                 metadata["title"] = elem.title
             elif isinstance(elem, music21.stream.Part):
+                parts.append([])
+                notes = parts[-1]
                 for subelem in elem.flatten():
                     if isinstance(subelem, music21.tempo.MetronomeMark):
                         metadata["bpm"] = subelem.getQuarterBPM()
@@ -111,7 +113,7 @@ class Song:
                     if isinstance(subelem, music21.note.Rest):
                         notes.append(Rest.from_music_xml(subelem))
 
-        return cls(metadata, notes)
+        return cls(metadata, parts)
 
     ###########################################################################
 
@@ -133,8 +135,10 @@ class Song:
         amk.append(f'#author  "{self.composer}"')
         amk.append(f'#title   "{self.title}"')
         amk.append("}")
-        amk.append(f"#0 w255 t{amk_tempo}")
-        amk.append("@9 v150 o5")
-        amk.append(" ".join(note.amk for note in self.notes))
+        for n, part in enumerate(self.parts):
+            amk.append("")
+            amk.append(f"#{n} w255 t{amk_tempo}")
+            amk.append("@9 v150 o5")
+            amk.append(" ".join(note.amk for note in part))
 
         return "\r\n".join(amk)
