@@ -31,7 +31,7 @@ _MUSIC_XML_DURATION = {
     9: 32,
 }
 
-_Track_Elem = Union["Annotation", "Measure", "Note", "Rest"]
+_TrackElem = Union["Annotation", "Measure", "Note", "Rest"]
 
 _CRLF = "\r\n"
 
@@ -125,7 +125,7 @@ class Song:
     @classmethod
     def from_music_xml(cls, fname: str) -> "Song":
         metadata = {}
-        parts: List[List[_Track_Elem]] = []
+        parts: List[List[_TrackElem]] = []
         for elem in music21.converter.parseFile(fname):
             if isinstance(elem, music21.metadata.Metadata):
                 metadata["composer"] = elem.composer
@@ -186,7 +186,7 @@ class Song:
 
 
 class Track:
-    def __init__(self, elems: List[_Track_Elem]):
+    def __init__(self, elems: List[_TrackElem]):
         self.elems = elems
 
     @property
