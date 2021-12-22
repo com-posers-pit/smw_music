@@ -117,9 +117,9 @@ class Rest:
 
 class Song:
     def __init__(self, metadata: Dict[str, str], track_list: List["Track"]):
-        self.title = metadata["title"]
-        self.composer = metadata["composer"]
-        self.bpm = int(metadata["bpm"])
+        self.title = metadata.get("title", "???")
+        self.composer = metadata.get("composer", "???")
+        self.bpm = int(metadata.get("bpm", 120))
         self.track_list = track_list
 
     ###########################################################################
