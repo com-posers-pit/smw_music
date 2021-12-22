@@ -7,9 +7,9 @@
 }
 
 #0 w255 t36
-@9 v150 o5
-o5 d32 o4 g32 o5 c+32 o4 g32 o5 c32 o4 g32 o5 c+32 o4 g32 o5 d32 o4 g32 o5 d+32 o4 g32 o5 d32 o4 g32 o5 c+32 o4 g32 o5 d32 o4 g32 o5 c+32 o4 g32 o5 c32 o4 g32 o5 c+32 o4 g32 o5 d32 o4 g32 o5 d+32 o4 g32 o5 d32 o4 g32 o5 c+32 o4 g32 o5 c+32 o4 f+32 o5 c32 o4 f+32 o5 c+32 o4 f+32 o5 d32 o4 f+32 o5 c+32 o4 f+32 o5 d32 o4 f+32 o5 c+32 o4 f+32 o5 c32 o4 f+32 o5 c+32 o4 f+32 o5 c32 o4 f+32 o5 c+32 o4 f+32 o5 d32 o4 f+32 o5 c+32 o4 f+32 o5 d32 o4 f+32 o5 c+32 o4 f+32 o5 c32 o4 f+32 o5 f32 o4 a+32 o5 f+32 o4 a+32 o5 f32 o4 a+32 o5 e32 o4 a+32 o5 f32 o4 a+32 o5 e32 o4 a+32 o5 d+32 o4 a+32 o5 e32 o4 a+32 o5 f32 o4 a+32 o5 f+32 o4 a+32 o5 f32 o4 a+32 o5 e32 o4 a+32 o5 f32 o4 a+32 o5 e32 o4 a+32 o5 d+32 o4 a+32 o5 e32 o4 a+32
+@9 v150
+o5  l32 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+ > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+ > f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+ > f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
 
 #1 w255 t36
-@9 v150 o5
-o4 a+32 r32 o4 a32 r32 o4 g+32 r32 o4 a32 r32 o4 a+32 r32 o4 b32 r32 o4 a+32 r32 o4 a32 r32 o4 a+32 r32 o4 a32 r32 o4 g+32 r32 o4 a32 r32 o4 a+32 r32 o4 b32 r32 o4 a+32 r32 o4 a32 r32 o4 a32 r32 o4 g+32 r32 o4 a32 r32 o4 a+32 r32 o4 a32 r32 o4 a+32 r32 o4 a32 r32 o4 g+32 r32 o4 a32 r32 o4 g+32 r32 o4 a32 r32 o4 a+32 r32 o4 a32 r32 o4 a+32 r32 o4 a32 r32 o4 g+32 r32 o5 c+32 r32 o5 d32 r32 o5 c+32 r32 o5 c32 r32 o5 c+32 r32 o5 c32 r32 o4 b32 r32 o5 c32 r32 o5 c+32 r32 o5 d32 r32 o5 c+32 r32 o5 c32 r32 o5 c+32 r32 o5 c32 r32 o4 b32 r32 o5 c32 r32
+@9 v150
+o4  l32 a+ r a r g+ r a r a+ r b r a+ r a r a+ r a r g+ r a r a+ r b r a+ r a r a r g+ r a r a+ r a r a+ r a r g+ r a r g+ r a r a+ r a r a+ r a r g+ r > c+ r d r c+ r c r c+ r c r < b r > c r c+ r d r c+ r c r c+ r c r < b r > c r
