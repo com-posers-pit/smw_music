@@ -6,10 +6,24 @@
 #title   "SMB Castle Theme"
 }
 
-#0 w255 t36
-@9 v150
-o5  l32 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+ > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+ > f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+ > f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#1 w255 t36
-@9 v150
-o4  l32 a+ r a r g+ r a r a+ r b r a+ r a r a+ r a r g+ r a r a+ r b r a+ r a r a r g+ r a r a+ r a r a+ r a r g+ r a r g+ r a r a+ r a r a+ r a r g+ r > c+ r d r c+ r c r c+ r c r < b r > c r c+ r d r c+ r c r c+ r c r < b r > c r
+#0 t36
+o5 l32
+@9 w255 v150 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 t36
+o4 l32
+@9 v150 a+ r a r g+ r a r a+ r b r a+ r a r
+a+ r a r g+ r a r a+ r b r a+ r a r
+a r g+ r a r a+ r a r a+ r a r g+ r
+a r g+ r a r a+ r a r a+ r a r g+ r
+> c+ r d r c+ r c r c+ r c r < b r > c r
+c+ r d r c+ r c r c+ r c r < b r > c r
