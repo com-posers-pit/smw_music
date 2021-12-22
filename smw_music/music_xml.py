@@ -150,7 +150,7 @@ class Song:
                                 Annotation.from_music_xml(subelem)
                             )
 
-        return cls(metadata, map(Track, parts))
+        return cls(metadata, list(map(Track, parts)))
 
     ###########################################################################
 
@@ -237,12 +237,9 @@ class Track:
                 else:
                     directive = ""
 
-            try:
+            if isinstance(elem, (Note, Rest)):
                 if elem.duration != base_dur:
                     directive += str(elem.duration)
-            except AttributeError:
-                # Only notes and rests have .duration attributes
-                pass
 
             if directive:
                 directives.append(directive)
