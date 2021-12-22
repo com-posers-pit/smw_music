@@ -5,6 +5,7 @@
 ###############################################################################
 
 from collections import Counter
+from dataclasses import dataclass
 from typing import Dict, Iterable, List, TypeVar, Union
 
 ###############################################################################
@@ -56,9 +57,9 @@ def _most_common(container: Iterable[_T]) -> _T:
 ###############################################################################
 
 
+@dataclass
 class Annotation:
-    def __init__(self, text: str):
-        self.text = text
+    text: str
 
     ###########################################################################
 
@@ -72,6 +73,7 @@ class Annotation:
 ###############################################################################
 
 
+@dataclass
 class Measure:
     pass
 
@@ -79,11 +81,11 @@ class Measure:
 ###############################################################################
 
 
+@dataclass
 class Note:
-    def __init__(self, name: str, duration: int, octave: int):
-        self.name = name
-        self.duration = duration
-        self.octave = octave
+    name: str
+    duration: int
+    octave: int
 
     ###########################################################################
 
@@ -99,9 +101,9 @@ class Note:
 ###############################################################################
 
 
+@dataclass
 class Rest:
-    def __init__(self, duration: int):
-        self.duration = duration
+    duration: int
 
     ###########################################################################
 
