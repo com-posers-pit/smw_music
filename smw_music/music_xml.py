@@ -4,7 +4,8 @@
 # Standard Library imports
 ###############################################################################
 
-from typing import Dict, List, Union
+from collections import Counter
+from typing import Dict, Iterable, List, TypeVar, Union
 
 ###############################################################################
 # Library imports
@@ -17,6 +18,8 @@ import music21  # type: ignore
 # Private constant definitions
 ###############################################################################
 
+_T = TypeVar("_T")
+
 # Music XML uses 4 for a whole note, 5 for a half note, etc.  AMK uses 1 for a
 # whole note, 2 for a half note, etc.
 _MUSIC_XML_DURATION = {
@@ -27,6 +30,15 @@ _MUSIC_XML_DURATION = {
     8: 16,
     9: 32,
 }
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _most_common(container: Iterable[_T]) -> _T:
+    return Counter(container).most_common(1)[0][0]
+
 
 ###############################################################################
 # API class definitions
@@ -51,19 +63,11 @@ class Note:
             elem.octave,
         )
 
-    ###########################################################################
-
-    @property
-    def amk(self) -> str:
-        return f"o{self.octave} {self.name}{self.duration}"
-
 
 ###############################################################################
 
 
 class Rest:
-    ###########################################################################
-
     def __init__(self, duration: int):
         self.duration = duration
 
@@ -73,24 +77,16 @@ class Rest:
     def from_music_xml(cls, elem: music21.note.Rest) -> "Rest":
         return cls(_MUSIC_XML_DURATION[elem.duration.ordinal])
 
-    ###########################################################################
-
-    @property
-    def amk(self) -> str:
-        return f"r{self.duration}"
-
 
 ###############################################################################
 
 
 class Song:
-    def __init__(
-        self, metadata: Dict[str, str], parts: List[List[Union[Note, Rest]]]
-    ):
+    def __init__(self, metadata: Dict[str, str], track_list: List["Track"]):
         self.title = metadata["title"]
         self.composer = metadata["composer"]
         self.bpm = int(metadata["bpm"])
-        self.parts = parts
+        self.track_list = track_list
 
     ###########################################################################
 
@@ -113,7 +109,7 @@ class Song:
                     if isinstance(subelem, music21.note.Rest):
                         notes.append(Rest.from_music_xml(subelem))
 
-        return cls(metadata, parts)
+        return cls(metadata, map(Track, parts))
 
     ###########################################################################
 
@@ -135,10 +131,61 @@ class Song:
         amk.append(f'#author  "{self.composer}"')
         amk.append(f'#title   "{self.title}"')
         amk.append("}")
-        for n, part in enumerate(self.parts):
+        for n, track in enumerate(self.track_list):
             amk.append("")
             amk.append(f"#{n} w255 t{amk_tempo}")
-            amk.append("@9 v150 o5")
-            amk.append(" ".join(note.amk for note in part))
+            amk.append("@9 v150")
+            amk.append(track.amk)
 
         return "\r\n".join(amk)
+
+
+###############################################################################
+
+
+class Track:
+    def __init__(self, notes: List[Union[Note, Rest]]):
+        self.notes = notes
+
+    @property
+    def base_note_length(self) -> int:
+        return _most_common(x.duration for x in self.notes)
+
+    @property
+    def base_octave(self) -> int:
+        return _most_common(
+            x.octave for x in self.notes if isinstance(x, Note)
+        )
+
+    @property
+    def amk(self) -> str:
+        cur_octave = self.base_octave
+        base_dur = self.base_note_length
+        rv = [f"o{cur_octave}", ""]
+        rv.append(f"l{base_dur}")
+
+        for note in self.notes:
+            if isinstance(note, Rest):
+                directive = "r"
+
+            if isinstance(note, Note):
+                octave = note.octave
+
+                if octave != cur_octave:
+                    if octave == cur_octave - 1:
+                        directive = "<"
+                    elif octave == cur_octave + 1:
+                        directive = ">"
+                    else:
+                        directive = f"o{octave}"
+                    rv.append(directive)
+                    cur_octave = octave
+
+                directive = note.name
+
+            if note.duration != base_dur:
+                directive += str(note.duration)
+
+            rv.append(directive)
+
+        return " ".join(rv)
