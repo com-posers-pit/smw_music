@@ -16,10 +16,13 @@ import music21  # type: ignore
 
 
 ###############################################################################
-# Private constant definitions
+# Private variable/constant definitions
 ###############################################################################
 
-_T = TypeVar("_T")
+# AMK files are used in windows and need the right line ending.
+_CRLF = "\r\n"
+
+###############################################################################
 
 # Music XML uses 4 for a whole note, 5 for a half note, etc.  AMK uses 1 for a
 # whole note, 2 for a half note, etc.
@@ -32,9 +35,15 @@ _MUSIC_XML_DURATION = {
     9: 32,
 }
 
-_TrackElem = Union["Annotation", "Measure", "Note", "Rest"]
+###############################################################################
 
-_CRLF = "\r\n"
+# Generic type variable
+_T = TypeVar("_T")
+
+###############################################################################
+
+# Valid music track element classes
+_TrackElem = Union["Annotation", "Measure", "Note", "Rest"]
 
 ###############################################################################
 # Private function definitions
