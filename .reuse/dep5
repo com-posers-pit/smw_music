@@ -1,0 +1,8 @@
+Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
+Upstream-Name: smw_music
+Upstream-Contact: Thomas Werne <werneta@gmail.com>
+Source: http://github.com/com-posers-pit/smw_music
+
+Files: *.rst doc poetry.lock tests/dst/* tests/src/* tox.ini
+Copyright: The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+License: CC0-1.0

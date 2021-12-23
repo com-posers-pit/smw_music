@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+#
+# SPDX-License-Identifier: CC0-1.0
+
 name: Lint and Test
 
 on:
