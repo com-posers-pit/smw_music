@@ -51,6 +51,18 @@ _T = TypeVar("_T")
 
 
 def _is_measure(elem: music21.stream.Stream) -> bool:
+    """
+    Test to see if a music21 stream element is a Measure object.
+
+    Parameters
+    ----------
+    elem : music21.stream.Stream
+        A music21 Stream element
+
+    Return
+    ------
+    bool : True iff `elem` is of type `music21.stream.Measure`
+    """
     return isinstance(elem, music21.stream.Measure)
 
 
@@ -58,6 +70,18 @@ def _is_measure(elem: music21.stream.Stream) -> bool:
 
 
 def _most_common(container: Iterable[_T]) -> _T:
+    """
+    Get the most common element in an iterable.
+
+    Parameters
+    ----------
+    container : iterable
+        A list/dictionary/... containing duplicate elements
+
+    Return
+    ------
+    The most common element in `container`
+    """
     return Counter(container).most_common(1)[0][0]
 
 
@@ -84,6 +108,8 @@ class Annotation:
 
     text: str
 
+    ###########################################################################
+    # API constructor definitions
     ###########################################################################
 
     @classmethod
@@ -243,6 +269,8 @@ class Note:
     octave: int
 
     ###########################################################################
+    # API constructor definitions
+    ###########################################################################
 
     @classmethod
     def from_music_xml(cls, elem: music21.note.Note) -> "Note":
@@ -286,6 +314,8 @@ class Rest:
 
     duration: int
 
+    ###########################################################################
+    # API constructor definitions
     ###########################################################################
 
     @classmethod
@@ -332,6 +362,10 @@ class Song:
     channel_list : list
         A list of up to 8 channels of music in this song.
     """
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
 
     def __init__(
         self, metadata: Dict[str, str], channel_list: List["Channel"]
@@ -386,6 +420,8 @@ class Song:
         return cls(metadata, list(map(Channel, parts)))
 
     ###########################################################################
+    # API method definitions
+    ###########################################################################
 
     def to_amk(self, fname: str):
         """
@@ -399,6 +435,8 @@ class Song:
         with open(fname, "w", encoding="ascii") as fobj:
             print(self.amk, end=_CRLF, file=fobj)
 
+    ###########################################################################
+    # API property definitions
     ###########################################################################
 
     @property
