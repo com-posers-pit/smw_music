@@ -42,3 +42,8 @@ repos:
     rev: 0.5.1
     hooks:
       - id: tox-ini-fmt
+
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: v0.13.0
+    hooks:
+      - id: reuse
