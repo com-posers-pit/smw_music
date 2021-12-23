@@ -5,7 +5,7 @@
 ###############################################################################
 
 from collections import Counter
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, TypeVar, Union
 
 ###############################################################################
@@ -156,6 +156,53 @@ class Channel:
     """
 
     elems: List[_ChannelElem]
+    _cur_octave: int = field(init=False, repr=False, compare=False)
+    _directives: List[str] = field(init=False, repr=False, compare=False)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _emit_annotation(self, annotation: Annotation):
+        prefix = "AMK:"
+        text = annotation.text
+        if text.startswith(prefix):
+            self._directives.append(text.removeprefix(prefix).strip())
+
+    ###########################################################################
+
+    def _emit_measure(self, _: "Measure"):
+        self._directives.append(_CRLF)
+
+    ###########################################################################
+
+    def _emit_note(self, note: "Note"):
+        octave = note.octave
+
+        # If the octave needs to be changed...
+        if octave != self._cur_octave:
+            if octave == self._cur_octave - 1:
+                directive = "<"
+            elif octave == self._cur_octave + 1:
+                directive = ">"
+            else:
+                directive = f"o{octave}"
+            self._directives.append(directive)
+            self._cur_octave = octave
+
+        directive = note.name
+        if note.duration != self.base_note_length:
+            directive += str(note.duration)
+        self._directives.append(directive)
+
+    ###########################################################################
+
+    def _emit_rest(self, rest: "Rest"):
+        directive = "r"
+        if rest.duration != self.base_note_length:
+            directive += str(rest.duration)
+
+        self._directives.append(directive)
 
     ###########################################################################
     # API property definitions
@@ -164,48 +211,24 @@ class Channel:
     @property
     def amk(self) -> str:
         """Return this channel's AddmusicK's text."""
-        cur_octave = self.base_octave
-        base_dur = self.base_note_length
-        directives = [f"o{cur_octave}"]
-        directives.append(f"l{base_dur}")
+        self._cur_octave = self.base_octave
+        self._directives = [f"o{self._cur_octave}"]
+        self._directives.append(f"l{self.base_note_length}")
 
         for elem in self.elems:
             if isinstance(elem, Rest):
-                directive = "r"
+                self._emit_rest(elem)
 
             if isinstance(elem, Note):
-                octave = elem.octave
-
-                if octave != cur_octave:
-                    if octave == cur_octave - 1:
-                        directive = "<"
-                    elif octave == cur_octave + 1:
-                        directive = ">"
-                    else:
-                        directive = f"o{octave}"
-                    directives.append(directive)
-                    cur_octave = octave
-
-                directive = elem.name
+                self._emit_note(elem)
 
             if isinstance(elem, Measure):
-                directive = _CRLF
+                self._emit_measure(elem)
 
             if isinstance(elem, Annotation):
-                text = elem.text
-                if text.startswith("AMK:"):
-                    directive = text.removeprefix("AMK:").strip()
-                else:
-                    directive = ""
+                self._emit_annotation(elem)
 
-            if isinstance(elem, (Note, Rest)):
-                if elem.duration != base_dur:
-                    directive += str(elem.duration)
-
-            if directive:
-                directives.append(directive)
-
-        lines = " ".join(directives).splitlines()
+        lines = " ".join(self._directives).splitlines()
         return _CRLF.join(x.strip() for x in lines)
 
     ###########################################################################
