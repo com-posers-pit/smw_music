@@ -26,9 +26,11 @@ pre-commit = "^2.16.0"
 [tool.poetry.scripts]
 smw_music_xml_to_amk = "smw_music.scripts.convert:main"
 
+[tool.pydocstyle]
+convention = "numpy"
+
 [tool.pylint.FORMAT]
 good-names = "n"
-
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
