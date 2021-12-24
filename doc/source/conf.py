@@ -33,7 +33,6 @@ release = __version__
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "myst_parser",  # Parse Markdown
     "sphinx.ext.autodoc",  # Include documentation from docstrings
     "sphinx.ext.napoleon",  # Support for NumPy and Google style docstrings
 ]
