@@ -28,7 +28,8 @@ Or install from source using `poetry <https://python-poetry.org/>`_:
 .. code-block:: bash
 
    pip install poetry
-   git clone https://github.com/com-posers-pit/
+   git clone https://github.com/com-posers-pit/smw_music
+   cd smw_music
    poetry install --no-dev
 
 Usage
