@@ -7,13 +7,15 @@ SMW Music
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
 
-Currently using MuseScore 3.x, but should be compliant to other tools.  Submit
-a bug report.
+The tooling has only been tested with exported MusicXML files from MuseScore
+3.6.2, but it should work with outputs from other music notation software.
 
-pre-alpha, APIs may change at any time
+The software (and especially the libraries) are pre-alpha.  APIs may change at
+any time for any/no reason.
 
 Installation
 ------------
+
 
 from git
 
@@ -23,8 +25,6 @@ Usage
 -----
 
 command line tool
-
-server
 
 rtd
 
@@ -72,8 +72,15 @@ Acknowledgements
    :target: https://www.python.org/
 .. |made-with-sphinx-doc| image:: https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg
    :target: https://www.sphinx-doc.org/
-.. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/tox.yml/badge.svg
+.. |bandit-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/bandit.yml/badge.svg
    :target: https://github.com/
+.. |lint-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/lint.yml/badge.svg
+   :target: https://github.com/
+.. |mypy-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/mypy.yml/badge.svg
+   :target: https://github.com/
+.. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml/badge.svg
+   :target: https://github.com/
+
 .. |license| image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
    :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
