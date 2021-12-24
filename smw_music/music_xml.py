@@ -163,6 +163,7 @@ class Channel:
     elems: List[_ChannelElem]
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
+    _triplet: bool = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Private method definitions
@@ -183,6 +184,8 @@ class Channel:
 
     def _emit_note(self, note: "Note"):
         octave = note.octave
+
+        self._handle_triplet(note)
 
         if note.tie == "start":
             self._directives.append("$F4$01")
@@ -210,12 +213,23 @@ class Channel:
     ###########################################################################
 
     def _emit_rest(self, rest: "Rest"):
+        self._handle_triplet(rest)
+
         directive = "r"
         if rest.duration != self.base_note_length:
             directive += str(rest.duration)
         directive += rest.dots * "."
 
         self._directives.append(directive)
+
+    ###########################################################################
+
+    def _handle_triplet(self, elem: Union["Rest", "Note"]):
+        if not self._triplet and elem.triplet:
+            self._directives.append("{")
+        if self._triplet and not elem.triplet:
+            self._directives.append("}")
+        self._triplet = elem.triplet
 
     ###########################################################################
     # API property definitions
@@ -225,6 +239,7 @@ class Channel:
     def amk(self) -> str:
         """Return this channel's AddmusicK's text."""
         self._cur_octave = self.base_octave
+        self._triplet = False
         self._directives = [f"o{self._cur_octave}"]
         self._directives.append(f"l{self.base_note_length}")
 
@@ -293,6 +308,9 @@ class Note:
     tie: str
         "start" to start a tie, "stop" to end a tie, "" if no tie (TODO: this
         is hokey, fix it)
+    triplet: bool
+        True if this note is a triplet, false otherwise (TODO: this is hokey,
+        fix it)
 
     Attributes
     ----------
@@ -307,6 +325,8 @@ class Note:
         The number of dots
     tie: str
         "start" to start a tie, "stop" to end a tie, "" if no tie
+    triplet: bool
+        True if this note is a triplet, false otherwise
     """
 
     name: str
@@ -314,6 +334,7 @@ class Note:
     octave: int
     dots: int = 0
     tie: str = ""
+    triplet: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -339,6 +360,7 @@ class Note:
             elem.octave,
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
+            bool(elem.duration.tuplets),
         )
 
 
@@ -363,10 +385,13 @@ class Rest:
         The note's length
     dots: int
         The number of dots
+    triplet: bool
+        True if this note is a triplet, false otherwise
     """
 
     duration: int
     dots: int = 0
+    triplet: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -387,7 +412,9 @@ class Rest:
         Note : A new Rest object with its attributes defined by `elem`
         """
         return cls(
-            _MUSIC_XML_DURATION[elem.duration.ordinal], elem.duration.dots
+            _MUSIC_XML_DURATION[elem.duration.ordinal],
+            elem.duration.dots,
+            bool(elem.duration.tuplets),
         )
 
 
