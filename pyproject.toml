@@ -30,11 +30,9 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.9"
 music21 = "^7.1.0"
-Mako = "^1.1.6"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.3.2"
-myst-parser = "^0.16.1"
 sphinx-rtd-theme = "^1.0.0"
 poetry = "^1.1.12"
 tox = "^3.24.4"
