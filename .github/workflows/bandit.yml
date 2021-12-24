@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: CC0-1.0
 
 # Adapted from https://github.com/snok/install-poetry
-name: Lint and Test
+name: Bandit
 
 on:
   - push
@@ -47,4 +47,4 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       - name: Test with tox
-        run: poetry run tox -e py
+        run: poetry run tox -e bandit
