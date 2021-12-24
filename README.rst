@@ -1,8 +1,9 @@
 SMW Music README
 ================
 
-|bandit-status| |lint-status| |mypy-status| |test-status| |made-with-python|
-|made-with-sphinx-doc| |rtd-status| |reuse| |license|
+|bandit-status| |lint-status| |mypy-status| |test-status|
+|package-version| |python-version| |rtd-status| |package-status| |reuse|
+|license|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
@@ -98,6 +99,13 @@ Acknowledgements
    :target: https://github.com/
 .. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml/badge.svg
    :target: https://github.com/
-.. |license| image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
+.. |license| image:: https://img.shields.io/pypi/l/smw_music
+   :alt: PyPI - License
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
    :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
+.. |package-version| image:: https://img.shields.io/pypi/v/smw_music
+   :alt: PyPI
+.. |python-version| image:: https://img.shields.io/pypi/pyversions/smw_music
+   :alt: PyPI - Python Version
+.. |package-status| image:: https://img.shields.io/pypi/status/smw_music
+   :alt: PyPI - Status
