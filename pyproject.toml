@@ -10,7 +10,7 @@ line-length = 79
 
 [tool.poetry]
 name = "smw_music"
-version = "0.1.0"
+version = "0.1.1"
 description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"

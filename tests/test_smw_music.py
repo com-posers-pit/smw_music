@@ -43,7 +43,7 @@ def constants():
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.0.0"
+    assert __version__ == "0.1.1"
 
 
 ###############################################################################
