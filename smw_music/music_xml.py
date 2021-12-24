@@ -184,6 +184,9 @@ class Channel:
     def _emit_note(self, note: "Note"):
         octave = note.octave
 
+        if note.tie == "start":
+            self._directives.append("$F4$01")
+
         # If the octave needs to be changed...
         if octave != self._cur_octave:
             if octave == self._cur_octave - 1:
@@ -200,6 +203,9 @@ class Channel:
             directive += str(note.duration)
         directive += note.dots * "."
         self._directives.append(directive)
+
+        if note.tie == "stop":
+            self._directives.append("$F4$01")
 
     ###########################################################################
 
@@ -284,6 +290,9 @@ class Note:
         The note's octave (TODO: standardize this notion)
     dots: int
         The number of dots
+    tie: str
+        "start" to start a tie, "stop" to end a tie, "" if no tie (TODO: this
+        is hokey, fix it)
 
     Attributes
     ----------
@@ -296,12 +305,15 @@ class Note:
         The note's octave
     dots: int
         The number of dots
+    tie: str
+        "start" to start a tie, "stop" to end a tie, "" if no tie
     """
 
     name: str
     duration: int
     octave: int
     dots: int = 0
+    tie: str = ""
 
     ###########################################################################
     # API constructor definitions
@@ -324,8 +336,9 @@ class Note:
         return cls(
             elem.name.lower().replace("#", "+"),
             _MUSIC_XML_DURATION[elem.duration.ordinal],
-            elem.octave - 1,
+            elem.octave,
             elem.duration.dots,
+            elem.tie.type if elem.tie is not None else "",
         )
 
 
