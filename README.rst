@@ -1,9 +1,8 @@
 SMW Music README
 ================
 
-|bandit-status| |lint-status| |mypy-status| |test-status| |br|
-|reuse| |license| |br|
-|made-with-python| |made-with-sphinx-doc|
+|bandit-status| |lint-status| |mypy-status| |test-status| |made-with-python|
+|made-with-sphinx-doc| |rtd-status| |reuse| |license|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
@@ -17,17 +16,31 @@ any time for any/no reason.
 Installation
 ------------
 
+Use `pip <https://pip.pypa.io/en/stable>`_ to install ``smw_music``:
 
-from git
+.. code-block:: bash
 
-from pypi
+   pip install smw_music
+
+Or install from source using `poetry <https://python-poetry.org/>`_:
+
+.. code-block:: bash
+
+   pip install poetry
+   git clone https://github.com/com-posers-pit/
+   poetry install --no-dev
 
 Usage
 -----
 
-command line tool
+After installing the tools, convert a MusicXML file ``song.mxl`` to an
+AddMusicK MML file ``song.txt`` by running the following command:
 
-rtd
+.. code-block:: bash
+
+   smw_music_xml_to_amk  song.xml song.txt
+
+See `Examples`_ in the official documentation for more detailed examples.
 
 Contributing
 ------------
@@ -63,6 +76,7 @@ Acknowledgements
 - Michael Scott Cuthbert and cuthbertLab's `music21 Python library`_
 
 .. # Links
+.. _Examples: https://smw-music.readthedocs.io/en/latest/examples.html
 .. _The SMW Music Python Project Authors: https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst
 .. _License: https://github.com/com-posers-pit/smw_music/blob/develop/LICENSES/AGPL-3.0-only.txt
 .. _Contributor Guide:  https://github.com/com-posers-pit/smw_music/blob/develop/CONTRIBUTING.rst
@@ -73,6 +87,9 @@ Acknowledgements
    :target: https://www.python.org/
 .. |made-with-sphinx-doc| image:: https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg
    :target: https://www.sphinx-doc.org/
+.. |rtd-status| image:: https://readthedocs.org/projects/smw-music/badge/?version=latest
+   :target: https://smw-music.readthedocs.io/en/latest/?badge=latest
+   :alt: Documentation Status
 .. |bandit-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/bandit.yml/badge.svg
    :target: https://github.com/
 .. |lint-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/lint.yml/badge.svg
