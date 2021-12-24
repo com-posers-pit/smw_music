@@ -10,6 +10,10 @@ Welcome to SMW Music's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   readme.rst
+   changelog.rst
+   examples.rst
+   modules.rst
 
 
 Indices and tables

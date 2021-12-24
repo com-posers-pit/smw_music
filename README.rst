@@ -1,5 +1,5 @@
-SMW Music
-=========
+SMW Music README
+================
 
 |bandit-status| |lint-status| |mypy-status| |test-status| |br|
 |reuse| |license| |br|
