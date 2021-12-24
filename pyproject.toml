@@ -11,9 +11,21 @@ line-length = 79
 [tool.poetry]
 name = "smw_music"
 version = "0.1.0"
-description = ""
+description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"
+readme = "README.rst"
+repository = "http://github.com/com-posers-pit/smw_music"
+classifiers = [
+    "Development Status :: 2 - Pre-Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: End Users/Desktop",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+    "Topic :: Software Development :: Libraries",
+]
 
 [tool.poetry.dependencies]
 python = "^3.9"
@@ -30,6 +42,9 @@ pre-commit = "^2.16.0"
 
 [tool.poetry.scripts]
 smw_music_xml_to_amk = "smw_music.scripts.convert:main"
+
+[tool.poetry.urls]
+"Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
 
 [tool.pydocstyle]
 convention = "numpy"
