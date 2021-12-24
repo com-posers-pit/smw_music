@@ -20,7 +20,7 @@ from smw_music import __version__
 # -- Project information -----------------------------------------------------
 
 project = "SMW Music"
-copyright = "2021, Thomas A. Werne"
+copyright = "2021, The SMW Music Python Project Authors"
 author = "Thomas A. Werne"
 
 # The full version, including alpha/beta/rc tags
