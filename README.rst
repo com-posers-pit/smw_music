@@ -1,8 +1,9 @@
 SMW Music
 =========
 
-|made-with-python| |made-with-sphinx-doc| |test-status|
-|reuse| |license|
+|bandit-status| |lint-status| |mypy-status| |test-status| |br|
+|reuse| |license| |br|
+|made-with-python| |made-with-sphinx-doc|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
@@ -61,13 +62,13 @@ Acknowledgements
 - Wakana's `SMW music porting tutorial`_
 - Michael Scott Cuthbert and cuthbertLab's `music21 Python library`_
 
+.. # Links
 .. _The SMW Music Python Project Authors: https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst
 .. _License: https://github.com/com-posers-pit/smw_music/blob/develop/LICENSES/AGPL-3.0-only.txt
 .. _Contributor Guide:  https://github.com/com-posers-pit/smw_music/blob/develop/CONTRIBUTING.rst
 .. _AddMusicK: https://www.smwcentral.net/?p=section&a=details&id=24994
 .. _SMW music porting tutorial: https://www.smwcentral.net/?p=viewthread&t=89606
 .. _music21 Python library: https://github.com/cuthbertLab/music21
-
 .. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
    :target: https://www.python.org/
 .. |made-with-sphinx-doc| image:: https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg
@@ -80,7 +81,11 @@ Acknowledgements
    :target: https://github.com/
 .. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml/badge.svg
    :target: https://github.com/
-
 .. |license| image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
    :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
+
+.. # define a hard line break for HTML
+.. |br| raw:: html
+
+   <br />
