@@ -2,7 +2,7 @@ SMW Music
 =========
 
 |made-with-python| |made-with-sphinx-doc| |test-status|
-|license|
+|reuse| |license|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
@@ -75,3 +75,5 @@ Acknowledgements
 .. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/tox.yml/badge.svg
    :target: https://github.com/
 .. |license| image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
+.. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
+   :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
