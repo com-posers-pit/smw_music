@@ -101,8 +101,3 @@ Acknowledgements
 .. |license| image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
    :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
-
-.. # define a hard line break for HTML
-.. |br| raw:: html
-
-   <br />
