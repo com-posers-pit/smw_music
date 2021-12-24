@@ -198,6 +198,7 @@ class Channel:
         directive = note.name
         if note.duration != self.base_note_length:
             directive += str(note.duration)
+        directive += note.dots * "."
         self._directives.append(directive)
 
     ###########################################################################
@@ -206,6 +207,7 @@ class Channel:
         directive = "r"
         if rest.duration != self.base_note_length:
             directive += str(rest.duration)
+        directive += rest.dots * "."
 
         self._directives.append(directive)
 
@@ -280,6 +282,8 @@ class Note:
         The note's length (TODO: standardize this notion)
     octave: int
         The note's octave (TODO: standardize this notion)
+    dots: int
+        The number of dots
 
     Attributes
     ----------
@@ -290,11 +294,14 @@ class Note:
         The note's length
     octave: int
         The note's octave
+    dots: int
+        The number of dots
     """
 
     name: str
     duration: int
     octave: int
+    dots: int = 0
 
     ###########################################################################
     # API constructor definitions
@@ -317,7 +324,8 @@ class Note:
         return cls(
             elem.name.lower().replace("#", "+"),
             _MUSIC_XML_DURATION[elem.duration.ordinal],
-            elem.octave,
+            elem.octave - 1,
+            elem.duration.dots,
         )
 
 
@@ -333,14 +341,19 @@ class Rest:
     ----------
     duration: int
         The rest's length (TODO: standardize this notion)
+    dots: int
+        The number of dots
 
     Attributes
     ----------
     duration: int
         The note's length
+    dots: int
+        The number of dots
     """
 
     duration: int
+    dots: int = 0
 
     ###########################################################################
     # API constructor definitions
@@ -360,7 +373,9 @@ class Rest:
         ------
         Note : A new Rest object with its attributes defined by `elem`
         """
-        return cls(_MUSIC_XML_DURATION[elem.duration.ordinal])
+        return cls(
+            _MUSIC_XML_DURATION[elem.duration.ordinal], elem.duration.dots
+        )
 
 
 ###############################################################################
