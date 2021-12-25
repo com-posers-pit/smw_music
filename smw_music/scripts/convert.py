@@ -12,6 +12,7 @@
 ###############################################################################
 
 import argparse
+import sys
 
 ###############################################################################
 # Package imports
@@ -25,15 +26,17 @@ from smw_music.music_xml import Song
 ###############################################################################
 
 
-def main():
+def main(args=None):
     """Entrypoint for Music XML -> AMK Converter."""
+    if args is None:
+        args = sys.argv[1:]
     parser = argparse.ArgumentParser(
         description=f"Music XML -> AMK Converter v{__version__}"
     )
     parser.add_argument("music_xml", type=str, help="Source Music XML file")
     parser.add_argument("amk", type=str, help="Output AMK file")
 
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     Song.from_music_xml(args.music_xml).to_amk(args.amk)
 
