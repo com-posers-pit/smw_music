@@ -62,9 +62,8 @@ def constants():
 ###############################################################################
 
 
-def test_version():
-    """Verify correct version number."""
-    assert __version__ == "0.1.1"
+def test_dotted(constants):
+    _compare("Dots.mxl", "Dots.txt", constants)
 
 
 ###############################################################################
@@ -86,3 +85,11 @@ def test_triplets(constants):
 
 def test_uncompressed_smb_castle(constants):
     _compare("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt", constants)
+
+
+###############################################################################
+
+
+def test_version():
+    """Verify correct version number."""
+    assert __version__ == "0.1.1"
