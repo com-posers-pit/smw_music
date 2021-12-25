@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+[run]
+branch = True
+source = smw_music
+
+[report]
+exclude_lines =
+    if self.debug:
+    pragma: no cover
+    raise NotImplementedError
+    if __name__ == .__main__.:
+ignore_errors = True
+omit =
+    tests/*
