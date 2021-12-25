@@ -1,7 +1,7 @@
 SMW Music README
 ================
 
-|bandit-status| |lint-status| |mypy-status| |test-status|
+|bandit-status| |lint-status| |mypy-status| |test-status| |coverage-status|
 |package-version| |python-version| |rtd-status| |package-status| |reuse|
 |license|
 
@@ -10,6 +10,7 @@ MusicXML.
 
 The tooling has only been tested with exported MusicXML files from MuseScore
 3.6.2, but it should work with outputs from other music notation software.
+Output files are tested against `AddMusicK`_ 1.0.8.
 
 The software (and especially the libraries) are pre-alpha.  APIs may change at
 any time for any/no reason.
@@ -94,6 +95,8 @@ Acknowledgements
    :alt: Documentation Status
 .. |bandit-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/bandit.yml/badge.svg
    :target: https://github.com/
+.. |coverage-status| image:: https://codecov.io/gh/com-posers-pit/smw_music/branch/develop/graph/badge.svg?token=VOG1I6FT1I
+   :target: https://codecov.io/gh/com-posers-pit/smw_music
 .. |lint-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/lint.yml/badge.svg
    :target: https://github.com/
 .. |mypy-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/mypy.yml/badge.svg
