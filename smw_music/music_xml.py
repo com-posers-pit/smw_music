@@ -542,4 +542,6 @@ class Song:
             amk.append(f"#{n} t{amk_tempo}")
             amk.append(channel.amk)
 
-        return _CRLF.join(amk)
+        amk = _CRLF.join(amk)
+        amk = amk.replace(_CRLF + "} ", " }" + _CRLF)
+        return amk
