@@ -81,6 +81,13 @@ def test_smb_castle(constants):
 ###############################################################################
 
 
+def test_ties(constants):
+    _compare("Ties.mxl", "Ties.txt", constants)
+
+
+###############################################################################
+
+
 def test_triplets(constants):
     _compare("Triplets.mxl", "Triplets.txt", constants)
 
