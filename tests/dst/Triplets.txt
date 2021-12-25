@@ -1,0 +1,57 @@
+#amk 2
+
+#spc
+{
+#author  "None"
+#title   "Triplets"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48
+o4 l2
+w255 v255 @9 { a r r
+} r1
+{ r b r
+} r1
+{ r r > c
+} r1
+{ < a b r
+} r1
+{ a r b
+} r1
+{ r b > c
+} r1
+{ < a b > c
+} r1
+{ < a1 > c
+} r1
+{ < a b1
+} r1
+{ a4 r4 r4 } r
+{ r4 b4 r4 } r
+{ r4 r4 > c4 } r
+{ < a4 b4 r4 } r
+{ a4 r4 > c4 } r
+{ r4 < b4 > c4 } r
+{ < a4 b4 > c4 } r
+{ < a > c4 } r
+{ < a4 b } r
+{ a8 r8 r8 } r4 r
+{ r8 b8 r8 } r4 r
+{ r8 r8 > c8 } r4 r4 r4
+{ < a8 b8 r8 } r4 r
+{ a8 r8 > c8 } r4 r
+{ r8 < b8 > c8 } r4 r
+{ < a8 b8 > c8 } r4 r
+{ < a4 b8 } r4 r
+{ a8 b4 } r4 r
+{ a16 r16 r16 } r8 r4 r
+{ r16 b16 r16 } r8 r4 r
+{ r16 r16 > c16 } r8 r4 r
+{ < a16 b16 r16 } r8 r4 r
+{ a16 r16 > c16 } r8 r4 r
+{ r16 < b16 > c16 } r8 r4 r
+{ < a16 b16 > c16 } r8 r4 r
+{ < a8 b16 } r8 r4 r
+{ a16 b8 } r8 r4 r
