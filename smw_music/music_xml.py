@@ -542,6 +542,6 @@ class Song:
             amk.append(f"#{n} t{amk_tempo}")
             amk.append(channel.amk)
 
-        amk = _CRLF.join(amk)
-        amk = amk.replace(_CRLF + "} ", " }" + _CRLF)
-        return amk
+        rv = _CRLF.join(amk)
+        # This handles a quirk of where triplet end marks are inserted
+        return rv.replace(_CRLF + "} ", " }" + _CRLF)
