@@ -24,6 +24,7 @@ import pytest
 ###############################################################################
 
 from smw_music import music_xml, __version__
+from smw_music.scripts import convert
 
 
 ###############################################################################
@@ -32,16 +33,15 @@ from smw_music import music_xml, __version__
 
 
 def _compare(src, dst, constants):
-    test_dir = constants["test_dir"]
-    fname = test_dir / "dst" / dst
+    fname = constants["amk_dir"] / dst
 
     with open(fname, "r") as fobj:
         target = fobj.readlines()
 
-    fname = test_dir / "src" / src
+    fname = constants["mxl_dir"] / src
 
     with tempfile.NamedTemporaryFile("r") as fobj:
-        music_xml.Song.from_music_xml(fname).to_amk(fobj.name)
+        convert.main([str(fname), str(fobj.name)])
         written = fobj.readlines()
 
     assert target == written
@@ -54,7 +54,12 @@ def _compare(src, dst, constants):
 
 @pytest.fixture
 def constants():
-    return {"test_dir": pathlib.Path("tests")}
+    testdir = pathlib.Path("tests")
+    return {
+        "test_dir": testdir,
+        "mxl_dir": testdir / "src",
+        "amk_dir": testdir / "dst",
+    }
 
 
 ###############################################################################
