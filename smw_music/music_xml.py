@@ -199,7 +199,7 @@ class Channel:
 
         self._handle_triplet(note)
 
-        if note.tie == "start":
+        if note.tie == "start" and not self._grace:
             self._toggle_legato()
 
         # If the octave needs to be changed...
@@ -217,11 +217,11 @@ class Channel:
 
         if self._grace:
             directive += f"={192//note.duration - grace_length}"
-            self._grace = False
         else:
             if note.grace:
                 directive += f"={grace_length}"
                 self._grace = True
+                self._directives.append("$F4$01")
             else:
                 if note.duration != self.base_note_length:
                     directive += str(note.duration)
@@ -231,6 +231,11 @@ class Channel:
 
         if note.tie == "stop":
             self._toggle_legato()
+
+        if self._grace and not note.grace:
+            self._grace = False
+            if note.tie != "start":
+                self._toggle_legato()
 
     ###########################################################################
 
