@@ -159,12 +159,17 @@ class Channel:
     ----------
     elems: list
         A list of elements in this channel
+
+    Todo
+    ----
+    Parameterize grace note length?
     """
 
     elems: List[_ChannelElem]
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
     _triplet: bool = field(init=False, repr=False, compare=False)
+    _grace: bool = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Private method definitions
@@ -190,6 +195,7 @@ class Channel:
 
     def _emit_note(self, note: "Note"):
         octave = note.octave
+        grace_length = 8
 
         self._handle_triplet(note)
 
@@ -208,9 +214,19 @@ class Channel:
             self._cur_octave = octave
 
         directive = note.name
-        if note.duration != self.base_note_length:
-            directive += str(note.duration)
-        directive += note.dots * "."
+
+        if self._grace:
+            directive += f"={192//note.duration - grace_length}"
+            self._grace = False
+        else:
+            if note.grace:
+                directive += f"={grace_length}"
+                self._grace = True
+            else:
+                if note.duration != self.base_note_length:
+                    directive += str(note.duration)
+                directive += note.dots * "."
+
         self._directives.append(directive)
 
         if note.tie == "stop":
@@ -238,14 +254,20 @@ class Channel:
         self._triplet = elem.triplet
 
     ###########################################################################
+
+    def _reset_state(self):
+        self._cur_octave = self.base_octave
+        self._triplet = False
+        self._grace = False
+
+    ###########################################################################
     # API property definitions
     ###########################################################################
 
     @property
     def amk(self) -> str:
         """Return this channel's AddmusicK's text."""
-        self._cur_octave = self.base_octave
-        self._triplet = False
+        self._reset_state()
         self._directives = [f"o{self._cur_octave}"]
         self._directives.append(f"l{self.base_note_length}")
 
@@ -357,17 +379,17 @@ class Note:
         The note's name (a-g) with '+'/'-' appended for sharp/flat,
         respectively.
     duration: int
-        The note's length (TODO: standardize this notion)
+        The note's length
     octave: int
-        The note's octave (TODO: standardize this notion)
+        The note's octave
     dots: int
         The number of dots
     tie: str
-        "start" to start a tie, "stop" to end a tie, "" if no tie (TODO: this
-        is hokey, fix it)
+        "start" to start a tie, "stop" to end a tie, "" if no tie
     triplet: bool
-        True if this note is a triplet, false otherwise (TODO: this is hokey,
-        fix it)
+        True iff this note is a triplet
+    grace: bool
+        True iff this is a grace note
 
     Attributes
     ----------
@@ -383,7 +405,13 @@ class Note:
     tie: str
         "start" to start a tie, "stop" to end a tie, "" if no tie
     triplet: bool
-        True if this note is a triplet, false otherwise
+        True iff this note is a triplet
+    grace: bool
+        True iff this is a grace note
+
+    Todo
+    ----
+    Duration, octave, tie, and triplet are poorly implemented, clean this up.
     """
 
     name: str
@@ -392,6 +420,7 @@ class Note:
     dots: int = 0
     tie: str = ""
     triplet: bool = False
+    grace: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -419,6 +448,7 @@ class Note:
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
             bool(elem.duration.tuplets),
+            isinstance(elem.duration, music21.duration.GraceDuration),
         )
 
 
