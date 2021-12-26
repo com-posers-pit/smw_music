@@ -1,5 +1,5 @@
-smw_music
-=========
+smw_music Package Documentation
+===============================
 
 .. toctree::
    :maxdepth: 4

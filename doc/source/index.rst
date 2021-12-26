@@ -7,13 +7,14 @@ Welcome to SMW Music's documentation!
 =====================================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :caption: Contents:
 
    readme
    changelog
    examples
    modules
+   authors
 
 
 Indices and tables
