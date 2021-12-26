@@ -67,7 +67,8 @@ def _is_measure(elem: music21.stream.Stream) -> bool:
 
     Return
     ------
-    bool : True iff `elem` is of type `music21.stream.Measure`
+    bool
+        True iff `elem` is of type `music21.stream.Measure`
     """
     return isinstance(elem, music21.stream.Measure)
 
@@ -86,7 +87,8 @@ def _most_common(container: Iterable[_T]) -> _T:
 
     Return
     ------
-    The most common element in `container`
+    object
+        The most common element in `container`
     """
     return Counter(container).most_common(1)[0][0]
 
@@ -132,8 +134,9 @@ class Annotation:
 
         Return
         ------
-        Annotation : A new Annotation object with its `text` attribute set to
-        the `elem`'s text content.
+        Annotation
+            A new Annotation object with its `text` attribute set to the
+            `elem`'s text content.
         """
         return cls(elem.content)
 
@@ -154,9 +157,6 @@ class Channel:
 
     Attributes
     ----------
-    amk
-    base_note_length
-    base_octave
     elems: list
         A list of elements in this channel
     """
@@ -353,7 +353,8 @@ class Note:
 
         Return
         ------
-        Note : A new Note object with its attributes defined by `elem`
+        Note
+            A new Note object with its attributes defined by `elem`
         """
         return cls(
             elem.name.lower().replace("#", "+"),
@@ -410,7 +411,8 @@ class Rest:
 
         Return
         ------
-        Note : A new Rest object with its attributes defined by `elem`
+        Rest
+            A new Rest object with its attributes defined by `elem`
         """
         return cls(
             _MUSIC_XML_DURATION[elem.duration.ordinal],
@@ -473,7 +475,8 @@ class Song:
 
         Return
         ------
-        Song : A new Song object representing the song described in `fname`
+        Song
+            A new Song object representing the song described in `fname`
         """
         metadata = {}
         parts: List[List[_ChannelElem]] = []
