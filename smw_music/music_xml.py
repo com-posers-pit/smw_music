@@ -25,7 +25,7 @@ import music21  # type: ignore
 ###############################################################################
 
 # Valid music channel element classes
-_ChannelElem = Union["Annotation", "Measure", "Note", "Rest"]
+_ChannelElem = Union["Annotation", "Dynamic", "Measure", "Note", "Rest"]
 
 ###############################################################################
 
@@ -152,8 +152,8 @@ class Channel:
     Parameters
     ----------
     elems: list
-        A list of valid channel elements (currently `Annotation`, `Measure,
-        `Note`, and `Rest`)
+        A list of valid channel elements (currently `Annotation`, `Dynamic`,
+        `Measure`, `Note`, and `Rest`)
 
     Attributes
     ----------
@@ -175,6 +175,11 @@ class Channel:
         text = annotation.text
         if text.startswith(prefix):
             self._directives.append(text.removeprefix(prefix).strip())
+
+    ###########################################################################
+
+    def _emit_dynamic(self, dyn: "Dynamic"):
+        self._directives.append(f"v{dyn.level}")
 
     ###########################################################################
 
@@ -248,6 +253,9 @@ class Channel:
             if isinstance(elem, Rest):
                 self._emit_rest(elem)
 
+            if isinstance(elem, Dynamic):
+                self._emit_dynamic(elem)
+
             if isinstance(elem, Note):
                 self._emit_note(elem)
 
@@ -277,6 +285,54 @@ class Channel:
         return _most_common(
             x.octave for x in self.elems if isinstance(x, Note)
         )
+
+
+###############################################################################
+
+
+@dataclass
+class Dynamic:
+    """
+    Dynamics marking.
+
+    Parameters
+    ----------
+    level: int
+        Volume level from 0-255
+
+    Attributes
+    ----------
+    level: int
+        Volume level from 0-255
+    """
+
+    level: int
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(cls, elem: music21.dynamics.Dynamic) -> "Dynamic":
+        """
+        Convert a MusicXML Dynamic to a Dynamic object.
+
+        Parameters
+        ----------
+        elem : music21.dynamics.Dynamic
+            A music21 representation of a dynamic level
+
+        Return
+        ------
+        Dynamic
+            A new Dynamic object with its level set to the volume scalare
+            squared
+
+        Todo
+        ----
+        Confirm this heuristic is good enough, or parameterize
+        """
+        return cls(int(255 * elem.volumeScalar ** 2))
 
 
 ###############################################################################
@@ -493,6 +549,10 @@ class Song:
                     for subelem in measure:
                         if isinstance(subelem, music21.tempo.MetronomeMark):
                             metadata["bpm"] = subelem.getQuarterBPM()
+                        if isinstance(subelem, music21.dynamics.Dynamic):
+                            channel_elem.append(
+                                Dynamic.from_music_xml(subelem)
+                            )
                         if isinstance(subelem, music21.note.Note):
                             channel_elem.append(Note.from_music_xml(subelem))
                         if isinstance(subelem, music21.note.Rest):
