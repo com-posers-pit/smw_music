@@ -200,7 +200,7 @@ class Channel:
         self._handle_triplet(note)
 
         if note.tie == "start":
-            self._directives.append("$F4$01")
+            self._toggle_legato()
 
         # If the octave needs to be changed...
         if octave != self._cur_octave:
@@ -230,7 +230,7 @@ class Channel:
         self._directives.append(directive)
 
         if note.tie == "stop":
-            self._directives.append("$F4$01")
+            self._toggle_legato()
 
     ###########################################################################
 
@@ -259,6 +259,11 @@ class Channel:
         self._cur_octave = self.base_octave
         self._triplet = False
         self._grace = False
+
+    ###########################################################################
+
+    def _toggle_legato(self):
+        self._directives.append("$F4$01")
 
     ###########################################################################
     # API property definitions
