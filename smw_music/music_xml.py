@@ -193,16 +193,8 @@ class Channel:
 
     ###########################################################################
 
-    def _emit_note(self, note: "Note"):
+    def _emit_octave(self, note: "Note"):
         octave = note.octave
-        grace_length = 8
-
-        self._handle_triplet(note)
-
-        if note.tie == "start" and not self._grace:
-            self._toggle_legato()
-
-        # If the octave needs to be changed...
         if octave != self._cur_octave:
             if octave == self._cur_octave - 1:
                 directive = "<"
@@ -212,6 +204,18 @@ class Channel:
                 directive = f"o{octave}"
             self._directives.append(directive)
             self._cur_octave = octave
+
+    ###########################################################################
+
+    def _emit_note(self, note: "Note"):
+        grace_length = 8
+
+        self._handle_triplet(note)
+
+        if note.tie == "start" and not self._grace:
+            self._toggle_legato()
+
+        self._emit_octave(note)
 
         directive = note.name
 
