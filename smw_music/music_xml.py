@@ -168,11 +168,31 @@ class Channel:
     elems: List[_ChannelElem]
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
+    _legato: bool = field(init=False, repr=False, compare=False)
+    _tie: bool = field(init=False, repr=False, compare=False)
     _triplet: bool = field(init=False, repr=False, compare=False)
     _grace: bool = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _calc_note_length(self, note: "Note") -> str:
+        grace_length = 8
+        note_length = ""
+
+        if not self._grace and not note.grace:
+            if note.duration != self.base_note_length:
+                note_length = str(note.duration)
+            note_length += note.dots * "."
+        else:
+            if note.grace:
+                note_length = f"={grace_length}"
+            else:
+                note_length = f"={192//note.duration - grace_length}"
+
+        return note_length
+
     ###########################################################################
 
     def _emit_annotation(self, annotation: Annotation):
@@ -208,38 +228,28 @@ class Channel:
     ###########################################################################
 
     def _emit_note(self, note: "Note"):
-        grace_length = 8
 
         self._handle_triplet(note)
 
-        if note.tie == "start" and not self._grace:
-            self._toggle_legato()
+        if note.tie == "start":
+            self._tie = True
+        if note.grace:
+            self._grace = True
 
         self._emit_octave(note)
 
-        directive = note.name
+        directive = note.name + self._calc_note_length(note)
 
-        if self._grace:
-            directive += f"={192//note.duration - grace_length}"
-        else:
-            if note.grace:
-                directive += f"={grace_length}"
-                self._grace = True
-                self._directives.append("$F4$01")
-            else:
-                if note.duration != self.base_note_length:
-                    directive += str(note.duration)
-                directive += note.dots * "."
-
+        self._start_legato()
         self._directives.append(directive)
 
         if note.tie == "stop":
-            self._toggle_legato()
+            self._tie = False
 
-        if self._grace and not note.grace:
+        if not note.grace:
             self._grace = False
-            if note.tie != "start":
-                self._toggle_legato()
+
+        self._stop_legato()
 
     ###########################################################################
 
@@ -266,8 +276,26 @@ class Channel:
 
     def _reset_state(self):
         self._cur_octave = self.base_octave
-        self._triplet = False
         self._grace = False
+        self._legato = False
+        self._tie = False
+        self._triplet = False
+
+    ###########################################################################
+
+    def _start_legato(self):
+        if not self._legato:
+            if self._tie or self._grace:
+                self._legato = True
+                self._toggle_legato()
+
+    ###########################################################################
+
+    def _stop_legato(self):
+        if self._legato:
+            if not self._tie and not self._grace:
+                self._legato = False
+                self._toggle_legato()
 
     ###########################################################################
 
