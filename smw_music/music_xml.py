@@ -486,7 +486,7 @@ class Note:
         return cls(
             elem.name.lower().replace("#", "+"),
             _MUSIC_XML_DURATION[elem.duration.ordinal],
-            elem.octave,
+            elem.octave - 1,
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
             bool(elem.duration.tuplets),
