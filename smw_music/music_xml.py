@@ -666,6 +666,8 @@ class Song:
 
         amk = ["#amk 2"]
         amk.append("")
+        amk.append(f"; MusicXML->AMK v{__version__}")
+        amk.append("")
         amk.append("#spc")
         amk.append("{")
         amk.append(f'#author  "{self.composer}"')
