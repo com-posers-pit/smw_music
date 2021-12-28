@@ -74,6 +74,13 @@ def test_dotted(constants):
 ###############################################################################
 
 
+def test_dynamics(constants):
+    _compare("Dynamics.mxl", "Dynamics.txt", constants)
+
+
+###############################################################################
+
+
 def test_smb_castle(constants):
     _compare("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", constants)
 
