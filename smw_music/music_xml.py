@@ -19,6 +19,11 @@ from typing import Dict, Iterable, List, TypeVar, Union
 
 import music21  # type: ignore
 
+###############################################################################
+# Project imports
+###############################################################################
+
+from . import __version__
 
 ###############################################################################
 # Private variable/constant definitions
