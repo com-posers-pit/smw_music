@@ -292,7 +292,7 @@ class Channel:
         if not self._legato:
             if self._tie or self._grace:
                 self._legato = True
-                self._toggle_legato()
+                self._directives.append("LEGATO_ON")
 
     ###########################################################################
 
@@ -300,12 +300,7 @@ class Channel:
         if self._legato:
             if not self._tie and not self._grace:
                 self._legato = False
-                self._toggle_legato()
-
-    ###########################################################################
-
-    def _toggle_legato(self):
-        self._directives.append("$F4$01")
+                self._directives.append("LEGATO_OFF")
 
     ###########################################################################
     # API property definitions
@@ -672,6 +667,9 @@ class Song:
         amk = ["#amk 2"]
         amk.append("")
         amk.append(f"; MusicXML->AMK v{__version__}")
+        amk.append("")
+        amk.append('"LEGATO_ON=$F4$01"')
+        amk.append('"LEGATO_OFF=$F4$01"')
         amk.append("")
         amk.append("#spc")
         amk.append("{")
