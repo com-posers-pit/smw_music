@@ -1,5 +1,7 @@
 #amk 2
 
+; MusicXML->AMK v0.1.1
+
 #spc
 {
 #author  "None"
