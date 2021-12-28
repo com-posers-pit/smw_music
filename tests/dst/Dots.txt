@@ -2,6 +2,9 @@
 
 ; MusicXML->AMK v0.1.1
 
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
 #spc
 {
 #author  "None"

@@ -2,6 +2,9 @@
 
 ; MusicXML->AMK v0.1.1
 
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
 #spc
 {
 #author  "None"
@@ -12,122 +15,122 @@
 
 #0 t48
 o5 l4
-$F4$01 c1 c2 $F4$01
-$F4$01 c1 c. $F4$01 r8
-$F4$01 c1 c $F4$01 r
-$F4$01 c1 c8. $F4$01 r16 r
-$F4$01 c1 c8 $F4$01 r8 r
-$F4$01 c1 c16. $F4$01 r32 r8 r
-$F4$01 c1 c16 $F4$01 r16 r8 r
-$F4$01 c1 c32. $F4$01 r64 r16 r8 r
-$F4$01 c1 c32 $F4$01 r32 r16 r8 r
-$F4$01 c2. c2. $F4$01
-$F4$01 c2. c2 $F4$01 r
-$F4$01 c2. c. $F4$01 r8 r
-$F4$01 c2. c $F4$01 r r
-$F4$01 c2. c8. $F4$01 r16 r r
-$F4$01 c2. c8 $F4$01 r8 r r
-$F4$01 c2. c16. $F4$01 r32 r8 r r
-$F4$01 c2. c16 $F4$01 r16 r8 r r
-$F4$01 c2. c32. $F4$01 r64 r16 r8 r r
-$F4$01 c2. c32 $F4$01 r32 r16 r8 r r
-$F4$01 c2 c1 $F4$01
-$F4$01 c2 c2. $F4$01 r
-$F4$01 c2 c2 $F4$01 r r
-$F4$01 c2 c. $F4$01 r8 r r
-$F4$01 c2 c $F4$01 r2 r
-$F4$01 c2 c8. $F4$01 r16 r2 r
-$F4$01 c2 c8 $F4$01 r8 r2 r
-$F4$01 c2 c16. $F4$01 r32 r8 r2 r
-$F4$01 c2 c16 $F4$01 r16 r8 r2 r
-$F4$01 c2 c32. $F4$01 r64 r16 r8 r2 r
-$F4$01 c2 c32 $F4$01 r32 r16 r8 r2 r
-$F4$01 c. c1 $F4$01 r8
-$F4$01 c. c2. $F4$01 r8 r
-$F4$01 c. c2 $F4$01 r8 r r
-$F4$01 c. c. $F4$01 r2 r
-$F4$01 c. c $F4$01 r8 r2 r
-$F4$01 c. c8. $F4$01 r16 r8 r2 r
-$F4$01 c. c8 $F4$01 r r2 r
-$F4$01 c. c16. $F4$01 r32 r r2 r
-$F4$01 c. c16 $F4$01 r16 r r2 r
-$F4$01 c. c32. $F4$01 r64 r16 r r2 r
-$F4$01 c. c32 $F4$01 r32 r16 r r2 r
-$F4$01 c c1 $F4$01 r
-$F4$01 c c2. $F4$01 r r
-$F4$01 c c2 $F4$01 r2 r
-$F4$01 c c. $F4$01 r8 r2 r
-$F4$01 c c $F4$01 r r2 r
-$F4$01 c c8. $F4$01 r16 r r2 r
-$F4$01 c c8 $F4$01 r8 r r2 r
-$F4$01 c c16. $F4$01 r32 r8 r r2 r
-$F4$01 c c16 $F4$01 r16 r8 r r2 r
-$F4$01 c c32. $F4$01 r64 r16 r8 r r2 r
-$F4$01 c c32 $F4$01 r32 r16 r8 r r2 r
-$F4$01 c8. c1 $F4$01 r16 r
-$F4$01 c8. c2. $F4$01 r16 r r
-$F4$01 c8. c2 $F4$01 r16 r2 r
-$F4$01 c8. c. $F4$01 r16 r8 r2 r
-$F4$01 c8. c $F4$01 r16 r r2 r
-$F4$01 c8. c8. $F4$01 r8 r r2 r
-$F4$01 c8. c8 $F4$01 r16 r8 r r2 r
-$F4$01 c8. c16. $F4$01 r32 r16 r8 r r2 r
-$F4$01 c8. c16 $F4$01 r r r2 r
-$F4$01 c8. c32. $F4$01 r64 r r r2 r
-$F4$01 c8. c32 $F4$01 r32 r r r2 r
-$F4$01 c8 c1 $F4$01 r8 r
-$F4$01 c8 c2. $F4$01 r8 r r
-$F4$01 c8 c2 $F4$01 r8 r2 r
-$F4$01 c8 c. $F4$01 r r2 r
-$F4$01 c8 c $F4$01 r8 r r2 r
-$F4$01 c8 c8. $F4$01 r16 r8 r r2 r
-$F4$01 c8 c8 $F4$01 r r r2 r
-$F4$01 c8 c16. $F4$01 r32 r r r2 r
-$F4$01 c8 c16 $F4$01 r16 r r r2 r
-$F4$01 c8 c32. $F4$01 r64 r16 r r r2 r
-$F4$01 c8 c32 $F4$01 r32 r16 r r r2 r
-$F4$01 c16. c1 $F4$01 r32 r8 r
-$F4$01 c16. c2. $F4$01 r32 r8 r r
-$F4$01 c16. c2 $F4$01 r32 r8 r2 r
-$F4$01 c16. c. $F4$01 r32 r r2 r
-$F4$01 c16. c $F4$01 r32 r8 r r2 r
-$F4$01 c16. c8. $F4$01 r32 r16 r8 r r2 r
-$F4$01 c16. c8 $F4$01 r32 r r r2 r
-$F4$01 c16. c16. $F4$01 r16 r r r2 r
-$F4$01 c16. c16 $F4$01 r32 r16 r r r2 r
-$F4$01 c16. c32. $F4$01 r64 r32 r16 r r r2 r
-$F4$01 c16. c32 $F4$01 r8 r r r2 r
-$F4$01 c16 c1 $F4$01 r16 r8 r
-$F4$01 c16 c2. $F4$01 r16 r8 r r
-$F4$01 c16 c2 $F4$01 r16 r8 r2 r
-$F4$01 c16 c. $F4$01 r16 r r2 r
-$F4$01 c16 c $F4$01 r16 r8 r r2 r
-$F4$01 c16 c8. $F4$01 r r r2 r
-$F4$01 c16 c8 $F4$01 r16 r r r2 r
-$F4$01 c16 c16. $F4$01 r32 r16 r r r2 r
-$F4$01 c16 c16 $F4$01 r8 r r r2 r
-$F4$01 c16 c32. $F4$01 r64 r8 r r r2 r
-$F4$01 c16 c32 $F4$01 r32 r8 r r r2 r
-$F4$01 c32. c1 $F4$01 r64 r16 r8 r
-$F4$01 c32. c2. $F4$01 r64 r16 r8 r r
-$F4$01 c32. c2 $F4$01 r64 r16 r8 r2 r
-$F4$01 c32. c. $F4$01 r64 r16 r r2 r
-$F4$01 c32. c $F4$01 r64 r16 r8 r r2 r
-$F4$01 c32. c8. $F4$01 r64 r r r2 r
-$F4$01 c32. c8 $F4$01 r64 r16 r r r2 r
-$F4$01 c32. c16. $F4$01 r64 r32 r16 r r r2 r
-$F4$01 c32. c16 $F4$01 r64 r8 r r r2 r
-$F4$01 c32. c32. $F4$01 r32 r8 r r r2 r
-$F4$01 c32. c32 $F4$01 r64 r32 r8 r r r2 r
-$F4$01 c32 c1 $F4$01 r32 r16 r8 r
-$F4$01 c32 c2. $F4$01 r32 r16 r8 r r
-$F4$01 c32 c2 $F4$01 r32 r16 r8 r2 r
-$F4$01 c32 c. $F4$01 r32 r16 r r2 r
-$F4$01 c32 c $F4$01 r32 r16 r8 r r2 r
-$F4$01 c32 c8. $F4$01 r32 r r r2 r
-$F4$01 c32 c8 $F4$01 r32 r16 r r r2 r
-$F4$01 c32 c16. $F4$01 r8 r r r2 r
-$F4$01 c32 c16 $F4$01 r32 r8 r r r2 r
-$F4$01 c32 c32. $F4$01 r64 r32 r8 r r r2 r
-$F4$01 c32 c32 $F4$01 r16 r8 r r r2 r
-$F4$01 c c8 c. c16 $F4$01 r16 r8 r r
+LEGATO_ON c1 c2 LEGATO_OFF
+LEGATO_ON c1 c. LEGATO_OFF r8
+LEGATO_ON c1 c LEGATO_OFF r
+LEGATO_ON c1 c8. LEGATO_OFF r16 r
+LEGATO_ON c1 c8 LEGATO_OFF r8 r
+LEGATO_ON c1 c16. LEGATO_OFF r32 r8 r
+LEGATO_ON c1 c16 LEGATO_OFF r16 r8 r
+LEGATO_ON c1 c32. LEGATO_OFF r64 r16 r8 r
+LEGATO_ON c1 c32 LEGATO_OFF r32 r16 r8 r
+LEGATO_ON c2. c2. LEGATO_OFF
+LEGATO_ON c2. c2 LEGATO_OFF r
+LEGATO_ON c2. c. LEGATO_OFF r8 r
+LEGATO_ON c2. c LEGATO_OFF r r
+LEGATO_ON c2. c8. LEGATO_OFF r16 r r
+LEGATO_ON c2. c8 LEGATO_OFF r8 r r
+LEGATO_ON c2. c16. LEGATO_OFF r32 r8 r r
+LEGATO_ON c2. c16 LEGATO_OFF r16 r8 r r
+LEGATO_ON c2. c32. LEGATO_OFF r64 r16 r8 r r
+LEGATO_ON c2. c32 LEGATO_OFF r32 r16 r8 r r
+LEGATO_ON c2 c1 LEGATO_OFF
+LEGATO_ON c2 c2. LEGATO_OFF r
+LEGATO_ON c2 c2 LEGATO_OFF r r
+LEGATO_ON c2 c. LEGATO_OFF r8 r r
+LEGATO_ON c2 c LEGATO_OFF r2 r
+LEGATO_ON c2 c8. LEGATO_OFF r16 r2 r
+LEGATO_ON c2 c8 LEGATO_OFF r8 r2 r
+LEGATO_ON c2 c16. LEGATO_OFF r32 r8 r2 r
+LEGATO_ON c2 c16 LEGATO_OFF r16 r8 r2 r
+LEGATO_ON c2 c32. LEGATO_OFF r64 r16 r8 r2 r
+LEGATO_ON c2 c32 LEGATO_OFF r32 r16 r8 r2 r
+LEGATO_ON c. c1 LEGATO_OFF r8
+LEGATO_ON c. c2. LEGATO_OFF r8 r
+LEGATO_ON c. c2 LEGATO_OFF r8 r r
+LEGATO_ON c. c. LEGATO_OFF r2 r
+LEGATO_ON c. c LEGATO_OFF r8 r2 r
+LEGATO_ON c. c8. LEGATO_OFF r16 r8 r2 r
+LEGATO_ON c. c8 LEGATO_OFF r r2 r
+LEGATO_ON c. c16. LEGATO_OFF r32 r r2 r
+LEGATO_ON c. c16 LEGATO_OFF r16 r r2 r
+LEGATO_ON c. c32. LEGATO_OFF r64 r16 r r2 r
+LEGATO_ON c. c32 LEGATO_OFF r32 r16 r r2 r
+LEGATO_ON c c1 LEGATO_OFF r
+LEGATO_ON c c2. LEGATO_OFF r r
+LEGATO_ON c c2 LEGATO_OFF r2 r
+LEGATO_ON c c. LEGATO_OFF r8 r2 r
+LEGATO_ON c c LEGATO_OFF r r2 r
+LEGATO_ON c c8. LEGATO_OFF r16 r r2 r
+LEGATO_ON c c8 LEGATO_OFF r8 r r2 r
+LEGATO_ON c c16. LEGATO_OFF r32 r8 r r2 r
+LEGATO_ON c c16 LEGATO_OFF r16 r8 r r2 r
+LEGATO_ON c c32. LEGATO_OFF r64 r16 r8 r r2 r
+LEGATO_ON c c32 LEGATO_OFF r32 r16 r8 r r2 r
+LEGATO_ON c8. c1 LEGATO_OFF r16 r
+LEGATO_ON c8. c2. LEGATO_OFF r16 r r
+LEGATO_ON c8. c2 LEGATO_OFF r16 r2 r
+LEGATO_ON c8. c. LEGATO_OFF r16 r8 r2 r
+LEGATO_ON c8. c LEGATO_OFF r16 r r2 r
+LEGATO_ON c8. c8. LEGATO_OFF r8 r r2 r
+LEGATO_ON c8. c8 LEGATO_OFF r16 r8 r r2 r
+LEGATO_ON c8. c16. LEGATO_OFF r32 r16 r8 r r2 r
+LEGATO_ON c8. c16 LEGATO_OFF r r r2 r
+LEGATO_ON c8. c32. LEGATO_OFF r64 r r r2 r
+LEGATO_ON c8. c32 LEGATO_OFF r32 r r r2 r
+LEGATO_ON c8 c1 LEGATO_OFF r8 r
+LEGATO_ON c8 c2. LEGATO_OFF r8 r r
+LEGATO_ON c8 c2 LEGATO_OFF r8 r2 r
+LEGATO_ON c8 c. LEGATO_OFF r r2 r
+LEGATO_ON c8 c LEGATO_OFF r8 r r2 r
+LEGATO_ON c8 c8. LEGATO_OFF r16 r8 r r2 r
+LEGATO_ON c8 c8 LEGATO_OFF r r r2 r
+LEGATO_ON c8 c16. LEGATO_OFF r32 r r r2 r
+LEGATO_ON c8 c16 LEGATO_OFF r16 r r r2 r
+LEGATO_ON c8 c32. LEGATO_OFF r64 r16 r r r2 r
+LEGATO_ON c8 c32 LEGATO_OFF r32 r16 r r r2 r
+LEGATO_ON c16. c1 LEGATO_OFF r32 r8 r
+LEGATO_ON c16. c2. LEGATO_OFF r32 r8 r r
+LEGATO_ON c16. c2 LEGATO_OFF r32 r8 r2 r
+LEGATO_ON c16. c. LEGATO_OFF r32 r r2 r
+LEGATO_ON c16. c LEGATO_OFF r32 r8 r r2 r
+LEGATO_ON c16. c8. LEGATO_OFF r32 r16 r8 r r2 r
+LEGATO_ON c16. c8 LEGATO_OFF r32 r r r2 r
+LEGATO_ON c16. c16. LEGATO_OFF r16 r r r2 r
+LEGATO_ON c16. c16 LEGATO_OFF r32 r16 r r r2 r
+LEGATO_ON c16. c32. LEGATO_OFF r64 r32 r16 r r r2 r
+LEGATO_ON c16. c32 LEGATO_OFF r8 r r r2 r
+LEGATO_ON c16 c1 LEGATO_OFF r16 r8 r
+LEGATO_ON c16 c2. LEGATO_OFF r16 r8 r r
+LEGATO_ON c16 c2 LEGATO_OFF r16 r8 r2 r
+LEGATO_ON c16 c. LEGATO_OFF r16 r r2 r
+LEGATO_ON c16 c LEGATO_OFF r16 r8 r r2 r
+LEGATO_ON c16 c8. LEGATO_OFF r r r2 r
+LEGATO_ON c16 c8 LEGATO_OFF r16 r r r2 r
+LEGATO_ON c16 c16. LEGATO_OFF r32 r16 r r r2 r
+LEGATO_ON c16 c16 LEGATO_OFF r8 r r r2 r
+LEGATO_ON c16 c32. LEGATO_OFF r64 r8 r r r2 r
+LEGATO_ON c16 c32 LEGATO_OFF r32 r8 r r r2 r
+LEGATO_ON c32. c1 LEGATO_OFF r64 r16 r8 r
+LEGATO_ON c32. c2. LEGATO_OFF r64 r16 r8 r r
+LEGATO_ON c32. c2 LEGATO_OFF r64 r16 r8 r2 r
+LEGATO_ON c32. c. LEGATO_OFF r64 r16 r r2 r
+LEGATO_ON c32. c LEGATO_OFF r64 r16 r8 r r2 r
+LEGATO_ON c32. c8. LEGATO_OFF r64 r r r2 r
+LEGATO_ON c32. c8 LEGATO_OFF r64 r16 r r r2 r
+LEGATO_ON c32. c16. LEGATO_OFF r64 r32 r16 r r r2 r
+LEGATO_ON c32. c16 LEGATO_OFF r64 r8 r r r2 r
+LEGATO_ON c32. c32. LEGATO_OFF r32 r8 r r r2 r
+LEGATO_ON c32. c32 LEGATO_OFF r64 r32 r8 r r r2 r
+LEGATO_ON c32 c1 LEGATO_OFF r32 r16 r8 r
+LEGATO_ON c32 c2. LEGATO_OFF r32 r16 r8 r r
+LEGATO_ON c32 c2 LEGATO_OFF r32 r16 r8 r2 r
+LEGATO_ON c32 c. LEGATO_OFF r32 r16 r r2 r
+LEGATO_ON c32 c LEGATO_OFF r32 r16 r8 r r2 r
+LEGATO_ON c32 c8. LEGATO_OFF r32 r r r2 r
+LEGATO_ON c32 c8 LEGATO_OFF r32 r16 r r r2 r
+LEGATO_ON c32 c16. LEGATO_OFF r8 r r r2 r
+LEGATO_ON c32 c16 LEGATO_OFF r32 r8 r r r2 r
+LEGATO_ON c32 c32. LEGATO_OFF r64 r32 r8 r r r2 r
+LEGATO_ON c32 c32 LEGATO_OFF r16 r8 r r r2 r
+LEGATO_ON c c8 c. c16 LEGATO_OFF r16 r8 r r
