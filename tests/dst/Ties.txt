@@ -14,7 +14,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48
-o5 l4
+o4 l4
 LEGATO_ON c1 c2 LEGATO_OFF
 LEGATO_ON c1 c. LEGATO_OFF r8
 LEGATO_ON c1 c LEGATO_OFF r
