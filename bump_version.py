@@ -23,6 +23,9 @@ import typing
 
 
 def _bump_version(version):
+    key = "version = "
+    _overwrite("pyproject.toml", key, f'{key}"{version}"')
+
     key = "__version__ = "
     _overwrite("smw_music/__init__.py", key, f'{key}"{version}"')
 
@@ -30,7 +33,7 @@ def _bump_version(version):
     _overwrite("tests/test_smw_music.py", key, f'{key}"{version}"')
 
     key = "; MusicXML->AMK v"
-    repl = f"{key}{version}"
+    repl = f"{key}{version}\r"
     for fname in glob.iglob("tests/dst/*.txt"):
         _overwrite(fname, key, repl)
 
@@ -39,7 +42,7 @@ def _bump_version(version):
 
 
 def _overwrite(fname: str, key: str, repl: str):
-    with open(fname, "r+") as fobj:
+    with open(fname, "r+", newline="") as fobj:
         contents = fobj.readlines()
         contents = [re.sub(f"{key}.*", repl, x) for x in contents]
         fobj.seek(0)
