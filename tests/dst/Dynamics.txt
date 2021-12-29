@@ -1,0 +1,27 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+#spc
+{
+#author  "None"
+#title   "Dynamics"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48
+o3 l1
+v2 c
+v5 d
+v15 e
+v31 f
+v51 g
+v77 a
+v124 b
+v184 > c
+v206 d
+v230 e

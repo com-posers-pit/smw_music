@@ -24,6 +24,27 @@ import pytest
 ###############################################################################
 
 from smw_music import music_xml, __version__
+from smw_music.scripts import convert
+
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _compare(src, dst, constants):
+    fname = constants["amk_dir"] / dst
+
+    with open(fname, "r") as fobj:
+        target = fobj.readlines()
+
+    fname = constants["mxl_dir"] / src
+
+    with tempfile.NamedTemporaryFile("r") as fobj:
+        convert.main([str(fname), str(fobj.name)])
+        written = fobj.readlines()
+
+    assert target == written
 
 
 ###############################################################################
@@ -33,7 +54,12 @@ from smw_music import music_xml, __version__
 
 @pytest.fixture
 def constants():
-    return {"test_dir": pathlib.Path("tests")}
+    testdir = pathlib.Path("tests")
+    return {
+        "test_dir": testdir,
+        "mxl_dir": testdir / "src",
+        "amk_dir": testdir / "dst",
+    }
 
 
 ###############################################################################
@@ -41,26 +67,55 @@ def constants():
 ###############################################################################
 
 
-def test_version():
-    """Verify correct version number."""
-    assert __version__ == "0.1.1"
+def test_dotted(constants):
+    _compare("Dots.mxl", "Dots.txt", constants)
+
+
+###############################################################################
+
+
+def test_dynamics(constants):
+    _compare("Dynamics.mxl", "Dynamics.txt", constants)
+
+
+###############################################################################
+
+
+def test_grace_notes(constants):
+    _compare("Grace_Notes.mxl", "Grace_Notes.txt", constants)
 
 
 ###############################################################################
 
 
 def test_smb_castle(constants):
-    test_dir = constants["test_dir"]
-    fname = test_dir / "dst" / "SMB_Castle_Theme.txt"
+    _compare("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", constants)
 
-    with open(fname, "r") as fobj:
-        target = fobj.readlines()
 
-    for fname in ["SMB_Castle_Theme.mxl", "SMB_Castle_Theme.musicxml"]:
-        fname = test_dir / "src" / fname
+###############################################################################
 
-        with tempfile.NamedTemporaryFile("r") as fobj:
-            music_xml.Song.from_music_xml(fname).to_amk(fobj.name)
-            written = fobj.readlines()
 
-        assert target == written
+def test_ties(constants):
+    _compare("Ties.mxl", "Ties.txt", constants)
+
+
+###############################################################################
+
+
+def test_triplets(constants):
+    _compare("Triplets.mxl", "Triplets.txt", constants)
+
+
+###############################################################################
+
+
+def test_uncompressed_smb_castle(constants):
+    _compare("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt", constants)
+
+
+###############################################################################
+
+
+def test_version():
+    """Verify correct version number."""
+    assert __version__ == "0.1.2"

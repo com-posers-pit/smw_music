@@ -1,14 +1,16 @@
 SMW Music README
 ================
 
-|bandit-status| |lint-status| |mypy-status| |test-status| |made-with-python|
-|made-with-sphinx-doc| |rtd-status| |reuse| |license|
+|bandit-status| |lint-status| |mypy-status| |test-status| |coverage-status|
+|package-version| |python-version| |rtd-status| |package-status| |reuse|
+|license|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
 
 The tooling has only been tested with exported MusicXML files from MuseScore
 3.6.2, but it should work with outputs from other music notation software.
+Output files are tested against `AddMusicK`_ 1.0.8.
 
 The software (and especially the libraries) are pre-alpha.  APIs may change at
 any time for any/no reason.
@@ -27,7 +29,8 @@ Or install from source using `poetry <https://python-poetry.org/>`_:
 .. code-block:: bash
 
    pip install poetry
-   git clone https://github.com/com-posers-pit/
+   git clone https://github.com/com-posers-pit/smw_music
+   cd smw_music
    poetry install --no-dev
 
 Usage
@@ -74,6 +77,7 @@ Acknowledgements
 - Kipernal, KungFuFurby, and other authors of `AddMusicK`_
 - Wakana's `SMW music porting tutorial`_
 - Michael Scott Cuthbert and cuthbertLab's `music21 Python library`_
+- W3C Music Notation Community Group `MusicXML`_
 
 .. # Links
 .. _Examples: https://smw-music.readthedocs.io/en/latest/examples.html
@@ -83,21 +87,37 @@ Acknowledgements
 .. _AddMusicK: https://www.smwcentral.net/?p=section&a=details&id=24994
 .. _SMW music porting tutorial: https://www.smwcentral.net/?p=viewthread&t=89606
 .. _music21 Python library: https://github.com/cuthbertLab/music21
-.. |made-with-python| image:: https://img.shields.io/badge/Made%20with-Python-1f425f.svg
-   :target: https://www.python.org/
-.. |made-with-sphinx-doc| image:: https://img.shields.io/badge/Made%20with-Sphinx-1f425f.svg
-   :target: https://www.sphinx-doc.org/
+.. _MusicXML: https://www.w3.org/community/music-notation/
 .. |rtd-status| image:: https://readthedocs.org/projects/smw-music/badge/?version=latest
    :target: https://smw-music.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation Status
 .. |bandit-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/bandit.yml/badge.svg
-   :target: https://github.com/
+   :target: https://github.com/com-posers-pit/smw_music/actions/workflows/bandit.yml
+   :alt: Bandit status
+.. |coverage-status| image:: https://codecov.io/gh/com-posers-pit/smw_music/branch/develop/graph/badge.svg?token=VOG1I6FT1I
+   :target: https://codecov.io/gh/com-posers-pit/smw_music
+   :alt: Code Coverage
 .. |lint-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/lint.yml/badge.svg
-   :target: https://github.com/
+   :target: https://github.com/com-posers-pit/smw_music/actions/workflows/lint.yml
+   :alt: Lint status
 .. |mypy-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/mypy.yml/badge.svg
-   :target: https://github.com/
+   :target: https://github.com/com-posers-pit/smw_music/actions/workflows/mypy.yml
+   :alt: MYPY status
 .. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml/badge.svg
-   :target: https://github.com/
-.. |license| image:: https://img.shields.io/badge/License-AGPLv3-blue.svg
+   :target: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml
+   :alt: Unit test status
+.. |license| image:: https://img.shields.io/pypi/l/smw_music
+   :target: https://pypi.com/l/smw_music
+   :alt: PyPI - License
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
    :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
+   :alt: REUSE Status
+.. |package-version| image:: https://img.shields.io/pypi/v/smw_music
+   :target: https://pypi.com/l/smw_music
+   :alt: PyPI - Package Version
+.. |python-version| image:: https://img.shields.io/pypi/pyversions/smw_music
+   :target: https://pypi.com/l/smw_music
+   :alt: PyPI - Python Version
+.. |package-status| image:: https://img.shields.io/pypi/status/smw_music
+   :target: https://pypi.com/l/smw_music
+   :alt: PyPI - Status

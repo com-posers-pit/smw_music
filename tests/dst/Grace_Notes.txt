@@ -1,0 +1,24 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+#spc
+{
+#author  "None"
+#title   "Grace Notes"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48
+o4 l8
+LEGATO_ON b=8 > c=40 LEGATO_OFF r4 r2
+o3 LEGATO_ON c+=8 c=40 LEGATO_OFF r r2
+> LEGATO_ON c+=8 c=16 LEGATO_OFF r r4 r2
+LEGATO_ON e=8 d=16 LEGATO_OFF r16 r4 r2
+< LEGATO_ON g=8 a=88 LEGATO_OFF r2
+> LEGATO_ON f=8 e=88 LEGATO_OFF r4
+< LEGATO_ON g=8 a=40 a4. LEGATO_OFF r r4

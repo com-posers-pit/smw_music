@@ -1,25 +1,54 @@
 #!/usr/bin/env python3
-
+#
 # SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-"""Music XML -> AMK Converter."""
+"""Project version bump tool."""
 
 ###############################################################################
 # Standard Library imports
 ###############################################################################
 
 import argparse
+import glob
+import re
 import sys
+import typing
 
 ###############################################################################
-# Package imports
+# Private function definitions
 ###############################################################################
 
-from smw_music import __version__
-from smw_music.music_xml import Song
+
+def _bump_version(version):
+    key = "version = "
+    _overwrite("pyproject.toml", key, f'{key}"{version}"')
+
+    key = "__version__ = "
+    _overwrite("smw_music/__init__.py", key, f'{key}"{version}"')
+
+    key = "assert __version__ == "
+    _overwrite("tests/test_smw_music.py", key, f'{key}"{version}"')
+
+    key = "; MusicXML->AMK v"
+    repl = f"{key}{version}\r"
+    for fname in glob.iglob("tests/dst/*.txt"):
+        _overwrite(fname, key, repl)
+
+
+###############################################################################
+
+
+def _overwrite(fname: str, key: str, repl: str):
+    with open(fname, "r+", newline="") as fobj:
+        contents = fobj.readlines()
+        contents = [re.sub(f"{key}.*", repl, x) for x in contents]
+        fobj.seek(0)
+        fobj.truncate()
+        fobj.writelines(contents)
+
 
 ###############################################################################
 # API function definitions
@@ -27,18 +56,14 @@ from smw_music.music_xml import Song
 
 
 def main(args=None):
-    """Entrypoint for Music XML -> AMK Converter."""
     if args is None:
         args = sys.argv[1:]
-    parser = argparse.ArgumentParser(
-        description=f"Music XML -> AMK Converter v{__version__}"
-    )
-    parser.add_argument("music_xml", type=str, help="Source Music XML file")
-    parser.add_argument("amk", type=str, help="Output AMK file")
+    parser = argparse.ArgumentParser("Version Update Tool")
+    parser.add_argument("version", type=str, help="New Version")
 
     args = parser.parse_args(args)
 
-    Song.from_music_xml(args.music_xml).to_amk(args.amk)
+    _bump_version(args.version)
 
 
 ###############################################################################
