@@ -81,6 +81,13 @@ def test_dynamics(constants):
 ###############################################################################
 
 
+def test_grace_notes(constants):
+    _compare("Grace_Notes.mxl", "Grace_Notes.txt", constants)
+
+
+###############################################################################
+
+
 def test_smb_castle(constants):
     _compare("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", constants)
 
