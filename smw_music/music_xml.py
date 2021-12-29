@@ -209,7 +209,19 @@ class Channel:
     ###########################################################################
 
     def _emit_dynamic(self, dyn: "Dynamic"):
-        self._directives.append(f"v{dyn.level}")
+        volmap = {
+            "pppp": "P_4",
+            "ppp": "P_3",
+            "pp": "P_2",
+            "p": "P_1",
+            "mp": "MP",
+            "mf": "MF",
+            "f": "F_1",
+            "ff": "F_2",
+            "fff": "F_3",
+            "ffff": "F_4",
+        }
+        self._directives.append(volmap[dyn.level])
 
     ###########################################################################
 
@@ -361,16 +373,16 @@ class Dynamic:
 
     Parameters
     ----------
-    level: int
-        Volume level from 0-255
+    level: str
+        dynamic level (pppp, ppp, pp, p, mp, mf, f, ff, fff, ffff)
 
     Attributes
     ----------
-    level: int
-        Volume level from 0-255
+    level: str
+        dynamic level
     """
 
-    level: int
+    level: str
 
     ###########################################################################
     # API constructor definitions
@@ -396,7 +408,7 @@ class Dynamic:
         ----
         Confirm this heuristic is good enough, or parameterize
         """
-        return cls(int(255 * elem.volumeScalar ** 2))
+        return cls(elem.value)
 
 
 ###############################################################################
@@ -490,7 +502,7 @@ class Note:
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
             bool(elem.duration.tuplets),
-            isinstance(elem.duration, music21.duration.GraceDuration),
+            elem.duration.isGrace,
         )
 
 
@@ -664,6 +676,19 @@ class Song:
         # Magic BPM -> AMK/SPC tempo conversion
         amk_tempo = int(self.bpm * 255 / 625)
 
+        volmap = {
+            "P_4": 26,
+            "P_3": 38,
+            "P_2": 64,
+            "P_1": 90,
+            "MP": 115,
+            "MF": 141,
+            "F_1": 179,
+            "F_2": 217,
+            "F_3": 230,
+            "F_4": 225,
+        }
+
         amk = ["#amk 2"]
         amk.append("")
         amk.append(f"; MusicXML->AMK v{__version__}")
@@ -681,6 +706,10 @@ class Song:
             amk.append(80 * ";")
             amk.append("")
             amk.append(f"#{n} t{amk_tempo}")
+            amk.append("")
+            for key, val in volmap.items():
+                amk.append(f'"{key}=v{val}"')
+            amk.append("")
             amk.append(channel.amk)
 
         rv = _CRLF.join(amk)
