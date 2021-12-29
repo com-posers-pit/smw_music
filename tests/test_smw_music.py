@@ -111,4 +111,4 @@ def test_uncompressed_smb_castle(constants):
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.1.1"
+    assert __version__ == "0.1.2"

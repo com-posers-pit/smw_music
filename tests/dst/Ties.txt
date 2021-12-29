@@ -1,6 +1,6 @@
 #amk 2
 
-; MusicXML->AMK v0.1.1
+; MusicXML->AMK v0.1.2
 
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
