@@ -28,89 +28,45 @@ from smw_music.scripts import convert
 
 
 ###############################################################################
-# Private function definitions
+# Test definitions
 ###############################################################################
 
 
-def _compare(src, dst, constants):
-    fname = constants["amk_dir"] / dst
+@pytest.mark.parametrize(
+    "src, dst",
+    [
+        ("Dots.mxl", "Dots.txt"),
+        ("Dynamics.mxl", "Dynamics.txt"),
+        ("Grace_Notes.mxl", "Grace_Notes.txt"),
+        ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt"),
+        ("Ties.mxl", "Ties.txt"),
+        ("Triplets.mxl", "Triplets.txt"),
+        ("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt"),
+    ],
+    ids=[
+        "Dots",
+        "Dynamics",
+        "Grace Notes",
+        "SMB Castle Theme (compressed)",
+        "Ties",
+        "Triplets",
+        "SMB Castle Theme (uncompressed)",
+    ],
+)
+def test_conversion(src, dst):
+    test_dir = pathlib.Path("tests")
+    fname = test_dir / "dst" / dst
 
     with open(fname, "r") as fobj:
         target = fobj.readlines()
 
-    fname = constants["mxl_dir"] / src
+    fname = test_dir / "src" / src
 
     with tempfile.NamedTemporaryFile("r") as fobj:
         convert.main([str(fname), str(fobj.name)])
         written = fobj.readlines()
 
     assert target == written
-
-
-###############################################################################
-# Fixture definitions
-###############################################################################
-
-
-@pytest.fixture
-def constants():
-    testdir = pathlib.Path("tests")
-    return {
-        "test_dir": testdir,
-        "mxl_dir": testdir / "src",
-        "amk_dir": testdir / "dst",
-    }
-
-
-###############################################################################
-# Test definitions
-###############################################################################
-
-
-def test_dotted(constants):
-    _compare("Dots.mxl", "Dots.txt", constants)
-
-
-###############################################################################
-
-
-def test_dynamics(constants):
-    _compare("Dynamics.mxl", "Dynamics.txt", constants)
-
-
-###############################################################################
-
-
-def test_grace_notes(constants):
-    _compare("Grace_Notes.mxl", "Grace_Notes.txt", constants)
-
-
-###############################################################################
-
-
-def test_smb_castle(constants):
-    _compare("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", constants)
-
-
-###############################################################################
-
-
-def test_ties(constants):
-    _compare("Ties.mxl", "Ties.txt", constants)
-
-
-###############################################################################
-
-
-def test_triplets(constants):
-    _compare("Triplets.mxl", "Triplets.txt", constants)
-
-
-###############################################################################
-
-
-def test_uncompressed_smb_castle(constants):
-    _compare("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt", constants)
 
 
 ###############################################################################
