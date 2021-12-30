@@ -40,6 +40,7 @@ pre-commit = "^2.16.0"
 
 [tool.poetry.scripts]
 smw_music_xml_to_amk = "smw_music.scripts.convert:main"
+smw_music_decode_spc = "smw_music.scripts.decode_spc:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
