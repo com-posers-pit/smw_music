@@ -3,9 +3,21 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-"""Utilities for SPC file handling."""
+"""
+Utilities for SPC file handling.
 
-# http://vspcplay.raphnet.net/spc_file_format.txt
+Notes
+-----
+See [1]_ for SPC file format specification.  Ambiguities in the specification
+(e.g., multi-byte endian, text formats, etc.) were resolved by referencing the
+sources for SPCAmp [2]_.
+
+References
+----------
+.. [1] SPC File Format. http://snesmusic.org/files/spc_file_format.txt
+.. [2] SPCAmp v3.1 Source. http://www.alpha-ii.com/Source/SAmp310s.rar
+"""
+
 
 ###############################################################################
 # Standard Library imports

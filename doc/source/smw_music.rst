@@ -16,6 +16,7 @@ Submodules
    :maxdepth: 4
 
    smw_music.music_xml
+   smw_music.spc
 
 Module contents
 ---------------
