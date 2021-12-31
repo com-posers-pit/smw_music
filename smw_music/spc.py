@@ -610,6 +610,7 @@ class Spc:  # pylint: disable=too-many-instance-attributes
 class Subchunk:
     subchunk_id: int
     subchunk_type: int
+    length_field: int
     data: Union[str, int]
     _LENGTH_TYPE: ClassVar[int] = 0
     _STRING_TYPE: ClassVar[int] = 1
@@ -620,17 +621,18 @@ class Subchunk:
     ###########################################################################
 
     @classmethod
-    def from_binary(cls, data) -> "Subchunk":
+    def from_binary(cls, data: bytes) -> "Subchunk":
         subchunk_id = data[0]
         subchunk_type = data[1]
         length = int.from_bytes(data[2:4], "little")
+        subchunk_data: Union[str, int]
 
         if subchunk_type == cls._LENGTH_TYPE:
             subchunk_data = length
         elif subchunk_type == cls._STRING_TYPE:
             if not 4 <= length <= 256:
                 raise SpcException(f"Invalid subchunk string length: {length}")
-            subchunk_data = data[4 : (4 + length)]
+            subchunk_data = _decode(data[4 : (4 + length)])
         elif subchunk_type == cls._INTEGER_TYPE:
             if not 4 == length:
                 raise SpcException(
@@ -640,7 +642,7 @@ class Subchunk:
         else:
             raise SpcException(f"Invalid subchunk type: {subchunk_type}")
 
-        return cls(subchunk_id, subchunk_type, subchunk_data)
+        return cls(subchunk_id, subchunk_type, length, subchunk_data)
 
     ###########################################################################
     # API property definitions
@@ -654,17 +656,18 @@ class Subchunk:
 
     @property
     def padded_length(self) -> int:
+        rv = 4  # Header length
         if self.subchunk_type == self._LENGTH_TYPE:
-            rv = 4
+            rv += 0
         elif self.subchunk_type == self._STRING_TYPE:
-            rv = 4 + ((len(cast(str, self.data)) + 3) & 0xFF)
+            rv += self.length_field
         elif self.subchunk_type == self._INTEGER_TYPE:
-            rv = 8
+            rv += 4
         else:
             raise SpcException(
                 f"Bad subchunk type in padded_length: {self.subchunk_type}"
             )
-        return rv
+        return (rv + 3) & ~0x3  # Round up to a multiple of 4
 
     ###########################################################################
     # Data model method definitions
