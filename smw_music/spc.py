@@ -35,6 +35,22 @@ from typing import cast, ClassVar, Dict, List, Optional, Union
 from . import SmwMusicException
 
 ###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _decode(binstr: bytes) -> str:
+    return binstr.rstrip(b"\x00").decode("ascii")
+
+
+###############################################################################
+
+
+def _encode(string: str, width: int) -> bytes:
+    return string.encode("ascii").ljust(width, b"\x00")
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -204,7 +220,7 @@ class Header:
     def binary(self) -> bytes:
         id666_flag = bytes([self._ID666_FIELD[self.contains_id666]])
         return (
-            self.file_header.encode("ascii")
+            _encode(self.file_header, 33)
             + self._FILL
             + id666_flag
             + bytes([self.version])
@@ -249,18 +265,18 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
     def from_binary(  # pylint: disable=too-many-locals
         cls, data: bytes
     ) -> "Id666Tag":
-        song_title = data[:32].decode("ascii").strip("\x00")
-        game_title = data[32:64].decode("ascii").strip("\x00")
-        dumper_name = data[64:80].decode("ascii").strip("\x00")
-        comments = data[80:112].decode("ascii").strip("\x00")
+        song_title = _decode(data[:32])
+        game_title = _decode(data[32:64])
+        dumper_name = _decode(data[64:80])
+        comments = _decode(data[80:112])
         dump_date: Union[int, str]
 
         if data[114] == ord(b"/"):
             # text ID tag
-            dump_date = data[112:123].decode("ascii").strip("\x00")
+            dump_date = _decode(data[112:123])
             unused = b""
-            secs = int(data[123:126])
-            fade_ms = int(data[126:129])
+            secs = int(_decode(data[123:126]))
+            fade_ms = int(_decode(data[126:129]))
             artist_offset = 131
         else:
             # binary ID tag
@@ -273,7 +289,7 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
             artist_offset = 130
 
         offset_end = artist_offset + 32
-        artist = data[artist_offset:offset_end].decode("ascii").strip("\x00")
+        artist = _decode(data[artist_offset:offset_end])
         default_disables = data[offset_end]
         emulator = chr(data[offset_end + 1])
         reserved = data[offset_end + 2 : 256]
@@ -302,10 +318,10 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
     @property
     def binary(self) -> bytes:
         rv = bytearray(210)
-        rv[:32] = self.song_title.ljust(32, "\x00").encode("ascii")
-        rv[32:64] = self.game_title.ljust(32, "\x00").encode("ascii")
-        rv[64:80] = self.dumper_name.ljust(16, "\x00").encode("ascii")
-        rv[80:112] = self.comments.ljust(32, "\x00").encode("ascii")
+        rv[:32] = _encode(self.song_title, 32)
+        rv[32:64] = _encode(self.game_title, 32)
+        rv[64:80] = _encode(self.dumper_name, 16)
+        rv[80:112] = _encode(self.comments, 32)
 
         if self.text_format:
             rv[112:122] = cast(str, self.dump_date).encode("ascii")
@@ -320,9 +336,7 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
             artist_offset = 130
 
         offset_end = artist_offset + 32
-        rv[artist_offset:offset_end] = self.artist.ljust(32, "\x00").encode(
-            "ascii"
-        )
+        rv[artist_offset:offset_end] = _encode(self.artist, 32)
         rv[offset_end] = self.default_disables
         rv[offset_end + 1] = ord(self.emulator)
 
