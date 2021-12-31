@@ -75,7 +75,7 @@ class Chunk:
     def from_binary(cls, data: bytes) -> "Chunk":
         subchunks = []
         subchunk_type = data[:4].decode("ascii")
-        data = data[4:]
+        data = data[8:]
         while data:
             subchunk = Subchunk.from_binary(data)
             subchunks.append(subchunk)
