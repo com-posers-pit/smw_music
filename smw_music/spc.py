@@ -181,9 +181,9 @@ class ExtraRam:
 
 @dataclass
 class Header:
-    file_header: str
-    contains_id666: bool
-    version: int
+    file_header: str = "SNES-SPC700 Sound File Data v0.30"
+    contains_id666: bool = True
+    version: int = 30
     _FILL: ClassVar[bytes] = bytes([26, 26])
     _ID666_FIELD: ClassVar[Dict[bool, int]] = {False: 27, True: 26}
 
