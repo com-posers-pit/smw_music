@@ -70,6 +70,70 @@ def test_dsp_registers_valid(arg):
 
 
 ###############################################################################
+# Header tests
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "arg",
+    [
+        b"000000000000000000000000000000000\x1a\x1a\x1a0",
+        b"000000000000000000000000000000000\x1a\x1a\x1b0",
+        b"0123456789abcdefghijklmnopqrstuvw\x1a\x1a\x1b0",
+    ],
+    ids=["Has ID666", "No ID666", "Arbitrary file header"],
+)
+def test_header_binary(arg):
+    header = spc.Header.from_binary(arg)
+    assert header.binary == arg
+
+
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "arg, match",
+    [
+        (
+            b"0000000000000000000000000000000000000",
+            "Invalid header fill",
+        ),
+        (
+            b"000000000000000000000000000000000\x1a\x1a00",
+            "Invalid ID666 header field",
+        ),
+    ],
+    ids=["Bad fill data", "Bad ID666 field"],
+)
+def test_header_invalid_binary(arg, match):
+    with pytest.raises(spc.SpcException, match=match):
+        header = spc.Header.from_binary(arg)
+
+
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "args, match",
+    [
+        ([32 * "0", True, 30], "Invalid file header length"),
+        ([34 * "0", True, 30], "Invalid file header length"),
+        ([33 * "0", True, -1], "Invalid file header version"),
+        ([33 * "0", True, 256], "Invalid file header version"),
+    ],
+    ids=[
+        "Short file header",
+        "Long file header",
+        "Version too small",
+        "Version too large",
+    ],
+)
+def test_header_invalid_construction(args, match):
+    with pytest.raises(spc.SpcException, match=match):
+        header = spc.Header(*args)
+
+
+###############################################################################
 # ExtraRam tests
 ###############################################################################
 
