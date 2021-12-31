@@ -40,14 +40,14 @@ def _decode_spc_file(fname: str, aram_fname: str, regs_fname: str):
     print(tmpl.render(fname=fname, spc=spc_data))
 
     if aram_fname:
-        with open(aram_fname, "wb") as fobj:
-            fobj.write(spc_data.ram.binary)
+        with open(aram_fname, "wb") as aram_fobj:
+            aram_fobj.write(spc_data.ram.binary)
 
     if regs_fname:
-        with open(regs_fname, "w") as fobj:
-            print(_hexify(spc_data.regs.binary), file=fobj)
-            print(_hexify(spc_data.dsp_regs.binary), file=fobj)
-            print(_hexify(spc_data.extra_ram.binary), file=fobj)
+        with open(regs_fname, "w") as regs_fobj:
+            print(_hexify(spc_data.regs.binary), file=regs_fobj)
+            print(_hexify(spc_data.dsp_regs.binary), file=regs_fobj)
+            print(_hexify(spc_data.extra_ram.binary), file=regs_fobj)
 
 
 ###############################################################################
