@@ -35,6 +35,7 @@ release = __version__
 extensions = [
     "sphinx.ext.autodoc",  # Include documentation from docstrings
     "sphinx.ext.napoleon",  # Support for NumPy and Google style docstrings
+    "sphinx.ext.todo",  # Support for todos
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -60,3 +61,5 @@ html_static_path = ["_static"]
 
 modindex_common_prefix = ["smw_music."]
 napoleon_preprocess_types = True
+
+todo_include_todos = True
