@@ -605,6 +605,9 @@ class Subchunk:
     subchunk_id: int
     subchunk_type: int
     data: Union[str, int]
+    _LENGTH_TYPE: ClassVar[int] = 0
+    _STRING_TYPE: ClassVar[int] = 1
+    _INTEGER_TYPE: ClassVar[int] = 4
 
     ###########################################################################
     # API constructor definitions
@@ -616,16 +619,13 @@ class Subchunk:
         subchunk_type = data[1]
         length = int.from_bytes(data[2:4], "little")
 
-        if subchunk_type == 0:
-            # Length type
+        if subchunk_type == cls._LENGTH_TYPE:
             subchunk_data = length
-        elif subchunk_type == 1:
-            # String type
+        elif subchunk_type == cls._STRING_TYPE:
             if not 4 <= length <= 256:
                 raise SpcException(f"Invalid subchunk string length: {length}")
             subchunk_data = data[4 : (4 + length)]
-        elif subchunk_type == 2:
-            # Int type
+        elif subchunk_type == cls._INTEGER_TYPE:
             if not 4 == length:
                 raise SpcException(
                     f"Invalid subchunk integer length: {length}"
@@ -648,11 +648,11 @@ class Subchunk:
 
     @property
     def padded_length(self) -> int:
-        if self.subchunk_type == 0:
+        if self.subchunk_type == self._LENGTH_TYPE:
             rv = 4
-        elif self.subchunk_type == 1:
+        elif self.subchunk_type == self._STRING_TYPE:
             rv = 4 + ((len(cast(str, self.data)) + 3) & 0xFF)
-        elif self.subchunk_type == 2:
+        elif self.subchunk_type == self._INTEGER_TYPE:
             rv = 8
         else:
             raise SpcException(
