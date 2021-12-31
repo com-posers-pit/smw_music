@@ -538,7 +538,7 @@ class Registers:
 class Spc:  # pylint: disable=too-many-instance-attributes
     header: Header
     regs: Registers = field(repr=False)
-    tag: Id666Tag
+    tag: Optional[Id666Tag]
     ram: Ram = field(repr=False)
     dsp_regs: DspRegisters = field(repr=False)
     extra_ram: ExtraRam = field(repr=False)
@@ -553,7 +553,10 @@ class Spc:  # pylint: disable=too-many-instance-attributes
     def from_binary(cls, data: bytes) -> "Spc":
         header = Header.from_binary(data[0x0:0x25])
         regs = Registers.from_binary(data[0x25:0x2E])
-        tag = Id666Tag.from_binary(data[0x2E:0x100])
+        if header.contains_id666:
+            tag = Id666Tag.from_binary(data[0x2E:0x100])
+        else:
+            tag = None
         ram = Ram.from_binary(data[0x100:0x10100])
         dsp_regs = DspRegisters.from_binary(data[0x10100:0x10180])
         unused = data[0x10180:0x101C0]
@@ -578,10 +581,15 @@ class Spc:  # pylint: disable=too-many-instance-attributes
 
     @property
     def binary(self) -> bytes:
+        if self.tag is not None:
+            tag = self.tag.binary
+        else:
+            tag = bytes(256 - 33)
+
         return (
             self.header.binary
             + self.regs.binary
-            + self.tag.binary
+            + tag
             + self.ram.binary
             + self.dsp_regs.binary
             + self.unused
