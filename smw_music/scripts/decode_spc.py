@@ -33,7 +33,9 @@ from smw_music.spc import Spc
 
 def _decode_spc_file(fname: str):
     spc_data = Spc.from_file(fname)
-    tmpl = Template(pkgutil.get_data("smw_music", "data/spc_output.txt"))
+    tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
+        pkgutil.get_data("smw_music", "data/spc_output.txt")
+    )
     print(tmpl.render(fname=fname, spc=spc_data))
 
 
