@@ -12,10 +12,12 @@ Decoding algorithm is documented in [1]_.
 
 File loop headers are discussed in [2]_.
 
-.. [1]: SNES Dev Manual Book 1 (Fixed ToC) : Nintendo : Free Download, Borrow,
-and Streaming : Internet Archive.  https://archive.org/details/snes_manual1
-.. [2]: >Trouble Creating Samples (Solved) - Custom Music - SMW Central.
-https://www.smwcentral.net/?p=viewthread&t=76768&page=1&pid=1192147#p1192147
+.. [1] SNES Dev Manual Book 1 (Fixed ToC) : Nintendo : Free Download, Borrow,
+       and Streaming : Internet Archive.
+       https://archive.org/details/snes_manual1
+
+.. [2] Trouble Creating Samples (Solved) - Custom Music - SMW Central.
+       https://www.smwcentral.net/?p=viewthread&t=76768&page=1&pid=1192147#p1192147
 """
 
 ###############################################################################

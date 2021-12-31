@@ -15,6 +15,7 @@ Submodules
 .. toctree::
    :maxdepth: 4
 
+   smw_music.brr
    smw_music.music_xml
    smw_music.spc
 
