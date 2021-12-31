@@ -30,6 +30,7 @@ classifiers = [
 [tool.poetry.dependencies]
 python = "^3.9"
 music21 = "^7.1.0"
+lark = "^1.0.0"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.3.2"
