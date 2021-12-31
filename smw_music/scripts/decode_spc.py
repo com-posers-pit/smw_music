@@ -10,7 +10,14 @@
 ###############################################################################
 
 import argparse
+import pkgutil
 import sys
+
+###############################################################################
+# Library imports
+###############################################################################
+
+from mako.template import Template  # type: ignore
 
 ###############################################################################
 # Package imports
@@ -18,6 +25,17 @@ import sys
 
 from smw_music import __version__
 from smw_music.spc import Spc
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _decode_spc_file(fname: str):
+    spc_data = Spc.from_file(fname)
+    tmpl = Template(pkgutil.get_data("smw_music", "data/spc_output.txt"))
+    print(tmpl.render(fname=fname, spc=spc_data))
+
 
 ###############################################################################
 # API function definitions
@@ -33,7 +51,7 @@ def main(args=None):
 
     args = parser.parse_args(args)
 
-    print(Spc.from_file(args.spc_file))
+    _decode_spc_file(args.spc_file)
 
 
 ###############################################################################

@@ -1,0 +1,38 @@
+## SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
+## <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+##
+## SPDX-License-Identifier: AGPL-3.0-only
+Filename: ${fname}
+
+=== Header
+File Header: ${spc.header.file_header}
+Contains ID666 Tag: ${spc.header.contains_id666}
+Version: ${spc.header.version}
+
+% if spc.header.contains_id666:
+=== ID666 Tag
+Song Title: ${spc.tag.song_title}
+Game Title: ${spc.tag.game_title}
+Dumped by: ${spc.tag.dumper_name}
+Comments: ${spc.tag.comments}
+Text format: ${spc.tag.text_format}
+Dump Date: ${spc.tag.dump_date}
+Length: ${spc.tag.secs}s
+Fade: ${spc.tag.fade_ms}ms
+Artist: ${spc.tag.artist}
+Default Disables: 0b${f'{spc.tag.default_disables:08b}'}
+Emulator: ${spc.tag.emu_name}
+% else:
+No ID666 Tag
+% endif
+
+% if spc.chunk is not None:
+=== Extended ID666 Tag
+Chunk type: ${spc.chunk.chunk_type}
+Size: ${spc.chunk.chunk_size}B
+% for subchunk in spc.chunk.subchunks:
+${subchunk}
+% endfor
+% else:
+No extended ID666
+% endif
