@@ -271,7 +271,8 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
         comments = _decode(data[80:112])
         dump_date: Union[int, str]
 
-        if data[114] == ord(b"/"):
+        # This is pretty poor way to figure out if the
+        if data[164] in b"012":
             # text ID tag
             dump_date = _decode(data[112:123])
             unused = b""
