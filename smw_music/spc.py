@@ -376,6 +376,14 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     @property
+    def emu_name(self) -> str:
+        return {"0": "Unknown", "1": "ZSNES", "2": "Snes9x"}.get(
+            self.emulator, "???"
+        )
+
+    ###########################################################################
+
+    @property
     def text_format(self) -> bool:
         return isinstance(self.dump_date, str)
 
