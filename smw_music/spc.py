@@ -411,7 +411,7 @@ class Id666Tag:  # pylint: disable=too-many-instance-attributes
             raise SpcException(f"Invalid comment length: {len(self.comments)}")
 
         if self.text_format:
-            if len(self.dump_date) != 10:
+            if len(self.dump_date) > 10:
                 raise SpcException(
                     f"Invalid dump date length: {len(self.dump_date)}"
                 )
