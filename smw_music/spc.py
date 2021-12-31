@@ -586,6 +586,11 @@ class Spc:  # pylint: disable=too-many-instance-attributes
         else:
             tag = bytes(256 - 33)
 
+        if self.chunk is not None:
+            chunk = self.chunk.binary
+        else:
+            chunk = b""
+
         return (
             self.header.binary
             + self.regs.binary
@@ -594,6 +599,7 @@ class Spc:  # pylint: disable=too-many-instance-attributes
             + self.dsp_regs.binary
             + self.unused
             + self.extra_ram.binary
+            + chunk
         )
 
 
