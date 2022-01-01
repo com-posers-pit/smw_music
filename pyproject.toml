@@ -50,6 +50,7 @@ smw_music_xml_to_amk = "smw_music.scripts.convert:main"
 
 [tool.pydocstyle]
 convention = "numpy"
+add-ignore = "D105"
 
 [tool.pylint.FORMAT]
 good-names = "n,rv"
