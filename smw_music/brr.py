@@ -27,8 +27,8 @@ File loop headers are discussed in [2]_.
 import wave
 
 from collections import deque
-from dataclasses import dataclass
-from typing import Optional
+from dataclasses import dataclass, field
+from typing import Dict, Optional
 
 ###############################################################################
 # Library imports
@@ -82,6 +82,9 @@ class BrrException(SmwMusicException):
 class Brr:
     blocks: npt.NDArray[np.uint8]
     loop_point: Optional[int] = None
+    _waveform_cache: Dict[int, npt.NDArray[np.int16]] = field(
+        init=False, repr=False, compare=False
+    )
 
     ###########################################################################
     # API constructor definitions
@@ -112,7 +115,13 @@ class Brr:
     # API method definitions
     ###########################################################################
 
+    # Hotspot
     def generate_waveform(self, loops: int = 1) -> npt.NDArray[np.int16]:
+        try:
+            return self._waveform_cache[loops]
+        except KeyError:
+            # Not in the cache, do the calculation
+            pass
 
         samples = np.zeros(16, dtype=np.int8)
         rv = []
@@ -142,7 +151,8 @@ class Brr:
 
             start_block = self.loop_block
 
-        return np.array(rv, dtype=np.int16).reshape(-1)
+        self._waveform_cache[loops] = np.array(rv, dtype=np.int16).reshape(-1)
+        return self._waveform_cache[loops]
 
     ###########################################################################
 
@@ -206,5 +216,7 @@ class Brr:
 
             if not (valid_len and valid_block):
                 raise BrrException(f"Invalid loop point: {self.loop_point}")
+
+        self._waveform_cache = {}
 
     ###########################################################################
