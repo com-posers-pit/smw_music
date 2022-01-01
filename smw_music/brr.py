@@ -26,6 +26,7 @@ File loop headers are discussed in [2]_.
 
 import wave
 
+from collections import deque
 from typing import Optional
 
 ###############################################################################
@@ -39,6 +40,20 @@ import numpy as np
 ###############################################################################
 
 from . import SmwMusicException
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+_PRESCALE = 64
+
+# Filter coefficients documented in [1]
+_FILTERS = {
+    0: tuple(_PRESCALE * x for x in (0, 0)),
+    1: tuple(_PRESCALE * x for x in (0.9375, 0.0)),
+    2: tuple(_PRESCALE * x for x in (1.90625, -0.9375)),
+    3: tuple(_PRESCALE * x for x in (1.796875, -0.8125)),
+}
 
 ###############################################################################
 # Private function definitions
@@ -62,7 +77,6 @@ class BrrException(SmwMusicException):
 
 
 class Brr:
-
     ###########################################################################
     # API constructor definitions
     ###########################################################################
@@ -99,11 +113,13 @@ class Brr:
     ###########################################################################
 
     def to_wave(self, fname: str, framerate: int = 8000):
-        with wave.open(fname, "w") as fobj:
-            fobj.setnchannels(1)
-            fobj.setsampwidth(2)
-            fobj.setframerate(framerate)
-            fobj.writeframesraw(self.decoded)
+        with wave.open(fname, "wb") as fobj:
+            fobj.setnchannels(1)  # pylint: disable=no-member
+            fobj.setsampwidth(2)  # pylint: disable=no-member
+            fobj.setframerate(framerate)  # pylint: disable=no-member
+            fobj.writeframesraw(  # pylint: disable=no-member
+                self.decoded.tobytes()
+            )
 
     ###########################################################################
     # API property definitions
@@ -122,7 +138,8 @@ class Brr:
     @property
     def csv(self) -> str:
         rv = [
-            "Range,Filter,Loop,End,S1,S2,S3,S4,S5,S6,S7,S8,S9,S10,S11,S12,S13,S14,S15,S16"
+            "Range,Filter,Loop,End,S1,S2,S3,S4,S5,S6,S7,S8,"
+            + "S9,S10,S11,S12,S13,S14,S15,S16"
         ]
 
         data = 20 * [0]
@@ -142,12 +159,11 @@ class Brr:
 
     @property
     def decoded(self) -> np.ndarray:
-        prescale = 64
         samples = np.zeros(16, dtype=np.int8)
         nrows = self.blocks.shape[0]
         rv = np.zeros((nrows, 16), dtype=np.int16)
+        x = deque([0, 0], 2)  # pylint: disable=invalid-name
 
-        x = [0, 0]
         for row, block in enumerate(self.blocks):
             range_val = block[0] >> 4
             filter_val = 0x3 & (block[0] >> 2)
@@ -157,23 +173,13 @@ class Brr:
             for col, sample in enumerate(samples):
                 rval = sample << range_val
 
-                # Filter coefficients documented in [1]  We use a prescalar so
-                # we stay in integer arithmetic.
-                if filter_val == 0:
-                    a, b = 0.0, 0.0
-                elif filter_val == 1:
-                    a, b = 0.9375, 0.0
-                elif filter_val == 2:
-                    a, b = 1.90625, -0.9375
-                else:  # filter_val == 3:
-                    a, b = 1.796875, -0.8125
+                a, b = _FILTERS[filter_val]  # pylint: disable=invalid-name
 
-                a, b = int(prescale * a), int(prescale * b)
+                x.appendleft(
+                    (_PRESCALE * rval + a * x[0] + b * x[1]) // _PRESCALE
+                )
 
-                xval = (prescale * rval + a * x[0] + b * x[1]) // prescale
-
-                x = [xval, x[0]]
-                rv[row, col] = xval
+                rv[row, col] = x[0]
 
         rv.shape = (-1,)
         return rv

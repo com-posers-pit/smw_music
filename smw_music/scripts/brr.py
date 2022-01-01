@@ -11,7 +11,6 @@
 
 import argparse
 import sys
-import wave
 
 from typing import Optional
 
@@ -19,7 +18,7 @@ from typing import Optional
 # Standard Library imports
 ###############################################################################
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 
 
 ###############################################################################
