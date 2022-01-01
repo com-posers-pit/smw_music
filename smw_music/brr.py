@@ -24,6 +24,8 @@ File loop headers are discussed in [2]_.
 # Standard Library imports
 ###############################################################################
 
+import wave
+
 from typing import Optional
 
 ###############################################################################
@@ -33,7 +35,7 @@ from typing import Optional
 import numpy as np
 
 ###############################################################################
-# Project imports
+# Package imports
 ###############################################################################
 
 from . import SmwMusicException
@@ -91,6 +93,17 @@ class Brr:
     def from_file(cls, fname: str) -> "Brr":
         with open(fname, "rb") as fobj:
             return cls.from_binary(fobj.read())
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def to_wave(self, fname: str, framerate: int = 8000):
+        with wave.open(fname, "w") as fobj:
+            fobj.setnchannels(1)
+            fobj.setsampwidth(2)
+            fobj.setframerate(framerate)
+            fobj.writeframesraw(self.decoded)
 
     ###########################################################################
     # API property definitions
