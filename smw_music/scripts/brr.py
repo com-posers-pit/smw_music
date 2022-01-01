@@ -35,6 +35,7 @@ from smw_music.brr import Brr
 
 def _convert(
     brr_fname: str,
+    loops: int = 1,
     wav_fname: Optional[str] = None,
     png_fname: Optional[str] = None,
 ):
@@ -42,10 +43,10 @@ def _convert(
     brr = Brr.from_file(brr_fname)
 
     if wav_fname is not None:
-        brr.to_wave(wav_fname)
+        brr.to_wav(wav_fname, loops)
 
     if png_fname is not None:
-        plt.plot(brr.decoded)
+        plt.plot(brr.generate_waveform(loops))
         plt.savefig(png_fname)
 
 
@@ -62,10 +63,13 @@ def main(args=None):
     parser.add_argument("brr", type=str, help="BRR Filename")
     parser.add_argument("--wav", type=str, help="Output .wav file")
     parser.add_argument("--png", type=str, help="Output .png file")
+    parser.add_argument(
+        "--loops", type=int, help="Number of times to loop", default=1
+    )
 
     args = parser.parse_args(args)
 
-    _convert(args.brr, args.wav, args.png)
+    _convert(args.brr, args.loops, args.wav, args.png)
 
 
 ###############################################################################

@@ -27,6 +27,7 @@ File loop headers are discussed in [2]_.
 import wave
 
 from collections import deque
+from dataclasses import dataclass
 from typing import Optional
 
 ###############################################################################
@@ -34,6 +35,7 @@ from typing import Optional
 ###############################################################################
 
 import numpy as np
+import numpy.typing as npt
 
 ###############################################################################
 # Package imports
@@ -60,7 +62,7 @@ _FILTERS = {
 ###############################################################################
 
 
-def _u4_to_s4(data: np.ndarray) -> np.ndarray:
+def _u4_to_s4(data: npt.NDArray[np.uint8]) -> npt.NDArray[np.int8]:
     return (0xF & (data.astype(np.int8) + 8)) - 8
 
 
@@ -76,15 +78,13 @@ class BrrException(SmwMusicException):
 ###############################################################################
 
 
+@dataclass
 class Brr:
+    blocks: npt.NDArray[np.uint8]
+    loop_point: Optional[int] = None
+
     ###########################################################################
     # API constructor definitions
-    ###########################################################################
-
-    def __init__(self, blocks: np.ndarray, loop_point: Optional[int] = None):
-        self.blocks = blocks
-        self.loop_point = loop_point
-
     ###########################################################################
 
     @classmethod
@@ -112,13 +112,47 @@ class Brr:
     # API method definitions
     ###########################################################################
 
-    def to_wave(self, fname: str, framerate: int = 8000):
+    def generate_waveform(self, loops: int = 1) -> npt.NDArray[np.int16]:
+
+        samples = np.zeros(16, dtype=np.int8)
+        rv = []
+        x = deque([0, 0], 2)  # pylint: disable=invalid-name
+
+        start_block = 0
+        for _ in range(loops):
+            for block in self.blocks[start_block:]:
+                range_val = block[0] >> 4
+                filter_val = 0x3 & (block[0] >> 2)
+                samples[0::2] = _u4_to_s4(0xF & (block[1:] >> 4))
+                samples[1::2] = _u4_to_s4(0xF & block[1:])
+
+                row = []
+                for sample in samples:
+                    rval = sample << range_val
+
+                    a, b = _FILTERS[filter_val]  # pylint: disable=invalid-name
+
+                    x.appendleft(
+                        (_PRESCALE * rval + a * x[0] + b * x[1]) // _PRESCALE
+                    )
+
+                    row.append(x[0])
+
+                rv.append(row)
+
+            start_block = self.loop_block
+
+        return np.array(rv, dtype=np.int16).reshape(-1)
+
+    ###########################################################################
+
+    def to_wav(self, fname: str, loops: int = 0, framerate: int = 8000):
         with wave.open(fname, "wb") as fobj:
             fobj.setnchannels(1)  # pylint: disable=no-member
             fobj.setsampwidth(2)  # pylint: disable=no-member
             fobj.setframerate(framerate)  # pylint: disable=no-member
             fobj.writeframesraw(  # pylint: disable=no-member
-                self.decoded.tobytes()
+                self.generate_waveform(loops).tobytes()
             )
 
     ###########################################################################
@@ -158,28 +192,19 @@ class Brr:
     ###########################################################################
 
     @property
-    def decoded(self) -> np.ndarray:
-        samples = np.zeros(16, dtype=np.int8)
-        nrows = self.blocks.shape[0]
-        rv = np.zeros((nrows, 16), dtype=np.int16)
-        x = deque([0, 0], 2)  # pylint: disable=invalid-name
+    def loop_block(self) -> int:
+        return 0 if self.loop_point is None else self.loop_point // 9
 
-        for row, block in enumerate(self.blocks):
-            range_val = block[0] >> 4
-            filter_val = 0x3 & (block[0] >> 2)
-            samples[0::2] = _u4_to_s4(0xF & (block[1:] >> 4))
-            samples[1::2] = _u4_to_s4(0xF & block[1:])
+    ###########################################################################
+    # Data model methods
+    ###########################################################################
 
-            for col, sample in enumerate(samples):
-                rval = sample << range_val
+    def __post_init__(self):
+        if self.loop_point is not None:
+            valid_len = self.loop_point % 9 == 0
+            valid_block = 0 <= self.loop_point < self.blocks.size
 
-                a, b = _FILTERS[filter_val]  # pylint: disable=invalid-name
+            if not (valid_len and valid_block):
+                raise BrrException(f"Invalid loop point: {self.loop_point}")
 
-                x.appendleft(
-                    (_PRESCALE * rval + a * x[0] + b * x[1]) // _PRESCALE
-                )
-
-                rv[row, col] = x[0]
-
-        rv.shape = (-1,)
-        return rv
+    ###########################################################################
