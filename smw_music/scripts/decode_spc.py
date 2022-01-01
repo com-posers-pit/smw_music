@@ -44,7 +44,7 @@ def _decode_spc_file(fname: str, aram_fname: str, regs_fname: str):
             aram_fobj.write(spc_data.ram.binary)
 
     if regs_fname:
-        with open(regs_fname, "w") as regs_fobj:
+        with open(regs_fname, "w", encoding="ascii") as regs_fobj:
             print(_hexify(spc_data.regs.binary), file=regs_fobj)
             print(_hexify(spc_data.dsp_regs.binary), file=regs_fobj)
             print(_hexify(spc_data.extra_ram.binary), file=regs_fobj)
