@@ -18,6 +18,9 @@ File loop headers are discussed in [2]_.
 
 .. [2] Trouble Creating Samples (Solved) - Custom Music - SMW Central.
        https://www.smwcentral.net/?p=viewthread&t=76768&page=1&pid=1192147#p1192147
+
+.. [3] scipy.signal.lfilter &#8212; SciPy v1.7.1 Manual.
+       https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.lfilter.html
 """
 
 ###############################################################################
@@ -26,9 +29,9 @@ File loop headers are discussed in [2]_.
 
 import wave
 
-from collections import deque
 from dataclasses import dataclass, field
-from typing import Dict, Optional
+from functools import cached_property
+from typing import Dict, List, Optional
 
 ###############################################################################
 # Library imports
@@ -36,6 +39,8 @@ from typing import Dict, Optional
 
 import numpy as np
 import numpy.typing as npt
+
+from scipy.signal import lfilter, lfiltic  # type: ignore
 
 ###############################################################################
 # Package imports
@@ -47,14 +52,13 @@ from . import SmwMusicException
 # Private constant definitions
 ###############################################################################
 
-_PRESCALE = 64
-
-# Filter coefficients documented in [1]
+# Filter coefficients documented in [1].  Coefficient signs (and leading 1s)
+# are required as documented in [3].
 _FILTERS = {
-    0: tuple(_PRESCALE * x for x in (0, 0)),
-    1: tuple(_PRESCALE * x for x in (0.9375, 0.0)),
-    2: tuple(_PRESCALE * x for x in (1.90625, -0.9375)),
-    3: tuple(_PRESCALE * x for x in (1.796875, -0.8125)),
+    0: np.array([1, 0, 0]),
+    1: np.array([1, -0.9375, 0]),
+    2: np.array([1, -1.90625, 0.9375]),
+    3: np.array([1, -1.7968750, 0.8125]),
 }
 
 ###############################################################################
@@ -115,43 +119,44 @@ class Brr:
     # API method definitions
     ###########################################################################
 
-    # Hotspot
     def generate_waveform(self, loops: int = 1) -> npt.NDArray[np.int16]:
+        # Cache lookup
         try:
             return self._waveform_cache[loops]
         except KeyError:
             # Not in the cache, do the calculation
             pass
 
-        samples = np.zeros(16, dtype=np.int8)
-        rv = []
-        x = deque([0, 0], 2)  # pylint: disable=invalid-name
+        if not self.sample_loops and loops != 1:
+            raise BrrException("Cannot loop non-looping sample")
 
+        # Variable initialization
+        nblocks = self.nblocks + (loops - 1) * (self.nblocks - self.loop_block)
+        rv = np.empty((nblocks, 16), dtype=np.int16)
+        proc = np.zeros(16)
+        rv_idx = 0
+
+        # Loop the requested number of times, starting at block 0 the first
+        # time and at the loop block all other times
         start_block = 0
         for _ in range(loops):
-            for block in self.blocks[start_block:]:
-                range_val = block[0] >> 4
-                filter_val = 0x3 & (block[0] >> 2)
-                samples[0::2] = _u4_to_s4(0xF & (block[1:] >> 4))
-                samples[1::2] = _u4_to_s4(0xF & block[1:])
+            for n in range(start_block, self.nblocks):
+                # Get the filter coefficients
+                a_coeffs = _FILTERS[self.filters[n]]
+                b_coeffs = [2 ** self.ranges[n]]
 
-                row = []
-                for sample in samples:
-                    rval = sample << range_val
+                # Run the IIR filter
+                init = lfiltic(b_coeffs, a_coeffs, [proc[-1], proc[-2]])
+                proc, _ = lfilter(b_coeffs, a_coeffs, self.samples[n], zi=init)
 
-                    a, b = _FILTERS[filter_val]  # pylint: disable=invalid-name
-
-                    x.appendleft(
-                        (_PRESCALE * rval + a * x[0] + b * x[1]) // _PRESCALE
-                    )
-
-                    row.append(x[0])
-
-                rv.append(row)
+                # Store the result
+                rv[rv_idx] = np.round(proc)
+                rv_idx += 1
 
             start_block = self.loop_block
 
-        self._waveform_cache[loops] = np.array(rv, dtype=np.int16).reshape(-1)
+        # Cache storage and return
+        self._waveform_cache[loops] = rv.reshape(-1)
         return self._waveform_cache[loops]
 
     ###########################################################################
@@ -169,7 +174,7 @@ class Brr:
     # API property definitions
     ###########################################################################
 
-    @property
+    @cached_property
     def binary(self) -> bytes:
         rv = b""
         if self.loop_point is not None:
@@ -187,30 +192,65 @@ class Brr:
         ]
 
         data = 20 * [0]
-        for block in self.blocks:
-            range_val = block[0] >> 4
-            filter_val = 0x3 & (block[0] >> 2)
-            loop = bool(block[0] & 0x2)
-            end = bool(block[0] & 0x1)
-            data[0:4] = [range_val, filter_val, loop, end]
-            data[4::2] = _u4_to_s4(0xF & (block[1:] >> 4))
-            data[5::2] = _u4_to_s4(0xF & block[1:])
+        for n, (rval, fval, block) in enumerate(
+            zip(self.ranges, self.filters, self.samples)
+        ):
+            loop = bool(self.blocks[n, 0] & 0x2)
+            end = bool(self.blocks[n, 0] & 0x1)
+            data = [rval, fval, loop, end, *block]
             rv.append(",".join(str(d) for d in data))
 
         return "\n".join(rv)
 
     ###########################################################################
 
-    @property
+    @cached_property
+    def filters(self) -> List[int]:
+        return list(0x3 & (self.blocks[:, 0] >> 2))
+
+    ###########################################################################
+
+    @cached_property
     def loop_block(self) -> int:
         return 0 if self.loop_point is None else self.loop_point // 9
+
+    ###########################################################################
+
+    @property
+    def nblocks(self) -> int:
+        return self.blocks.shape[0]
+
+    ###########################################################################
+
+    @cached_property
+    def ranges(self) -> List[int]:
+        return list(0xF & (self.blocks[:, 0] >> 4))
+
+    ###########################################################################
+
+    @cached_property
+    def sample_loops(self) -> bool:
+        return bool(self.blocks[-1, 0] & 2)
+
+    ###########################################################################
+
+    @cached_property
+    def samples(self) -> npt.NDArray[np.int8]:
+        evens = 0xF & (self.blocks[:, 1:] >> 4)
+        odds = 0xF & (self.blocks[:, 1:])
+
+        rv = np.empty((evens.shape[0], 16), dtype=np.int8)
+        rv[:, ::2] = evens
+        rv[:, 1::2] = odds
+
+        return _u4_to_s4(rv)
 
     ###########################################################################
     # Data model methods
     ###########################################################################
 
     def __post_init__(self):
-        if self.loop_point is not None:
+        if self.sample_loops and self.loop_point is not None:
             valid_len = self.loop_point % 9 == 0
             valid_block = 0 <= self.loop_point < self.blocks.size
 
