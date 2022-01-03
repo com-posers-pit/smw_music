@@ -194,7 +194,9 @@ class Channel:
             if note.grace:
                 note_length = f"={grace_length}"
             else:
-                note_length = f"={192//note.duration - grace_length}"
+                duration = 192 // note.duration
+                duration = int(duration * (2 - 0.5 ** note.dots))
+                note_length = f"={duration - grace_length}"
 
         return note_length
 
@@ -312,7 +314,7 @@ class Channel:
 
     def _stop_legato(self):
         if self._legato:
-            if not self._grace:
+            if not (self._grace or self._tie):
                 self._legato = False
                 self._directives.append("LEGATO_OFF")
 
