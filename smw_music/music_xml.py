@@ -248,14 +248,16 @@ class Channel:
 
         self._handle_triplet(note)
 
-        if note.tie == "start":
-            self._tie = True
         if note.grace:
             self._grace = True
 
         self._emit_octave(note)
 
-        directive = note.name + self._calc_note_length(note)
+        directive = "^" if self._tie else note.name
+        directive += self._calc_note_length(note)
+
+        if note.tie == "start":
+            self._tie = True
 
         self._start_legato()
         self._directives.append(directive)
@@ -302,7 +304,7 @@ class Channel:
 
     def _start_legato(self):
         if not self._legato:
-            if self._tie or self._grace:
+            if self._grace:
                 self._legato = True
                 self._directives.append("LEGATO_ON")
 
@@ -310,7 +312,7 @@ class Channel:
 
     def _stop_legato(self):
         if self._legato:
-            if not self._tie and not self._grace:
+            if not self._grace:
                 self._legato = False
                 self._directives.append("LEGATO_OFF")
 
@@ -713,5 +715,10 @@ class Song:
             amk.append(channel.amk)
 
         rv = _CRLF.join(amk)
+
         # This handles a quirk of where triplet end marks are inserted
-        return rv.replace(_CRLF + "} ", " }" + _CRLF)
+        rv = rv.replace(_CRLF + "} ", " }" + _CRLF)
+
+        rv = rv.replace(" ^", "^")
+
+        return rv
