@@ -214,16 +214,16 @@ class Channel:
 
     def _emit_dynamic(self, dyn: "Dynamic"):
         volmap = {
-            "pppp": "P_4",
-            "ppp": "P_3",
-            "pp": "P_2",
-            "p": "P_1",
-            "mp": "MP",
-            "mf": "MF",
-            "f": "F_1",
-            "ff": "F_2",
-            "fff": "F_3",
-            "ffff": "F_4",
+            "pppp": "vPPPP",
+            "ppp": "vPPP",
+            "pp": "vPP",
+            "p": "vP",
+            "mp": "vMP",
+            "mf": "vMF",
+            "f": "vF",
+            "ff": "vFF",
+            "fff": "vFFF",
+            "ffff": "vFFFF",
         }
         self._directives.append(volmap[dyn.level])
 
@@ -737,16 +737,16 @@ class Song:
         amk_tempo = int(self.bpm * 255 / 625)
 
         volmap = {
-            "P_4": 26,
-            "P_3": 38,
-            "P_2": 64,
-            "P_1": 90,
-            "MP": 115,
-            "MF": 141,
-            "F_1": 179,
-            "F_2": 217,
-            "F_3": 230,
-            "F_4": 225,
+            "vPPPP": 26,
+            "vPPP": 38,
+            "vPP": 64,
+            "vP": 90,
+            "vMP": 115,
+            "vMF": 141,
+            "vF": 179,
+            "vFF": 217,
+            "vFFF": 230,
+            "vFFFF": 225,
         }
 
         amk = ["#amk 2"]
@@ -767,8 +767,10 @@ class Song:
             amk.append("")
             amk.append(f"#{n} t{amk_tempo}")
             amk.append("")
-            for key, val in volmap.items():
-                amk.append(f'"{key}=v{val}"')
+            amk.append("; Parameters")
+            amk.append(
+                " ".join(f'"{key}=v{val}"' for key, val in volmap.items())
+            )
             amk.append("")
             amk.append(channel.amk)
 
