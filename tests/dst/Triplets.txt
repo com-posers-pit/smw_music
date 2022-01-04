@@ -15,16 +15,8 @@
 
 #0 t48
 
-"P_4=v26"
-"P_3=v38"
-"P_2=v64"
-"P_1=v90"
-"MP=v115"
-"MF=v141"
-"F_1=v179"
-"F_2=v217"
-"F_3=v230"
-"F_4=v225"
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
 
 o3 l2
 w255 v255 @9 { a r r }

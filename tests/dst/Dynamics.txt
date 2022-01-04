@@ -15,25 +15,17 @@
 
 #0 t48
 
-"P_4=v26"
-"P_3=v38"
-"P_2=v64"
-"P_1=v90"
-"MP=v115"
-"MF=v141"
-"F_1=v179"
-"F_2=v217"
-"F_3=v230"
-"F_4=v225"
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
 
 o3 l1
-P_4 c
-P_3 d
-P_2 e
-P_1 f
-MP g
-MF a
-F_1 b
-F_2 > c
-F_3 d
-F_4 e
+vPPPP c
+vPPP d
+vPP e
+vP f
+vMP g
+vMF a
+vF b
+vFF > c
+vFFF d
+vFFFF e
