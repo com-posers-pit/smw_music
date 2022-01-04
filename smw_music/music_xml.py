@@ -30,7 +30,9 @@ from . import __version__
 ###############################################################################
 
 # Valid music channel element classes
-_ChannelElem = Union["Annotation", "Dynamic", "Measure", "Note", "Rest"]
+_ChannelElem = Union[
+    "Annotation", "Dynamic", "Measure", "Note", "Repeat", "Rest"
+]
 
 ###############################################################################
 
@@ -158,7 +160,7 @@ class Channel:
     ----------
     elems: list
         A list of valid channel elements (currently `Annotation`, `Dynamic`,
-        `Measure`, `Note`, and `Rest`)
+        `Measure`, `Note`, `Repeat`, and `Rest`)
 
     Attributes
     ----------
@@ -274,6 +276,12 @@ class Channel:
 
     ###########################################################################
 
+    def _emit_repeat(self, repeat: "Repeat"):
+        if repeat.start:
+            self._directives.append("/")
+
+    ###########################################################################
+
     def _emit_rest(self, rest: "Rest"):
         self._handle_triplet(rest)
 
@@ -330,6 +338,9 @@ class Channel:
         self._directives.append(f"l{self.base_note_length}")
 
         for elem in self.elems:
+            if isinstance(elem, Repeat):
+                self._emit_repeat(elem)
+
             if isinstance(elem, Rest):
                 self._emit_rest(elem)
 
@@ -514,6 +525,49 @@ class Note:
 
 
 @dataclass
+class Repeat:
+    """
+    A repeat bar.
+
+    Parameters
+    ----------
+    start : bool
+        True iff this is a "repeat start" bar
+
+    Attributes
+    ----------
+    start : bool
+        True iff this is a "repeat start" bar
+    """
+
+    start: bool
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(cls, elem: music21.bar.Repeat) -> "Repeat":
+        """
+        Convert a MusicXML repeat to a Repeat object.
+
+        Parameters
+        ----------
+        elem : music21.bar.Repeat
+            A music21 representation of a repeat bar
+
+        Return
+        ------
+        Repeat
+            A new Repeat object with its attributes defined by `elem`
+        """
+        return cls(elem.direction == "start")
+
+
+###############################################################################
+
+
+@dataclass
 class Rest:
     """
     Music rest.
@@ -643,6 +697,8 @@ class Song:
                             )
                         if isinstance(subelem, music21.note.Note):
                             channel_elem.append(Note.from_music_xml(subelem))
+                        if isinstance(subelem, music21.bar.Repeat):
+                            channel_elem.append(Repeat.from_music_xml(subelem))
                         if isinstance(subelem, music21.note.Rest):
                             channel_elem.append(Rest.from_music_xml(subelem))
                         if isinstance(
