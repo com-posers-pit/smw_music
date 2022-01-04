@@ -771,7 +771,9 @@ class Song:
             amk.append(
                 " ".join(f'"{key}=v{val}"' for key, val in volmap.items())
             )
+            amk.append("@0 v255 y10 q7F")
             amk.append("")
+            amk.append("; Music")
             amk.append(channel.amk)
 
         rv = _CRLF.join(amk)
