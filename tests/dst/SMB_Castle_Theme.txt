@@ -17,7 +17,9 @@
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+@0 v255 y10 q7F
 
+; Music
 o4 l32
 @9 w255 v150 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
 > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
@@ -32,7 +34,9 @@ o4 l32
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+@0 v255 y10 q7F
 
+; Music
 o3 l32
 @9 v150 a+ r a r g+ r a r a+ r b r a+ r a r
 a+ r a r g+ r a r a+ r b r a+ r a r

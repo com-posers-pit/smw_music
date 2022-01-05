@@ -17,7 +17,9 @@
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+@0 v255 y10 q7F
 
+; Music
 o4 l4
 c1^2
 c1^. r8

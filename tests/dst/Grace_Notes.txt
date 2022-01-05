@@ -17,7 +17,9 @@
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+@0 v255 y10 q7F
 
+; Music
 o4 l8
 LEGATO_ON b=8 > c=40 LEGATO_OFF r4 r2
 o3 LEGATO_ON c+=8 c=64 LEGATO_OFF r r2
