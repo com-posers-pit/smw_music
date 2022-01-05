@@ -11,7 +11,7 @@
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, TypeVar, Union
+from typing import Dict, Iterable, List, Tuple, TypeVar, Union
 
 ###############################################################################
 # Library imports
@@ -31,7 +31,7 @@ from . import __version__
 
 # Valid music channel element classes
 _ChannelElem = Union[
-    "Annotation", "Dynamic", "Measure", "Note", "Repeat", "Rest"
+    "Annotation", "Dynamic", "Measure", "Note", "Repeat", "Rest", "Slur"
 ]
 
 ###############################################################################
@@ -160,7 +160,7 @@ class Channel:
     ----------
     elems: list
         A list of valid channel elements (currently `Annotation`, `Dynamic`,
-        `Measure`, `Note`, `Repeat`, and `Rest`)
+        `Measure`, `Note`, `Repeat`, `Rest`, and `Slur`)
 
     Attributes
     ----------
@@ -175,10 +175,11 @@ class Channel:
     elems: List[_ChannelElem]
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
+    _grace: bool = field(init=False, repr=False, compare=False)
     _legato: bool = field(init=False, repr=False, compare=False)
+    _slur: bool = field(init=False, repr=False, compare=False)
     _tie: bool = field(init=False, repr=False, compare=False)
     _triplet: bool = field(init=False, repr=False, compare=False)
-    _grace: bool = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Private method definitions
@@ -294,6 +295,11 @@ class Channel:
 
     ###########################################################################
 
+    def _emit_slur(self, slur: "Slur"):
+        self._slur = slur.start
+
+    ###########################################################################
+
     def _handle_triplet(self, elem: Union["Rest", "Note"]):
         if not self._triplet and elem.triplet:
             self._directives.append("{")
@@ -307,6 +313,7 @@ class Channel:
         self._cur_octave = self.base_octave
         self._grace = False
         self._legato = False
+        self._slur = False
         self._tie = False
         self._triplet = False
 
@@ -314,7 +321,7 @@ class Channel:
 
     def _start_legato(self):
         if not self._legato:
-            if self._grace:
+            if self._slur or self._grace:
                 self._legato = True
                 self._directives.append("LEGATO_ON")
 
@@ -322,7 +329,7 @@ class Channel:
 
     def _stop_legato(self):
         if self._legato:
-            if not (self._grace or self._tie):
+            if not (self._grace or self._slur or self._tie):
                 self._legato = False
                 self._directives.append("LEGATO_OFF")
 
@@ -346,6 +353,9 @@ class Channel:
 
             if isinstance(elem, Dynamic):
                 self._emit_dynamic(elem)
+
+            if isinstance(elem, Slur):
+                self._emit_slur(elem)
 
             if isinstance(elem, Note):
                 self._emit_note(elem)
@@ -622,6 +632,28 @@ class Rest:
 ###############################################################################
 
 
+@dataclass
+class Slur:
+    """
+    A Slur object.
+
+    Parameters
+    ----------
+    start : bool
+        True iff this is the start of a slur
+
+    Attributes
+    ----------
+    start : bool
+        True iff this is a the start of a slur
+    """
+
+    start: bool
+
+
+###############################################################################
+
+
 class Song:
     """
     A complete song.
@@ -685,6 +717,11 @@ class Song:
             elif isinstance(elem, music21.stream.Part):
                 parts.append([])
                 channel_elem = parts[-1]
+                slurs: Tuple[List[int], List[int]] = ([], [])
+                for subelem in elem:
+                    if isinstance(subelem, music21.spanner.Slur):
+                        slurs[0].append(subelem.getFirst().id)
+                        slurs[1].append(subelem.getLast().id)
                 for measure in filter(_is_measure, elem):
                     channel_elem.append(Measure())
 
@@ -696,6 +733,10 @@ class Song:
                                 Dynamic.from_music_xml(subelem)
                             )
                         if isinstance(subelem, music21.note.Note):
+                            if subelem.id in slurs[0]:
+                                channel_elem.append(Slur(True))
+                            if subelem.id in slurs[1]:
+                                channel_elem.append(Slur(False))
                             channel_elem.append(Note.from_music_xml(subelem))
                         if isinstance(subelem, music21.bar.Repeat):
                             channel_elem.append(Repeat.from_music_xml(subelem))
