@@ -9,6 +9,8 @@
 # Standard Library imports
 ###############################################################################
 
+import pkgutil
+
 from collections import Counter
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Tuple, TypeVar, Union
@@ -18,6 +20,8 @@ from typing import Dict, Iterable, List, Tuple, TypeVar, Union
 ###############################################################################
 
 import music21  # type: ignore
+
+from mako.template import Template  # type: ignore
 
 ###############################################################################
 # Project imports
@@ -765,7 +769,7 @@ class Song:
             The output file to write to.
         """
         with open(fname, "w", encoding="ascii") as fobj:
-            print(self.amk, end=_CRLF, file=fobj)
+            print(self.amk, end="", file=fobj)
 
     ###########################################################################
     # API property definitions
@@ -790,34 +794,14 @@ class Song:
             "vFFFF": 225,
         }
 
-        amk = ["#amk 2"]
-        amk.append("")
-        amk.append(f"; MusicXML->AMK v{__version__}")
-        amk.append("")
-        amk.append('"LEGATO_ON=$F4$01"')
-        amk.append('"LEGATO_OFF=$F4$01"')
-        amk.append("")
-        amk.append("#spc")
-        amk.append("{")
-        amk.append(f'#author  "{self.composer}"')
-        amk.append(f'#title   "{self.title}"')
-        amk.append("}")
-        for n, channel in enumerate(self.channel_list):
-            amk.append("")
-            amk.append(80 * ";")
-            amk.append("")
-            amk.append(f"#{n} t{amk_tempo}")
-            amk.append("")
-            amk.append("; Parameters")
-            amk.append(
-                " ".join(f'"{key}=v{val}"' for key, val in volmap.items())
-            )
-            amk.append("@0 v255 y10 q7F")
-            amk.append("")
-            amk.append("; Music")
-            amk.append(channel.amk)
+        tmpl = Template(pkgutil.get_data("smw_music", "data/mml.txt"))
 
-        rv = _CRLF.join(amk)
+        rv = tmpl.render(
+            version=__version__,
+            tempo=amk_tempo,
+            song=self,
+            volmap=volmap,
+        )
 
         # This handles a quirk of where triplet end marks are inserted
         rv = rv.replace(_CRLF + "} ", " }" + _CRLF)
