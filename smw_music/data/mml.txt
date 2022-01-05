@@ -18,7 +18,7 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#${n} t${tempo}
+#${n}${f" t{tempo}" if n == 0 else ''} $F4$02${" /" if "/" not in channel.amk else ""}
 
 ; Parameters
 ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
