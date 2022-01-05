@@ -35,10 +35,17 @@ def main(args=None):
     )
     parser.add_argument("music_xml", type=str, help="Source Music XML file")
     parser.add_argument("amk", type=str, help="Output AMK file")
+    parser.add_argument(
+        "--disable_global_legato",
+        action="store_true",
+        help="Disable the global legato setting",
+    )
 
     args = parser.parse_args(args)
 
-    Song.from_music_xml(args.music_xml).to_amk(args.amk)
+    Song.from_music_xml(args.music_xml).to_mml_file(
+        args.amk, not args.disable_global_legato
+    )
 
 
 ###############################################################################

@@ -759,27 +759,17 @@ class Song:
     # API method definitions
     ###########################################################################
 
-    def to_amk(self, fname: str):
+    def generate_mml(self, global_legato: bool = True) -> str:
         """
-        Output the AMK representation of this Song to a file.
+        Return this song's AddmusicK's text.
 
         Parameters
         ----------
-        fname : str
-            The output file to write to.
+        global_legato : bool
+            True iff global legato should be enabled
         """
-        with open(fname, "w", encoding="ascii") as fobj:
-            print(self.amk, end="", file=fobj)
-
-    ###########################################################################
-    # API property definitions
-    ###########################################################################
-
-    @property
-    def amk(self) -> str:
-        """Return this song's AddmusicK's text."""
-        # Magic BPM -> AMK/SPC tempo conversion
-        amk_tempo = int(self.bpm * 255 / 625)
+        # Magic BPM -> MML/SPC tempo conversion
+        mml_tempo = int(self.bpm * 255 / 625)
 
         volmap = {
             "vPPPP": 26,
@@ -798,7 +788,8 @@ class Song:
 
         rv = tmpl.render(
             version=__version__,
-            tempo=amk_tempo,
+            global_legato=global_legato,
+            tempo=mml_tempo,
             song=self,
             volmap=volmap,
         )
@@ -809,3 +800,19 @@ class Song:
         rv = rv.replace(" ^", "^")
 
         return rv
+
+    ###########################################################################
+
+    def to_mml_file(self, fname: str, global_legato: bool = True):
+        """
+        Output the MML representation of this Song to a file.
+
+        Parameters
+        ----------
+        fname : str
+            The output file to write to.
+        global_legato : bool
+            True iff global legato should be enabled
+        """
+        with open(fname, "w", encoding="ascii") as fobj:
+            print(self.generate_mml(global_legato), end="", file=fobj)
