@@ -784,7 +784,9 @@ class Song:
             "vFFFF": 225,
         }
 
-        tmpl = Template(pkgutil.get_data("smw_music", "data/mml.txt"))
+        tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
+            pkgutil.get_data("smw_music", "data/mml.txt")
+        )
 
         rv = tmpl.render(
             version=__version__,
