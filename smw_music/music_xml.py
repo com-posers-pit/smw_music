@@ -13,7 +13,7 @@ import pkgutil
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, TypeVar, Union
+from typing import Dict, Iterable, List, Optional, TypeVar, Union
 
 ###############################################################################
 # Library imports
@@ -35,7 +35,7 @@ from . import __version__
 
 # Valid music channel element classes
 _ChannelElem = Union[
-    "Annotation", "Dynamic", "Measure", "Note", "Repeat", "Rest", "Slur"
+    "Annotation", "Dynamic", "Measure", "Note", "Repeat", "Rest"
 ]
 
 ###############################################################################
@@ -184,7 +184,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ----------
     elems: list
         A list of valid channel elements (currently `Annotation`, `Dynamic`,
-        `Measure`, `Note`, `Repeat`, `Rest`, and `Slur`)
+        `Measure`, `Note`, `Repeat`, and `Rest`)
 
     Attributes
     ----------
@@ -213,17 +213,24 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         grace_length = 8
         note_length = ""
 
-        if not self._grace and not note.grace:
-            if note.duration != self.base_note_length:
-                note_length = str(note.duration)
-            note_length += note.dots * "."
+        if note.slur is False:
+            self._slur = False
+            duration = 192 // note.duration
+            duration = int(duration * (2 - 0.5 ** note.dots))
+            self._legato = False
+            note_length = f"=1 LEGATO_OFF ^={duration - 1}"
         else:
-            if note.grace:
-                note_length = f"={grace_length}"
+            if not self._grace and not note.grace:
+                if note.duration != self.base_note_length:
+                    note_length = str(note.duration)
+                note_length += note.dots * "."
             else:
-                duration = 192 // note.duration
-                duration = int(duration * (2 - 0.5 ** note.dots))
-                note_length = f"={duration - grace_length}"
+                if note.grace:
+                    note_length = f"={grace_length}"
+                else:
+                    duration = 192 // note.duration
+                    duration = int(duration * (2 - 0.5 ** note.dots))
+                    note_length = f"={duration - grace_length}"
 
         return note_length
 
@@ -279,6 +286,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         if note.grace:
             self._grace = True
+        if note.slur:
+            self._slur = True
 
         self._emit_octave(note)
 
@@ -316,11 +325,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         directive += rest.dots * "."
 
         self._directives.append(directive)
-
-    ###########################################################################
-
-    def _emit_slur(self, slur: "Slur"):
-        self._slur = slur.start
 
     ###########################################################################
 
@@ -377,9 +381,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
             if isinstance(elem, Dynamic):
                 self._emit_dynamic(elem)
-
-            if isinstance(elem, Slur):
-                self._emit_slur(elem)
 
             if isinstance(elem, Note):
                 self._emit_note(elem)
@@ -472,7 +473,7 @@ class Measure:
 
 
 @dataclass
-class Note:
+class Note:  # pylint: disable=too-many-instance-attributes
     """
     Music note.
 
@@ -493,6 +494,9 @@ class Note:
         True iff this note is a triplet
     grace: bool
         True iff this is a grace note
+    slur: Optional[bool]
+        True if this is the start of a slur, False if it's the end, None
+        otherwise
 
     Attributes
     ----------
@@ -511,6 +515,9 @@ class Note:
         True iff this note is a triplet
     grace: bool
         True iff this is a grace note
+    slur: Optional[bool]
+        True if this is the start of a slur, False if it's the end, None
+        otherwise
 
     Todo
     ----
@@ -524,6 +531,7 @@ class Note:
     tie: str = ""
     triplet: bool = False
     grace: bool = False
+    slur: Optional[bool] = None
 
     ###########################################################################
     # API constructor definitions
@@ -656,28 +664,6 @@ class Rest:
 ###############################################################################
 
 
-@dataclass
-class Slur:
-    """
-    A Slur object.
-
-    Parameters
-    ----------
-    start : bool
-        True iff this is the start of a slur
-
-    Attributes
-    ----------
-    start : bool
-        True iff this is a the start of a slur
-    """
-
-    start: bool
-
-
-###############################################################################
-
-
 class Song:
     """
     A complete song.
@@ -768,11 +754,12 @@ class Song:
                 if isinstance(subelem, music21.dynamics.Dynamic):
                     channel_elem.append(Dynamic.from_music_xml(subelem))
                 if isinstance(subelem, music21.note.Note):
+                    note = Note.from_music_xml(subelem)
                     if subelem.id in slurs[0]:
-                        channel_elem.append(Slur(True))
+                        note.slur = True
                     if subelem.id in slurs[1]:
-                        channel_elem.append(Slur(False))
-                    channel_elem.append(Note.from_music_xml(subelem))
+                        note.slur = False
+                    channel_elem.append(note)
                 if isinstance(subelem, music21.bar.Repeat):
                     channel_elem.append(Repeat.from_music_xml(subelem))
                 if isinstance(subelem, music21.note.Rest):
