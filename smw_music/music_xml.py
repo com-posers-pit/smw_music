@@ -13,7 +13,7 @@ import pkgutil
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Tuple, TypeVar, Union
+from typing import Dict, Iterable, List, TypeVar, Union
 
 ###############################################################################
 # Library imports
@@ -82,6 +82,26 @@ def _is_measure(elem: music21.stream.Stream) -> bool:
         True iff `elem` is of type `music21.stream.Measure`
     """
     return isinstance(elem, music21.stream.Measure)
+
+
+###############################################################################
+
+
+def _is_slur(elem: music21.stream.Stream) -> bool:
+    """
+    Test to see if a music21 stream element is a Slur object.
+
+    Parameters
+    ----------
+    elem : music21.stream.Stream
+        A music21 Stream element
+
+    Return
+    ------
+    bool
+        True iff `elem` is of type `music21.spanner.Slur`
+    """
+    return isinstance(elem, music21.spanner.Slur)
 
 
 ###############################################################################
@@ -156,7 +176,7 @@ class Annotation:
 
 
 @dataclass
-class Channel:
+class Channel:  # pylint: disable=too-many-instance-attributes
     """
     Single music channel.
 
@@ -714,46 +734,53 @@ class Song:
         """
         metadata = {}
         parts: List[List[_ChannelElem]] = []
-        for elem in music21.converter.parseFile(fname):
+        stream = music21.converter.parseFile(fname)
+        for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
                 metadata["composer"] = elem.composer
                 metadata["title"] = elem.title
-            elif isinstance(elem, music21.stream.Part):
-                parts.append([])
-                channel_elem = parts[-1]
-                slurs: Tuple[List[int], List[int]] = ([], [])
-                for subelem in elem:
-                    if isinstance(subelem, music21.spanner.Slur):
-                        slurs[0].append(subelem.getFirst().id)
-                        slurs[1].append(subelem.getLast().id)
-                for measure in filter(_is_measure, elem):
-                    channel_elem.append(Measure())
+            if isinstance(elem, music21.tempo.MetronomeMark):
+                metadata["bpm"] = elem.getQuarterBPM()
 
-                    for subelem in measure:
-                        if isinstance(subelem, music21.tempo.MetronomeMark):
-                            metadata["bpm"] = subelem.getQuarterBPM()
-                        if isinstance(subelem, music21.dynamics.Dynamic):
-                            channel_elem.append(
-                                Dynamic.from_music_xml(subelem)
-                            )
-                        if isinstance(subelem, music21.note.Note):
-                            if subelem.id in slurs[0]:
-                                channel_elem.append(Slur(True))
-                            if subelem.id in slurs[1]:
-                                channel_elem.append(Slur(False))
-                            channel_elem.append(Note.from_music_xml(subelem))
-                        if isinstance(subelem, music21.bar.Repeat):
-                            channel_elem.append(Repeat.from_music_xml(subelem))
-                        if isinstance(subelem, music21.note.Rest):
-                            channel_elem.append(Rest.from_music_xml(subelem))
-                        if isinstance(
-                            subelem, music21.expressions.TextExpression
-                        ):
-                            channel_elem.append(
-                                Annotation.from_music_xml(subelem)
-                            )
+        for elem in stream:
+            if isinstance(elem, music21.stream.Part):
+                parts.append(cls._parse_part(elem))
 
         return cls(metadata, list(map(Channel, parts)))
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @classmethod
+    def _parse_part(cls, part: music21.stream.Part) -> List[_ChannelElem]:
+        channel_elem = []
+        slurs: List[List[int], List[int]] = [[], []]
+
+        slur_list = filter(_is_slur, part)
+        slurs[0] = [x.getFirst().id for x in slur_list]
+        slurs[1] = [x.getLast().id for x in slur_list]
+
+        for measure in filter(_is_measure, part):
+            channel_elem.append(Measure())
+
+            for subelem in measure:
+                if isinstance(subelem, music21.dynamics.Dynamic):
+                    channel_elem.append(Dynamic.from_music_xml(subelem))
+                if isinstance(subelem, music21.note.Note):
+                    if subelem.id in slurs[0]:
+                        channel_elem.append(Slur(True))
+                    if subelem.id in slurs[1]:
+                        channel_elem.append(Slur(False))
+                    channel_elem.append(Note.from_music_xml(subelem))
+                if isinstance(subelem, music21.bar.Repeat):
+                    channel_elem.append(Repeat.from_music_xml(subelem))
+                if isinstance(subelem, music21.note.Rest):
+                    channel_elem.append(Rest.from_music_xml(subelem))
+                if isinstance(subelem, music21.expressions.TextExpression):
+                    channel_elem.append(Annotation.from_music_xml(subelem))
+
+        return channel_elem
 
     ###########################################################################
     # API method definitions
