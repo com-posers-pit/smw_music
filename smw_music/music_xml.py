@@ -754,8 +754,8 @@ class Song:
 
     @classmethod
     def _parse_part(cls, part: music21.stream.Part) -> List[_ChannelElem]:
-        channel_elem = []
-        slurs: List[List[int], List[int]] = [[], []]
+        channel_elem: List[_ChannelElem] = []
+        slurs: List[List[int]] = [[], []]
 
         slur_list = filter(_is_slur, part)
         slurs[0] = [x.getFirst().id for x in slur_list]
