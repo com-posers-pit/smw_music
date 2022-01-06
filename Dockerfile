@@ -18,14 +18,11 @@ RUN mkdir /var/run/apache2      &&  \
     pip install poetry
 
 COPY ./webserver/httpd.conf  /usr/local/apache2/conf/httpd.conf
-COPY webserver/ $TARGET
-COPY ./ /home/
+COPY webserver/ /var/www/html
+COPY ./ /tmp
 
-RUN cd /home/smw_music                          && \
-    poetry config virtualenvs.create false      &&  \
-    poetry install --no-root --extras webserver
-
-RUN cd /home/smw_music && \
-    poetry install --no-dev
+RUN cd /tmp                                     && \
+    poetry config virtualenvs.create false      && \
+    poetry install --extras webserver
 
 CMD httpd-foreground
