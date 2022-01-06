@@ -757,7 +757,7 @@ class Song:
         channel_elem: List[_ChannelElem] = []
         slurs: List[List[int]] = [[], []]
 
-        slur_list = filter(_is_slur, part)
+        slur_list = list(filter(_is_slur, part))
         slurs[0] = [x.getFirst().id for x in slur_list]
         slurs[1] = [x.getLast().id for x in slur_list]
 
