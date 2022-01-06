@@ -1,4 +1,5 @@
-# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
+# <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -31,6 +32,7 @@ classifiers = [
 python = "^3.9"
 music21 = "^7.1.0"
 Mako = "^1.1.6"
+Flask = {version = "^2.0.2", optional = true}
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.3.2"
@@ -38,6 +40,9 @@ sphinx-rtd-theme = "^1.0.0"
 poetry = "^1.1.12"
 tox = "^3.24.4"
 pre-commit = "^2.16.0"
+
+[tool.poetry.extras]
+webserver = ["flask"]
 
 [tool.poetry.scripts]
 smw_music_xml_to_amk = "smw_music.scripts.convert:main"
