@@ -3,10 +3,12 @@
 #
 # SPDX-License-Identifier: CC0-1.0
 
-.mypy_cache
-.pytest_cache
-.reuse
-.github
-.tox
-.git
-Dockerfile
+*
+!/poetry.lock
+!/pyproject.toml
+!/README.rst
+!/smw_music
+!/webserver
+
+/**/__pycache__
+/**/.*.sw?
