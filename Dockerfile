@@ -5,8 +5,9 @@
 
 FROM httpd:2.4.52
 EXPOSE 80
-WORKDIR /var/www/html
+WORKDIR /code
 
+# Base installation
 RUN mkdir /var/run/apache2      &&  \
     apt-get update              &&  \
     apt-get install -y              \
@@ -17,12 +18,18 @@ RUN mkdir /var/run/apache2      &&  \
     rm -rf /var/lib/apt/lists/  &&  \
     pip install poetry
 
+# Install python dependencies.
+RUN poetry config virtualenvs.in-project true
+COPY pyproject.toml poetry.lock ./
+RUN poetry install --no-dev --extras webserver
+
+# Copy the webserver config
 COPY ./webserver/httpd.conf  /usr/local/apache2/conf/httpd.conf
 COPY webserver/ /var/www/html
-COPY ./ /tmp
 
-RUN cd /tmp                                     && \
-    poetry config virtualenvs.create false      && \
-    poetry install --extras webserver
+# Copy the python project files and install them
+COPY ./ ./
+RUN poetry install --no-dev
 
+# Apache runs as www-data per httpd.conf above
 CMD httpd-foreground
