@@ -35,6 +35,7 @@ from smw_music.scripts import convert
 @pytest.mark.parametrize(
     "src, dst",
     [
+        ("Articulations.mxl", "Articulations.txt"),
         ("Dots.mxl", "Dots.txt"),
         ("Dynamics.mxl", "Dynamics.txt"),
         ("Grace_Notes.mxl", "Grace_Notes.txt"),
@@ -45,6 +46,7 @@ from smw_music.scripts import convert
         ("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt"),
     ],
     ids=[
+        "Articulations",
         "Dots",
         "Dynamics",
         "Grace Notes",

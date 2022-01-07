@@ -1,0 +1,64 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+#spc
+{
+#author  "None"
+#title   "Articulations"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o4 l4
+qACC_ON c1
+c2. r
+c2 r2
+c. r8 r2
+c r r2
+c8. r16 r r2
+c8 r8 r r2
+c16. r32 r8 r r2
+c16 r16 r8 r r2
+c32. r64 r16 r8 r r2
+c32 r32 r16 r8 r r2
+qACC_OFF qSTAC_ON c1
+c2. r
+c2 r2
+c. r8 r2
+c r r2
+c8. r16 r r2
+c8 r8 r r2
+c16. r32 r8 r r2
+c16 r16 r8 r r2
+c32. r64 r16 r8 r r2
+c32 r32 r16 r8 r r2
+qSTAC_OFF qACC_ON c c r2
+c qACC_OFF qSTAC_ON c r2
+qSTAC_OFF qACC_ON c qACC_OFF c r2
+qSTAC_ON c qSTAC_OFF qACC_ON c r2
+qACC_OFF qSTAC_ON c c r2
+c qSTAC_OFF c r2
+c qACC_ON c r2
+qACC_OFF c qSTAC_ON c r2
+qSTAC_OFF c c r2
+qACC_ON c r c r
+c r qACC_OFF qSTAC_ON c r
+qSTAC_OFF qACC_ON c r qACC_OFF c r
+qSTAC_ON c r qSTAC_OFF qACC_ON c r
+qACC_OFF qSTAC_ON c r c r
+c r qSTAC_OFF c r
+c r qACC_ON c r
+qACC_OFF c r qSTAC_ON c r
+qSTAC_OFF c r c r
