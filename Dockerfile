@@ -32,4 +32,4 @@ COPY ./ ./
 RUN poetry install --no-dev
 
 # Apache runs as www-data per httpd.conf above
-CMD httpd-foreground
+CMD VENV="$(poetry env info -p)" httpd-foreground
