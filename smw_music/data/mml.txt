@@ -25,7 +25,8 @@ ${" /" if "/" not in channel.amk else ""}
 
 ; Parameters
 ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
-@0 v255 y10 q7F
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
 
 ; Music
 ${channel.amk}

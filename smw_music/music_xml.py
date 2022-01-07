@@ -197,11 +197,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     """
 
     elems: List[_ChannelElem]
+    _accent: bool = field(init=False, repr=False, compare=False)
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
     _grace: bool = field(init=False, repr=False, compare=False)
     _legato: bool = field(init=False, repr=False, compare=False)
     _slur: bool = field(init=False, repr=False, compare=False)
+    _staccato: bool = field(init=False, repr=False, compare=False)
     _tie: bool = field(init=False, repr=False, compare=False)
     _triplet: bool = field(init=False, repr=False, compare=False)
 
@@ -298,6 +300,22 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             self._tie = True
 
         self._start_legato()
+
+        if not note.accent and self._accent:
+            self._accent = False
+            self._directives.append("qACC_OFF")
+        if not note.staccato and self._staccato:
+            self._staccato = False
+            self._directives.append("qSTAC_OFF")
+
+        if note.accent and not self._accent:
+            self._accent = True
+            self._directives.append("qACC_ON")
+
+        if note.staccato and not self._staccato:
+            self._staccato = True
+            self._directives.append("qSTAC_ON")
+
         self._directives.append(directive)
 
         if note.tie == "stop":
@@ -338,10 +356,12 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _reset_state(self):
+        self._accent = False
         self._cur_octave = self.base_octave
         self._grace = False
         self._legato = False
         self._slur = False
+        self._staccato = False
         self._tie = False
         self._triplet = False
 
@@ -494,6 +514,10 @@ class Note:  # pylint: disable=too-many-instance-attributes
         True iff this note is a triplet
     grace: bool
         True iff this is a grace note
+    accent: bool
+        True iff this is an accented note
+    staccato: bool
+        True iff this is an staccato note
     slur: Optional[bool]
         True if this is the start of a slur, False if it's the end, None
         otherwise
@@ -515,6 +539,10 @@ class Note:  # pylint: disable=too-many-instance-attributes
         True iff this note is a triplet
     grace: bool
         True iff this is a grace note
+    accent: bool
+        True iff this is an accented note
+    staccato: bool
+        True iff this is an staccato note
     slur: Optional[bool]
         True if this is the start of a slur, False if it's the end, None
         otherwise
@@ -531,6 +559,8 @@ class Note:  # pylint: disable=too-many-instance-attributes
     tie: str = ""
     triplet: bool = False
     grace: bool = False
+    accent: bool = False
+    staccato: bool = False
     slur: Optional[bool] = None
 
     ###########################################################################
@@ -552,6 +582,11 @@ class Note:  # pylint: disable=too-many-instance-attributes
         Note
             A new Note object with its attributes defined by `elem`
         """
+        articulations = [type(x) for x in elem.articulations]
+
+        accent = music21.articulations.Accent in articulations
+        staccato = music21.articulations.Staccato in articulations
+
         return cls(
             elem.name.lower().replace("#", "+"),
             _MUSIC_XML_DURATION[elem.duration.ordinal],
@@ -560,6 +595,8 @@ class Note:  # pylint: disable=too-many-instance-attributes
             elem.tie.type if elem.tie is not None else "",
             bool(elem.duration.tuplets),
             elem.duration.isGrace,
+            accent,
+            staccato,
         )
 
 
