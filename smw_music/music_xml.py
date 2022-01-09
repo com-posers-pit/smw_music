@@ -392,7 +392,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._directives = [f"o{self._cur_octave}"]
         self._directives.append(f"l{self.base_note_length}")
 
-        for elem in self.elems:
+        for n, elem in enumerate(self.elems):
             if isinstance(elem, Repeat):
                 self._emit_repeat(elem)
 
@@ -710,7 +710,7 @@ class Song:
     metadata: dict
         A dictionary containing the song's title (key "title"), composer (key
         "composer"), and tempo (key "bpm").
-    channel_list: list
+    channels: list
         A list of `Channel` objects, the first 8 of which are used in this
         song.
 
@@ -722,7 +722,7 @@ class Song:
         The song's composer, or '???' if one was not provided
     bpm : int
         The song's tempo in beats per minute
-    channel_list : list
+    channels : list
         A list of up to 8 channels of music in this song.
     """
 
@@ -730,13 +730,11 @@ class Song:
     # API constructor definitions
     ###########################################################################
 
-    def __init__(
-        self, metadata: Dict[str, str], channel_list: List["Channel"]
-    ):
+    def __init__(self, metadata: Dict[str, str], channels: List["Channel"]):
         self.title = metadata.get("title", "???")
         self.composer = metadata.get("composer", "???")
         self.bpm = int(metadata.get("bpm", 120))
-        self.channel_list = channel_list[:8]
+        self.channels = channels[:8]
 
     ###########################################################################
 

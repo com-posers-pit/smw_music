@@ -14,7 +14,7 @@
 #author  "${song.composer}"
 #title   "${song.title}"
 }
-% for n, channel in enumerate(song.channel_list):
+% for n, channel in enumerate(song.channels):
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
