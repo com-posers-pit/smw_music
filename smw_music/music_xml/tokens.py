@@ -9,8 +9,8 @@
 # Standard Library imports
 ###############################################################################
 
-from dataclasses import dataclass
-from typing import Optional, Union
+from dataclasses import dataclass, field
+from typing import ClassVar, Optional, Union
 
 ###############################################################################
 # Library imports
@@ -24,7 +24,7 @@ import music21  # type: ignore
 
 # Valid music channel element classes
 ChannelElem = Union[
-    "Annotation", "Dynamic", "Measure", "Note", "Repeat", "Rest"
+    "Annotation", "Dynamic", "Loop", "Measure", "Note", "Repeat", "Rest"
 ]
 
 ###############################################################################
@@ -162,6 +162,27 @@ class Dynamic:
         Confirm this heuristic is good enough, or parameterize
         """
         return cls(elem.value)
+
+
+###############################################################################
+
+
+@dataclass
+class Loop:
+    start: bool
+    label: int = field(init=False)
+
+    _label: ClassVar[int] = 0
+
+    def __post_init__(self):
+        # Get a label number and increment the count
+        self.label = self._incr_label() if self.start else -1
+
+    @classmethod
+    def _incr_label(cls) -> int:
+        label = cls._label
+        cls._label += 1
+        return label
 
 
 ###############################################################################

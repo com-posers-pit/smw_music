@@ -11,7 +11,7 @@
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Iterable, List, Tuple, TypeVar, Union
+from typing import Dict, Iterable, List, Tuple, TypeVar, Union
 
 ###############################################################################
 # Project imports
@@ -22,6 +22,7 @@ from .tokens import (
     Annotation,
     ChannelElem,
     Dynamic,
+    Loop,
     Measure,
     Note,
     Repeat,
@@ -89,6 +90,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     _directives: List[str] = field(init=False, repr=False, compare=False)
     _grace: bool = field(init=False, repr=False, compare=False)
     _legato: bool = field(init=False, repr=False, compare=False)
+    _loops: Dict[int, ChannelElem] = field(
+        init=False, repr=False, compare=False
+    )
     _slur: bool = field(init=False, repr=False, compare=False)
     _staccato: bool = field(init=False, repr=False, compare=False)
     _tie: bool = field(init=False, repr=False, compare=False)
@@ -248,6 +252,20 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _repeat_analysis(self, idx: int) -> Tuple[int, int]:
+        for label, loop in self._loops.items():
+            cand = []
+            skip_count = 0
+            for elem in self.elems[idx:]:
+                skip_count += 1
+                if isinstance(elem, (Note, Rest, Dynamic)):
+                    cand.append(elem)
+                if len(cand) == len(loop):
+                    break
+
+            if cand == loop:
+                self._directives.append(f"({label})")
+                return skip_count, 0
+
         elem = self.elems[idx]
 
         repeat_count = 0
@@ -269,6 +287,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                     break
 
         if repeat_count >= 3:
+            print("printing")
             self._directives.append("[")
         else:
             skip_count = 0
@@ -282,6 +301,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._cur_octave = self.base_octave
         self._grace = False
         self._legato = False
+        self._loops = {}
         self._slur = False
         self._staccato = False
         self._tie = False
@@ -329,14 +349,29 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         skip_count = 0
         repeat_count = 0
+        in_loop = False
+
+        loop = []
 
         for n, elem in enumerate(self.elems):
             if skip_count:
                 skip_count -= 1
                 continue
 
-            if loop_analysis:
+            if isinstance(elem, Loop) and elem.start:
+                in_loop = True
+                loop = []
+                self._loops[elem.label] = loop
+                self._directives.append(f"({elem.label})[")
+
+            if in_loop and isinstance(elem, (Rest, Dynamic, Note)):
+                loop.append(elem)
+
+            if loop_analysis and not in_loop:
                 skip_count, repeat_count = self._repeat_analysis(n)
+
+            if skip_count != 0:
+                continue
 
             if isinstance(elem, Repeat):
                 self._emit_repeat(elem)
@@ -359,6 +394,10 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             if repeat_count >= 3:
                 self._directives.append(f"]{repeat_count}")
                 repeat_count = 0
+
+            if isinstance(elem, Loop) and not elem.start:
+                in_loop = False
+                self._directives.append("]")
 
         lines = " ".join(self._directives).splitlines()
         return CRLF.join(x.strip() for x in lines)
