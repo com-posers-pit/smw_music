@@ -233,6 +233,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     _triplet: bool = field(init=False, repr=False, compare=False)
 
     ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __getitem__(self, n: int) -> _ChannelElem:
+        return self.elems[n]
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
