@@ -388,6 +388,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     def _repeat_analysis(self, idx: int) -> Tuple[int, int]:
         elem = self.elems[idx]
 
+        repeat_count = 0
+        skip_count = 0
+
         # Look for repeats
         if isinstance(elem, (Note, Rest)):
             repeat_count = 1
