@@ -14,14 +14,14 @@
 #author  "${song.composer}"
 #title   "${song.title}"
 }
-% for n, channel in enumerate(song.channels):
+% for n, channel in enumerate(channels):
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #${n}\
 ${f" t{tempo}" if n == 0 else ''}\
 ${" $F4$02" if global_legato else ""}\
-${" /" if "/" not in channel.generate_mml(loop_analysis) else ""}
+${" /" if "/" not in channel else ""}
 
 ; Parameters
 ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
@@ -29,5 +29,5 @@ ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
 @0 v255 y10 qDEF
 
 ; Music
-${channel.generate_mml(loop_analysis)}
+${channel}
 % endfor

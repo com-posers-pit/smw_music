@@ -221,6 +221,8 @@ class Song:
             "vFFFF": 225,
         }
 
+        channels = [x.generate_mml(loop_analysis) for x in self.channels]
+
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")
         )
@@ -230,7 +232,7 @@ class Song:
             global_legato=global_legato,
             tempo=mml_tempo,
             song=self,
-            loop_analysis=loop_analysis,
+            channels=channels,
             volmap=volmap,
         )
 
