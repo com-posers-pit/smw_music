@@ -33,17 +33,18 @@ from smw_music.scripts import convert
 
 
 @pytest.mark.parametrize(
-    "src, dst",
+    "src, dst, args",
     [
-        ("Articulations.mxl", "Articulations.txt"),
-        ("Dots.mxl", "Dots.txt"),
-        ("Dynamics.mxl", "Dynamics.txt"),
-        ("Grace_Notes.mxl", "Grace_Notes.txt"),
-        ("Loop_Point.mxl", "Loop_Point.txt"),
-        ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt"),
-        ("Ties.mxl", "Ties.txt"),
-        ("Triplets.mxl", "Triplets.txt"),
-        ("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt"),
+        ("Articulations.mxl", "Articulations.txt", []),
+        ("Dots.mxl", "Dots.txt", []),
+        ("Dynamics.mxl", "Dynamics.txt", []),
+        ("Grace_Notes.mxl", "Grace_Notes.txt", []),
+        ("Loop_Point.mxl", "Loop_Point.txt", []),
+        ("Repeats.mxl", "Repeats.txt", ["--loop_analysis"]),
+        ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", []),
+        ("Ties.mxl", "Ties.txt", []),
+        ("Triplets.mxl", "Triplets.txt", []),
+        ("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt", []),
     ],
     ids=[
         "Articulations",
@@ -51,13 +52,14 @@ from smw_music.scripts import convert
         "Dynamics",
         "Grace Notes",
         "Loop Point",
+        "Repeats",
         "SMB Castle Theme (compressed)",
         "Ties",
         "Triplets",
         "SMB Castle Theme (uncompressed)",
     ],
 )
-def test_conversion(src, dst):
+def test_conversion(src, dst, args):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "dst" / dst
 
@@ -67,7 +69,7 @@ def test_conversion(src, dst):
     fname = test_dir / "src" / src
 
     with tempfile.NamedTemporaryFile("r") as fobj:
-        convert.main([str(fname), str(fobj.name)])
+        convert.main([str(fname), str(fobj.name)] + args)
         written = fobj.readlines()
 
     assert target == written
