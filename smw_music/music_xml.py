@@ -422,7 +422,37 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._directives = [f"o{self._cur_octave}"]
         self._directives.append(f"l{self.base_note_length}")
 
+        skip_count = 0
+        repeat_count = 0
+
         for n, elem in enumerate(self.elems):
+            if skip_count:
+                skip_count -= 1
+                continue
+
+            # Look for repeats
+            if isinstance(elem, (Note, Rest)):
+                repeat_count = 1
+                skip_count = 0
+                for cand in self.elems[n + 1 :]:
+                    if cand == elem:
+                        repeat_count += 1
+                        skip_count += 1
+                    elif isinstance(cand, Measure):
+                        skip_count += 1
+                    elif (
+                        isinstance(cand, Annotation)
+                        and not cand.amk_annotation
+                    ):
+                        skip_count += 1
+                    else:
+                        break
+
+            if repeat_count >= 3:
+                self._directives.append("[")
+            else:
+                skip_count = 0
+
             if isinstance(elem, Repeat):
                 self._emit_repeat(elem)
 
@@ -440,6 +470,10 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
             if isinstance(elem, Annotation):
                 self._emit_annotation(elem)
+
+            if repeat_count >= 3:
+                self._directives.append(f"]{repeat_count}")
+                repeat_count = 0
 
         lines = " ".join(self._directives).splitlines()
         return _CRLF.join(x.strip() for x in lines)
@@ -879,6 +913,8 @@ class Song:
         rv = rv.replace(_CRLF + "} ", " }" + _CRLF)
 
         rv = rv.replace(" ^", "^")
+        rv = rv.replace("[ ", "[")
+        rv = rv.replace(" ]", "]")
 
         return rv
 
