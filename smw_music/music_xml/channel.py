@@ -90,7 +90,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     _directives: List[str] = field(init=False, repr=False, compare=False)
     _grace: bool = field(init=False, repr=False, compare=False)
     _legato: bool = field(init=False, repr=False, compare=False)
-    _loops: Dict[int, ChannelElem] = field(
+    _loops: Dict[int, List[ChannelElem]] = field(
         init=False, repr=False, compare=False
     )
     _slur: bool = field(init=False, repr=False, compare=False)
@@ -275,19 +275,21 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         if isinstance(elem, (Note, Rest)):
             repeat_count = 1
             skip_count = 0
-            for cand in self.elems[idx + 1 :]:
-                if cand == elem:
+            for rep_cand in self.elems[idx + 1 :]:
+                if rep_cand == elem:
                     repeat_count += 1
                     skip_count += 1
-                elif isinstance(cand, Measure):
+                elif isinstance(rep_cand, Measure):
                     skip_count += 1
-                elif isinstance(cand, Annotation) and not cand.amk_annotation:
+                elif (
+                    isinstance(rep_cand, Annotation)
+                    and not rep_cand.amk_annotation
+                ):
                     skip_count += 1
                 else:
                     break
 
         if repeat_count >= 3:
-            print("printing")
             self._directives.append("[")
         else:
             skip_count = 0
@@ -351,7 +353,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         repeat_count = 0
         in_loop = False
 
-        loop = []
+        loop: List[ChannelElem] = []
 
         for n, elem in enumerate(self.elems):
             if skip_count:
