@@ -412,12 +412,25 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 self._directives.append("LEGATO_OFF")
 
     ###########################################################################
-    # API property definitions
+    # API method definitions
     ###########################################################################
 
-    @property
-    def amk(self) -> str:
-        """Return this channel's AddmusicK's text."""
+    def generate_mml(self, loop_analysis: bool = True) -> str:
+        """
+        Generate this channel's AddMusicK MML text.
+
+        Parameters
+        ----------
+        loop_analysis: bool
+            True iff loop analysis should be enabled
+
+
+        Return
+        ------
+        str
+            The MML text for this channel
+
+        """
         self._reset_state()
         self._directives = [f"o{self._cur_octave}"]
         self._directives.append(f"l{self.base_note_length}")
@@ -430,23 +443,24 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 skip_count -= 1
                 continue
 
-            # Look for repeats
-            if isinstance(elem, (Note, Rest)):
-                repeat_count = 1
-                skip_count = 0
-                for cand in self.elems[n + 1 :]:
-                    if cand == elem:
-                        repeat_count += 1
-                        skip_count += 1
-                    elif isinstance(cand, Measure):
-                        skip_count += 1
-                    elif (
-                        isinstance(cand, Annotation)
-                        and not cand.amk_annotation
-                    ):
-                        skip_count += 1
-                    else:
-                        break
+            if loop_analysis:
+                # Look for repeats
+                if isinstance(elem, (Note, Rest)):
+                    repeat_count = 1
+                    skip_count = 0
+                    for cand in self.elems[n + 1 :]:
+                        if cand == elem:
+                            repeat_count += 1
+                            skip_count += 1
+                        elif isinstance(cand, Measure):
+                            skip_count += 1
+                        elif (
+                            isinstance(cand, Annotation)
+                            and not cand.amk_annotation
+                        ):
+                            skip_count += 1
+                        else:
+                            break
 
             if repeat_count >= 3:
                 self._directives.append("[")
@@ -478,6 +492,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         lines = " ".join(self._directives).splitlines()
         return _CRLF.join(x.strip() for x in lines)
 
+    ###########################################################################
+    # API property definitions
     ###########################################################################
 
     @property
@@ -872,7 +888,9 @@ class Song:
     # API method definitions
     ###########################################################################
 
-    def generate_mml(self, global_legato: bool = True) -> str:
+    def generate_mml(
+        self, global_legato: bool = True, loop_analysis: bool = True
+    ) -> str:
         """
         Return this song's AddmusicK's text.
 
@@ -880,6 +898,8 @@ class Song:
         ----------
         global_legato : bool
             True iff global legato should be enabled
+        loop_analysis : bool
+            True iff loops should be detected and replaced with references
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -906,6 +926,7 @@ class Song:
             global_legato=global_legato,
             tempo=mml_tempo,
             song=self,
+            loop_analysis=loop_analysis,
             volmap=volmap,
         )
 
@@ -920,7 +941,12 @@ class Song:
 
     ###########################################################################
 
-    def to_mml_file(self, fname: str, global_legato: bool = True):
+    def to_mml_file(
+        self,
+        fname: str,
+        global_legato: bool = True,
+        loop_analysis: bool = True,
+    ):
         """
         Output the MML representation of this Song to a file.
 
@@ -930,6 +956,12 @@ class Song:
             The output file to write to.
         global_legato : bool
             True iff global legato should be enabled
+        loop_analysis: bool
+            True iff loops should be detected and replaced with references
         """
         with open(fname, "w", encoding="ascii") as fobj:
-            print(self.generate_mml(global_legato), end="", file=fobj)
+            print(
+                self.generate_mml(global_legato, loop_analysis),
+                end="",
+                file=fobj,
+            )

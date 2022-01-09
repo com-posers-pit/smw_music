@@ -21,7 +21,7 @@
 #${n}\
 ${f" t{tempo}" if n == 0 else ''}\
 ${" $F4$02" if global_legato else ""}\
-${" /" if "/" not in channel.amk else ""}
+${" /" if "/" not in channel.generate_mml(loop_analysis) else ""}
 
 ; Parameters
 ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
@@ -29,5 +29,5 @@ ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
 @0 v255 y10 qDEF
 
 ; Music
-${channel.amk}
+${channel.generate_mml(loop_analysis)}
 % endfor
