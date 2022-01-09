@@ -13,7 +13,7 @@ import pkgutil
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, TypeVar, Union
+from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 
 ###############################################################################
 # Library imports
@@ -385,6 +385,33 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
+    def _repeat_analysis(self, idx: int) -> Tuple[int, int]:
+        elem = self.elems[idx]
+
+        # Look for repeats
+        if isinstance(elem, (Note, Rest)):
+            repeat_count = 1
+            skip_count = 0
+            for cand in self.elems[idx + 1 :]:
+                if cand == elem:
+                    repeat_count += 1
+                    skip_count += 1
+                elif isinstance(cand, Measure):
+                    skip_count += 1
+                elif isinstance(cand, Annotation) and not cand.amk_annotation:
+                    skip_count += 1
+                else:
+                    break
+
+        if repeat_count >= 3:
+            self._directives.append("[")
+        else:
+            skip_count = 0
+
+        return (skip_count, repeat_count)
+
+    ###########################################################################
+
     def _reset_state(self):
         self._accent = False
         self._cur_octave = self.base_octave
@@ -444,28 +471,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 continue
 
             if loop_analysis:
-                # Look for repeats
-                if isinstance(elem, (Note, Rest)):
-                    repeat_count = 1
-                    skip_count = 0
-                    for cand in self.elems[n + 1 :]:
-                        if cand == elem:
-                            repeat_count += 1
-                            skip_count += 1
-                        elif isinstance(cand, Measure):
-                            skip_count += 1
-                        elif (
-                            isinstance(cand, Annotation)
-                            and not cand.amk_annotation
-                        ):
-                            skip_count += 1
-                        else:
-                            break
-
-            if repeat_count >= 3:
-                self._directives.append("[")
-            else:
-                skip_count = 0
+                skip_count, repeat_count = self._repeat_analysis(n)
 
             if isinstance(elem, Repeat):
                 self._emit_repeat(elem)
