@@ -25,9 +25,10 @@ def uploader():
             fname = f"/tmp/{secure_filename(f.filename)}"
             f.save(fname)
             global_legato = "global_legato" in request.form
+            loop_analysis = "loop_analysis" in request.form
 
             song = music_xml.Song.from_music_xml(fname)
-            mml = song.generate_mml(global_legato)
+            mml = song.generate_mml(global_legato, loop_analysis)
             response = make_response(mml, 200)
         except Exception as e:
             response = make_response(str(e), 400)

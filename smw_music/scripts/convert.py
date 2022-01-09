@@ -40,11 +40,16 @@ def main(args=None):
         action="store_true",
         help="Disable the global legato setting",
     )
+    parser.add_argument(
+        "--loop_analysis",
+        action="store_true",
+        help="Enable loop optimizations",
+    )
 
     args = parser.parse_args(args)
 
     Song.from_music_xml(args.music_xml).to_mml_file(
-        args.amk, not args.disable_global_legato
+        args.amk, not args.disable_global_legato, args.loop_analysis
     )
 
 
