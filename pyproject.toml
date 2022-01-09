@@ -56,6 +56,9 @@ add-ignore = "D105"
 [tool.pylint.FORMAT]
 good-names = "n,rv"
 
+[tool.pylint.SIMILARITIES]
+ignore-imports = "yes"
+
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
