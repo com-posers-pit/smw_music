@@ -146,6 +146,7 @@ class Annotation:
     """
 
     text: str
+    _amk_prefix = "AMK:"
 
     ###########################################################################
     # API constructor definitions
@@ -170,6 +171,30 @@ class Annotation:
             `elem`'s text content.
         """
         return cls(elem.content)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def amk_annotation(self) -> bool:
+        """Return True iff this is an annotation for AMK."""
+        return self.text.startswith(self._amk_prefix)
+
+    ###########################################################################
+
+    @property
+    def amk_text(self) -> str:
+        """
+        Return the text for AMK annotations, minus the AMK prefix.
+
+        If this is not an AMK annotation, return ''.
+        """
+        if self.amk_annotation:
+            rv = self.text.removeprefix(self._amk_prefix).strip()
+        else:
+            rv = ""
+        return rv
 
 
 ###############################################################################
@@ -239,10 +264,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _emit_annotation(self, annotation: Annotation):
-        prefix = "AMK:"
-        text = annotation.text
-        if text.startswith(prefix):
-            self._directives.append(text.removeprefix(prefix).strip())
+        if annotation.amk_annotation:
+            self._directives.append(annotation.amk_text)
 
     ###########################################################################
 
