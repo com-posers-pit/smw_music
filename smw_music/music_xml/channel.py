@@ -374,12 +374,20 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         in_loop = False
 
         loop: List[ChannelElem] = []
+        do_measure = False
 
         # In desperate need of a refactor
         for n, elem in enumerate(self.elems):
             if skip_count:
+                if isinstance(elem, Measure):
+                    do_measure = True
                 skip_count -= 1
                 continue
+
+            if do_measure:
+                do_measure = False
+                if not isinstance(elem, Measure):
+                    self._emit_measure(Measure())
 
             if isinstance(elem, Loop) and elem.start:
                 in_loop = True
