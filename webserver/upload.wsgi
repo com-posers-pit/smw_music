@@ -26,15 +26,20 @@ def uploader():
             f.save(fname)
             global_legato = "global_legato" in request.form
             loop_analysis = "loop_analysis" in request.form
+            measure_numbers = "measure_numbers" in request.form
 
             song = music_xml.Song.from_music_xml(fname)
 
             if "download_file" in request.form:
                 fname += ".txt"
-                song.to_mml_file(fname, global_legato, loop_analysis)
+                song.to_mml_file(
+                    fname, global_legato, loop_analysis, measure_numbers
+                )
                 response = send_file(fname, as_attachment=True)
             else:
-                mml = song.generate_mml(global_legato, loop_analysis)
+                mml = song.generate_mml(
+                    global_legato, loop_analysis, measure_numbers
+                )
                 response = make_response(mml, 200)
                 response.mimetype = "text/plain"
         except Exception as e:
