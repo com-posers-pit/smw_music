@@ -45,11 +45,19 @@ def main(args=None):
         action="store_true",
         help="Enable loop optimizations",
     )
+    parser.add_argument(
+        "--measure_numbers",
+        action="store_true",
+        help="Emit measure numbers",
+    )
 
     args = parser.parse_args(args)
 
     Song.from_music_xml(args.music_xml).to_mml_file(
-        args.amk, not args.disable_global_legato, args.loop_analysis
+        args.amk,
+        not args.disable_global_legato,
+        args.loop_analysis,
+        args.measure_numbers,
     )
 
 

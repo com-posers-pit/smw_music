@@ -93,6 +93,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     _loops: Dict[int, List[ChannelElem]] = field(
         init=False, repr=False, compare=False
     )
+    _measure_numbers: bool = field(init=False, repr=False, compare=False)
     _slur: bool = field(init=False, repr=False, compare=False)
     _staccato: bool = field(init=False, repr=False, compare=False)
     _tie: bool = field(init=False, repr=False, compare=False)
@@ -159,8 +160,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _emit_measure(self, _: "Measure"):
-        self._directives.append(CRLF)
+    def _emit_measure(self, measure: "Measure"):
+        num = measure.number
+        comment = ""
+        if self._measure_numbers and num > 0:
+            comment = f"; Measure {num}"
+
+        self._directives.append(f"{comment}{CRLF}")
 
     ###########################################################################
 
@@ -348,6 +354,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._grace = False
         self._legato = False
         self._loops = {}
+        self._measure_numbers = True
         self._slur = False
         self._staccato = False
         self._tie = False
@@ -373,7 +380,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def generate_mml(self, loop_analysis: bool = True) -> str:
+    def generate_mml(
+        self, loop_analysis: bool = True, measure_numbers: bool = True
+    ) -> str:
         """
         Generate this channel's AddMusicK MML text.
 
@@ -381,7 +390,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         ----------
         loop_analysis: bool
             True iff loop analysis should be enabled
-
+        measure_numbers: bool
+            True iff measure numbers should be included in MML
 
         Return
         ------
@@ -391,6 +401,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._reset_state()
         self._directives = [f"o{self._cur_octave}"]
         self._directives.append(f"l{self.base_note_length}")
+        self._measure_numbers = measure_numbers
 
         skip_count = 0
         repeat_count = 0
@@ -411,7 +422,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             if do_measure:
                 do_measure = False
                 if not isinstance(elem, Measure):
-                    self._emit_measure(Measure())
+                    self._emit_measure(Measure(-1))
 
             if isinstance(elem, Loop) and elem.start:
                 in_loop = True

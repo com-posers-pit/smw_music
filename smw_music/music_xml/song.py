@@ -197,8 +197,9 @@ class Song:
 
         loopno = 100 * partno
 
-        for measure in filter(_is_measure, part):
-            channel_elem.append(Measure())
+        n = 0
+        for n, measure in enumerate(filter(_is_measure, part)):
+            channel_elem.append(Measure(n))
 
             for subelem in measure:
                 if subelem.id in lines[0]:
@@ -224,6 +225,8 @@ class Song:
                 if subelem.id in lines[1]:
                     channel_elem.append(Loop(False, -1))
 
+        channel_elem.append(Measure(n + 1))
+
         return channel_elem
 
     ###########################################################################
@@ -231,7 +234,10 @@ class Song:
     ###########################################################################
 
     def generate_mml(
-        self, global_legato: bool = True, loop_analysis: bool = True
+        self,
+        global_legato: bool = True,
+        loop_analysis: bool = True,
+        measure_numbers: bool = True,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -242,6 +248,8 @@ class Song:
             True iff global legato should be enabled
         loop_analysis : bool
             True iff loops should be detected and replaced with references
+        measure_numbers: bool
+            True iff measure numbers should be included in MML
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -259,7 +267,10 @@ class Song:
             "vFFFF": 225,
         }
 
-        channels = [x.generate_mml(loop_analysis) for x in self.channels]
+        channels = [
+            x.generate_mml(loop_analysis, measure_numbers)
+            for x in self.channels
+        ]
 
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")
@@ -290,6 +301,7 @@ class Song:
         fname: str,
         global_legato: bool = True,
         loop_analysis: bool = True,
+        measure_numbers: bool = True,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -302,10 +314,14 @@ class Song:
             True iff global legato should be enabled
         loop_analysis: bool
             True iff loops should be detected and replaced with references
+        measure_numbers: bool
+            True iff measure numbers should be included in MML
         """
         with open(fname, "w", encoding="ascii") as fobj:
             print(
-                self.generate_mml(global_legato, loop_analysis),
+                self.generate_mml(
+                    global_legato, loop_analysis, measure_numbers
+                ),
                 end="",
                 file=fobj,
             )

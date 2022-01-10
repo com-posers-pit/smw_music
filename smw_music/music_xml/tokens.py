@@ -196,7 +196,21 @@ class Loop:
 
 @dataclass
 class Measure:
-    """An object representing the start of a new measure of music."""
+    """
+    An object representing the start of a new measure of music.
+
+    Parameters
+    ----------
+    number : int
+        The measure number
+
+    Attributes
+    ----------
+    number : int
+        The measure number
+    """
+
+    number: int = 0
 
 
 ###############################################################################
