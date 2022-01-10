@@ -11,7 +11,7 @@
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Tuple, TypeVar, Union
+from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 
 ###############################################################################
 # Project imports
@@ -251,7 +251,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _loop_analysis(self, idx: int) -> int:
+    def _loop_analysis(self, idx: int, last_loop: Optional[int] = None) -> int:
         skip_count = 0
 
         for label, loop in self._loops.items():
@@ -274,9 +274,12 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
             if loops >= 1:
                 skip_count -= 1
-                self._directives.append(
-                    f"({label}){loops if loops > 1 else ''}"
-                )
+                if label != last_loop:
+                    self._directives.append(
+                        f"({label}){loops if loops > 1 else ''}"
+                    )
+                else:
+                    self._directives[-1] += f"{loops + 1}"
                 break
 
             skip_count = 0
@@ -376,6 +379,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         loop: List[ChannelElem] = []
         do_measure = False
+        last_loop = None
 
         # In desperate need of a refactor
         for n, elem in enumerate(self.elems):
@@ -395,12 +399,14 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 loop = []
                 self._loops[elem.label] = loop
                 self._directives.append(f"({elem.label})[")
+                last_loop = elem.label
 
             if in_loop and isinstance(elem, (Rest, Dynamic, Note)):
                 loop.append(elem)
 
             if loop_analysis and not in_loop:
-                skip_count = self._loop_analysis(n)
+                skip_count = self._loop_analysis(n, last_loop)
+                last_loop = None
                 if skip_count:
                     continue
 
