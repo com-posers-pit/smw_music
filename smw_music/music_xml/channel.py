@@ -251,7 +251,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _repeat_analysis(self, idx: int) -> Tuple[int, int]:
+    def _loop_analysis(self, idx: int) -> int:
+        skip_count = 0
         for label, loop in self._loops.items():
             cand = []
             skip_count = 0
@@ -264,12 +265,19 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
             if cand == loop:
                 self._directives.append(f"({label})")
-                return skip_count, 0
+                break
+            else:
+                skip_count = 0
 
-        elem = self.elems[idx]
+        return skip_count
 
+    ###########################################################################
+
+    def _repeat_analysis(self, idx: int) -> Tuple[int, int]:
         repeat_count = 0
         skip_count = 0
+
+        elem = self.elems[idx]
 
         # Look for repeats
         if isinstance(elem, (Note, Rest)):
@@ -370,10 +378,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 loop.append(elem)
 
             if loop_analysis and not in_loop:
-                skip_count, repeat_count = self._repeat_analysis(n)
+                skip_count = self._loop_analysis(n)
+                if skip_count:
+                    continue
 
-            if skip_count != 0:
-                continue
+                skip_count, repeat_count = self._repeat_analysis(n)
 
             if isinstance(elem, Repeat):
                 self._emit_repeat(elem)
