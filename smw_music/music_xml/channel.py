@@ -266,8 +266,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             if cand == loop:
                 self._directives.append(f"({label})")
                 break
-            else:
-                skip_count = 0
+
+            skip_count = 0
 
         return skip_count
 
@@ -337,7 +337,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def generate_mml(self, loop_analysis: bool = True) -> str:
+    def generate_mml(  # pylint: disable=too-many-branches
+        self, loop_analysis: bool = True
+    ) -> str:
         """
         Generate this channel's AddMusicK MML text.
 
@@ -351,7 +353,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         ------
         str
             The MML text for this channel
-
         """
         self._reset_state()
         self._directives = [f"o{self._cur_octave}"]
@@ -363,6 +364,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         loop: List[ChannelElem] = []
 
+        # In desperate need of a refactor
         for n, elem in enumerate(self.elems):
             if skip_count:
                 skip_count -= 1
