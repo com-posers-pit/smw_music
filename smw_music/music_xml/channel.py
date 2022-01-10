@@ -253,18 +253,29 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _loop_analysis(self, idx: int) -> int:
         skip_count = 0
-        for label, loop in self._loops.items():
-            cand = []
-            skip_count = 0
-            for elem in self.elems[idx:]:
-                skip_count += 1
-                if isinstance(elem, (Note, Rest, Dynamic)):
-                    cand.append(elem)
-                if len(cand) == len(loop):
-                    break
 
-            if cand == loop:
-                self._directives.append(f"({label})")
+        for label, loop in self._loops.items():
+            cand_skip_count = 0
+            match_count = 0
+            loops = 0
+
+            for elem in self.elems[idx:]:
+                cand_skip_count += 1
+                if isinstance(elem, (Note, Rest, Dynamic)):
+                    if elem == loop[match_count]:
+                        match_count += 1
+                        if match_count == len(loop):
+                            loops += 1
+                            skip_count += cand_skip_count
+                            cand_skip_count = 0
+                            match_count = 0
+                    else:
+                        break
+
+            if loops >= 1:
+                self._directives.append(
+                    f"({label}){loops if loops > 1 else ''}"
+                )
                 break
 
             skip_count = 0
