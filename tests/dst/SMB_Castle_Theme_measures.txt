@@ -1,0 +1,48 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+#spc
+{
+#author  "Koji Kondo"
+#title   "SMB Castle Theme"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t36 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o4 l32
+@9 w255 v150 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g ; Measure 1
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g ; Measure 2
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+ ; Measure 3
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+ ; Measure 4
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+ ; Measure 5
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+ ; Measure 6
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o3 l32
+@9 v150 a+ r a r g+ r a r a+ r b r a+ r a r ; Measure 1
+a+ r a r g+ r a r a+ r b r a+ r a r ; Measure 2
+a r g+ r a r a+ r a r a+ r a r g+ r ; Measure 3
+a r g+ r a r a+ r a r a+ r a r g+ r ; Measure 4
+> c+ r d r c+ r c r c+ r c r < b r > c r ; Measure 5
+c+ r d r c+ r c r c+ r c r < b r > c r ; Measure 6

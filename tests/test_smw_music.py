@@ -46,6 +46,11 @@ from smw_music.scripts import convert
         ("Ties.mxl", "Ties.txt", []),
         ("Triplets.mxl", "Triplets.txt", []),
         ("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt", []),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_measures.txt",
+            ["--measure_numbers"],
+        ),
     ],
     ids=[
         "Articulations",
@@ -59,6 +64,7 @@ from smw_music.scripts import convert
         "Ties",
         "Triplets",
         "SMB Castle Theme (uncompressed)",
+        "SMB Castle Theme (measure #s)",
     ],
 )
 def test_conversion(src, dst, args):
