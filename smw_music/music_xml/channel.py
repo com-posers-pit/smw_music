@@ -273,6 +273,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                         break
 
             if loops >= 1:
+                skip_count -= 1
                 self._directives.append(
                     f"({label}){loops if loops > 1 else ''}"
                 )
@@ -379,9 +380,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         # In desperate need of a refactor
         for n, elem in enumerate(self.elems):
             if skip_count:
+                skip_count -= 1
                 if isinstance(elem, Measure):
                     do_measure = True
-                skip_count -= 1
                 continue
 
             if do_measure:
