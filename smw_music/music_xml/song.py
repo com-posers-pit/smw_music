@@ -170,7 +170,8 @@ class Song:
 
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
-                parts.append(cls._parse_part(elem))
+                partno = len(parts)
+                parts.append(cls._parse_part(elem, partno))
 
         return cls(metadata, list(map(Channel, parts)))
 
@@ -179,7 +180,9 @@ class Song:
     ###########################################################################
 
     @classmethod
-    def _parse_part(cls, part: music21.stream.Part) -> List[ChannelElem]:
+    def _parse_part(
+        cls, part: music21.stream.Part, partno: int
+    ) -> List[ChannelElem]:
         channel_elem: List[ChannelElem] = []
         slurs: List[List[int]] = [[], []]
         lines: List[List[int]] = [[], []]
@@ -192,12 +195,15 @@ class Song:
         lines[0] = [x.getFirst().id for x in line_list]
         lines[1] = [x.getLast().id for x in line_list]
 
+        loopno = 100 * partno
+
         for measure in filter(_is_measure, part):
             channel_elem.append(Measure())
 
             for subelem in measure:
                 if subelem.id in lines[0]:
-                    channel_elem.append(Loop(True))
+                    channel_elem.append(Loop(True, loopno))
+                    loopno += 1
 
                 if isinstance(subelem, music21.dynamics.Dynamic):
                     channel_elem.append(Dynamic.from_music_xml(subelem))
@@ -216,7 +222,7 @@ class Song:
                     channel_elem.append(Annotation.from_music_xml(subelem))
 
                 if subelem.id in lines[1]:
-                    channel_elem.append(Loop(False))
+                    channel_elem.append(Loop(False, -1))
 
         return channel_elem
 

@@ -9,8 +9,8 @@
 # Standard Library imports
 ###############################################################################
 
-from dataclasses import dataclass, field
-from typing import ClassVar, Optional, Union
+from dataclasses import dataclass
+from typing import Optional, Union
 
 ###############################################################################
 # Library imports
@@ -176,36 +176,19 @@ class Loop:
     ----------
     start : bool
         True iff this is the start of a loop
+    label : int
+        If this is a loop start, the loop's global index number
 
     Attributes
     ----------
     start : bool
         True iff this is the start of a loop
     label : int
-        If this is a loop start, the loop's global index number; otherwise -1
+        If this is a loop start, the loop's global index number
     """
 
     start: bool
-    label: int = field(init=False)
-    _label: ClassVar[int] = 0
-
-    ###########################################################################
-    # Data model method definitions
-    ###########################################################################
-
-    def __post_init__(self):
-        # Get a label number and increment the count
-        self.label = self._incr_label() if self.start else -1
-
-    ###########################################################################
-    # Private method definitions
-    ###########################################################################
-
-    @classmethod
-    def _incr_label(cls) -> int:
-        label = cls._label
-        cls._label += 1
-        return label
+    label: int
 
 
 ###############################################################################
