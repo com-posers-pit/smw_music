@@ -4,7 +4,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-from flask import Flask, make_response, render_template, request
+from flask import Flask, make_response, render_template, request, send_file
 from werkzeug.utils import secure_filename
 
 from smw_music import music_xml
@@ -28,12 +28,19 @@ def uploader():
             loop_analysis = "loop_analysis" in request.form
 
             song = music_xml.Song.from_music_xml(fname)
-            mml = song.generate_mml(global_legato, loop_analysis)
-            response = make_response(mml, 200)
+
+            if "download_file" in request.form:
+                fname += ".txt"
+                song.to_mml_file(fname, global_legato, loop_analysis)
+                response = send_file(fname, as_attachment=True)
+            else:
+                mml = song.generate_mml(global_legato, loop_analysis)
+                response = make_response(mml, 200)
+                response.mimetype = "text/plain"
         except Exception as e:
             response = make_response(str(e), 400)
+            response.mimetype = "text/plain"
 
-        response.mimetype = "text/plain"
         return response
 
 
