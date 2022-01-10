@@ -242,6 +242,27 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
+    def _emit_token(self, elem: ChannelElem):
+        if isinstance(elem, Repeat):
+            self._emit_repeat(elem)
+
+        if isinstance(elem, Rest):
+            self._emit_rest(elem)
+
+        if isinstance(elem, Dynamic):
+            self._emit_dynamic(elem)
+
+        if isinstance(elem, Note):
+            self._emit_note(elem)
+
+        if isinstance(elem, Measure):
+            self._emit_measure(elem)
+
+        if isinstance(elem, Annotation):
+            self._emit_annotation(elem)
+
+    ###########################################################################
+
     def _handle_triplet(self, elem: Union["Rest", "Note"]):
         if not self._triplet and elem.triplet:
             self._directives.append("{")
@@ -352,9 +373,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def generate_mml(  # pylint: disable=too-many-branches
-        self, loop_analysis: bool = True
-    ) -> str:
+    def generate_mml(self, loop_analysis: bool = True) -> str:
         """
         Generate this channel's AddMusicK MML text.
 
@@ -412,23 +431,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
                 skip_count, repeat_count = self._repeat_analysis(n)
 
-            if isinstance(elem, Repeat):
-                self._emit_repeat(elem)
-
-            if isinstance(elem, Rest):
-                self._emit_rest(elem)
-
-            if isinstance(elem, Dynamic):
-                self._emit_dynamic(elem)
-
-            if isinstance(elem, Note):
-                self._emit_note(elem)
-
-            if isinstance(elem, Measure):
-                self._emit_measure(elem)
-
-            if isinstance(elem, Annotation):
-                self._emit_annotation(elem)
+            self._emit_token(elem)
 
             if repeat_count >= 3:
                 self._directives.append(f"]{repeat_count}")
