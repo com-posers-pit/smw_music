@@ -22,6 +22,7 @@ from .tokens import (
     Annotation,
     ChannelElem,
     Dynamic,
+    RehearsalMark,
     Loop,
     Measure,
     Note,
@@ -71,8 +72,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     Parameters
     ----------
     elems: list
-        A list of valid channel elements (currently `Annotation`, `Dynamic`,
-        `Measure`, `Note`, `Repeat`, and `Rest`)
+        A list of valid channel elements
 
     Attributes
     ----------
@@ -157,6 +157,15 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             "ffff": "vFFFF",
         }
         self._directives.append(volmap[dyn.level])
+
+    ###########################################################################
+
+    def _emit_rehearsal_mark(self, mark: RehearsalMark):
+        self._directives.append(CRLF)
+        self._directives.append(f";===================={CRLF}")
+        self._directives.append(f"; Section {mark.mark}{CRLF}")
+        self._directives.append(f";===================={CRLF}")
+        self._directives.append(CRLF)
 
     ###########################################################################
 
@@ -257,6 +266,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         if isinstance(elem, Dynamic):
             self._emit_dynamic(elem)
+
+        if isinstance(elem, RehearsalMark):
+            self._emit_rehearsal_mark(elem)
 
         if isinstance(elem, Note):
             self._emit_note(elem)

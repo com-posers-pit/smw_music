@@ -31,6 +31,7 @@ from .tokens import (
     Annotation,
     ChannelElem,
     Dynamic,
+    RehearsalMark,
     Loop,
     Measure,
     Note,
@@ -168,10 +169,12 @@ class Song:
             if isinstance(elem, music21.tempo.MetronomeMark):
                 metadata["bpm"] = elem.getQuarterBPM()
 
+        sections = cls._find_rehearsal_marks(stream)
+
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
                 partno = len(parts)
-                parts.append(cls._parse_part(elem, partno))
+                parts.append(cls._parse_part(elem, partno, sections))
 
         return cls(metadata, list(map(Channel, parts)))
 
@@ -180,8 +183,29 @@ class Song:
     ###########################################################################
 
     @classmethod
+    def _find_rehearsal_marks(
+        cls, stream: music21.stream.Score
+    ) -> Dict[int, RehearsalMark]:
+        marks = {}
+        for elem in stream:
+            if isinstance(elem, music21.stream.Part):
+                for n, measure in enumerate(filter(_is_measure, elem)):
+                    for subelem in measure:
+                        if isinstance(
+                            subelem, music21.expressions.RehearsalMark
+                        ):
+                            marks[n] = RehearsalMark.from_music_xml(subelem)
+                break
+        return marks
+
+    ###########################################################################
+
+    @classmethod
     def _parse_part(
-        cls, part: music21.stream.Part, partno: int
+        cls,
+        part: music21.stream.Part,
+        partno: int,
+        sections: Dict[int, RehearsalMark],
     ) -> List[ChannelElem]:
         channel_elem: List[ChannelElem] = []
         slurs: List[List[int]] = [[], []]
@@ -200,6 +224,8 @@ class Song:
         n = 0
         for n, measure in enumerate(filter(_is_measure, part)):
             channel_elem.append(Measure(n))
+            if n in sections:
+                channel_elem.append(sections[n])
 
             for subelem in measure:
                 if subelem.id in lines[0]:
@@ -221,7 +247,6 @@ class Song:
                     channel_elem.append(Rest.from_music_xml(subelem))
                 if isinstance(subelem, music21.expressions.TextExpression):
                     channel_elem.append(Annotation.from_music_xml(subelem))
-
                 if subelem.id in lines[1]:
                     channel_elem.append(Loop(False, -1))
 

@@ -24,7 +24,14 @@ import music21  # type: ignore
 
 # Valid music channel element classes
 ChannelElem = Union[
-    "Annotation", "Dynamic", "Loop", "Measure", "Note", "Repeat", "Rest"
+    "Annotation",
+    "Dynamic",
+    "Loop",
+    "Measure",
+    "Note",
+    "RehearsalMark",
+    "Repeat",
+    "Rest",
 ]
 
 ###############################################################################
@@ -162,6 +169,52 @@ class Dynamic:
         Confirm this heuristic is good enough, or parameterize
         """
         return cls(elem.value)
+
+
+###############################################################################
+
+
+@dataclass
+class RehearsalMark:
+    """
+    An object representing a rehearsal mark.
+
+    Parameters
+    ----------
+    mark : str
+        The rehearsal mark's text
+
+    Attributes
+    ----------
+    mark : str
+        The rehearsal mark's text
+    """
+
+    mark: str
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(
+        cls, elem: music21.expressions.RehearsalMark
+    ) -> "RehearsalMark":
+        """
+        Convert a music21 RehearsalMark to a RehearsalMark object.
+
+        Parameters
+        ----------
+        elem : music21.expressions.RehearsalMark
+            A music21 representation of a RehearsalMark
+
+        Return
+        ------
+        RehearsalMark
+            A new RehearsalMark object with its `mark` attribute set to the
+            `elem`'s text content.
+        """
+        return cls(elem.content)
 
 
 ###############################################################################
