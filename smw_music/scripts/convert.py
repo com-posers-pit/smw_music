@@ -50,6 +50,11 @@ def main(args=None):
         action="store_true",
         help="Emit measure numbers",
     )
+    parser.add_argument(
+        "--disable_dt",
+        action="store_true",
+        help="Disable including datetime in MML file",
+    )
 
     args = parser.parse_args(args)
 
@@ -58,6 +63,7 @@ def main(args=None):
         not args.disable_global_legato,
         args.loop_analysis,
         args.measure_numbers,
+        not args.disable_dt,
     )
 
 

@@ -5,6 +5,9 @@
 #amk 2
 
 ; MusicXML->AMK v${version}
+% if datetime:
+; Built: ${datetime}
+%endif
 
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"

@@ -11,6 +11,7 @@
 
 import pkgutil
 
+from datetime import datetime
 from typing import Dict, List
 
 ###############################################################################
@@ -263,6 +264,7 @@ class Song:
         global_legato: bool = True,
         loop_analysis: bool = True,
         measure_numbers: bool = True,
+        include_dt: bool = True,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -275,6 +277,8 @@ class Song:
             True iff loops should be detected and replaced with references
         measure_numbers: bool
             True iff measure numbers should be included in MML
+        include_dt: bool
+            True iff current date/time is included in MML
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -297,6 +301,10 @@ class Song:
             for x in self.channels
         ]
 
+        build_dt = ""
+        if include_dt:
+            build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
+
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")
         )
@@ -308,6 +316,7 @@ class Song:
             song=self,
             channels=channels,
             volmap=volmap,
+            datetime=build_dt,
         )
 
         # This handles a quirk of where triplet end marks are inserted
@@ -321,12 +330,13 @@ class Song:
 
     ###########################################################################
 
-    def to_mml_file(
+    def to_mml_file(  # pylint: disable=too-many-arguments
         self,
         fname: str,
         global_legato: bool = True,
         loop_analysis: bool = True,
         measure_numbers: bool = True,
+        include_dt: bool = True,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -341,11 +351,13 @@ class Song:
             True iff loops should be detected and replaced with references
         measure_numbers: bool
             True iff measure numbers should be included in MML
+        include_dt: bool
+            True iff current date/time is included in MML
         """
         with open(fname, "w", encoding="ascii") as fobj:
             print(
                 self.generate_mml(
-                    global_legato, loop_analysis, measure_numbers
+                    global_legato, loop_analysis, measure_numbers, include_dt
                 ),
                 end="",
                 file=fobj,
