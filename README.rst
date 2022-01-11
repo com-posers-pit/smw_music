@@ -3,7 +3,7 @@ SMW Music README
 
 |bandit-status| |lint-status| |mypy-status| |test-status| |coverage-status|
 |package-version| |python-version| |rtd-status| |package-status| |reuse|
-|license|
+|license| |python-style|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
@@ -121,3 +121,5 @@ Acknowledgements
 .. |package-status| image:: https://img.shields.io/pypi/status/smw_music
    :target: https://pypi.com/l/smw_music
    :alt: PyPI - Status
+.. |python-style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
