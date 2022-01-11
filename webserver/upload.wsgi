@@ -12,13 +12,13 @@ from smw_music import music_xml
 application = Flask(__name__)
 
 
-@application.route("/upload")
-def upload_file():
+@application.route("/mml_upload")
+def _upload_file():
     return render_template("upload.html")
 
 
-@application.route("/uploader", methods=["GET", "POST"])
-def uploader():
+@application.route("/mml_uploader", methods=["GET", "POST"])
+def _uploader():
     if request.method == "POST":
         try:
             f = request.files["file"]
