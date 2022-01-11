@@ -1,0 +1,30 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+#spc
+{
+#author  "None"
+#title   "Slurs"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o3 l4
+c d LEGATO_ON e f
+g a=1 LEGATO_OFF^=47 b > c
+< c d e LEGATO_ON f
+g a b > c
+< c d=1 LEGATO_OFF^=47 e f
+LEGATO_ON g a=1 LEGATO_OFF^=47 b > c

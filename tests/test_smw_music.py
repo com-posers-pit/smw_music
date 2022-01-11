@@ -23,7 +23,7 @@ import pytest
 # Project imports
 ###############################################################################
 
-from smw_music import music_xml, __version__
+from smw_music import __version__
 from smw_music.scripts import convert
 
 
@@ -43,6 +43,7 @@ from smw_music.scripts import convert
         ("Loop_Point.mxl", "Loop_Point.txt", []),
         ("Loops.mxl", "Loops.txt", ["--loop_analysis"]),
         ("Repeats.mxl", "Repeats.txt", ["--loop_analysis"]),
+        ("Slurs.mxl", "Slurs.txt", []),
         ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", []),
         ("Ties.mxl", "Ties.txt", []),
         ("Triplets.mxl", "Triplets.txt", []),
@@ -62,6 +63,7 @@ from smw_music.scripts import convert
         "Loop Point",
         "Loops",
         "Repeats",
+        "Slurs",
         "SMB Castle Theme (compressed)",
         "Ties",
         "Triplets",
