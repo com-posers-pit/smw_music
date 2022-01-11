@@ -32,4 +32,6 @@ COPY ./ ./
 RUN poetry install --no-dev
 
 # Apache runs as www-data per httpd.conf above
-CMD VENV="$(poetry env info -p)" httpd-foreground
+ARG GITHASH
+ENV GITHASH="$GITHASH"
+CMD GITHASH="$GITHASH" VENV="$(poetry env info -p)" httpd-foreground
