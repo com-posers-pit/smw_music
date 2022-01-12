@@ -16,12 +16,10 @@ application = Flask(__name__)
 
 
 def _update(mml: str) -> str:
-    try:
+    if githash := os.environ.get("GITHASH", ""):
         githash = os.environ["GITHASH"]
         pattern = re.compile("(MusicXML->AMK v.*)\r")
         mml = pattern.sub(f"\\1+{githash}\r", mml)
-    except KeyError:
-        pass
 
     return mml
 
@@ -61,6 +59,8 @@ def _uploader():
             response.mimetype = "text/plain"
 
         return response
+    else:
+        return make_response(":-P", 400)
 
 
 if __name__ == "__main__":
