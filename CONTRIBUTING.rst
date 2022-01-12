@@ -4,10 +4,10 @@ Contributing
 Expectations
 ------------
 
-In the interest of maintaining a clean and organized project, we
-maintain a high standard for contributions.  Pull requests that don't
-meet these standards will need to be reworked before being accepted into
-the codebase.
+In the interest of maintaining a clean and organized project, we maintain a
+high standard for contributions.
+Pull requests that don't meet these standards will need to be reworked before
+being accepted into the codebase.
 
 Getting Started
 -----------------------
@@ -23,6 +23,7 @@ Conventions
 - `gitflow`_ branching model for development
 - `Numpy`_-style docstrings
 - A standard format for `commit messages`_
+- In RST files, sentences start on new lines
 
 Tools
 -----
@@ -80,20 +81,21 @@ Web Frontend
 
 This package includes a rudimentary web tool for converting MusicXML files to
 MML which uses uses `flask`_ as a web framework, running on Apache 2.24.52 via
-`mod_wsgi`_ in a `Docker`_ container.  The GitHub Deploy workflow in
-``/.github/workflows/deploy.yml`` shows how to the container can be built and
-deployed on any system running Docker.  Briefly, run the following commands in
-the top level of the project:
+`mod_wsgi`_ in a `Docker`_ container.
+The GitHub Deploy workflow in ``/.github/workflows/deploy.yml`` shows how to
+the container can be built and deployed on any system running Docker.
+Briefly, run the following commands in the top level of the project:
 
 .. code-block:: bash
 
    docker build -t smw_music --build-arg GITHASH=$(git rev-parse --short HEAD) .
    docker run -dit --name smw_music -p 5000:80 smw_music
 
-Then navigate to `localhost:5000` in a web browser.  The ``GITHASH`` argument in
-the ``docker build`` command appends argument's value to the reported release
-number in the generated MML, which assists in file provenance.  The argument can
-be omitted, in which case the package version number is used.
+Then navigate to `localhost:5000` in a web browser.
+The ``GITHASH`` argument in the ``docker build`` command appends argument's
+value to the reported release number in the generated MML, which assists in
+file provenance.
+The argument can be omitted, in which case the package version number is used.
 
 Configuration details follow in subsequent sections.
 
@@ -101,8 +103,9 @@ Docker Configuration
 ++++++++++++++++++++
 
 The ``/.dockerignore`` file is optimized to use a minimal set of files in the
-Docker context.  The ``/Dockerfile`` performs the following (with attention paid
-to ensure optimal layer caching):
+Docker context.
+The ``/Dockerfile`` performs the following (with attention paid to ensure
+optimal layer caching):
 
 - Start with a base Apache 2.4.52 system
 - Install Python3, pip, mod_wsgi, poetry, and clean up the apt caches
@@ -132,24 +135,26 @@ to ensure optimal layer caching):
 Apache Configuration
 ++++++++++++++++++++
 
-The ``/webserver/httpd.conf`` file contains the Apache configuration.  It is a
-stripped-down version of the default config file provided with the Docker image,
-with mod_wsgi enabled.
+The ``/webserver/httpd.conf`` file contains the Apache configuration.
+It is a stripped-down version of the default config file provided with the
+Docker image, with mod_wsgi enabled.
 
 The server listens on port 80 and routes all HTTP requests to the
 ``/webserver/upload.wsgi`` file, which is running under mod_wsgi as a daemon
 process as the ``www-data`` user, with its python home directory set to the
-``VENV`` environment variable (i.e., the directory of the poetry-managed virtual
-environment containing the ``smw_music`` package).
+``VENV`` environment variable (i.e., the directory of the poetry-managed
+virtual environment containing the ``smw_music`` package).
 
 Web Frontend Confguration
 +++++++++++++++++++++++++
 
 The ``/webserver/upload.wsgi`` web frontend uses flask to handle requests and
-routing.  The main UI page is the ``mml_upload`` endpoint (which is the
-``/webserver/templates/upload.html`` file).  POST requests are routed to
-``mml_uploader``, which passes the uploaded MusicXML file to the ``smw_music``
-package utilities for conversion to MML and returns the result to the user.
+routing.
+The main UI page is the ``mml_upload`` endpoint (which is the
+``/webserver/templates/upload.html`` file).
+POST requests are routed to ``mml_uploader``, which passes the uploaded
+MusicXML file to the ``smw_music`` package utilities for conversion to MML and
+returns the result to the user.
 
 
 GitHub Actions
