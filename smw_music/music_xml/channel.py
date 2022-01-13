@@ -311,7 +311,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         if isinstance(elem, Note):
             self._emit_note(elem)
 
-        if isinstance(elem, Measure):
+        # The triplet exclusion is some weird problem in AMK
+        if isinstance(elem, Measure) and not self._triplet:
             self._emit_measure(elem)
 
         if isinstance(elem, Annotation):
