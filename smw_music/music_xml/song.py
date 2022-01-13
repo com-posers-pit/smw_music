@@ -161,7 +161,7 @@ class Song:
             A new Song object representing the song described in `fname`
         """
         metadata = {}
-        parts: List[List[Token]] = []
+        parts: List[Channel] = []
         stream = music21.converter.parseFile(fname)
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
@@ -174,10 +174,17 @@ class Song:
 
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
-                partno = len(parts)
-                parts.append(cls._parse_part(elem, partno, sections))
+                percussion = False
+                for n in elem.flatten():
+                    if isinstance(n, music21.clef.PercussionClef):
+                        percussion = True
+                        break
 
-        return cls(metadata, list(map(Channel, parts)))
+                partno = len(parts)
+                part = cls._parse_part(elem, partno, sections)
+                parts.append(Channel(part, percussion))
+
+        return cls(metadata, parts)
 
     ###########################################################################
     # Private method definitions
@@ -235,7 +242,9 @@ class Song:
 
                 if isinstance(subelem, music21.dynamics.Dynamic):
                     channel_elem.append(Dynamic.from_music_xml(subelem))
-                if isinstance(subelem, music21.note.Note):
+                if isinstance(
+                    subelem, (music21.note.Note, music21.note.Unpitched)
+                ):
                     note = Note.from_music_xml(subelem)
                     if subelem.id in slurs[0]:
                         note.slur = True
@@ -305,6 +314,8 @@ class Song:
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
+        percussion = any(x.percussion for x in self.channels)
+
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")
         )
@@ -317,6 +328,7 @@ class Song:
             channels=channels,
             volmap=volmap,
             datetime=build_dt,
+            percussion=percussion,
         )
 
         # This handles a quirk of where triplet end marks are inserted

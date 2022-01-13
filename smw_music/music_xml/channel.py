@@ -37,6 +37,27 @@ from .tokens import (
 # Generic type variable
 _T = TypeVar("_T")
 
+_PERCUSSION_MAP = {
+    "x": {
+        "b5": "CR2",  # Note: can't distinguish crash 2/chinese
+        "a5": "CR1",
+        "g5": "CH",
+        "e5": "OH",
+        "d5": "RC",
+    },
+    "diamond": {
+        "f5": "RB",
+    },
+    "normal": {
+        "f5": "HMT",
+        "e5": "LMT",
+        "d5": "LT",
+        "c5": "SN",  # Note: can't distinguish electric/acoustic snare
+        "a4": "LFT",
+        "f4": "KD",
+    },
+}
+
 ###############################################################################
 # Private function definitions
 ###############################################################################
@@ -73,11 +94,15 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ----------
     elems: list
         A list of valid channel elements
+    percussion: bool
+        Ture iff this is a percussion channel
 
     Attributes
     ----------
     elems: list
         A list of elements in this channel
+    percussion: bool
+        Ture iff this is a percussion channel
 
     Todo
     ----
@@ -85,6 +110,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     """
 
     elems: List[Token]
+    percussion: bool
     _accent: bool = field(init=False, repr=False, compare=False)
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
@@ -193,8 +219,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _emit_note(self, note: "Note"):
-
+    def _emit_note(self, note: "Note"):  # pylint: disable=too-many-branches
         self._handle_triplet(note)
 
         if note.grace:
@@ -202,9 +227,22 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         if note.slur:
             self._slur = True
 
-        self._emit_octave(note)
+        if not self.percussion:
+            self._emit_octave(note)
 
-        directive = "^" if self._tie else note.name
+        if self._tie:
+            directive = "^"
+        else:
+            if not self.percussion:
+                directive = note.name
+            else:
+                directive = (
+                    _PERCUSSION_MAP[note.head][
+                        note.name + str(note.octave + 1)
+                    ]
+                    + " c"
+                )
+
         directive += self._calc_note_length(note)
 
         if note.tie == "start":
@@ -362,7 +400,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _reset_state(self):
         self._accent = False
-        self._cur_octave = self.base_octave
+        self._cur_octave = 3 if self.percussion else self.base_octave
         self._grace = False
         self._legato = False
         self._loops = {}

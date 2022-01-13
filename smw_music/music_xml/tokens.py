@@ -10,7 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Optional, Union
 
 ###############################################################################
 # Library imports
@@ -274,6 +274,8 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         The note's length
     octave: int
         The note's octave
+    head: str
+        Note head shape
     dots: int
         The number of dots
     tie: str
@@ -299,6 +301,8 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         The note's length
     octave: int
         The note's octave
+    head: str
+        Note head shape
     dots: int
         The number of dots
     tie: str
@@ -323,6 +327,7 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
     name: str
     duration: int
     octave: int
+    head: str
     dots: int = 0
     tie: str = ""
     triplet: bool = False
@@ -336,7 +341,9 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     @classmethod
-    def from_music_xml(cls, elem: music21.note.Note) -> "Note":
+    def from_music_xml(
+        cls, elem: Union[music21.note.Note, music21.note.Unpitched]
+    ) -> "Note":
         """
         Convert a MusicXML note to a Note object.
 
@@ -352,13 +359,21 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         """
         articulations = [type(x) for x in elem.articulations]
 
+        if isinstance(elem, music21.note.Note):
+            name = elem.name
+            octave = elem.octave
+        else:
+            name = elem.displayPitch().name
+            octave = elem.displayOctave
+
         accent = music21.articulations.Accent in articulations
         staccato = music21.articulations.Staccato in articulations
 
         return cls(
-            elem.name.lower().replace("#", "+"),
+            name.lower().replace("#", "+"),
             _MUSIC_XML_DURATION[elem.duration.ordinal],
-            elem.octave - 1,
+            octave - 1,
+            elem.notehead,
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
             bool(elem.duration.tuplets),

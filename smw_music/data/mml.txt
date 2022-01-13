@@ -12,6 +12,22 @@
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
 
+% if percussion:
+; Defaults---fix these
+"SN=@10"
+"KD=@21"
+"LFT=@21"
+"LT=@21"
+"LMT=@23"
+"HMT=@24"
+"CR2=@22"
+"CR1=@22"
+"CH=@22"
+"OH=@22"
+"RC=@22"
+"RB=@22"
+
+%endif
 #spc
 {
 #author  "${song.composer}"
