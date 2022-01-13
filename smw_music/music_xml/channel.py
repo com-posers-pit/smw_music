@@ -20,7 +20,7 @@ from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 from .shared import CRLF
 from .tokens import (
     Annotation,
-    ChannelElem,
+    Token,
     Dynamic,
     RehearsalMark,
     Loop,
@@ -84,13 +84,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     Parameterize grace note length?
     """
 
-    elems: List[ChannelElem]
+    elems: List[Token]
     _accent: bool = field(init=False, repr=False, compare=False)
     _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
     _grace: bool = field(init=False, repr=False, compare=False)
     _legato: bool = field(init=False, repr=False, compare=False)
-    _loops: Dict[int, List[ChannelElem]] = field(
+    _loops: Dict[int, List[Token]] = field(
         init=False, repr=False, compare=False
     )
     _measure_numbers: bool = field(init=False, repr=False, compare=False)
@@ -103,7 +103,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # Data model method definitions
     ###########################################################################
 
-    def __getitem__(self, n: int) -> ChannelElem:
+    def __getitem__(self, n: int) -> Token:
         return self.elems[n]
 
     ###########################################################################
@@ -257,7 +257,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _emit_token(self, elem: ChannelElem):
+    def _emit_token(self, elem: Token):
         if isinstance(elem, Repeat):
             self._emit_repeat(elem)
 
@@ -419,7 +419,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         repeat_count = 0
         in_loop = False
 
-        loop: List[ChannelElem] = []
+        loop: List[Token] = []
         do_measure = False
         last_loop = None
 

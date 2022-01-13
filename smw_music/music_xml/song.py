@@ -30,7 +30,7 @@ from .channel import Channel
 from .shared import CRLF
 from .tokens import (
     Annotation,
-    ChannelElem,
+    Token,
     Dynamic,
     RehearsalMark,
     Loop,
@@ -161,7 +161,7 @@ class Song:
             A new Song object representing the song described in `fname`
         """
         metadata = {}
-        parts: List[List[ChannelElem]] = []
+        parts: List[List[Token]] = []
         stream = music21.converter.parseFile(fname)
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
@@ -207,8 +207,8 @@ class Song:
         part: music21.stream.Part,
         partno: int,
         sections: Dict[int, RehearsalMark],
-    ) -> List[ChannelElem]:
-        channel_elem: List[ChannelElem] = []
+    ) -> List[Token]:
+        channel_elem: List[Token] = []
         slurs: List[List[int]] = [[], []]
         lines: List[List[int]] = [[], []]
 

@@ -10,29 +10,13 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Optional
 
 ###############################################################################
 # Library imports
 ###############################################################################
 
 import music21  # type: ignore
-
-###############################################################################
-# API constant definitions
-###############################################################################
-
-# Valid music channel element classes
-ChannelElem = Union[
-    "Annotation",
-    "Dynamic",
-    "Loop",
-    "Measure",
-    "Note",
-    "RehearsalMark",
-    "Repeat",
-    "Rest",
-]
 
 ###############################################################################
 # Private variable/constant definitions
@@ -55,8 +39,15 @@ _MUSIC_XML_DURATION = {
 ###############################################################################
 
 
+class Token:  # pylint: disable=too-few-public-methods
+    """Base class for MusicXML->MML tokens."""
+
+
+###############################################################################
+
+
 @dataclass
-class Annotation:
+class Annotation(Token):
     """
     Expressions attached to music notes.
 
@@ -127,7 +118,7 @@ class Annotation:
 
 
 @dataclass
-class Dynamic:
+class Dynamic(Token):
     """
     Dynamics marking.
 
@@ -175,7 +166,7 @@ class Dynamic:
 
 
 @dataclass
-class RehearsalMark:
+class RehearsalMark(Token):
     """
     An object representing a rehearsal mark.
 
@@ -221,7 +212,7 @@ class RehearsalMark:
 
 
 @dataclass
-class Loop:
+class Loop(Token):
     """
     A user-defined loop.
 
@@ -248,7 +239,7 @@ class Loop:
 
 
 @dataclass
-class Measure:
+class Measure(Token):
     """
     An object representing the start of a new measure of music.
 
@@ -270,7 +261,7 @@ class Measure:
 
 
 @dataclass
-class Note:  # pylint: disable=too-many-instance-attributes
+class Note(Token):  # pylint: disable=too-many-instance-attributes
     """
     Music note.
 
@@ -381,7 +372,7 @@ class Note:  # pylint: disable=too-many-instance-attributes
 
 
 @dataclass
-class Repeat:
+class Repeat(Token):
     """
     A repeat bar.
 
@@ -424,7 +415,7 @@ class Repeat:
 
 
 @dataclass
-class Rest:
+class Rest(Token):
     """
     Music rest.
 
