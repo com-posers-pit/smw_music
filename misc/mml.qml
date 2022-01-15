@@ -136,25 +136,20 @@ MuseScore {
     data += "\r\n";
     data += xmlFile.read() + "\r\n";
 
-    if (globalLegato.checked) {
-      data += "--" + boundary + "\r\n";
-      data += 'content-disposition: form-data; name="global_legato"\r\n';
-      data += "\r\n";
-      data += '"1"\r\n';
-    }
+    var options = [[globalLegato, "global_legato"],
+                   [loopAnalysis, "loop_analysis"],
+                   [measureNumbers, "measure_numbers"]];
 
-    if (loopAnalysis.checked) {
-      data += "--" + boundary + "\r\n";
-      data += 'content-disposition: form-data; name="loop_analysis"\r\n';
-      data += "\r\n";
-      data += '"1"\r\n';
-    }
-
-    if (measureNumbers.checked) {
-      data += "--" + boundary + "\r\n";
-      data += 'content-disposition: form-data; name="measure_numbers"\r\n';
-      data += "\r\n";
-      data += '"1"\r\n';
+    for (var i = 0; i < options.length; i++) {
+      var checkbox = options[i][0];
+      var label = options[i][1];
+      if (checkbox.checked) {
+        data += "--" + boundary + "\r\n";
+        data += "content-disposition: form-data;"
+        data += 'name="' + label + '"\r\n';
+        data += "\r\n";
+        data += '"1"\r\n';
+      }
     }
 
     data += "--" + boundary + "--";
