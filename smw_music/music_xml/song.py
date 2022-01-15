@@ -265,6 +265,17 @@ class Song:
         return channel_elem
 
     ###########################################################################
+
+    def _validate(self):
+        for n, channel in enumerate(self.channels):
+            try:
+                channel.check()
+            except MusicXmlException as e:
+                raise MusicXmlException(
+                    e.args[0] + f" in staff {n + 1}"
+                ) from e
+
+    ###########################################################################
     # API method definitions
     ###########################################################################
 
@@ -305,17 +316,11 @@ class Song:
             "vFFFF": 225,
         }
 
-        channels = []
-        for n, channel in enumerate(self.channels):
-            try:
-                channel.check()
-            except MusicXmlException as e:
-                raise MusicXmlException(
-                    e.args[0] + f" in staff {n + 1}"
-                ) from e
-
-            mml = channel.generate_mml(loop_analysis, measure_numbers)
-            channels.append(mml)
+        self._validate()
+        channels = [
+            x.generate_mml(loop_analysis, measure_numbers)
+            for x in self.channels
+        ]
 
         build_dt = ""
         if include_dt:

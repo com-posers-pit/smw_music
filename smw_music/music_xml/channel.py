@@ -432,6 +432,15 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def check(self):
+        """
+        Confirm that the channel's notes are acceptable.
+
+        Raises
+        ------
+        MusicXmlException :
+            Whenever an invalid percussion note is used, or when a musical note
+            outside octaves 1-6  is used.
+        """
         measure = 0
         note = 0
         for token in self[:]:
@@ -457,6 +466,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                         raise MusicXmlException(
                             f"Bad note #{note} in measure {measure}"
                         )
+
+    ###########################################################################
 
     def generate_mml(
         self, loop_analysis: bool = True, measure_numbers: bool = True
