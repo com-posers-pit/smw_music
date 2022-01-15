@@ -54,7 +54,7 @@ convention = "numpy"
 add-ignore = "D105"
 
 [tool.pylint.FORMAT]
-good-names = "n,rv"
+good-names = "e,n,rv"
 
 [tool.pylint.SIMILARITIES]
 ignore-imports = "yes"

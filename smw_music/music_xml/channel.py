@@ -17,7 +17,7 @@ from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 # Project imports
 ###############################################################################
 
-from .shared import CRLF
+from .shared import CRLF, MusicXmlException
 from .tokens import (
     Annotation,
     Token,
@@ -430,6 +430,33 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
     # API method definitions
     ###########################################################################
+
+    def check(self):
+        measure = 0
+        note = 0
+        for token in self[:]:
+            if isinstance(token, Measure):
+                measure += 1
+                note = 0
+
+            if isinstance(token, (Note, Rest)):
+                note += 1
+
+            if isinstance(token, Note):
+                if self.percussion:
+                    try:
+                        _PERCUSSION_MAP[token.head][
+                            token.name + str(token.octave + 1)
+                        ]
+                    except KeyError as e:
+                        raise MusicXmlException(
+                            f"Bad percussion note #{note} in measure {measure}"
+                        ) from e
+                else:
+                    if not 0 <= token.octave <= 6:
+                        raise MusicXmlException(
+                            f"Bad note #{note} in measure {measure}"
+                        )
 
     def generate_mml(
         self, loop_analysis: bool = True, measure_numbers: bool = True

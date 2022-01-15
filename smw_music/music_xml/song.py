@@ -27,7 +27,7 @@ from mako.template import Template  # type: ignore
 ###############################################################################
 
 from .channel import Channel
-from .shared import CRLF
+from .shared import CRLF, MusicXmlException
 from .tokens import (
     Annotation,
     Token,
@@ -305,10 +305,17 @@ class Song:
             "vFFFF": 225,
         }
 
-        channels = [
-            x.generate_mml(loop_analysis, measure_numbers)
-            for x in self.channels
-        ]
+        channels = []
+        for n, channel in enumerate(self.channels):
+            try:
+                channel.check()
+            except MusicXmlException as e:
+                raise MusicXmlException(
+                    e.args[0] + f" in staff {n + 1}"
+                ) from e
+
+            mml = channel.generate_mml(loop_analysis, measure_numbers)
+            channels.append(mml)
 
         build_dt = ""
         if include_dt:
