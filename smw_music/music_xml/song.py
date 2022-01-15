@@ -235,6 +235,7 @@ class Song:
         n = 0
         triplets = False
         for n, measure in enumerate(filter(_is_measure, part)):
+            note_num = 0
             channel_elem.append(Measure(n))
             if n in sections:
                 channel_elem.append(sections[n])
@@ -245,6 +246,7 @@ class Song:
                     loopno += 1
 
                 if isinstance(subelem, music21.note.GeneralNote):
+                    note_num += 1
                     if not triplets and bool(subelem.duration.tuplets):
                         channel_elem.append(Triplet(True))
                         triplets = True
@@ -267,12 +269,17 @@ class Song:
                     if subelem.id in slurs[1]:
                         channel_elem.append(Slur(False))
 
+                    note.measure_num = n + 1
+                    note.note_num = note_num
                     channel_elem.append(note)
 
                 if isinstance(subelem, music21.bar.Repeat):
                     channel_elem.append(Repeat.from_music_xml(subelem))
                 if isinstance(subelem, music21.note.Rest):
-                    channel_elem.append(Rest.from_music_xml(subelem))
+                    rest = Rest.from_music_xml(subelem)
+                    rest.measure_num = n
+                    rest.note_num = note_num
+                    channel_elem.append(rest)
                 if isinstance(subelem, music21.expressions.TextExpression):
                     channel_elem.append(Annotation.from_music_xml(subelem))
                 if subelem.id in lines[1]:

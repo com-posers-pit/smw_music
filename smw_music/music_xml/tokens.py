@@ -46,6 +46,27 @@ class Token:  # pylint: disable=too-few-public-methods
 ###############################################################################
 
 
+class Playable:
+    @property
+    def measure_num(self):
+        return self._measure_num
+
+    @measure_num.setter
+    def measure_num(self, val):
+        self._measure_num = val
+
+    @property
+    def note_num(self):
+        return self._note_num
+
+    @note_num.setter
+    def note_num(self, val):
+        self._note_num = val
+
+
+###############################################################################
+
+
 @dataclass
 class Annotation(Token):
     """
@@ -261,7 +282,7 @@ class Measure(Token):
 
 
 @dataclass
-class Note(Token):  # pylint: disable=too-many-instance-attributes
+class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     """
     Music note.
 
@@ -417,7 +438,7 @@ class Repeat(Token):
 
 
 @dataclass
-class Rest(Token):
+class Rest(Token, Playable):
     """
     Music rest.
 

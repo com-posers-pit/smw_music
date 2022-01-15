@@ -454,17 +454,10 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             Whenever an invalid percussion note is used, or when a musical note
             outside octaves 1-6  is used.
         """
-        measure = 0
-        note = 0
         for token in self[:]:
-            if isinstance(token, Measure):
-                measure += 1
-                note = 0
-
-            if isinstance(token, (Note, Rest)):
-                note += 1
-
             if isinstance(token, Note):
+                note = token.note_num
+                measure = token.measure_num
                 if self.percussion:
                     try:
                         _PERCUSSION_MAP[token.head][
