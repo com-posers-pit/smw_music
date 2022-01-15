@@ -10,6 +10,7 @@
 ###############################################################################
 
 from collections import Counter
+from enum import auto, Enum
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
 
@@ -28,6 +29,7 @@ from .tokens import (
     Note,
     Repeat,
     Rest,
+    Slur,
 )
 
 ###############################################################################
@@ -81,6 +83,17 @@ def _most_common(container: Iterable[_T]) -> _T:
 
 
 ###############################################################################
+# Private class definitions
+###############################################################################
+
+
+class _SlurState(Enum):
+    SLUR_IDLE = auto()
+    SLUR_ACTIVE = auto()
+    SLUR_END = auto()
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -120,10 +133,10 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         init=False, repr=False, compare=False
     )
     _measure_numbers: bool = field(init=False, repr=False, compare=False)
-    _slur: bool = field(init=False, repr=False, compare=False)
     _staccato: bool = field(init=False, repr=False, compare=False)
     _tie: bool = field(init=False, repr=False, compare=False)
     _triplet: bool = field(init=False, repr=False, compare=False)
+    _slur_state: _SlurState = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Data model method definitions
@@ -140,8 +153,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         grace_length = 8
         note_length = ""
 
-        if note.slur is False:
-            self._slur = False
+        if self._slur_state == _SlurState.SLUR_END:
+            self._slur_state = _SlurState.SLUR_IDLE
             duration = 192 // note.duration
             duration = int(duration * (2 - 0.5 ** note.dots))
             self._legato = False
@@ -224,8 +237,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         if note.grace:
             self._grace = True
-        if note.slur:
-            self._slur = True
 
         if not self.percussion:
             self._emit_octave(note)
@@ -318,6 +329,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         if isinstance(elem, Annotation):
             self._emit_annotation(elem)
 
+        if isinstance(elem, Slur):
+            self._slur_state = (
+                _SlurState.SLUR_ACTIVE if elem.start else _SlurState.SLUR_END
+            )
+
     ###########################################################################
 
     def _handle_triplet(self, elem: Union["Rest", "Note"]):
@@ -406,7 +422,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._legato = False
         self._loops = {}
         self._measure_numbers = True
-        self._slur = False
+        self._slur_state = _SlurState.SLUR_IDLE
         self._staccato = False
         self._tie = False
         self._triplet = False
@@ -415,7 +431,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _start_legato(self):
         if not self._legato:
-            if self._slur or self._grace:
+            if (self._slur_state == _SlurState.SLUR_ACTIVE) or self._grace:
                 self._legato = True
                 self._directives.append("LEGATO_ON")
 
@@ -423,7 +439,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _stop_legato(self):
         if self._legato:
-            if not (self._grace or self._slur or self._tie):
+            if not (
+                self._grace
+                or (self._slur_state == _SlurState.SLUR_ACTIVE)
+                or self._tie
+            ):
                 self._legato = False
                 self._directives.append("LEGATO_OFF")
 

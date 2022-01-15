@@ -10,7 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import Optional, Union
+from typing import Union
 
 ###############################################################################
 # Library imports
@@ -288,9 +288,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         True iff this is an accented note
     staccato: bool
         True iff this is an staccato note
-    slur: Optional[bool]
-        True if this is the start of a slur, False if it's the end, None
-        otherwise
 
     Attributes
     ----------
@@ -315,9 +312,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         True iff this is an accented note
     staccato: bool
         True iff this is an staccato note
-    slur: Optional[bool]
-        True if this is the start of a slur, False if it's the end, None
-        otherwise
 
     Todo
     ----
@@ -334,7 +328,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
     grace: bool = False
     accent: bool = False
     staccato: bool = False
-    slur: Optional[bool] = None
 
     ###########################################################################
     # API constructor definitions
@@ -479,3 +472,25 @@ class Rest(Token):
             elem.duration.dots,
             bool(elem.duration.tuplets),
         )
+
+
+###############################################################################
+
+
+@dataclass
+class Slur(Token):
+    """
+    A slur.
+
+    Parameters
+    ----------
+    start : bool
+        True iff this is the start of a slur
+
+    Attributes
+    ----------
+    start : bool
+        True iff this is the start of a loop
+    """
+
+    start: bool

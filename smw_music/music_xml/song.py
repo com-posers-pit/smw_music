@@ -38,6 +38,7 @@ from .tokens import (
     Note,
     Repeat,
     Rest,
+    Slur,
 )
 from .. import __version__
 
@@ -247,9 +248,9 @@ class Song:
                 ):
                     note = Note.from_music_xml(subelem)
                     if subelem.id in slurs[0]:
-                        note.slur = True
+                        channel_elem.append(Slur(True))
                     if subelem.id in slurs[1]:
-                        note.slur = False
+                        channel_elem.append(Slur(False))
                     channel_elem.append(note)
                 if isinstance(subelem, music21.bar.Repeat):
                     channel_elem.append(Repeat.from_music_xml(subelem))
