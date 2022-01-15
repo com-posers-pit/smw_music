@@ -11,3 +11,11 @@
 
 # AMK files are used in windows and need the right line ending.
 CRLF = "\r\n"
+
+###############################################################################
+# API class definitions
+###############################################################################
+
+
+class MusicXmlException(Exception):
+    """Parent class for MusicXML exceptions."""
