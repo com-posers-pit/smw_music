@@ -5,4 +5,5 @@
 
 """Utilities for handling Music XML conversions."""
 
+from .shared import MusicXmlException  # noqa: F401
 from .song import Song  # noqa: F401
