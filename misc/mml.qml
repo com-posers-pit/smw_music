@@ -26,21 +26,39 @@ MuseScore {
 
     RowLayout {
       Text {
-        text: "Server:"}
-        TextField {id: "serverField"}
+        text: "Server:"
       }
+      TextField {
+        id: "serverField"
+      }
+    }
 
-      RowLayout {
-        Button {
-          id: "chooseOutput"
-          text: "MML Output File"
-          onClicked: fileDialog.open()
+    RowLayout {
+      Button {
+        id: "chooseOutput"
+        text: "MML Output File"
+        onClicked: fileDialog.open()
       }
 
       Text {
-          id: "mmlPath"
-          text: ""
+        id: "mmlPath"
+        text: ""
       }
+    }
+
+    CheckBox {
+      id: "globalLegato"
+      text: qsTr("Enable Global Legato")
+    }
+
+    CheckBox {
+      id: "measureNumbers"
+      text: qsTr("Include Measure Numbers")
+    }
+
+    CheckBox {
+      id: "loopAnalysis"
+      text: qsTr("Perform Loop Analysis")
     }
 
     Button {
@@ -117,6 +135,28 @@ MuseScore {
     data += "Content-Type: application/vnd.recordare.musicxml3+xml\r\n";
     data += "\r\n";
     data += xmlFile.read() + "\r\n";
+
+    if (globalLegato.checked) {
+      data += "--" + boundary + "\r\n";
+      data += 'content-disposition: form-data; name="global_legato"\r\n';
+      data += "\r\n";
+      data += '"1"\r\n';
+    }
+
+    if (loopAnalysis.checked) {
+      data += "--" + boundary + "\r\n";
+      data += 'content-disposition: form-data; name="loop_analysis"\r\n';
+      data += "\r\n";
+      data += '"1"\r\n';
+    }
+
+    if (measureNumbers.checked) {
+      data += "--" + boundary + "\r\n";
+      data += 'content-disposition: form-data; name="measure_numbers"\r\n';
+      data += "\r\n";
+      data += '"1"\r\n';
+    }
+
     data += "--" + boundary + "--";
 
     mmlFile.source = mmlPath.text
