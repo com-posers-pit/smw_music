@@ -24,6 +24,7 @@ import pytest
 ###############################################################################
 
 from smw_music import __version__
+from smw_music.music_xml import MusicXmlException
 from smw_music.scripts import convert
 
 
@@ -95,6 +96,34 @@ def test_conversion(src, dst, args):
         written = fobj.readlines()
 
     assert target == written
+
+
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "src, text",
+    [
+        (
+            "Bad_Percussion.mxl",
+            r"Bad percussion note #3 in measure 1 in staff 1",
+        ),
+        ("TooHigh.mxl", r"Bad note #3 in measure 1 in staff 1"),
+        ("TooLow.mxl", r"Bad note #2 in measure 1 in staff 1"),
+    ],
+    ids=[
+        "Bad percussion",
+        "Note too high",
+        "Note too low",
+    ],
+)
+def test_invalid(src, text):
+    test_dir = pathlib.Path("tests")
+    fname = test_dir / "src" / src
+
+    with tempfile.NamedTemporaryFile("r") as fobj:
+        with pytest.raises(MusicXmlException, match=text):
+            convert.main([str(fname), str(fobj.name)])
 
 
 ###############################################################################
