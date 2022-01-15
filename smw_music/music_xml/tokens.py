@@ -280,8 +280,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         The number of dots
     tie: str
         "start" to start a tie, "stop" to end a tie, "" if no tie
-    triplet: bool
-        True iff this note is a triplet
     grace: bool
         True iff this is a grace note
     accent: bool
@@ -304,8 +302,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
         The number of dots
     tie: str
         "start" to start a tie, "stop" to end a tie, "" if no tie
-    triplet: bool
-        True iff this note is a triplet
     grace: bool
         True iff this is a grace note
     accent: bool
@@ -315,7 +311,7 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
 
     Todo
     ----
-    Duration, octave, tie, and triplet are poorly implemented, clean this up.
+    Duration, octave, and tie are poorly implemented, clean this up.
     """
 
     name: str
@@ -324,7 +320,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
     head: str
     dots: int = 0
     tie: str = ""
-    triplet: bool = False
     grace: bool = False
     accent: bool = False
     staccato: bool = False
@@ -369,7 +364,6 @@ class Note(Token):  # pylint: disable=too-many-instance-attributes
             elem.notehead,
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
-            bool(elem.duration.tuplets),
             elem.duration.isGrace,
             accent,
             staccato,
@@ -440,13 +434,10 @@ class Rest(Token):
         The note's length
     dots: int
         The number of dots
-    triplet: bool
-        True if this note is a triplet, false otherwise
     """
 
     duration: int
     dots: int = 0
-    triplet: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -470,7 +461,6 @@ class Rest(Token):
         return cls(
             _MUSIC_XML_DURATION[elem.duration.ordinal],
             elem.duration.dots,
-            bool(elem.duration.tuplets),
         )
 
 
@@ -480,7 +470,7 @@ class Rest(Token):
 @dataclass
 class Slur(Token):
     """
-    A slur.
+    A slur start/stop.
 
     Parameters
     ----------
@@ -491,6 +481,28 @@ class Slur(Token):
     ----------
     start : bool
         True iff this is the start of a loop
+    """
+
+    start: bool
+
+
+###############################################################################
+
+
+@dataclass
+class Triplet(Token):
+    """
+    A triplet start/stop.
+
+    Parameters
+    ----------
+    start : bool
+        True iff this is the start of a triplet
+
+    Attributes
+    ----------
+    start : bool
+        True iff this is the start of a triplet
     """
 
     start: bool

@@ -39,6 +39,7 @@ from .tokens import (
     Repeat,
     Rest,
     Slur,
+    Triplet,
 )
 from .. import __version__
 
@@ -231,6 +232,7 @@ class Song:
         loopno = 100 * partno
 
         n = 0
+        triplets = False
         for n, measure in enumerate(filter(_is_measure, part)):
             channel_elem.append(Measure(n))
             if n in sections:
@@ -240,6 +242,15 @@ class Song:
                 if subelem.id in lines[0]:
                     channel_elem.append(Loop(True, loopno))
                     loopno += 1
+
+                if isinstance(subelem, music21.note.GeneralNote):
+                    if not triplets and bool(subelem.duration.tuplets):
+                        channel_elem.append(Triplet(True))
+                        triplets = True
+
+                    if triplets and not bool(subelem.duration.tuplets):
+                        channel_elem.append(Triplet(False))
+                        triplets = False
 
                 if isinstance(subelem, music21.dynamics.Dynamic):
                     channel_elem.append(Dynamic.from_music_xml(subelem))
@@ -251,7 +262,9 @@ class Song:
                         channel_elem.append(Slur(True))
                     if subelem.id in slurs[1]:
                         channel_elem.append(Slur(False))
+
                     channel_elem.append(note)
+
                 if isinstance(subelem, music21.bar.Repeat):
                     channel_elem.append(Repeat.from_music_xml(subelem))
                 if isinstance(subelem, music21.note.Rest):

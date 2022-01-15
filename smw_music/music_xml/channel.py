@@ -12,7 +12,7 @@
 from collections import Counter
 from enum import auto, Enum
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, Tuple, TypeVar, Union
+from typing import Dict, Iterable, List, Optional, Tuple, TypeVar
 
 ###############################################################################
 # Project imports
@@ -30,6 +30,7 @@ from .tokens import (
     Repeat,
     Rest,
     Slur,
+    Triplet,
 )
 
 ###############################################################################
@@ -233,8 +234,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _emit_note(self, note: "Note"):  # pylint: disable=too-many-branches
-        self._handle_triplet(note)
-
         if note.grace:
             self._grace = True
 
@@ -295,8 +294,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _emit_rest(self, rest: "Rest"):
-        self._handle_triplet(rest)
-
         directive = "r"
         if rest.duration != self.base_note_length:
             directive += str(rest.duration)
@@ -334,14 +331,14 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 _SlurState.SLUR_ACTIVE if elem.start else _SlurState.SLUR_END
             )
 
+        if isinstance(elem, Triplet):
+            self._emit_triplet(elem)
+
     ###########################################################################
 
-    def _handle_triplet(self, elem: Union["Rest", "Note"]):
-        if not self._triplet and elem.triplet:
-            self._directives.append("{")
-        if self._triplet and not elem.triplet:
-            self._directives.append("}")
-        self._triplet = elem.triplet
+    def _emit_triplet(self, elem: Triplet):
+        self._directives.append("{" if elem.start else "}")
+        self._triplet = elem.start
 
     ###########################################################################
 
