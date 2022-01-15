@@ -14,18 +14,19 @@
 
 % if percussion:
 ; Defaults---fix these
-"SN=@10"
-"KD=@21"
-"LFT=@21"
-"LT=@21"
-"LMT=@23"
-"HMT=@24"
+
+"CR3=@22"
 "CR2=@22"
-"CR1=@22"
+"CR=@22"
 "CH=@22"
 "OH=@22"
-"RC=@22"
-"RB=@22"
+"RD=@22"
+"RD2=@22"
+"HT=@24"
+"MT=@23"
+"SN=@10"
+"LT=@21"
+"KD=@21"
 
 %endif
 #spc

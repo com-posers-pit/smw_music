@@ -37,23 +37,23 @@ from .tokens import (
 # Generic type variable
 _T = TypeVar("_T")
 
+# Weinberg:
+# http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
 _PERCUSSION_MAP = {
     "x": {
-        "b5": "CR2",  # Note: can't distinguish crash 2/chinese
-        "a5": "CR1",
+        "c6": "CR3",
+        "b5": "CR2",
+        "a5": "CR",
         "g5": "CH",
+        "f5": "RD",
         "e5": "OH",
-        "d5": "RC",
-    },
-    "diamond": {
-        "f5": "RB",
+        "d5": "RD2",
     },
     "normal": {
-        "f5": "HMT",
-        "e5": "LMT",
-        "d5": "LT",
-        "c5": "SN",  # Note: can't distinguish electric/acoustic snare
-        "a4": "LFT",
+        "e5": "HT",
+        "d5": "MT",
+        "c5": "SN",
+        "a4": "LT",
         "f4": "KD",
     },
 }
