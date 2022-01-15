@@ -1,0 +1,55 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+; Defaults---fix these
+
+"CR3=@22"
+"CR2=@22"
+"CR=@22"
+"CH=@22"
+"OH=@22"
+"RD=@22"
+"RD2=@22"
+"HT=@24"
+"MT=@23"
+"SN=@10"
+"LT=@21"
+"KD=@21"
+
+#spc
+{
+#author  "None"
+#title   "Percussion"
+}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o3 l4
+KD c SN c KD c SN c
+HT c MT c LT c KD c
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o3 l4
+CH c OH c CR c RD c
+CR3 c CR2 c RD2 c r
