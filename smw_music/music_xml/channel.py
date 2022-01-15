@@ -136,7 +136,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     _measure_numbers: bool = field(init=False, repr=False, compare=False)
     _staccato: bool = field(init=False, repr=False, compare=False)
     _tie: bool = field(init=False, repr=False, compare=False)
-    _triplet: bool = field(init=False, repr=False, compare=False)
     _slur_state: _SlurState = field(init=False, repr=False, compare=False)
 
     ###########################################################################
@@ -319,8 +318,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         if isinstance(elem, Note):
             self._emit_note(elem)
 
-        # The triplet exclusion is some weird problem in AMK
-        if isinstance(elem, Measure) and not self._triplet:
+        if isinstance(elem, Measure):
             self._emit_measure(elem)
 
         if isinstance(elem, Annotation):
@@ -338,7 +336,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _emit_triplet(self, elem: Triplet):
         self._directives.append("{" if elem.start else "}")
-        self._triplet = elem.start
 
     ###########################################################################
 
@@ -422,7 +419,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._slur_state = _SlurState.SLUR_IDLE
         self._staccato = False
         self._tie = False
-        self._triplet = False
 
     ###########################################################################
 

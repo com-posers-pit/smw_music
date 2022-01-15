@@ -27,10 +27,10 @@ from mako.template import Template  # type: ignore
 ###############################################################################
 
 from .channel import Channel
-from .shared import CRLF, MusicXmlException
+from .reduction import adjust_triplets
+from .shared import MusicXmlException
 from .tokens import (
     Annotation,
-    Token,
     Dynamic,
     RehearsalMark,
     Loop,
@@ -39,6 +39,7 @@ from .tokens import (
     Repeat,
     Rest,
     Slur,
+    Token,
     Triplet,
 )
 from .. import __version__
@@ -260,6 +261,9 @@ class Song:
                     note = Note.from_music_xml(subelem)
                     if subelem.id in slurs[0]:
                         channel_elem.append(Slur(True))
+                    # It seems weird to put slur-ends before the actual last
+                    # slur note.  But the note that comes at the slur-end needs
+                    # to know it so the legato can be put in the right place.
                     if subelem.id in slurs[1]:
                         channel_elem.append(Slur(False))
 
@@ -276,7 +280,7 @@ class Song:
 
         channel_elem.append(Measure(n + 1))
 
-        return channel_elem
+        return adjust_triplets(channel_elem)
 
     ###########################################################################
 
@@ -356,9 +360,6 @@ class Song:
             datetime=build_dt,
             percussion=percussion,
         )
-
-        # This handles a quirk of where triplet end marks are inserted
-        rv = rv.replace(CRLF + "} ", " }" + CRLF)
 
         rv = rv.replace(" ^", "^")
         rv = rv.replace("[ ", "[")
