@@ -10,7 +10,6 @@
 ###############################################################################
 
 from collections import Counter
-from enum import auto, Enum
 from dataclasses import dataclass, field
 from typing import Dict, Iterable, List, Optional, TypeVar
 
@@ -18,19 +17,14 @@ from typing import Dict, Iterable, List, Optional, TypeVar
 # Project imports
 ###############################################################################
 
+from .context import MmlState, SlurState
 from .shared import CRLF, MusicXmlException
 from .tokens import (
-    Annotation,
     Token,
     Dynamic,
-    RehearsalMark,
-    Loop,
-    Measure,
     Note,
-    Repeat,
     Rest,
     Slur,
-    Triplet,
 )
 
 ###############################################################################
@@ -84,17 +78,6 @@ def _most_common(container: Iterable[_T]) -> _T:
 
 
 ###############################################################################
-# Private class definitions
-###############################################################################
-
-
-class _SlurState(Enum):
-    SLUR_IDLE = auto()
-    SLUR_ACTIVE = auto()
-    SLUR_END = auto()
-
-
-###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -126,17 +109,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     elems: List[Token]
     percussion: bool
     _accent: bool = field(init=False, repr=False, compare=False)
-    _cur_octave: int = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
-    _grace: bool = field(init=False, repr=False, compare=False)
-    _legato: bool = field(init=False, repr=False, compare=False)
     _loops: Dict[int, List[Token]] = field(
         init=False, repr=False, compare=False
     )
     _measure_numbers: bool = field(init=False, repr=False, compare=False)
     _staccato: bool = field(init=False, repr=False, compare=False)
-    _tie: bool = field(init=False, repr=False, compare=False)
-    _slur_state: _SlurState = field(init=False, repr=False, compare=False)
+    _mml_state: MmlState = MmlState()
 
     ###########################################################################
     # Data model method definitions
@@ -147,216 +126,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
     # Private method definitions
-    ###########################################################################
-
-    def _calc_note_length(self, note: "Note") -> str:
-        grace_length = 8
-        note_length = ""
-
-        if self._slur_state == _SlurState.SLUR_END:
-            self._slur_state = _SlurState.SLUR_IDLE
-            duration = 192 // note.duration
-            duration = int(duration * (2 - 0.5 ** note.dots))
-            self._legato = False
-            note_length = f"=1 LEGATO_OFF ^={duration - 1}"
-        else:
-            if not self._grace and not note.grace:
-                if note.duration != self.base_note_length:
-                    note_length = str(note.duration)
-                note_length += note.dots * "."
-            else:
-                if note.grace:
-                    note_length = f"={grace_length}"
-                else:
-                    duration = 192 // note.duration
-                    duration = int(duration * (2 - 0.5 ** note.dots))
-                    note_length = f"={duration - grace_length}"
-
-        return note_length
-
-    ###########################################################################
-
-    def _emit_annotation(self, annotation: Annotation):
-        if annotation.amk_annotation:
-            self._directives.append(annotation.amk_text)
-
-    ###########################################################################
-
-    def _emit_dynamic(self, dyn: "Dynamic"):
-        volmap = {
-            "pppp": "vPPPP",
-            "ppp": "vPPP",
-            "pp": "vPP",
-            "p": "vP",
-            "mp": "vMP",
-            "mf": "vMF",
-            "f": "vF",
-            "ff": "vFF",
-            "fff": "vFFF",
-            "ffff": "vFFFF",
-        }
-        self._directives.append(volmap[dyn.level])
-
-    ###########################################################################
-
-    def _emit_rehearsal_mark(self, mark: RehearsalMark):
-        self._directives.append(CRLF)
-        self._directives.append(f";===================={CRLF}")
-        self._directives.append(f"; Section {mark.mark}{CRLF}")
-        self._directives.append(f";===================={CRLF}")
-        self._directives.append(CRLF)
-
-    ###########################################################################
-
-    def _emit_measure(self, measure: "Measure"):
-        num = measure.number
-        comment = ""
-        if self._measure_numbers and num > 0:
-            comment = f"; Measure {num}"
-
-        self._directives.append(f"{comment}{CRLF}")
-
-    ###########################################################################
-
-    def _emit_octave(self, note: "Note"):
-        octave = note.octave
-        if octave != self._cur_octave:
-            if octave == self._cur_octave - 1:
-                directive = "<"
-            elif octave == self._cur_octave + 1:
-                directive = ">"
-            else:
-                directive = f"o{octave}"
-            self._directives.append(directive)
-            self._cur_octave = octave
-
-    ###########################################################################
-
-    def _emit_note(self, note: "Note"):  # pylint: disable=too-many-branches
-        if note.grace:
-            self._grace = True
-
-        if not self.percussion:
-            self._emit_octave(note)
-
-        if self._tie:
-            directive = "^"
-        else:
-            if not self.percussion:
-                directive = note.name
-            else:
-                directive = (
-                    _PERCUSSION_MAP[note.head][
-                        note.name + str(note.octave + 1)
-                    ]
-                    + " c"
-                )
-
-        directive += self._calc_note_length(note)
-
-        if note.tie == "start":
-            self._tie = True
-
-        self._start_legato()
-
-        if not note.accent and self._accent:
-            self._accent = False
-            self._directives.append("qACC_OFF")
-        if not note.staccato and self._staccato:
-            self._staccato = False
-            self._directives.append("qSTAC_OFF")
-
-        if note.accent and not self._accent:
-            self._accent = True
-            self._directives.append("qACC_ON")
-
-        if note.staccato and not self._staccato:
-            self._staccato = True
-            self._directives.append("qSTAC_ON")
-
-        self._directives.append(directive)
-
-        if note.tie == "stop":
-            self._tie = False
-
-        if not note.grace:
-            self._grace = False
-
-        self._stop_legato()
-
-    ###########################################################################
-
-    def _emit_repeat(self, repeat: "Repeat"):
-        if repeat.start:
-            self._directives.append("/")
-
-    ###########################################################################
-
-    def _emit_rest(self, rest: "Rest"):
-        directive = "r"
-        if rest.duration != self.base_note_length:
-            directive += str(rest.duration)
-        directive += rest.dots * "."
-
-        self._directives.append(directive)
-
-    ###########################################################################
-
-    def _emit_token(self, elem: Token):
-        if isinstance(elem, Repeat):
-            self._emit_repeat(elem)
-
-        if isinstance(elem, Rest):
-            self._emit_rest(elem)
-
-        if isinstance(elem, Dynamic):
-            self._emit_dynamic(elem)
-
-        if isinstance(elem, RehearsalMark):
-            self._emit_rehearsal_mark(elem)
-
-        if isinstance(elem, Note):
-            self._emit_note(elem)
-
-        if isinstance(elem, Measure):
-            self._emit_measure(elem)
-
-        if isinstance(elem, Annotation):
-            self._emit_annotation(elem)
-
-        if isinstance(elem, Slur):
-            self._slur_state = (
-                _SlurState.SLUR_ACTIVE if elem.start else _SlurState.SLUR_END
-            )
-
-        if isinstance(elem, Triplet):
-            self._emit_triplet(elem)
-
-        if isinstance(elem, Loop):
-            if elem.superloop:
-                open_dir = "[[ "
-                close_dir = "]]"
-            else:
-                open_dir = f"({elem.loop_id})[ "
-                close_dir = "]"
-            if elem.repeats > 1:
-                close_dir += str(elem.repeats)
-
-            self._directives.append(open_dir)
-
-            for loop_elem in elem.elem:
-                if isinstance(loop_elem, Note):
-                    self._emit_note(loop_elem)
-                elif isinstance(loop_elem, Rest):
-                    self._emit_rest(loop_elem)
-
-            self._directives.append(close_dir)
-
-    ###########################################################################
-
-    def _emit_triplet(self, elem: Triplet):
-        self._directives.append("{" if elem.start else "}")
-
     ###########################################################################
 
     def _loop_analysis(self, idx: int, last_loop: Optional[int] = None) -> int:
@@ -397,35 +166,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _reset_state(self):
+        self._mml_state = MmlState(self.base_octave, self.base_note_length)
+
         self._accent = False
-        self._cur_octave = 3 if self.percussion else self.base_octave
-        self._grace = False
-        self._legato = False
         self._loops = {}
-        self._measure_numbers = True
-        self._slur_state = _SlurState.SLUR_IDLE
         self._staccato = False
-        self._tie = False
-
-    ###########################################################################
-
-    def _start_legato(self):
-        if not self._legato:
-            if (self._slur_state == _SlurState.SLUR_ACTIVE) or self._grace:
-                self._legato = True
-                self._directives.append("LEGATO_ON")
-
-    ###########################################################################
-
-    def _stop_legato(self):
-        if self._legato:
-            if not (
-                self._grace
-                or (self._slur_state == _SlurState.SLUR_ACTIVE)
-                or self._tie
-            ):
-                self._legato = False
-                self._directives.append("LEGATO_OFF")
 
     ###########################################################################
     # API method definitions
@@ -477,13 +222,12 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             The MML text for this channel
         """
         self._reset_state()
-        self._directives = [f"o{self._cur_octave}"]
-        self._directives.append(f"l{self.base_note_length}")
-        self._measure_numbers = measure_numbers
+        self._directives = [f"o{self._mml_state.octave}"]
+        self._directives.append(f"l{self._mml_state.default_note_len}")
+        self._mml_state.measure_numbers = measure_numbers
 
-        # In desperate need of a refactor
         for elem in self.elems:
-            self._emit_token(elem)
+            elem.emit(self._mml_state, self._directives)
 
         lines = " ".join(self._directives).splitlines()
         return CRLF.join(x.strip() for x in lines)
