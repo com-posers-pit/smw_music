@@ -21,23 +21,41 @@ Webserver
 MusicXML files (compressed or uncompressed) can be converted to MML
 files using a simple webapp, contact the maintainer for its address.
 Navigate to that site and you should see something similar to
-|webtool-image|.  Click ``Choose File`` and select the ``.mxl`` or
-``.musicxml`` file to upload, enable the options you'd like, then click
-Submit.  If ``Download file`` is enabled, you'll be prompted for a file
-download.  If not, the converted MML will be displayed in the browser.
 
-A `MuseScore plugin`_ that communicates with the server is also
-available.  Download that file and save it into your MuseScore's plugins
-directory, then in MuseScore select ``Plugins -> Plugin Manager ->
-Reload Plugins``, and enable ``mml``.  Then hit ``OK`` and select
-``Plugins -> MML`` to enable the plugin.  You should see something
-similar to |plugin-image|.  Enter the server address, click ``MML Output
-File`` to select the file you'd like to save into, and enable the
-options you'd like, then click ``Convert``.  You should get a popup
-confirming a successful conversion, or reporting an error.
+.. image:: https://github.com/com-posers-pit/smw_music/blob/develop/doc/images/webtool.png
+   :align: center
+   :alt: Example webtool image
+
+Click ``Choose File`` and select the ``.mxl`` or
+``.musicxml`` file to upload, enable the options you'd like, then click
+Submit.
+If ``Download file`` is enabled, you'll be prompted for a file
+download.
+If not, the converted MML will be displayed in the browser.
 
 The server runs the latest development version of the software, please
 report any bugs or unexpected behavior/output as an issue.
+
+MuseScore Plugin
+----------------
+
+A `MuseScore plugin`_ that communicates with the server is also
+available.
+Download that file and save it into your MuseScore's plugins directory,
+then in MuseScore select ``Plugins -> Plugin Manager -> Reload
+Plugins``, and enable ``mml``.
+Then hit ``OK`` and select ``Plugins -> MML`` to enable the plugin.
+You should see something similar to
+
+.. image:: https://github.com/com-posers-pit/smw_music/blob/develop/doc/images/plugin.png
+   :align: center
+   :alt: Example plugin image
+
+Enter the server address, click ``MML Output File`` to select the file
+you'd like to save into, and enable the options you'd like, then click
+``Convert``.
+You should get a popup confirming a successful conversion, or reporting
+an error.
 
 Local Installation
 ------------------
@@ -149,5 +167,3 @@ Acknowledgements
    :alt: PyPI - Status
 .. |python-style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
-.. |plugin-image| image:: https://github.com/com-posers-pit/smw_music/blob/develop/doc/images/plugin.png
-.. |webtool-image| image:: https://github.com/com-posers-pit/smw_music/blob/develop/doc/images/webtool.png
