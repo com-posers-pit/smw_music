@@ -189,6 +189,13 @@ class Song:
         return cls(metadata, parts)
 
     ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __getitem__(self, n: int) -> Channel:
+        return self.channels[n]
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -228,7 +235,7 @@ class Song:
         line_list = list(filter(_is_line, part))
         lines[0] = [x.getFirst().id for x in line_list]
         lines[1] = [x.getLast().id for x in line_list]
-        loop_nos = list(part_no * 100 + n for n in range(len(lines)))
+        loop_nos = list(part_no * 100 + n for n in range(len(lines[0])))
 
         n = 0
         triplets = False
@@ -292,9 +299,11 @@ class Song:
 
     ###########################################################################
 
-    def _reduce(self, loop_analysis: bool):
+    def _reduce(self, loop_analysis: bool, superloop_analysis: bool):
         for chan in self.channels:
-            chan.tokens = reduce(chan.tokens, loop_analysis)
+            chan.tokens = reduce(
+                chan.tokens, loop_analysis, superloop_analysis
+            )
 
     ###########################################################################
 
@@ -315,6 +324,7 @@ class Song:
         self,
         global_legato: bool = True,
         loop_analysis: bool = True,
+        superloop_analysis: bool = True,
         measure_numbers: bool = True,
         include_dt: bool = True,
     ) -> str:
@@ -327,6 +337,8 @@ class Song:
             True iff global legato should be enabled
         loop_analysis : bool
             True iff loops should be detected and replaced with references
+        superloop_analysis: bool
+            True iff loops should be detected
         measure_numbers: bool
             True iff measure numbers should be included in MML
         include_dt: bool
@@ -348,7 +360,7 @@ class Song:
             "vFFFF": 225,
         }
 
-        self._reduce(loop_analysis)
+        self._reduce(loop_analysis, superloop_analysis)
 
         self._validate()
         channels = [x.generate_mml(measure_numbers) for x in self.channels]
@@ -386,6 +398,7 @@ class Song:
         fname: str,
         global_legato: bool = True,
         loop_analysis: bool = True,
+        superloop_analysis: bool = True,
         measure_numbers: bool = True,
         include_dt: bool = True,
     ):
@@ -400,6 +413,8 @@ class Song:
             True iff global legato should be enabled
         loop_analysis: bool
             True iff loops should be detected and replaced with references
+        superloop_analysis: bool
+            True iff loops should be detected
         measure_numbers: bool
             True iff measure numbers should be included in MML
         include_dt: bool
@@ -408,7 +423,11 @@ class Song:
         with open(fname, "w", encoding="ascii") as fobj:
             print(
                 self.generate_mml(
-                    global_legato, loop_analysis, measure_numbers, include_dt
+                    global_legato,
+                    loop_analysis,
+                    superloop_analysis,
+                    measure_numbers,
+                    include_dt,
                 ),
                 end="",
                 file=fobj,
