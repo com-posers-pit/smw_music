@@ -42,6 +42,31 @@ _MUSIC_XML_DURATION = {
 }
 
 ###############################################################################
+# API constant definitions
+###############################################################################
+
+# Weinberg:
+# http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
+PERCUSSION_MAP = {
+    "x": {
+        "c6": "CR3",
+        "b5": "CR2",
+        "a5": "CR",
+        "g5": "CH",
+        "f5": "RD",
+        "e5": "OH",
+        "d5": "RD2",
+    },
+    "normal": {
+        "e5": "HT",
+        "d5": "MT",
+        "c5": "SN",
+        "a4": "LT",
+        "f4": "KD",
+    },
+}
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -546,21 +571,19 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         if self.grace:
             state.grace = True
 
-        # if not self.percussion
-        self._emit_octave(state, directives)
+        if not state.percussion:
+            self._emit_octave(state, directives)
 
         if state.tie:
             directive = "^"
         else:
-            # if not self.percussion:
-            directive = self.name
-        # else:
-        #    directive = (
-        #        _PERCUSSION_MAP[note.head][
-        #            note.name + str(note.octave + 1)
-        #        ]
-        #        + " c"
-        #    )
+            if not state.percussion:
+                directive = self.name
+            else:
+                directive = (
+                    PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
+                    + " c"
+                )
 
         directive += self._calc_note_length(state)
 
@@ -593,9 +616,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             state.grace = False
 
         self._stop_legato(state, directives)
-
-
-###########################################################################
 
 
 ###############################################################################

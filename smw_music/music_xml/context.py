@@ -27,10 +27,11 @@ class SlurState(Enum):
 
 @dataclass
 class MmlState:
-    octave: int = 0
-    default_note_len: int = 0
+    octave: int
+    default_note_len: int
     grace: bool = False
     measure_numbers: bool = False
     slur: SlurState = SlurState.SLUR_IDLE
     tie: bool = False
     legato: bool = False
+    percussion: bool = False

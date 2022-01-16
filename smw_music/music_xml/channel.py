@@ -17,15 +17,9 @@ from typing import Dict, Iterable, List, Optional, TypeVar
 # Project imports
 ###############################################################################
 
-from .context import MmlState, SlurState
+from .context import MmlState
 from .shared import CRLF, MusicXmlException
-from .tokens import (
-    Token,
-    Dynamic,
-    Note,
-    Rest,
-    Slur,
-)
+from .tokens import Token, Dynamic, Note, Rest, PERCUSSION_MAP
 
 ###############################################################################
 # Private variable/constant definitions
@@ -33,27 +27,6 @@ from .tokens import (
 
 # Generic type variable
 _T = TypeVar("_T")
-
-# Weinberg:
-# http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
-_PERCUSSION_MAP = {
-    "x": {
-        "c6": "CR3",
-        "b5": "CR2",
-        "a5": "CR",
-        "g5": "CH",
-        "f5": "RD",
-        "e5": "OH",
-        "d5": "RD2",
-    },
-    "normal": {
-        "e5": "HT",
-        "d5": "MT",
-        "c5": "SN",
-        "a4": "LT",
-        "f4": "KD",
-    },
-}
 
 ###############################################################################
 # Private function definitions
@@ -115,7 +88,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     )
     _measure_numbers: bool = field(init=False, repr=False, compare=False)
     _staccato: bool = field(init=False, repr=False, compare=False)
-    _mml_state: MmlState = MmlState()
+    _mml_state: MmlState = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Data model method definitions
@@ -167,6 +140,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _reset_state(self):
         self._mml_state = MmlState(self.base_octave, self.base_note_length)
+        self._mml_state.percussion = self.percussion
 
         self._accent = False
         self._loops = {}
@@ -192,7 +166,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 measure = token.measure_num
                 if self.percussion:
                     try:
-                        _PERCUSSION_MAP[token.head][
+                        PERCUSSION_MAP[token.head][
                             token.name + str(token.octave + 1)
                         ]
                     except KeyError as e:
@@ -248,6 +222,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     @property
     def base_octave(self) -> int:
         """Return this channel's most common octave."""
-        return _most_common(
-            x.octave for x in self.elems if isinstance(x, Note)
-        )
+        if self.percussion:
+            octave = 4
+        else:
+            octave = _most_common(
+                x.octave for x in self.elems if isinstance(x, Note)
+            )
+
+        return octave
