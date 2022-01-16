@@ -114,8 +114,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     @property
-    def _playable(self) -> List[Note]:
-        playable = []
+    def _playable(self) -> List[Playable]:
+        playable: List[Playable] = []
         for token in self.tokens:
             if isinstance(token, Playable):
                 playable.append(token)

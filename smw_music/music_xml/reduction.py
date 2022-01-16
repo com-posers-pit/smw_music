@@ -176,7 +176,7 @@ def _reference_loop(tokens: List[Token], loop: Loop) -> List[Token]:
     while tokens:
         repeats = 0
         match_count = 0
-        cand_skipped = []
+        cand_skipped: List[Token] = []
         skipped = []
         for token in tokens:
             if token == loop.tokens[match_count]:
