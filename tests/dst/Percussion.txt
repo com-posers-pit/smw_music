@@ -36,7 +36,7 @@
 @0 v255 y10 qDEF
 
 ; Music
-o3 l4
+o4 l4
 KD c SN c KD c SN c
 HT c MT c LT c KD c
 
@@ -50,6 +50,6 @@ HT c MT c LT c KD c
 @0 v255 y10 qDEF
 
 ; Music
-o3 l4
+o4 l4
 CH c OH c CR c RD c
 CR3 c CR2 c RD2 c r
