@@ -369,7 +369,6 @@ class Song:
         )
 
         rv = rv.replace(" ^", "^")
-        rv = rv.replace("[ ", "[")
         rv = rv.replace(" ]", "]")
 
         return rv

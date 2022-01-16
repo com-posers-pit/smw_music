@@ -310,10 +310,10 @@ class Loop(Token):
 
     def emit(self, state: MmlState, directives: List[str]):
         if self.superloop:
-            open_dir = "[[ "
+            open_dir = "[["
             close_dir = "]]"
         else:
-            open_dir = f"({self.loop_id})[ "
+            open_dir = f"({self.loop_id})["
             close_dir = "]"
         if self.repeats > 1:
             close_dir += str(self.repeats)
