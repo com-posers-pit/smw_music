@@ -288,7 +288,7 @@ class Song:
 
     def _reduce(self, loop_analysis: bool):
         for n, chan in enumerate(self.channels):
-            chan.elems = reduce(chan.elems, loop_analysis, 100 * n)
+            chan.tokens = reduce(chan.tokens, loop_analysis, 100 * n)
 
     ###########################################################################
 

@@ -62,15 +62,15 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     Parameters
     ----------
-    elems: list
-        A list of valid channel elements
+    tokens: list
+        A list of valid channel tokens
     percussion: bool
         Ture iff this is a percussion channel
 
     Attributes
     ----------
-    elems: list
-        A list of elements in this channel
+    tokens: list
+        A list of elements in this tokens
     percussion: bool
         Ture iff this is a percussion channel
 
@@ -79,7 +79,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     Parameterize grace note length?
     """
 
-    elems: List[Token]
+    tokens: List[Token]
     percussion: bool
     _accent: bool = field(init=False, repr=False, compare=False)
     _directives: List[str] = field(init=False, repr=False, compare=False)
@@ -95,7 +95,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def __getitem__(self, n: int) -> Token:
-        return self.elems[n]
+        return self.tokens[n]
 
     ###########################################################################
     # Private method definitions
@@ -116,7 +116,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     @property
     def _playable(self) -> List[Note]:
         playable = []
-        for token in self[:]:
+        for token in self.tokens:
             if isinstance(token, Playable):
                 playable.append(token)
             elif isinstance(token, Loop):
@@ -163,7 +163,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._directives.append(f"l{self._mml_state.default_note_len}")
         self._mml_state.measure_numbers = measure_numbers
 
-        for elem in self.elems:
+        for elem in self.tokens:
             elem.emit(self._mml_state, self._directives)
 
         lines = " ".join(self._directives).splitlines()
