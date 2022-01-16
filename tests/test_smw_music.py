@@ -51,6 +51,7 @@ from smw_music.scripts import convert
         ("Repeats.mxl", "Repeats.txt", ["--loop_analysis", "--disable_dt"]),
         ("Slurs.mxl", "Slurs.txt", ["--disable_dt"]),
         ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", ["--disable_dt"]),
+        ("TiedArticulations.mxl", "TiedArticulations.txt", ["--disable_dt"]),
         ("Ties.mxl", "Ties.txt", ["--disable_dt"]),
         ("Triplets.mxl", "Triplets.txt", ["--disable_dt"]),
         (
@@ -76,6 +77,7 @@ from smw_music.scripts import convert
         "Repeats",
         "Slurs",
         "SMB Castle Theme (compressed)",
+        "TiedArticulations",
         "Ties",
         "Triplets",
         "SMB Castle Theme (uncompressed)",
