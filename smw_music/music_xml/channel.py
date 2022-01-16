@@ -18,8 +18,8 @@ from typing import Dict, Iterable, List, TypeVar
 ###############################################################################
 
 from .context import MmlState
-from .shared import CRLF, MusicXmlException
-from .tokens import Token, Note, Rest, PERCUSSION_MAP
+from .shared import CRLF
+from .tokens import Loop, Note, Playable, Rest, Token
 
 ###############################################################################
 # Private variable/constant definitions
@@ -110,6 +110,22 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._staccato = False
 
     ###########################################################################
+    # Private property definitions
+    ###########################################################################
+
+    @property
+    def _playable(self) -> List[Note]:
+        playable = []
+        for token in self[:]:
+            if isinstance(token, Playable):
+                playable.append(token)
+            elif isinstance(token, Loop):
+                for loop_tok in token.tokens:
+                    if isinstance(loop_tok, Playable):
+                        playable.append(loop_tok)
+        return playable
+
+    ###########################################################################
     # API method definitions
     ###########################################################################
 
@@ -123,24 +139,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             Whenever an invalid percussion note is used, or when a musical note
             outside octaves 1-6  is used.
         """
-        for token in self[:]:
-            if isinstance(token, Note):
-                note = token.note_num
-                measure = token.measure_num
-                if self.percussion:
-                    try:
-                        PERCUSSION_MAP[token.head][
-                            token.name + str(token.octave + 1)
-                        ]
-                    except KeyError as e:
-                        raise MusicXmlException(
-                            f"Bad percussion note #{note} in measure {measure}"
-                        ) from e
-                else:
-                    if not 0 <= token.octave <= 6:
-                        raise MusicXmlException(
-                            f"Bad note #{note} in measure {measure}"
-                        )
+        for token in [x for x in self._playable if isinstance(x, Note)]:
+            token.check(self.percussion)
 
     ###########################################################################
 
@@ -177,7 +177,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     def base_note_length(self) -> int:
         """Return this channel's most common note/rest length."""
         return _most_common(
-            x.duration for x in self.elems if isinstance(x, (Note, Rest))
+            x.duration for x in self._playable if isinstance(x, (Note, Rest))
         )
 
     ###########################################################################
@@ -189,7 +189,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             octave = 4
         else:
             octave = _most_common(
-                x.octave for x in self.elems if isinstance(x, Note)
+                x.octave for x in self._playable if isinstance(x, Note)
             )
 
         return octave

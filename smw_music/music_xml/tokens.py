@@ -23,7 +23,7 @@ import music21  # type: ignore
 ###############################################################################
 
 from .context import MmlState, SlurState
-from .shared import CRLF
+from .shared import CRLF, MusicXmlException
 
 ###############################################################################
 # Private variable/constant definitions
@@ -517,6 +517,24 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             accent,
             staccato,
         )
+
+    ###########################################################################
+
+    def check(self, percussion: bool):
+        note = self.note_num
+        measure = self.measure_num
+        if percussion:
+            try:
+                PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
+            except KeyError as e:
+                raise MusicXmlException(
+                    f"Bad percussion note #{note} in measure {measure}"
+                ) from e
+        else:
+            if not 0 <= self.octave <= 6:
+                raise MusicXmlException(
+                    f"Bad note #{note} in measure {measure}"
+                )
 
     ###########################################################################
 
