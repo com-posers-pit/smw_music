@@ -35,3 +35,5 @@ class MmlState:
     tie: bool = False
     legato: bool = False
     percussion: bool = False
+    accent: bool = False
+    staccato: bool = False

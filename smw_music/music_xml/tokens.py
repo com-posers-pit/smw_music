@@ -592,21 +592,21 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
         self._start_legato(state, directives)
 
-        #        if not note.accent and self._accent:
-        #            self._accent = False
-        #            self._directives.append("qACC_OFF")
-        #        if not note.staccato and self._staccato:
-        #            self._staccato = False
-        #            self._directives.append("qSTAC_OFF")
-        #
-        #        if note.accent and not self._accent:
-        #            self._accent = True
-        #            self._directives.append("qACC_ON")
-        #
-        #        if note.staccato and not self._staccato:
-        #            self._staccato = True
-        #            self._directives.append("qSTAC_ON")
-        #
+        if not self.accent and state.accent:
+            state.accent = False
+            directives.append("qACC_OFF")
+        if not self.staccato and state.staccato:
+            state.staccato = False
+            directives.append("qSTAC_OFF")
+
+        if self.accent and not state.accent:
+            state.accent = True
+            directives.append("qACC_ON")
+
+        if self.staccato and not state.staccato:
+            state.staccato = True
+            directives.append("qSTAC_ON")
+
         directives.append(directive)
 
         if self.tie == "stop":
