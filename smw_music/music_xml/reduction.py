@@ -106,7 +106,6 @@ def _adjust_triplets(tokens: List[Token]) -> List[Token]:
 
 
 def _deduplicate(tokens: List[Token]) -> List[Token]:
-    tokens = _deduplicate_loops(tokens)
     tokens = _deduplicate_measures(tokens)
     return tokens
 
@@ -154,6 +153,40 @@ def _deduplicate_measures(tokens: List[Token]) -> List[Token]:
 
         if not drop:
             rv.append(token)
+
+    return rv
+
+
+###############################################################################
+
+
+def _loopify(tokens: List[Token]) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+    rv = []
+
+    while tokens:
+        token = tokens.pop(0)
+        skipped = []
+        if isinstance(token, LoopDelim) and token.start:
+            loop_id = token.loop_id
+            loop_tokens: List[Token] = []
+            while tokens:
+                nxt = tokens.pop(0)
+
+                if isinstance(nxt, LoopDelim) and not nxt.start:
+                    token = Loop(loop_tokens, loop_id, 1, False)
+                    break
+
+                if isinstance(nxt, (Dynamic, Playable, Triplet, Slur)):
+                    loop_tokens.append(nxt)
+                elif isinstance(nxt, Annotation) and nxt.amk_annotation:
+                    loop_tokens.append(nxt)
+                else:
+                    skipped.append(nxt)
+
+        rv.append(token)
+        rv.extend(skipped)
 
     return rv
 
@@ -216,40 +249,6 @@ def _reference_loops(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _loopify(tokens: List[Token]) -> List[Token]:
-    # Copy the input list (we're modifying, don't want to upset the caller)
-    tokens = list(tokens)
-    rv = []
-
-    while tokens:
-        token = tokens.pop(0)
-        skipped = []
-        if isinstance(token, LoopDelim) and token.start:
-            loop_id = token.loop_id
-            loop_tokens: List[Token] = []
-            while tokens:
-                nxt = tokens.pop(0)
-
-                if isinstance(nxt, LoopDelim) and not nxt.start:
-                    token = Loop(loop_tokens, loop_id, 1, False)
-                    break
-
-                if isinstance(nxt, (Dynamic, Playable, Triplet, Slur)):
-                    loop_tokens.append(nxt)
-                elif isinstance(nxt, Annotation) and nxt.amk_annotation:
-                    loop_tokens.append(nxt)
-                else:
-                    skipped.append(nxt)
-
-        rv.append(token)
-        rv.extend(skipped)
-
-    return rv
-
-
-###############################################################################
-
-
 def _repeat_analysis(tokens: List[Token]) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
@@ -286,15 +285,69 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 
 
 ###############################################################################
+
+
+def _superloopify(tokens: List[Token]) -> List[Token]:
+
+    elements: List[Token] = []
+
+    for token in tokens:
+        if isinstance(
+            token, (Dynamic, Playable, Loop, LoopRef, Slur, Triplet)
+        ):
+            elements.append(token)
+        if isinstance(token, Annotation) and token.amk_annotation:
+            elements.append(token)
+        if isinstance(token, Repeat) and token.start:
+            elements.append(token)
+
+    for nelem in range(len(elements) // 2, 0, -1):
+        for start in range(0, len(elements) - 2 * nelem + 1):
+            cand = start + nelem
+            set1 = elements[start : (start + nelem)]
+            set2 = elements[cand : (cand + nelem)]
+
+            hasloop = False
+            for (el1, el2) in zip(set1, set2):
+                ok = False
+                if el1 == el2:
+                    ok = True
+                if isinstance(el1, Loop) and isinstance(el2, LoopRef):
+                    ok = (el1.loop_id == el2.loop_id) and (
+                        el1.repeats == el2.repeats
+                    )
+
+                if isinstance(el2, LoopRef):
+                    hasloop = True
+
+                if not ok:
+                    break
+            else:
+                if hasloop or len(set1) > 4:
+                    print("matcherino")
+                    print(nelem)
+                    print(start)
+                    print(el1)
+                    print(el2)
+
+    return tokens
+
+
+###############################################################################
 # API function definitions
 ###############################################################################
 
 
-def reduce(tokens: list[Token], loop_analysis: bool) -> List[Token]:
+def reduce(
+    tokens: list[Token], loop_analysis: bool, superloop_analysis: bool
+) -> List[Token]:
     tokens = _adjust_triplets(tokens)
     if loop_analysis:
         tokens = _loopify(tokens)
         tokens = _reference_loops(tokens)
+        tokens = _deduplicate_loops(tokens)
+        if superloop_analysis:
+            tokens = _superloopify(tokens)
         tokens = _repeat_analysis(tokens)
     tokens = _deduplicate(tokens)
     return tokens
