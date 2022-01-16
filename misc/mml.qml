@@ -17,8 +17,8 @@ MuseScore {
   menuPath: "Plugins.MML"
   pluginType: "dock"
   dockArea: "right"
-  width: 100
-  height: 400
+  width: 200
+  height: 500
 
   ColumnLayout {
     spacing: 0
