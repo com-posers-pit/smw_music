@@ -46,6 +46,11 @@ def main(args=None):
         help="Enable loop optimizations",
     )
     parser.add_argument(
+        "--superloop_analysis",
+        action="store_true",
+        help="Enable superloop optimizations",
+    )
+    parser.add_argument(
         "--measure_numbers",
         action="store_true",
         help="Emit measure numbers",
@@ -62,6 +67,7 @@ def main(args=None):
         args.amk,
         not args.disable_global_legato,
         args.loop_analysis,
+        args.superloop_analysis,
         args.measure_numbers,
         not args.disable_dt,
     )
