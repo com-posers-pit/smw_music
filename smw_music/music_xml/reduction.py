@@ -9,7 +9,6 @@
 # Standard Library imports
 ###############################################################################
 
-from collections import deque
 from typing import List
 
 ###############################################################################
@@ -20,6 +19,7 @@ from .tokens import (
     Annotation,
     Dynamic,
     Loop,
+    LoopDelim,
     Measure,
     Playable,
     RehearsalMark,
@@ -107,7 +107,6 @@ def _adjust_triplets(tokens: List[Token]) -> List[Token]:
 def _deduplicate(tokens: List[Token]) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
-
     rv = []
 
     while tokens:
@@ -127,6 +126,39 @@ def _deduplicate(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
+def _loopify(tokens: List[Token]) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+    rv = []
+
+    while tokens:
+        token = tokens.pop(0)
+        skipped = []
+        if isinstance(token, LoopDelim) and token.start:
+            loop_elems: List[Token] = []
+            while tokens:
+                nxt = tokens.pop(0)
+
+                if isinstance(nxt, LoopDelim) and not nxt.start:
+                    token = Loop(loop_elems, -1, 1, False)
+                    break
+
+                if isinstance(nxt, (Dynamic, Playable)):
+                    loop_elems.append(nxt)
+                elif isinstance(nxt, Annotation) and nxt.amk_annotation:
+                    loop_elems.append(nxt)
+                else:
+                    skipped.append(nxt)
+
+        rv.append(token)
+        rv.extend(skipped)
+
+    return rv
+
+
+###############################################################################
+
+
 def _repeat_analysis(tokens: List[Token]) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
@@ -137,7 +169,7 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 
     while tokens:
         token = tokens.pop(0)
-        skipped = []
+        skipped: List[Token] = []
 
         if isinstance(token, Playable):
             repeat_count = 1
@@ -171,6 +203,7 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 def reduce(tokens: list[Token], loop_analysis: bool) -> List[Token]:
     tokens = _adjust_triplets(tokens)
     if loop_analysis:
+        tokens = _loopify(tokens)
         tokens = _repeat_analysis(tokens)
     tokens = _deduplicate(tokens)
     return tokens

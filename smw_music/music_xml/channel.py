@@ -12,7 +12,7 @@
 from collections import Counter
 from enum import auto, Enum
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, Tuple, TypeVar
+from typing import Dict, Iterable, List, Optional, TypeVar
 
 ###############################################################################
 # Project imports
@@ -333,14 +333,24 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             self._emit_triplet(elem)
 
         if isinstance(elem, Loop):
-            loop_elem = elem.elem[0]
+            if elem.superloop:
+                open_dir = "[[ "
+                close_dir = "]]"
+            else:
+                open_dir = f"({elem.loop_id})[ "
+                close_dir = "]"
+            if elem.repeats > 1:
+                close_dir += str(elem.repeats)
 
-            self._directives.append("[[ ")
-            if isinstance(loop_elem, Note):
-                self._emit_note(loop_elem)
-            elif isinstance(loop_elem, Rest):
-                self._emit_rest(loop_elem)
-            self._directives.append(f"]]{elem.repeats}")
+            self._directives.append(open_dir)
+
+            for loop_elem in elem.elem:
+                if isinstance(loop_elem, Note):
+                    self._emit_note(loop_elem)
+                elif isinstance(loop_elem, Rest):
+                    self._emit_rest(loop_elem)
+
+            self._directives.append(close_dir)
 
     ###########################################################################
 
@@ -471,54 +481,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._directives.append(f"l{self.base_note_length}")
         self._measure_numbers = measure_numbers
 
-        skip_count = 0
-        repeat_count = 0
-        in_loop = False
-
-        loop: List[Token] = []
-        do_measure = False
-        last_loop = None
-
         # In desperate need of a refactor
-        for n, elem in enumerate(self.elems):
-            if skip_count:
-                skip_count -= 1
-                if isinstance(elem, Measure):
-                    do_measure = True
-                continue
-
-            if do_measure:
-                do_measure = False
-                if not isinstance(elem, Measure):
-                    self._emit_measure(Measure(-1))
-
-            #            if isinstance(elem, Loop) and elem.start:
-            #                in_loop = True
-            #                loop = []
-            #                self._loops[elem.label] = loop
-            #                self._directives.append(f"({elem.label})[")
-            #                last_loop = elem.label
-            #
-            #            if in_loop and isinstance(elem, (Rest, Dynamic, Note)):
-            #                loop.append(elem)
-            #
-            #            if loop_analysis and not in_loop:
-            #                skip_count = self._loop_analysis(n, last_loop)
-            #                last_loop = None
-            #                if skip_count:
-            #                    continue
-            #
-            #                skip_count, repeat_count = self._repeat_analysis(n)
-            #
+        for elem in self.elems:
             self._emit_token(elem)
-
-        #            if repeat_count >= 3:
-        #                self._directives.append(f"]{repeat_count}")
-        #                repeat_count = 0
-        #
-        #            if isinstance(elem, Loop) and not elem.start:
-        #                in_loop = False
-        #                self._directives.append("]")
 
         lines = " ".join(self._directives).splitlines()
         return CRLF.join(x.strip() for x in lines)

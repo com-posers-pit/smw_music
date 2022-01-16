@@ -286,6 +286,12 @@ class Song:
 
     ###########################################################################
 
+    def _reduce(self, loop_analysis: bool):
+        for chan in self.channels:
+            chan.elems = reduce(chan.elems, loop_analysis)
+
+    ###########################################################################
+
     def _validate(self):
         for n, channel in enumerate(self.channels):
             try:
@@ -336,7 +342,7 @@ class Song:
             "vFFFF": 225,
         }
 
-        self.reduce(loop_analysis)
+        self._reduce(loop_analysis)
 
         self._validate()
         channels = [x.generate_mml(measure_numbers) for x in self.channels]
@@ -367,12 +373,6 @@ class Song:
         rv = rv.replace(" ]", "]")
 
         return rv
-
-    ###########################################################################
-
-    def reduce(self, loop_analysis: bool):
-        for chan in self.channels:
-            chan.elems = reduce(chan.elems, loop_analysis)
 
     ###########################################################################
 
