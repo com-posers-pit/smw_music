@@ -234,7 +234,7 @@ def _loopify(tokens: List[Token], loop_start) -> List[Token]:
                     loop_start += 1
                     break
 
-                if isinstance(nxt, (Dynamic, Playable, Triplet)):
+                if isinstance(nxt, (Dynamic, Playable, Triplet, Slur)):
                     loop_tokens.append(nxt)
                 elif isinstance(nxt, Annotation) and nxt.amk_annotation:
                     loop_tokens.append(nxt)
