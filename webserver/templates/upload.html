@@ -8,7 +8,7 @@ SPDX-License-Identifier: AGPL-3.0-only
 
 <html>
   <head>
-    <title>MusicXML -> AMK MML</title>
+    <title>MusicXML-to-AMK MML</title>
   </head>
   <body>
     <form action="mml_uploader" method="POST" enctype="multipart/form-data">
@@ -17,6 +17,8 @@ SPDX-License-Identifier: AGPL-3.0-only
                                             name="global_legato"><br />
       Loop Analysis: <input type="checkbox" checked="1"
                                             name="loop_analysis"><br />
+      Superloop Analysis: <input type="checkbox" checked="0"
+                                            name="superloop_analysis"><br />
       Download File: <input type="checkbox" checked="1"
                                             name="download_file"><br />
       Include Measure #s: <input type="checkbox" checked="1"

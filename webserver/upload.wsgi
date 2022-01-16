@@ -38,11 +38,15 @@ def _uploader():
             file.save(fname)
             global_legato = "global_legato" in request.form
             loop_analysis = "loop_analysis" in request.form
+            superloop_analysis = "superloop_analysis" in request.form
             measure_numbers = "measure_numbers" in request.form
 
             song = music_xml.Song.from_music_xml(fname)
             mml = song.generate_mml(
-                global_legato, loop_analysis, measure_numbers
+                global_legato,
+                loop_analysis,
+                superloop_analysis,
+                measure_numbers,
             )
             mml = _update(mml)
 
