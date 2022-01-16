@@ -111,6 +111,15 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
 ###############################################################################
 
 
+class ChordError(MusicXmlException):
+    def __init__(self, note: int, measure: int, part: int):
+        msg = f"Chord found at {note} in measure {measure} in part {part}"
+        super().__init__(msg)
+
+
+###############################################################################
+
+
 class Song:
     """
     A complete song.
@@ -237,13 +246,13 @@ class Song:
         lines[1] = [x.getLast().id for x in line_list]
         loop_nos = list(part_no * 100 + n for n in range(len(lines[0])))
 
-        n = 0
+        measure_no = 0
         triplets = False
-        for n, measure in enumerate(filter(_is_measure, part)):
-            note_num = 0
-            channel_elem.append(Measure(n))
-            if n in sections:
-                channel_elem.append(sections[n])
+        for measure_no, measure in enumerate(filter(_is_measure, part)):
+            note_no = 0
+            channel_elem.append(Measure(measure_no))
+            if measure_no in sections:
+                channel_elem.append(sections[measure_no])
 
             for subelem in measure:
                 if subelem.id in lines[0]:
@@ -251,8 +260,11 @@ class Song:
                         LoopDelim(True, loop_nos[lines[0].index(subelem.id)])
                     )
 
+                if isinstance(subelem, music21.chord.Chord):
+                    raise ChordError(note_no + 1, measure_no + 1, part_no)
+
                 if isinstance(subelem, music21.note.GeneralNote):
-                    note_num += 1
+                    note_no += 1
                     if not triplets and bool(subelem.duration.tuplets):
                         channel_elem.append(Triplet(True))
                         triplets = True
@@ -275,16 +287,16 @@ class Song:
                     if subelem.id in slurs[1]:
                         channel_elem.append(Slur(False))
 
-                    note.measure_num = n + 1
-                    note.note_num = note_num
+                    note.measure_num = measure_no + 1
+                    note.note_num = note_no
                     channel_elem.append(note)
 
                 if isinstance(subelem, music21.bar.Repeat):
                     channel_elem.append(Repeat.from_music_xml(subelem))
                 if isinstance(subelem, music21.note.Rest):
                     rest = Rest.from_music_xml(subelem)
-                    rest.measure_num = n
-                    rest.note_num = note_num
+                    rest.measure_num = measure_no
+                    rest.note_num = note_no
                     channel_elem.append(rest)
                 if isinstance(subelem, music21.expressions.TextExpression):
                     channel_elem.append(Annotation.from_music_xml(subelem))
@@ -293,7 +305,7 @@ class Song:
                         LoopDelim(False, loop_nos[lines[1].index(subelem.id)])
                     )
 
-        channel_elem.append(Measure(n + 1))
+        channel_elem.append(Measure(measure_no + 1))
 
         return channel_elem
 

@@ -324,11 +324,8 @@ def _superloopify(tokens: List[Token]) -> List[Token]:
                     break
             else:
                 if hasloop or len(set1) > 4:
-                    print("matcherino")
-                    print(nelem)
-                    print(start)
-                    print(el1)
-                    print(el2)
+                    # matchy matchy
+                    pass
 
     return tokens
 

@@ -110,11 +110,13 @@ def test_conversion(src, dst, args):
             "Bad_Percussion.mxl",
             r"Bad percussion note #3 in measure 1 in staff 1",
         ),
+        ("Chords.mxl", r"Chord found at 1 in measure 2 in part 0"),
         ("TooHigh.mxl", r"Bad note #3 in measure 1 in staff 1"),
         ("TooLow.mxl", r"Bad note #2 in measure 1 in staff 1"),
     ],
     ids=[
         "Bad percussion",
+        "Chord",
         "Note too high",
         "Note too low",
     ],
