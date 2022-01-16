@@ -287,8 +287,8 @@ class Song:
     ###########################################################################
 
     def _reduce(self, loop_analysis: bool):
-        for chan in self.channels:
-            chan.elems = reduce(chan.elems, loop_analysis)
+        for n, chan in enumerate(self.channels):
+            chan.elems = reduce(chan.elems, loop_analysis, 100 * n)
 
     ###########################################################################
 

@@ -299,7 +299,7 @@ class RehearsalMark(Token):
 
 @dataclass
 class Loop(Token):
-    elem: List[Token]
+    tokens: List[Token]
     loop_id: int
     repeats: int
     superloop: bool
@@ -320,8 +320,8 @@ class Loop(Token):
 
         directives.append(open_dir)
 
-        for elem in self.elem:
-            elem.emit(state, directives)
+        for token in self.tokens:
+            token.emit(state, directives)
 
         directives.append(close_dir)
 
@@ -347,6 +347,13 @@ class LoopDelim(Token):
 
     start: bool
 
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, state: MmlState, directives: List[str]):
+        raise NotImplementedError
+
 
 ###############################################################################
 
@@ -355,6 +362,14 @@ class LoopDelim(Token):
 class LoopRef(Token):
     loop_id: int
     repeats: int
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, _: MmlState, directives: List[str]):
+        repeats = f"{self.repeats}" if self.repeats > 1 else ""
+        directives.append(f"({self.loop_id}){repeats}")
 
 
 ###############################################################################

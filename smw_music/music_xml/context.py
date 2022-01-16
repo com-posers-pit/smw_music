@@ -26,7 +26,7 @@ class SlurState(Enum):
 
 
 @dataclass
-class MmlState:
+class MmlState:  # pylint: disable=too-many-instance-attributes
     octave: int
     default_note_len: int
     grace: bool = False

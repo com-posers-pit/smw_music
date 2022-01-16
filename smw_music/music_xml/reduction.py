@@ -20,6 +20,7 @@ from .tokens import (
     Dynamic,
     Loop,
     LoopDelim,
+    LoopRef,
     Measure,
     Playable,
     RehearsalMark,
@@ -105,6 +106,40 @@ def _adjust_triplets(tokens: List[Token]) -> List[Token]:
 
 
 def _deduplicate(tokens: List[Token]) -> List[Token]:
+    tokens = _deduplicate_loops(tokens)
+    tokens = _deduplicate_measures(tokens)
+    return tokens
+
+
+###############################################################################
+
+
+def _deduplicate_loops(tokens: List[Token]) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+    rv = []
+
+    while tokens:
+        drop = False
+        token = tokens.pop()
+
+        if isinstance(token, LoopRef):
+            prev = tokens[-1]
+            if isinstance(prev, Loop) and prev.loop_id == token.loop_id:
+                prev.repeats += token.repeats
+                drop = True
+
+        if not drop:
+            rv.append(token)
+
+    rv.reverse()
+    return rv
+
+
+###############################################################################
+
+
+def _deduplicate_measures(tokens: List[Token]) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -126,7 +161,62 @@ def _deduplicate(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _loopify(tokens: List[Token]) -> List[Token]:
+def _reference_loop(tokens: List[Token], loop: Loop) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+    rv = []
+
+    pushable = (RehearsalMark, Measure)
+
+    # Copy everythign before the loop to the output
+    while tokens[0] != loop:
+        rv.append(tokens.pop(0))
+    rv.append(tokens.pop(0))
+
+    while tokens:
+        repeats = 0
+        match_count = 0
+        cand_skipped = []
+        skipped = []
+        for token in tokens:
+            if token == loop.tokens[match_count]:
+                match_count += 1
+                if match_count == len(loop.tokens):
+                    repeats += 1
+                    skipped.extend(cand_skipped)
+                    cand_skipped = []
+                    match_count = 0
+            elif isinstance(token, pushable):
+                cand_skipped.append(token)
+            else:
+                break
+
+        if repeats:
+            tokens = tokens[repeats * len(loop.tokens) + len(skipped) :]
+            rv.append(LoopRef(loop.loop_id, repeats))
+            rv.extend(skipped)
+        else:
+            rv.append(tokens.pop(0))
+
+    return rv
+
+
+###############################################################################
+
+
+def _reference_loops(tokens: List[Token]) -> List[Token]:
+    loops = [token for token in tokens if isinstance(token, Loop)]
+
+    for loop in loops:
+        tokens = _reference_loop(tokens, loop)
+
+    return tokens
+
+
+###############################################################################
+
+
+def _loopify(tokens: List[Token], loop_start) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -135,18 +225,19 @@ def _loopify(tokens: List[Token]) -> List[Token]:
         token = tokens.pop(0)
         skipped = []
         if isinstance(token, LoopDelim) and token.start:
-            loop_elems: List[Token] = []
+            loop_tokens: List[Token] = []
             while tokens:
                 nxt = tokens.pop(0)
 
                 if isinstance(nxt, LoopDelim) and not nxt.start:
-                    token = Loop(loop_elems, -1, 1, False)
+                    token = Loop(loop_tokens, loop_start, 1, False)
+                    loop_start += 1
                     break
 
-                if isinstance(nxt, (Dynamic, Playable)):
-                    loop_elems.append(nxt)
+                if isinstance(nxt, (Dynamic, Playable, Triplet)):
+                    loop_tokens.append(nxt)
                 elif isinstance(nxt, Annotation) and nxt.amk_annotation:
-                    loop_elems.append(nxt)
+                    loop_tokens.append(nxt)
                 else:
                     skipped.append(nxt)
 
@@ -184,8 +275,7 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
                     break
             if repeat_count >= 3:
                 token = Loop([token], -1, repeat_count, True)
-                for _ in range(repeat_count + len(skipped) - 1):
-                    tokens.pop(0)
+                tokens = tokens[repeat_count + len(skipped) - 1 :]
             else:
                 skipped = []
 
@@ -200,10 +290,13 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def reduce(tokens: list[Token], loop_analysis: bool) -> List[Token]:
+def reduce(
+    tokens: list[Token], loop_analysis: bool, loop_start: int
+) -> List[Token]:
     tokens = _adjust_triplets(tokens)
     if loop_analysis:
-        tokens = _loopify(tokens)
+        tokens = _loopify(tokens, loop_start)
+        tokens = _reference_loops(tokens)
         tokens = _repeat_analysis(tokens)
     tokens = _deduplicate(tokens)
     return tokens

@@ -11,7 +11,7 @@
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Optional, TypeVar
+from typing import Dict, Iterable, List, TypeVar
 
 ###############################################################################
 # Project imports
@@ -19,7 +19,7 @@ from typing import Dict, Iterable, List, Optional, TypeVar
 
 from .context import MmlState
 from .shared import CRLF, MusicXmlException
-from .tokens import Token, Dynamic, Note, Rest, PERCUSSION_MAP
+from .tokens import Token, Note, Rest, PERCUSSION_MAP
 
 ###############################################################################
 # Private variable/constant definitions
@@ -99,43 +99,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
     # Private method definitions
-    ###########################################################################
-
-    def _loop_analysis(self, idx: int, last_loop: Optional[int] = None) -> int:
-        skip_count = 0
-
-        for label, loop in self._loops.items():
-            cand_skip_count = 0
-            match_count = 0
-            loops = 0
-
-            for elem in self.elems[idx:]:
-                cand_skip_count += 1
-                if isinstance(elem, (Note, Rest, Dynamic)):
-                    if elem == loop[match_count]:
-                        match_count += 1
-                        if match_count == len(loop):
-                            loops += 1
-                            skip_count += cand_skip_count
-                            cand_skip_count = 0
-                            match_count = 0
-                    else:
-                        break
-
-            if loops >= 1:
-                skip_count -= 1
-                if label != last_loop:
-                    self._directives.append(
-                        f"({label}){loops if loops > 1 else ''}"
-                    )
-                else:
-                    self._directives[-1] += f"{loops + 1}"
-                break
-
-            skip_count = 0
-
-        return skip_count
-
     ###########################################################################
 
     def _reset_state(self):
