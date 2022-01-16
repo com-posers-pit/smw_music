@@ -338,14 +338,19 @@ class LoopDelim(Token):
     ----------
     start : bool
         True iff this is the start of a loop
+    loop_id : int
+        Loop ID #
 
     Attributes
     ----------
     start : bool
         True iff this is the start of a loop
+    loop_id : int
+        Loop ID #
     """
 
     start: bool
+    loop_id: int
 
     ###########################################################################
     # API method definitions

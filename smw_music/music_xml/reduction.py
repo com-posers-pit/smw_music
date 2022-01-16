@@ -216,7 +216,7 @@ def _reference_loops(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _loopify(tokens: List[Token], loop_start) -> List[Token]:
+def _loopify(tokens: List[Token]) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -225,13 +225,13 @@ def _loopify(tokens: List[Token], loop_start) -> List[Token]:
         token = tokens.pop(0)
         skipped = []
         if isinstance(token, LoopDelim) and token.start:
+            loop_id = token.loop_id
             loop_tokens: List[Token] = []
             while tokens:
                 nxt = tokens.pop(0)
 
                 if isinstance(nxt, LoopDelim) and not nxt.start:
-                    token = Loop(loop_tokens, loop_start, 1, False)
-                    loop_start += 1
+                    token = Loop(loop_tokens, loop_id, 1, False)
                     break
 
                 if isinstance(nxt, (Dynamic, Playable, Triplet, Slur)):
@@ -290,12 +290,10 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def reduce(
-    tokens: list[Token], loop_analysis: bool, loop_start: int
-) -> List[Token]:
+def reduce(tokens: list[Token], loop_analysis: bool) -> List[Token]:
     tokens = _adjust_triplets(tokens)
     if loop_analysis:
-        tokens = _loopify(tokens, loop_start)
+        tokens = _loopify(tokens)
         tokens = _reference_loops(tokens)
         tokens = _repeat_analysis(tokens)
     tokens = _deduplicate(tokens)

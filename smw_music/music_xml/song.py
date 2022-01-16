@@ -183,7 +183,7 @@ class Song:
                         percussion = True
                         break
 
-                part = cls._parse_part(elem, sections)
+                part = cls._parse_part(elem, sections, len(parts))
                 parts.append(Channel(part, percussion))
 
         return cls(metadata, parts)
@@ -215,6 +215,7 @@ class Song:
         cls,
         part: music21.stream.Part,
         sections: Dict[int, RehearsalMark],
+        part_no: int,
     ) -> List[Token]:
         channel_elem: List[Token] = []
         slurs: List[List[int]] = [[], []]
@@ -227,6 +228,7 @@ class Song:
         line_list = list(filter(_is_line, part))
         lines[0] = [x.getFirst().id for x in line_list]
         lines[1] = [x.getLast().id for x in line_list]
+        loop_nos = list(part_no * 100 + n for n in range(len(lines)))
 
         n = 0
         triplets = False
@@ -238,7 +240,9 @@ class Song:
 
             for subelem in measure:
                 if subelem.id in lines[0]:
-                    channel_elem.append(LoopDelim(True))
+                    channel_elem.append(
+                        LoopDelim(True, loop_nos[lines[0].index(subelem.id)])
+                    )
 
                 if isinstance(subelem, music21.note.GeneralNote):
                     note_num += 1
@@ -278,7 +282,9 @@ class Song:
                 if isinstance(subelem, music21.expressions.TextExpression):
                     channel_elem.append(Annotation.from_music_xml(subelem))
                 if subelem.id in lines[1]:
-                    channel_elem.append(LoopDelim(False))
+                    channel_elem.append(
+                        LoopDelim(False, loop_nos[lines[1].index(subelem.id)])
+                    )
 
         channel_elem.append(Measure(n + 1))
 
@@ -287,8 +293,8 @@ class Song:
     ###########################################################################
 
     def _reduce(self, loop_analysis: bool):
-        for n, chan in enumerate(self.channels):
-            chan.tokens = reduce(chan.tokens, loop_analysis, 100 * n)
+        for chan in self.channels:
+            chan.tokens = reduce(chan.tokens, loop_analysis)
 
     ###########################################################################
 
