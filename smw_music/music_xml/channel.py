@@ -332,6 +332,16 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         if isinstance(elem, Triplet):
             self._emit_triplet(elem)
 
+        if isinstance(elem, Loop):
+            loop_elem = elem.elem[0]
+
+            self._directives.append("[[ ")
+            if isinstance(loop_elem, Note):
+                self._emit_note(loop_elem)
+            elif isinstance(loop_elem, Rest):
+                self._emit_rest(loop_elem)
+            self._directives.append(f"]]{elem.repeats}")
+
     ###########################################################################
 
     def _emit_triplet(self, elem: Triplet):
@@ -373,39 +383,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             skip_count = 0
 
         return skip_count
-
-    ###########################################################################
-
-    def _repeat_analysis(self, idx: int) -> Tuple[int, int]:
-        repeat_count = 0
-        skip_count = 0
-
-        elem = self.elems[idx]
-
-        # Look for repeats
-        if isinstance(elem, (Note, Rest)):
-            repeat_count = 1
-            skip_count = 0
-            for rep_cand in self.elems[idx + 1 :]:
-                if rep_cand == elem:
-                    repeat_count += 1
-                    skip_count += 1
-                elif isinstance(rep_cand, Measure):
-                    skip_count += 1
-                elif (
-                    isinstance(rep_cand, Annotation)
-                    and not rep_cand.amk_annotation
-                ):
-                    skip_count += 1
-                else:
-                    break
-
-        if repeat_count >= 3:
-            self._directives.append("[")
-        else:
-            skip_count = 0
-
-        return (skip_count, repeat_count)
 
     ###########################################################################
 
@@ -475,16 +452,12 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def generate_mml(
-        self, loop_analysis: bool = True, measure_numbers: bool = True
-    ) -> str:
+    def generate_mml(self, measure_numbers: bool = True) -> str:
         """
         Generate this channel's AddMusicK MML text.
 
         Parameters
         ----------
-        loop_analysis: bool
-            True iff loop analysis should be enabled
         measure_numbers: bool
             True iff measure numbers should be included in MML
 
@@ -519,33 +492,33 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 if not isinstance(elem, Measure):
                     self._emit_measure(Measure(-1))
 
-            if isinstance(elem, Loop) and elem.start:
-                in_loop = True
-                loop = []
-                self._loops[elem.label] = loop
-                self._directives.append(f"({elem.label})[")
-                last_loop = elem.label
-
-            if in_loop and isinstance(elem, (Rest, Dynamic, Note)):
-                loop.append(elem)
-
-            if loop_analysis and not in_loop:
-                skip_count = self._loop_analysis(n, last_loop)
-                last_loop = None
-                if skip_count:
-                    continue
-
-                skip_count, repeat_count = self._repeat_analysis(n)
-
+            #            if isinstance(elem, Loop) and elem.start:
+            #                in_loop = True
+            #                loop = []
+            #                self._loops[elem.label] = loop
+            #                self._directives.append(f"({elem.label})[")
+            #                last_loop = elem.label
+            #
+            #            if in_loop and isinstance(elem, (Rest, Dynamic, Note)):
+            #                loop.append(elem)
+            #
+            #            if loop_analysis and not in_loop:
+            #                skip_count = self._loop_analysis(n, last_loop)
+            #                last_loop = None
+            #                if skip_count:
+            #                    continue
+            #
+            #                skip_count, repeat_count = self._repeat_analysis(n)
+            #
             self._emit_token(elem)
 
-            if repeat_count >= 3:
-                self._directives.append(f"]{repeat_count}")
-                repeat_count = 0
-
-            if isinstance(elem, Loop) and not elem.start:
-                in_loop = False
-                self._directives.append("]")
+        #            if repeat_count >= 3:
+        #                self._directives.append(f"]{repeat_count}")
+        #                repeat_count = 0
+        #
+        #            if isinstance(elem, Loop) and not elem.start:
+        #                in_loop = False
+        #                self._directives.append("]")
 
         lines = " ".join(self._directives).splitlines()
         return CRLF.join(x.strip() for x in lines)

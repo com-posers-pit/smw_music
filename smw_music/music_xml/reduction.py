@@ -9,6 +9,7 @@
 # Standard Library imports
 ###############################################################################
 
+from collections import deque
 from typing import List
 
 ###############################################################################
@@ -20,6 +21,7 @@ from .tokens import (
     Dynamic,
     Loop,
     Measure,
+    Playable,
     RehearsalMark,
     Repeat,
     Slur,
@@ -28,11 +30,11 @@ from .tokens import (
 )
 
 ###############################################################################
-# API function definitions
+# Private function definitions
 ###############################################################################
 
 
-def adjust_triplets(tokens: List[Token]) -> List[Token]:
+def _adjust_triplets(tokens: List[Token]) -> List[Token]:
     """
     Address idiosyncrasies the triplet parsing order.
 
@@ -97,3 +99,78 @@ def adjust_triplets(tokens: List[Token]) -> List[Token]:
     # it's faster and we care?)
     rv.reverse()
     return rv
+
+
+###############################################################################
+
+
+def _deduplicate(tokens: List[Token]) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+
+    rv = []
+
+    while tokens:
+        drop = False
+        token = tokens.pop(0)
+
+        if isinstance(token, Measure):
+            if tokens:
+                drop = isinstance(tokens[0], Measure)
+
+        if not drop:
+            rv.append(token)
+
+    return rv
+
+
+###############################################################################
+
+
+def _repeat_analysis(tokens: List[Token]) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+
+    rv = []
+
+    repeat_count = 0
+
+    while tokens:
+        token = tokens.pop(0)
+        skipped = []
+
+        if isinstance(token, Playable):
+            repeat_count = 1
+            for nxt in tokens:
+                if nxt == token:
+                    repeat_count += 1
+                elif isinstance(nxt, Measure):
+                    skipped.append(nxt)
+                elif isinstance(nxt, Annotation) and not nxt.amk_annotation:
+                    skipped.append(nxt)
+                else:
+                    break
+            if repeat_count >= 3:
+                token = Loop([token], -1, repeat_count, True)
+                for _ in range(repeat_count + len(skipped) - 1):
+                    tokens.pop(0)
+            else:
+                skipped = []
+
+        rv.append(token)
+        rv.extend(skipped)
+
+    return rv
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def reduce(tokens: list[Token], loop_analysis: bool) -> List[Token]:
+    tokens = _adjust_triplets(tokens)
+    if loop_analysis:
+        tokens = _repeat_analysis(tokens)
+    tokens = _deduplicate(tokens)
+    return tokens

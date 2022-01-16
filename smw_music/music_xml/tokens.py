@@ -10,7 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import Union
+from typing import List, Union
 
 ###############################################################################
 # Library imports
@@ -234,26 +234,41 @@ class RehearsalMark(Token):
 
 @dataclass
 class Loop(Token):
+    elem: List[Token]
+    loop_id: int
+    repeats: int
+    superloop: bool
+
+
+###############################################################################
+
+
+@dataclass
+class LoopDelim(Token):
     """
-    A user-defined loop.
+    A user-defined loop token.
 
     Parameters
     ----------
     start : bool
         True iff this is the start of a loop
-    label : int
-        If this is a loop start, the loop's global index number
 
     Attributes
     ----------
     start : bool
         True iff this is the start of a loop
-    label : int
-        If this is a loop start, the loop's global index number
     """
 
     start: bool
-    label: int
+
+
+###############################################################################
+
+
+@dataclass
+class LoopRef(Token):
+    loop_id: int
+    repeats: int
 
 
 ###############################################################################

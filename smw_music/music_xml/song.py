@@ -27,13 +27,13 @@ from mako.template import Template  # type: ignore
 ###############################################################################
 
 from .channel import Channel
-from .reduction import adjust_triplets
+from .reduction import reduce
 from .shared import MusicXmlException
 from .tokens import (
     Annotation,
     Dynamic,
     RehearsalMark,
-    Loop,
+    LoopDelim,
     Measure,
     Note,
     Repeat,
@@ -183,8 +183,7 @@ class Song:
                         percussion = True
                         break
 
-                partno = len(parts)
-                part = cls._parse_part(elem, partno, sections)
+                part = cls._parse_part(elem, sections)
                 parts.append(Channel(part, percussion))
 
         return cls(metadata, parts)
@@ -215,7 +214,6 @@ class Song:
     def _parse_part(
         cls,
         part: music21.stream.Part,
-        partno: int,
         sections: Dict[int, RehearsalMark],
     ) -> List[Token]:
         channel_elem: List[Token] = []
@@ -230,8 +228,6 @@ class Song:
         lines[0] = [x.getFirst().id for x in line_list]
         lines[1] = [x.getLast().id for x in line_list]
 
-        loopno = 100 * partno
-
         n = 0
         triplets = False
         for n, measure in enumerate(filter(_is_measure, part)):
@@ -242,8 +238,7 @@ class Song:
 
             for subelem in measure:
                 if subelem.id in lines[0]:
-                    channel_elem.append(Loop(True, loopno))
-                    loopno += 1
+                    channel_elem.append(LoopDelim(True))
 
                 if isinstance(subelem, music21.note.GeneralNote):
                     note_num += 1
@@ -283,11 +278,11 @@ class Song:
                 if isinstance(subelem, music21.expressions.TextExpression):
                     channel_elem.append(Annotation.from_music_xml(subelem))
                 if subelem.id in lines[1]:
-                    channel_elem.append(Loop(False, -1))
+                    channel_elem.append(LoopDelim(False))
 
         channel_elem.append(Measure(n + 1))
 
-        return adjust_triplets(channel_elem)
+        return channel_elem
 
     ###########################################################################
 
@@ -341,11 +336,10 @@ class Song:
             "vFFFF": 225,
         }
 
+        self.reduce(loop_analysis)
+
         self._validate()
-        channels = [
-            x.generate_mml(loop_analysis, measure_numbers)
-            for x in self.channels
-        ]
+        channels = [x.generate_mml(measure_numbers) for x in self.channels]
 
         build_dt = ""
         if include_dt:
@@ -373,6 +367,12 @@ class Song:
         rv = rv.replace(" ]", "]")
 
         return rv
+
+    ###########################################################################
+
+    def reduce(self, loop_analysis: bool):
+        for chan in self.channels:
+            chan.elems = reduce(chan.elems, loop_analysis)
 
     ###########################################################################
 
