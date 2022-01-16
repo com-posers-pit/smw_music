@@ -17,8 +17,8 @@ MuseScore {
   menuPath: "Plugins.MML"
   pluginType: "dock"
   dockArea: "right"
-  width: 50
-  height: 200
+  width: 100
+  height: 400
 
   ColumnLayout {
     spacing: 0
@@ -59,6 +59,11 @@ MuseScore {
     CheckBox {
       id: "loopAnalysis"
       text: qsTr("Perform Loop Analysis")
+    }
+
+    CheckBox {
+      id: "superloopAnalysis"
+      text: qsTr("Perform Superloop Analysis")
     }
 
     Button {
@@ -138,6 +143,7 @@ MuseScore {
 
     var options = [[globalLegato, "global_legato"],
                    [loopAnalysis, "loop_analysis"],
+                   [superloopAnalysis, "superloop_analysis"],
                    [measureNumbers, "measure_numbers"]];
 
     for (var i = 0; i < options.length; i++) {
