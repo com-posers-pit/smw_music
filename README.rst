@@ -123,8 +123,7 @@ Acknowledgements
 - W3C Music Notation Community Group `MusicXML`_
 
 .. # Links
-.. _MuseScore plugin: https://github.com/com-posers-pit/smw_music/blob/develop/misc/mml.qml
-.. _The SMW Music Python Project Authors: https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst
+.. _MuseScore plugin: https://raw.githubusercontent.com/com-posers-pit/smw_music/develop/misc/mml.qml
 .. _Examples: https://smw-music.readthedocs.io/en/latest/examples.html
 .. _The SMW Music Python Project Authors: https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst
 .. _License: https://github.com/com-posers-pit/smw_music/blob/develop/LICENSES/AGPL-3.0-only.txt
