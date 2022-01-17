@@ -12,7 +12,7 @@
 import pkgutil
 
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 ###############################################################################
 # Library imports
@@ -27,6 +27,7 @@ from mako.template import Template  # type: ignore
 ###############################################################################
 
 from .channel import Channel
+from .echo import EchoConfig
 from .reduction import reduce
 from .shared import MusicXmlException
 from .tokens import (
@@ -354,6 +355,7 @@ class Song:
         superloop_analysis: bool = True,
         measure_numbers: bool = True,
         include_dt: bool = True,
+        echo_config: Optional[EchoConfig] = None,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -370,6 +372,8 @@ class Song:
             True iff measure numbers should be included in MML
         include_dt: bool
             True iff current date/time is included in MML
+        echo_config: EchoConfig
+            Echo configuration
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -411,6 +415,7 @@ class Song:
             volmap=volmap,
             datetime=build_dt,
             percussion=percussion,
+            echo_config=echo_config,
         )
 
         rv = rv.replace(" ^", "^")
@@ -428,6 +433,7 @@ class Song:
         superloop_analysis: bool = True,
         measure_numbers: bool = True,
         include_dt: bool = True,
+        echo_config: Optional[EchoConfig] = None,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -446,6 +452,8 @@ class Song:
             True iff measure numbers should be included in MML
         include_dt: bool
             True iff current date/time is included in MML
+        echo_config: EchoConfig
+            Echo configuration
         """
         with open(fname, "w", encoding="ascii") as fobj:
             print(
@@ -455,6 +463,7 @@ class Song:
                     superloop_analysis,
                     measure_numbers,
                     include_dt,
+                    echo_config,
                 ),
                 end="",
                 file=fobj,
