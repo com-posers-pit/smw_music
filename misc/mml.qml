@@ -66,6 +66,160 @@ MuseScore {
       text: qsTr("Perform Superloop Analysis")
     }
 
+    CheckBox {
+      id: "echoEnabled"
+      text: qsTr("Enable Echo")
+    }
+
+    RowLayout {
+      Label {
+        text: "Echo Channels"
+      }
+
+      CheckBox {
+        id: "echo_ch0"
+        text: "0"
+      }
+      CheckBox {
+        id: "echo_ch1"
+        text: "1"
+      }
+      CheckBox {
+        id: "echo_ch2"
+        text: "2"
+      }
+      CheckBox {
+        id: "echo_ch3"
+        text: "3"
+      }
+      CheckBox {
+        id: "echo_ch4"
+        text: "4"
+      }
+      CheckBox {
+        id: "echo_ch5"
+        text: "5"
+      }
+      CheckBox {
+        id: "echo_ch6"
+        text: "6"
+      }
+      CheckBox {
+        id: "echo_ch7"
+        text: "7"
+      }
+    }
+
+    RowLayout {
+      Label {
+        text: "Left Vol"
+      }
+
+      Label {
+        id: "echoLvolLabel"
+        text: "50"
+      }
+
+      Slider {
+        id: "echoLvolSlider"
+        from: 0
+        to: 127
+        stepSize: 1
+        value: 50
+        onMoved: echoLvolLabel.text = value
+      }
+
+      CheckBox {
+        id: "echoLvolInv"
+        text: "Inverted Phase?"
+      }
+    }
+
+    RowLayout {
+      Label {
+        text: "Right Vol"
+      }
+
+      Label {
+        id: "echoRvolLabel"
+        text: "50"
+      }
+
+      Slider {
+        id: "echoRvolSlider"
+        from: 0
+        to: 127
+        stepSize: 1
+        value: 50
+        onMoved: echoRvolLabel.text = value
+      }
+
+      CheckBox {
+        id: "echoRvolInv"
+        text: "Inverted Phase?"
+      }
+    }
+
+    RowLayout {
+      Label {
+        text: "Room Size"
+      }
+
+      Label {
+        id: "echoDelayLabel"
+        text: "5"
+      }
+
+      Slider {
+        id: "echoDelaySlider"
+        from: 1
+        to: 10
+        stepSize: 1
+        value: 5
+        onMoved: echoDelayLabel.text = value
+      }
+    }
+
+    RowLayout {
+      Label {
+        text: "Fadeout"
+      }
+
+      Label {
+        id: "echoReverbLabel"
+        text: "50"
+      }
+
+      Slider {
+        id: "echoReverbSlider"
+        from: 0
+        to: 127
+        stepSize: 1
+        value: 50
+        onMoved: echoReverbLabel.text = value
+      }
+
+      CheckBox {
+        id: "echoReverbInv"
+        text: "Inverted Phase?"
+      }
+    }
+
+    RowLayout {
+      Label {
+        text: "FIR Filter"
+      }
+
+      RadioButton {
+        text: "0"
+      }
+      RadioButton {
+        id: "filterFir1"
+        checked: True
+        text: "1"
+      }
+    }
+
     Button {
       id: "convertBtn"
       text: "Convert"
@@ -144,19 +298,52 @@ MuseScore {
     var options = [[globalLegato, "global_legato"],
                    [loopAnalysis, "loop_analysis"],
                    [superloopAnalysis, "superloop_analysis"],
-                   [measureNumbers, "measure_numbers"]];
+                   [measureNumbers, "measure_numbers"],
+                   [echoEnabled, "echo_enabled"],
+                   [echo_ch0, "echo_ch0"],
+                   [echo_ch1, "echo_ch1"],
+                   [echo_ch2, "echo_ch2"],
+                   [echo_ch3, "echo_ch3"],
+                   [echo_ch4, "echo_ch4"],
+                   [echo_ch5, "echo_ch5"],
+                   [echo_ch6, "echo_ch6"],
+                   [echo_ch7, "echo_ch7"],
+                   [echoLvolInv, "echo_lvol_inv"],
+                   [echoRvolInv, "echo_rvol_inv"],
+                   [echoReverbInv, "echo_rev_inv"]];
 
-    for (var i = 0; i < options.length; i++) {
-      var checkbox = options[i][0];
-      var label = options[i][1];
-      if (checkbox.checked) {
-        data += "--" + boundary + "\r\n";
-        data += "content-disposition: form-data;"
-        data += 'name="' + label + '"\r\n';
-        data += "\r\n";
-        data += '"1"\r\n';
-      }
+     for (var i = 0; i < options.length; i++) {
+       var checkbox = options[i][0];
+       var label = options[i][1];
+       if (checkbox.checked) {
+         data += "--" + boundary + "\r\n";
+         data += "content-disposition: form-data;"
+         data += 'name="' + label + '"\r\n';
+         data += "\r\n";
+         data += '"1"\r\n';
+       }
     }
+
+    var options = [[echoLvolSlider, "echo_lvol"],
+                   [echoRvolSlider, "echo_rvol"],
+                   [echoDelaySlider, "echo_delay"],
+                   [echoReverbSlider, "echo_reverb"]];
+
+     for (var i = 0; i < options.length; i++) {
+       var slider = options[i][0];
+       var label = options[i][1];
+       data += "--" + boundary + "\r\n";
+       data += "content-disposition: form-data;"
+       data += 'name="' + label + '"\r\n';
+       data += "\r\n";
+       data += '' + slider.value + '\r\n';
+    }
+
+    data += "--" + boundary + "\r\n";
+    data += "content-disposition: form-data;"
+    data += 'name="' + "echo_filter" + '"\r\n';
+    data += "\r\n";
+    data += '' + (filterFir1.checked ? "1" : "0") + '\r\n';
 
     data += "--" + boundary + "--";
 
