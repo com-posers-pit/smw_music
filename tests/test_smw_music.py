@@ -125,7 +125,7 @@ def test_conversion(src, dst, args):
 )
 def test_invalid(src, text):
     test_dir = pathlib.Path("tests")
-    fname = test_dir / "src" / src
+    fname = test_dir / "src" / "bad" / src
 
     with tempfile.NamedTemporaryFile("r") as fobj:
         with pytest.raises(MusicXmlException, match=text):
