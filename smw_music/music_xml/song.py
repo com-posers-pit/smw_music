@@ -113,7 +113,7 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
 
 class ChordError(MusicXmlException):
     def __init__(self, note: int, measure: int, part: int):
-        msg = f"Chord found at {note} in measure {measure} in part {part}"
+        msg = f"Chord found, #{note} in measure {measure} in staff {part}"
         super().__init__(msg)
 
 
@@ -260,8 +260,11 @@ class Song:
                         LoopDelim(True, loop_nos[lines[0].index(subelem.id)])
                     )
 
-                if isinstance(subelem, music21.chord.Chord):
-                    raise ChordError(note_no + 1, measure_no + 1, part_no)
+                if isinstance(
+                    subelem,
+                    (music21.chord.Chord, music21.percussion.PercussionChord),
+                ):
+                    raise ChordError(note_no + 1, measure_no + 1, part_no + 1)
 
                 if isinstance(subelem, music21.note.GeneralNote):
                     note_no += 1
