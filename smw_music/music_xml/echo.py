@@ -146,7 +146,7 @@ class EchoConfig:
     ###########################################################################
 
     @property
-    def right_vol(self) -> int:
+    def right_vol_reg(self) -> int:
         """Return the echo right volume (EVOL(R)) register."""
         return 0xFF & (self.vol_mag[1] * (-1) ** self.vol_inv[1])
 
