@@ -85,7 +85,8 @@ AddMusicK MML file ``song.txt`` by running the following command:
 
    smw_music_xml_to_amk  song.xml song.txt
 
-See `Examples`_ in the official documentation for more detailed examples.
+See `Examples`_ in the official documentation for more detailed examples
+and a feature list.
 
 Contributing
 ------------
