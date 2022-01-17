@@ -114,6 +114,7 @@ def test_conversion(src, dst, args):
         ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
         ("TooHigh.mxl", r"Bad note #3 in measure 1 in staff 1"),
         ("TooLow.mxl", r"Bad note #2 in measure 1 in staff 1"),
+        ("Voices.mxl", r"Multiple voices in measure 2 in staff 1"),
     ],
     ids=[
         "Bad percussion",
@@ -121,6 +122,7 @@ def test_conversion(src, dst, args):
         "Percussion Chord",
         "Note too high",
         "Note too low",
+        "Multiple Voices",
     ],
 )
 def test_invalid(src, text):

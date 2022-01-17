@@ -49,6 +49,14 @@ from .. import __version__
 ###############################################################################
 
 
+def _chord_error(note: int, measure: int, part: int) -> MusicXmlException:
+    msg = f"Chord found, #{note} in measure {measure} in staff {part}"
+    return MusicXmlException(msg)
+
+
+###############################################################################
+
+
 def _is_line(elem: music21.stream.Stream) -> bool:
     """
     Test to see if a music21 stream element is a Line object.
@@ -107,16 +115,15 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
 
 
 ###############################################################################
-# API class definitions
+
+
+def _voice_error(measure: int, part: int) -> MusicXmlException:
+    msg = f"Multiple voices in measure {measure} in staff {part}"
+    return MusicXmlException(msg)
+
+
 ###############################################################################
-
-
-class ChordError(MusicXmlException):
-    def __init__(self, note: int, measure: int, part: int):
-        msg = f"Chord found, #{note} in measure {measure} in staff {part}"
-        super().__init__(msg)
-
-
+# API class definitions
 ###############################################################################
 
 
@@ -264,7 +271,12 @@ class Song:
                     subelem,
                     (music21.chord.Chord, music21.percussion.PercussionChord),
                 ):
-                    raise ChordError(note_no + 1, measure_no + 1, part_no + 1)
+                    raise _chord_error(
+                        note_no + 1, measure_no + 1, part_no + 1
+                    )
+
+                if isinstance(subelem, (music21.stream.Voice)):
+                    raise _voice_error(measure_no + 1, part_no + 1)
 
                 if isinstance(subelem, music21.note.GeneralNote):
                     note_no += 1
