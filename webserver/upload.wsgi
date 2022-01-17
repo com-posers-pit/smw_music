@@ -40,6 +40,33 @@ def _uploader():
             loop_analysis = "loop_analysis" in request.form
             superloop_analysis = "superloop_analysis" in request.form
             measure_numbers = "measure_numbers" in request.form
+            echo_en = "echo_enabled" in request.form
+
+            if echo_en:
+                channels = set()
+                for chan in range(8):
+                    if f"echo_ch{chan}" in request.form:
+                        channels.add(chan)
+                lvol = int(request.form["echo_lvol"])
+                rvol = int(request.form["echo_rvol"])
+                lvol_inv = "echo_lvol_inv" in request.form
+                rvol_inv = "echo_rvol_inv" in request.form
+                delay = int(request.form["echo_delay"])
+                reverb = int(request.form["echo_reverb"])
+                rev_inv = "echo_rev_inv" in request.form
+                filt = int(request.form["echo_filter"])
+
+                echo_config = music_xml.EchoConfig(
+                    channels,
+                    (lvol, rvol),
+                    (lvol_inv, rvol_inv),
+                    delay,
+                    reverb,
+                    rev_inv,
+                    filt,
+                )
+            else:
+                echo_config = None
 
             song = music_xml.Song.from_music_xml(fname)
             mml = song.generate_mml(
@@ -47,6 +74,8 @@ def _uploader():
                 loop_analysis,
                 superloop_analysis,
                 measure_numbers,
+                False,  # Always emit datetime in prod
+                echo_config,
             )
             mml = _update(mml)
 
