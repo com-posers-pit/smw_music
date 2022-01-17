@@ -38,11 +38,11 @@
 
 ; Echo settings
 
-"ECHO_CHAN=${f'{echo_config.channels:02x}'}"
-"ECHO_LVOL=${f'{echo_config.left_vol:02x}'}"
-"ECHO_RVOL=${f'{echo_config.right_vol:02x}'}"
+"ECHO_CHAN=${f'{echo_config.channel_reg:02x}'}"
+"ECHO_LVOL=${f'{echo_config.left_vol_reg:02x}'}"
+"ECHO_RVOL=${f'{echo_config.right_vol_reg:02x}'}"
 "ECHO_DEL=${f'{echo_config.delay:02x}'}"
-"ECHO_REV=${f'{echo_config.reverb:02x}'}"
+"ECHO_REV=${f'{echo_config.fb_reg:02x}'}"
 "ECHO_FILT=${f'{echo_config.fir_filt:02x}'}"
 
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL

@@ -31,21 +31,85 @@ def _truthy(arg: str) -> bool:
 
 @dataclass(frozen=True)
 class EchoConfig:
+    """
+    Configuration settings for setting up echo/reverb
+
+    Parameters
+    ----------
+    chan_list: set
+        The set of channels that start with echo on (0-7, inclusive)
+    vol_mag: tuple
+        The (left, right) echo volume magnitudes (0-127, inclusive)
+    vol_inv: tuple
+        The (left, right) phase inversion settings---True to enable, False to
+        disable
+    delay: int
+        The echo delay time, in taps (16ms/tap, 0-15 inclusive) (EDL register)
+    fb_mag: int
+        The feedback magnitude (0-127, inclusive)
+    fb_inv: bool
+        The feedback phase inversion---True to enable, False to disable
+    fir_filt: int
+        FIR filter selection (0 and 1 supported)
+
+    Attributes
+    ----------
+    chan_list: set
+        The set of channels that start with echo on (0-7, inclusive)
+    vol_mag: tuple
+        The (left, right) echo volume magnitudes (0-127, inclusive)
+    vol_inv: tuple
+        The (left, right) phase inversion settings---True to enable, False to
+        disable
+    delay: int
+        The echo delay time, in taps (16ms/tap, 0-15 inclusive) (EDL register)
+    fb_mag: int
+        The feedback magnitude (0-127, inclusive)
+    fb_inv: bool
+        The feedback phase inversion---True to enable, False to disable
+    fir_filt: int
+        FIR filter selection (0 and 1 supported)
+    """
+
     chan_list: Set[int]
     vol_mag: Tuple[int, int]
     vol_inv: Tuple[bool, bool]
     delay: int
-    rev_mag: int
-    rev_inv: bool
+    fb_mag: int
+    fb_inv: bool
     fir_filt: int
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
 
     @classmethod
     def from_csv(cls, csv: str) -> "EchoConfig":
+        """
+        Construct an EchoConfig object from a CSV definition
+
+        Paramters
+        ---------
+        csv: str
+            A comma separated string echo configuration definition.  The input
+            starts with a list of the channels with echo enabled (0-7),
+            followed by the left volume magnitude (integer, 0-127), a truthy
+            indicator for phase-inverting the left channel, the right volume
+            magnitude (integer, 0-127), a truthy indicator for phase-inverting
+            the right channel, an echo delay (integer, 0-15), the feedback
+            magnitude (integer, 0-127), a truthy indicator for phase-inverting
+            the feedback magnitude, and an FIR filter selection (0 or 1).
+
+        Return
+        ------
+        EchoConfig
+            The constructed echo configuration
+        """
         fields = csv.split(",")
 
         fir_filt = int(fields.pop())
-        rev_inv = _truthy(fields.pop())
-        rev_mag = int(fields.pop())
+        fb_inv = _truthy(fields.pop())
+        fb_mag = int(fields.pop())
         delay = int(fields.pop())
 
         rvol_inv = _truthy(fields.pop())
@@ -60,23 +124,35 @@ class EchoConfig:
             (lvol_mag, rvol_mag),
             (lvol_inv, rvol_inv),
             delay,
-            rev_mag,
-            rev_inv,
+            fb_mag,
+            fb_inv,
             fir_filt,
         )
 
+    ###########################################################################
+
     @property
-    def channels(self):
+    def channel_reg(self) -> int:
+        """Return the echo enabled channel (EON) register."""
         return sum(2 ** x for x in self.chan_list)
 
+    ###########################################################################
+
     @property
-    def left_vol(self):
+    def left_vol_reg(self) -> int:
+        """Return the echo left volume (EVOL(L)) register."""
         return 0xFF & (self.vol_mag[0] * (-1) ** self.vol_inv[0])
 
-    @property
-    def right_vol(self):
-        return 0xFF & (self.vol_mag[1] * (-1) ** self.vol_inv[1])
+    ###########################################################################
 
     @property
-    def reverb(self):
-        return 0xFF & (self.rev_mag * (-1) ** self.rev_inv)
+    def right_vol(self) -> int:
+        """Return the echo right volume (EVOL(R)) register."""
+        return 0xFF & (self.vol_mag[1] * (-1) ** self.vol_inv[1])
+
+    ###########################################################################
+
+    @property
+    def fb_reg(self) -> int:
+        """Return the feedback (EFB) register setting."""
+        return 0xFF & (self.fb_mag * (-1) ** self.fb_inv)
