@@ -115,11 +115,6 @@ MuseScore {
         text: "Left Vol"
       }
 
-      Label {
-        id: "echoLvolLabel"
-        text: "50"
-      }
-
       Slider {
         id: "echoLvolSlider"
         from: 0
@@ -129,20 +124,20 @@ MuseScore {
         onMoved: echoLvolLabel.text = value
       }
 
+      Label {
+        id: "echoLvolLabel"
+        text: "50"
+      }
+
       CheckBox {
         id: "echoLvolInv"
-        text: "Inverted Phase?"
+        text: "Surround?"
       }
     }
 
     RowLayout {
       Label {
         text: "Right Vol"
-      }
-
-      Label {
-        id: "echoRvolLabel"
-        text: "50"
       }
 
       Slider {
@@ -154,9 +149,14 @@ MuseScore {
         onMoved: echoRvolLabel.text = value
       }
 
+      Label {
+        id: "echoRvolLabel"
+        text: "50"
+      }
+
       CheckBox {
         id: "echoRvolInv"
-        text: "Inverted Phase?"
+        text: "Surround?"
       }
     }
 
@@ -165,29 +165,24 @@ MuseScore {
         text: "Room Size"
       }
 
-      Label {
-        id: "echoDelayLabel"
-        text: "5"
-      }
-
       Slider {
         id: "echoDelaySlider"
-        from: 1
-        to: 10
+        from: 0
+        to: 15
         stepSize: 1
-        value: 5
-        onMoved: echoDelayLabel.text = value
+        value: 0
+        onMoved: echoDelayLabel.text = 16*value + 'ms'
+      }
+
+      Label {
+        id: "echoDelayLabel"
+        text: "0ms"
       }
     }
 
     RowLayout {
       Label {
         text: "Fadeout"
-      }
-
-      Label {
-        id: "echoReverbLabel"
-        text: "50"
       }
 
       Slider {
@@ -199,9 +194,14 @@ MuseScore {
         onMoved: echoReverbLabel.text = value
       }
 
+      Label {
+        id: "echoReverbLabel"
+        text: "50"
+      }
+
       CheckBox {
         id: "echoReverbInv"
-        text: "Inverted Phase?"
+        text: "Surround?"
       }
     }
 

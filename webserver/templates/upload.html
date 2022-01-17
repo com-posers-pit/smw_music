@@ -54,33 +54,33 @@ SPDX-License-Identifier: AGPL-3.0-only
         </div>
         <div>
           Left Volume:
-          <input type="number" min="0" max="127" value="50" name="echo_lvol" onchange="this.nextElementSibling.value=this.value">
-          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.previousElementSibling.value=this.value">
+          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.nextElementSibling.value=this.value">
+          <input type="number" min="0" max="127" value="50" name="echo_lvol" onchange="this.previousElementSibling.value=this.value">
 
-          Invert Phase?
+          Surround?
           <input type="checkbox" name="echo_lvol_inv"> <br />
         </div>
 
         <div>
           Right Volume:
-          <input type="number" min="0" max="127" value="50" name="echo_rvol" onchange="this.nextElementSibling.value=this.value">
-          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.previousElementSibling.value=this.value">
+          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.nextElementSibling.value=this.value">
+          <input type="number" min="0" max="127" value="50" name="echo_rvol" onchange="this.previousElementSibling.value=this.value">
 
-          Invert Phase?
+          Surround?
           <input type="checkbox" name="echo_rvol_inv"> <br />
         </div>
 
         <div>
-          Room Size:
-          <input type="number" min="1" max="10" value="1" name="echo_delay" onchange="this.nextElementSibling.value=this.value">
-          <input type="range" min="1" max="10" value="1" class="slider" onchange="this.previousElementSibling.value=this.value">
+          Delay:
+          <input type="range" min="0" max="15" value="0" name="echo_delay" class="slider" onchange="this.nextElementSibling.value=16*this.value + 'ms'">
+          <output>0ms</output>
         </div>
 
         <div>
           Fadeout:
-          <input type="number" min="0" max="127" value="50" name="echo_reverb" onchange="this.nextElementSibling.value=this.value">
-          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.previousElementSibling.value=this.value">
-          Invert Phase? <input type="checkbox" name="echo_rev_inv"> <br />
+          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.nextElementSibling.value=this.value">
+          <input type="number" min="0" max="127" value="50" name="echo_reverb" onchange="this.previousElementSibling.value=this.value">
+          Surround? <input type="checkbox" name="echo_rev_inv"> <br />
         </div>
 
         FIR Filter:
