@@ -19,7 +19,7 @@ import sys
 ###############################################################################
 
 from smw_music import __version__
-from smw_music.music_xml import Song
+from smw_music.music_xml import EchoConfig, Song
 
 ###############################################################################
 # API function definitions
@@ -60,6 +60,12 @@ def main(args=None):
         action="store_true",
         help="Disable including datetime in MML file",
     )
+    parser.add_argument(
+        "--echo",
+        help="Echo configuration",
+        type=EchoConfig.from_csv,
+        default=None,
+    )
 
     args = parser.parse_args(args)
 
@@ -70,6 +76,7 @@ def main(args=None):
         args.superloop_analysis,
         args.measure_numbers,
         not args.disable_dt,
+        args.echo,
     )
 
 
