@@ -1,0 +1,60 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+
+#spc
+{
+#author  "Koji Kondo"
+#title   "SMB Castle Theme"
+}
+
+; Echo settings
+
+"ECHO_CHAN=1c"
+"ECHO_LVOL=f2"
+"ECHO_RVOL=18"
+"ECHO_DEL=0b"
+"ECHO_REV=29"
+"ECHO_FILT=01"
+
+$EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
+$F1$ECHO_DEL$ECHO_REV$ECHO_FILT
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t36 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o4 l32
+@9 w255 v150 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+@0 v255 y10 qDEF
+
+; Music
+o3 l32
+@9 v150 a+ r a r g+ r a r a+ r b r a+ r a r
+a+ r a r g+ r a r a+ r b r a+ r a r
+a r g+ r a r a+ r a r a+ r a r g+ r
+a r g+ r a r a+ r a r a+ r a r g+ r
+> c+ r d r c+ r c r c+ r c r < b r > c r
+c+ r d r c+ r c r c+ r c r < b r > c r

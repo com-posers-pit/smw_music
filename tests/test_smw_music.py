@@ -64,6 +64,15 @@ from smw_music.scripts import convert
             "SMB_Castle_Theme_measures.txt",
             ["--measure_numbers", "--disable_dt"],
         ),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_Echo.txt",
+            [
+                "--disable_dt",
+                "--echo",
+                "2,3,4,14,Y,24,N,11,41,N,1",
+            ],
+        ),
     ],
     ids=[
         "Articulations",
@@ -82,6 +91,7 @@ from smw_music.scripts import convert
         "Triplets",
         "SMB Castle Theme (uncompressed)",
         "SMB Castle Theme (measure #s)",
+        "SMB Castle Theme (echo enabled)",
     ],
 )
 def test_conversion(src, dst, args):
