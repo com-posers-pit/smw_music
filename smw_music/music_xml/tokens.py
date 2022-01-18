@@ -357,7 +357,7 @@ class LoopDelim(Token):
     ###########################################################################
 
     def emit(self, state: MmlState, directives: List[str]):
-        raise NotImplementedError
+        pass
 
 
 ###############################################################################
