@@ -47,12 +47,12 @@ def _uploader():
                 for chan in range(8):
                     if f"echo_ch{chan}" in request.form:
                         channels.add(chan)
-                lvol = int(request.form["echo_lvol"])
-                rvol = int(request.form["echo_rvol"])
+                lvol = float(request.form["echo_lvol"]) / 100
+                rvol = float(request.form["echo_rvol"]) / 100
                 lvol_inv = "echo_lvol_inv" in request.form
                 rvol_inv = "echo_rvol_inv" in request.form
                 delay = int(request.form["echo_delay"])
-                reverb = int(request.form["echo_reverb"])
+                reverb = float(request.form["echo_reverb"]) / 100
                 rev_inv = "echo_rev_inv" in request.form
                 filt = int(request.form["echo_filter"])
 

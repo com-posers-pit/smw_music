@@ -53,19 +53,18 @@ SPDX-License-Identifier: AGPL-3.0-only
           <label for="echo_ch1">7</label>
         </div>
         <div>
-          Left Volume:
-          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.nextElementSibling.value=this.value">
-          <input type="number" min="0" max="127" value="50" name="echo_lvol" onchange="this.previousElementSibling.value=this.value">
+          Left Volume (%):
+          <input type="range" min="0" max="100" value="50" step="0.1" class="slider" onchange="this.nextElementSibling.value=this.value">
+          <input type="number" min="0" max="100" value="50" step="0.1" name="echo_lvol" onchange="this.previousElementSibling.value=this.value">
 
           Surround?
           <input type="checkbox" name="echo_lvol_inv"> <br />
         </div>
 
         <div>
-          Right Volume:
-          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.nextElementSibling.value=this.value">
-          <input type="number" min="0" max="127" value="50" name="echo_rvol" onchange="this.previousElementSibling.value=this.value">
-
+          Right Volume (%):
+          <input type="range" min="0" max="100" value="50" step="0.1" class="slider" onchange="this.nextElementSibling.value=this.value">
+          <input type="number" min="0" max="100" value="50" step="0.1" name="echo_rvol" onchange="this.previousElementSibling.value=this.value">
           Surround?
           <input type="checkbox" name="echo_rvol_inv"> <br />
         </div>
@@ -78,8 +77,8 @@ SPDX-License-Identifier: AGPL-3.0-only
 
         <div>
           Fadeout:
-          <input type="range" min="0" max="127" value="50" class="slider" onchange="this.nextElementSibling.value=this.value">
-          <input type="number" min="0" max="127" value="50" name="echo_reverb" onchange="this.previousElementSibling.value=this.value">
+          <input type="range" min="0" max="100" value="50" step="0.1" class="slider" onchange="this.nextElementSibling.value=this.value">
+          <input type="number" min="0" max="100" value="50" step="0.1" name="echo_reverb" onchange="this.previousElementSibling.value=this.value">
           Surround? <input type="checkbox" name="echo_rev_inv"> <br />
         </div>
 
