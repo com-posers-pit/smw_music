@@ -81,10 +81,10 @@ class EchoConfig:
     """
 
     chan_list: Set[int]
-    vol_mag: Tuple[int, int]
+    vol_mag: Tuple[float, float]
     vol_inv: Tuple[bool, bool]
     delay: int
-    fb_mag: int
+    fb_mag: float
     fb_inv: bool
     fir_filt: int
 

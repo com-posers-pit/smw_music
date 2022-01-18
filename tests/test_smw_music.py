@@ -70,7 +70,7 @@ from smw_music.scripts import convert
             [
                 "--disable_dt",
                 "--echo",
-                "2,3,4,14,Y,24,N,11,41,N,1",
+                "2,3,4,0.109,Y,0.189,N,11,0.323,N,1",
             ],
         ),
     ],

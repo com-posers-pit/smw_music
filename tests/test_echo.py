@@ -22,18 +22,23 @@ from smw_music.music_xml import EchoConfig
 # Test definitions
 ###############################################################################
 
+# Here we go - vertigo
+# Video vertigo
+# Test for echo
+# https://www.youtube.com/watch?v=VaDLxSHVsVo
+
 
 @pytest.mark.parametrize(
     "csv, exp",
     [
         (
-            "0,1,2,3,4,5,6,7,127,0,127,0,0,127,0,0",
+            "0,1,2,3,4,5,6,7,1.0,0,1.0,0,0,1.0,0,0",
             (
                 set(range(8)),
-                (127, 127),
+                (1.0, 1.0),
                 (False, False),
                 0,
-                127,
+                1.0,
                 False,
                 0,
                 255,
@@ -43,13 +48,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "127,0,127,0,0,127,0,0",
+            "1.0,0,1.0,0,0,1.0,0,0",
             (
                 set(),
-                (127, 127),
+                (1.0, 1.0),
                 (False, False),
                 0,
-                127,
+                1.0,
                 False,
                 0,
                 0,
@@ -59,13 +64,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "2,5,1,4,10,0,20,0,0,30,0,0",
+            "2,5,1,4,0.0787,0,0.157,0,0,0.236,0,0",
             (
                 set((1, 2, 4, 5)),
-                (10, 20),
+                (0.0787, 0.157),
                 (False, False),
                 0,
-                30,
+                0.236,
                 False,
                 0,
                 0x36,
@@ -75,13 +80,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "0,1,2,11,1,21,0,0,31,0,0",
+            "0,1,2,0.0859,1,0.165,0,0,0.244,0,0",
             (
                 set((0, 1, 2)),
-                (11, 21),
+                (0.0859, 0.165),
                 (True, False),
                 0,
-                31,
+                0.244,
                 False,
                 0,
                 0x7,
@@ -91,13 +96,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "4,5,6,12,0,22,1,0,32,0,0",
+            "4,5,6,0.0945,0,0.172,1,0,0.252,0,0",
             (
                 set((4, 5, 6)),
-                (12, 22),
+                (0.0945, 0.172),
                 (False, True),
                 0,
-                32,
+                0.252,
                 False,
                 0,
                 0x70,
@@ -107,13 +112,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "7,0,1,13,0,23,0,0,33,1,0",
+            "7,0,1,0.102,0,0.181,0,0,0.258,1,0",
             (
                 set((0, 1, 7)),
-                (13, 23),
+                (0.102, 0.181),
                 (False, False),
                 0,
-                33,
+                0.258,
                 True,
                 0,
                 0x83,
@@ -123,13 +128,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "2,3,4,14,0,24,0,5,34,0,0",
+            "2,3,4,0.110,0,0.189,0,5,0.268,0,0",
             (
                 set((2, 3, 4)),
-                (14, 24),
+                (0.110, 0.189),
                 (False, False),
                 5,
-                34,
+                0.268,
                 False,
                 0,
                 0x1C,
@@ -139,13 +144,13 @@ from smw_music.music_xml import EchoConfig
             ),
         ),
         (
-            "5,6,7,15,0,25,0,0,35,0,1",
+            "5,6,7,0.118,0,0.197,0,0,0.276,0,1",
             (
                 set((5, 6, 7)),
-                (15, 25),
+                (0.118, 0.197),
                 (False, False),
                 0,
-                35,
+                0.276,
                 False,
                 1,
                 0xE0,
@@ -168,14 +173,15 @@ from smw_music.music_xml import EchoConfig
 )
 def test_echo(csv, exp):
     cfg = EchoConfig.from_csv(csv)
-    assert cfg.chan_list == exp[0]
-    assert cfg.vol_mag == exp[1]
-    assert cfg.vol_inv == exp[2]
-    assert cfg.delay == exp[3]
-    assert cfg.fb_mag == exp[4]
-    assert cfg.fb_inv == exp[5]
-    assert cfg.fir_filt == exp[6]
-    assert cfg.channel_reg == exp[7]
-    assert cfg.left_vol_reg == exp[8]
-    assert cfg.right_vol_reg == exp[9]
-    assert cfg.fb_reg == exp[10]
+    assert cfg.chan_list == exp[0], "Channel list"
+    assert pytest.approx(cfg.vol_mag[0], exp[1][0]), "Left Volume"
+    assert pytest.approx(cfg.vol_mag[1], exp[1][1]), "Right Volume"
+    assert cfg.vol_inv == exp[2], "Volume phase invert"
+    assert cfg.delay == exp[3], "Delay"
+    assert pytest.approx(cfg.fb_mag == exp[4]), "Feedback magnitude"
+    assert cfg.fb_inv == exp[5], "Feedback phase invert"
+    assert cfg.fir_filt == exp[6], "FIR filter selection"
+    assert cfg.channel_reg == exp[7], "Channel register"
+    assert cfg.left_vol_reg == exp[8], "Left volume register"
+    assert cfg.right_vol_reg == exp[9], "Right volume register"
+    assert cfg.fb_reg == exp[10], "Feedback register"
