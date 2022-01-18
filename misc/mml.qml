@@ -121,12 +121,12 @@ MuseScore {
         to: 100
         stepSize: 0.1
         value: 50
-        onMoved: echoLvolLabel.text = value + "%"
+        onMoved: echoLvolLabel.text = percentify(value)
       }
 
       Label {
         id: "echoLvolLabel"
-        text: "50"
+        text: "50.0%"
       }
 
       CheckBox {
@@ -146,12 +146,12 @@ MuseScore {
         to: 100
         stepSize: 0.1
         value: 50
-        onMoved: echoRvolLabel.text = value + "%"
+        onMoved: echoRvolLabel.text = percentify(value)
       }
 
       Label {
         id: "echoRvolLabel"
-        text: "50"
+        text: "50.0%"
       }
 
       CheckBox {
@@ -162,7 +162,7 @@ MuseScore {
 
     RowLayout {
       Label {
-        text: "Room Size"
+        text: "Delay"
       }
 
       Slider {
@@ -182,25 +182,25 @@ MuseScore {
 
     RowLayout {
       Label {
-        text: "Fadeout"
+        text: "Feedback"
       }
 
       Slider {
-        id: "echoReverbSlider"
+        id: "echoFbSlider"
         from: 0
         to: 100
         stepSize: 0.1
         value: 50
-        onMoved: echoReverbLabel.text = value + "%"
+        onMoved: echoFbLabel.text = percentify(value)
       }
 
       Label {
-        id: "echoReverbLabel"
-        text: "50"
+        id: "echoFbLabel"
+        text: "50.0%"
       }
 
       CheckBox {
-        id: "echoReverbInv"
+        id: "echoFbInv"
         text: "Surround?"
       }
     }
@@ -215,7 +215,7 @@ MuseScore {
       }
       RadioButton {
         id: "filterFir1"
-        checked: True
+        checked: true
         text: "1"
       }
     }
@@ -275,6 +275,10 @@ MuseScore {
     }
   }
 
+  function percentify(val) {
+    return val.toFixed(1) + '%'
+  }
+
   function convert() {
     const server = serverField.text;
 
@@ -310,7 +314,7 @@ MuseScore {
                    [echo_ch7, "echo_ch7"],
                    [echoLvolInv, "echo_lvol_inv"],
                    [echoRvolInv, "echo_rvol_inv"],
-                   [echoReverbInv, "echo_rev_inv"]];
+                   [echoFbInv, "echo_fb_inv"]];
 
      for (var i = 0; i < options.length; i++) {
        var checkbox = options[i][0];
@@ -327,7 +331,7 @@ MuseScore {
     var options = [[echoLvolSlider, "echo_lvol"],
                    [echoRvolSlider, "echo_rvol"],
                    [echoDelaySlider, "echo_delay"],
-                   [echoReverbSlider, "echo_reverb"]];
+                   [echoFbSlider, "echo_fb"]];
 
      for (var i = 0; i < options.length; i++) {
        var slider = options[i][0];
@@ -336,14 +340,14 @@ MuseScore {
        data += "content-disposition: form-data;"
        data += 'name="' + label + '"\r\n';
        data += "\r\n";
-       data += '' + slider.value + '\r\n';
+       data += slider.value + '\r\n';
     }
 
     data += "--" + boundary + "\r\n";
     data += "content-disposition: form-data;"
     data += 'name="' + "echo_filter" + '"\r\n';
     data += "\r\n";
-    data += '' + (filterFir1.checked ? "1" : "0") + '\r\n';
+    data += (filterFir1.checked ? "1" : "0") + '\r\n';
 
     data += "--" + boundary + "--";
 

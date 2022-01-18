@@ -31,6 +31,7 @@ def _upload_file():
 
 @application.route("/mml_uploader", methods=["GET", "POST"])
 def _uploader():
+    response = make_response(":-P", 400)
     if request.method == "POST":
         try:
             file = request.files["file"]
@@ -52,8 +53,8 @@ def _uploader():
                 lvol_inv = "echo_lvol_inv" in request.form
                 rvol_inv = "echo_rvol_inv" in request.form
                 delay = int(request.form["echo_delay"])
-                reverb = float(request.form["echo_reverb"]) / 100
-                rev_inv = "echo_rev_inv" in request.form
+                feedback = float(request.form["echo_fb"]) / 100
+                fb_inv = "echo_fb_inv" in request.form
                 filt = int(request.form["echo_filter"])
 
                 echo_config = music_xml.EchoConfig(
@@ -61,8 +62,8 @@ def _uploader():
                     (lvol, rvol),
                     (lvol_inv, rvol_inv),
                     delay,
-                    reverb,
-                    rev_inv,
+                    feedback,
+                    fb_inv,
                     filt,
                 )
             else:
@@ -91,9 +92,7 @@ def _uploader():
             response = make_response(str(e), 400)
             response.mimetype = "text/plain"
 
-        return response
-    else:
-        return make_response(":-P", 400)
+    return response
 
 
 if __name__ == "__main__":
