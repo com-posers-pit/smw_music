@@ -46,7 +46,7 @@ def _default_octave_notelen(
 
     octaves = [cast(Note, x).octave for x in playable if isinstance(x, Note)]
     octave = _most_common(octaves) if octaves else 4
-    notelen = _most_common([x.duration for x in playable])
+    notelen = _most_common([x.duration for x in playable]) if playable else 1
 
     return (octave, notelen)
 
@@ -172,7 +172,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         for n, elem in enumerate(self.tokens):
             if isinstance(elem, RehearsalMark):
                 self._update_state_defaults(
-                    *_default_octave_notelen(self.tokens[n + 1 :])
+                    *_default_octave_notelen(flatten(self.tokens[n + 1 :]))
                 )
             elem.emit(self._mml_state, self._directives)
 
