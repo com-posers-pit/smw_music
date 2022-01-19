@@ -10,7 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import Callable, ClassVar, List, Optional, Tuple, Union
 
 ###############################################################################
 # Library imports
@@ -126,7 +126,14 @@ class Annotation(Token):
     """
 
     text: str
-    _amk_prefix = "AMK:"
+    matches: ClassVar[
+        List[Tuple[Callable[[str], bool], Callable[[str], str]]]
+    ] = [
+        (
+            lambda x: x.startswith("AMK: "),
+            lambda x: x.removeprefix("AMK:").strip(),
+        )
+    ]
 
     ###########################################################################
     # API constructor definitions
@@ -148,14 +155,13 @@ class Annotation(Token):
         ------
         Annotation
             A new Annotation object with its `text` attribute set to the
-            `elem`'s text content.
+            `elem`'s text content, or None.
         """
         text = elem.content
-        if text.startswith(cls._amk_prefix):
-            text = text.removeprefix(cls._amk_prefix).strip()
-            rv = cls(text)
-        else:
-            rv = None
+        rv = None
+        for match, proc in cls.matches:
+            if match(text):
+                rv = cls(proc(text))
         return rv
 
     ###########################################################################
