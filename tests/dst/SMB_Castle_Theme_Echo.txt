@@ -17,11 +17,11 @@
 "ECHO_LVOL=f2"
 "ECHO_RVOL=18"
 "ECHO_DEL=0b"
-"ECHO_REV=29"
+"ECHO_FB=29"
 "ECHO_FILT=01"
 
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
-$F1$ECHO_DEL$ECHO_REV$ECHO_FILT
+$F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

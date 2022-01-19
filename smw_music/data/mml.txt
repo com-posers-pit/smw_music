@@ -42,11 +42,11 @@
 "ECHO_LVOL=${f'{echo_config.left_vol_reg:02x}'}"
 "ECHO_RVOL=${f'{echo_config.right_vol_reg:02x}'}"
 "ECHO_DEL=${f'{echo_config.delay:02x}'}"
-"ECHO_REV=${f'{echo_config.fb_reg:02x}'}"
+"ECHO_FB=${f'{echo_config.fb_reg:02x}'}"
 "ECHO_FILT=${f'{echo_config.fir_filt:02x}'}"
 
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
-$F1$ECHO_DEL$ECHO_REV$ECHO_FILT
+$F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 %endif
 % for n, channel in enumerate(channels):
 
