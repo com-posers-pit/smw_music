@@ -97,7 +97,7 @@ The tool supports the following features:
 
 - Optional instrument name detection
 
-  - Any text that starts with ``To `` is converted to a macro and
+  - Any text that starts with ``To`` is converted to a macro and
     inserted into the score with a default instrument number ``0``
 
       - This convention is supported by at least MuseScore, Sibelius,
