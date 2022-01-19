@@ -80,7 +80,7 @@ def _uploader():
                 loop_analysis,
                 superloop_analysis,
                 measure_numbers,
-                False,  # Always emit datetime in prod
+                True,  # Always emit datetime in prod
                 echo_config,
             )
             mml = _update(mml)
