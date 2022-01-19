@@ -315,7 +315,9 @@ class Song:
                     rest.note_num = note_no
                     channel_elem.append(rest)
                 if isinstance(subelem, music21.expressions.TextExpression):
-                    channel_elem.append(Annotation.from_music_xml(subelem))
+                    annotation = Annotation.from_music_xml(subelem)
+                    if annotation is not None:
+                        channel_elem.append(annotation)
                 if subelem.id in lines[1]:
                     channel_elem.append(
                         LoopDelim(False, loop_nos[lines[1].index(subelem.id)])

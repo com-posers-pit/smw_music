@@ -10,7 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import List, Union
+from typing import List, Optional, Union
 
 ###############################################################################
 # Library imports
@@ -135,7 +135,7 @@ class Annotation(Token):
     @classmethod
     def from_music_xml(
         cls, elem: music21.expressions.TextExpression
-    ) -> "Annotation":
+    ) -> Optional["Annotation"]:
         """
         Convert a Text Expression to an Annotation object.
 
@@ -150,39 +150,20 @@ class Annotation(Token):
             A new Annotation object with its `text` attribute set to the
             `elem`'s text content.
         """
-        return cls(elem.content)
+        text = elem.content
+        if text.startswith(cls._amk_prefix):
+            text = text.removeprefix(cls._amk_prefix).strip()
+            rv = cls(text)
+        else:
+            rv = None
+        return rv
 
     ###########################################################################
     # API method definitions
     ###########################################################################
 
     def emit(self, _: MmlState, directives: List[str]):
-        if text := self.amk_text:
-            directives.append(text)
-
-    ###########################################################################
-    # API property definitions
-    ###########################################################################
-
-    @property
-    def amk_annotation(self) -> bool:
-        """Return True iff this is an annotation for AMK."""
-        return self.text.startswith(self._amk_prefix)
-
-    ###########################################################################
-
-    @property
-    def amk_text(self) -> str:
-        """
-        Return the text for AMK annotations, minus the AMK prefix.
-
-        If this is not an AMK annotation, return ''.
-        """
-        if self.amk_annotation:
-            rv = self.text.removeprefix(self._amk_prefix).strip()
-        else:
-            rv = ""
-        return rv
+        directives.append(self.text)
 
 
 ###############################################################################

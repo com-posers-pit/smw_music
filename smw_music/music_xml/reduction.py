@@ -180,7 +180,7 @@ def _loopify(tokens: List[Token]) -> List[Token]:
 
                 if isinstance(nxt, (Dynamic, Playable, Triplet, Slur)):
                     loop_tokens.append(nxt)
-                elif isinstance(nxt, Annotation) and nxt.amk_annotation:
+                elif isinstance(nxt, Annotation):
                     loop_tokens.append(nxt)
                 else:
                     skipped.append(nxt)
@@ -268,8 +268,6 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
                     repeat_count += 1
                 elif isinstance(nxt, Measure):
                     skipped.append(nxt)
-                elif isinstance(nxt, Annotation) and not nxt.amk_annotation:
-                    skipped.append(nxt)
                 else:
                     break
             if repeat_count >= 3:
@@ -296,7 +294,7 @@ def _superloopify(tokens: List[Token]) -> List[Token]:
             token, (Dynamic, Playable, Loop, LoopRef, Slur, Triplet)
         ):
             elements.append(token)
-        if isinstance(token, Annotation) and token.amk_annotation:
+        if isinstance(token, Annotation):
             elements.append(token)
         if isinstance(token, Repeat) and token.start:
             elements.append(token)
