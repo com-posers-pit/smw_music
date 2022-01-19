@@ -5,7 +5,7 @@
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
 
-; Defaults---fix these
+; PORTER: Instrument Definitions
 
 "CR3=@22"
 "CR2=@22"
