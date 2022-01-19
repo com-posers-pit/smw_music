@@ -41,6 +41,9 @@ def _uploader():
             loop_analysis = "loop_analysis" in request.form
             superloop_analysis = "superloop_analysis" in request.form
             measure_numbers = "measure_numbers" in request.form
+            instrument_to_annotations = (
+                "instrument_to_annotations" in request.form
+            )
             echo_en = "echo_enabled" in request.form
 
             if echo_en:
@@ -69,7 +72,9 @@ def _uploader():
             else:
                 echo_config = None
 
-            song = music_xml.Song.from_music_xml(fname)
+            song = music_xml.Song.from_music_xml(
+                fname, instrument_to_annotations
+            )
             mml = song.generate_mml(
                 global_legato,
                 loop_analysis,
