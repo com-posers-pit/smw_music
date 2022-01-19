@@ -72,9 +72,7 @@ def _uploader():
             else:
                 echo_config = None
 
-            song = music_xml.Song.from_music_xml(
-                fname, instrument_to_annotations
-            )
+            song = music_xml.Song.from_music_xml(fname)
             mml = song.generate_mml(
                 global_legato,
                 loop_analysis,
@@ -82,6 +80,7 @@ def _uploader():
                 measure_numbers,
                 True,  # Always emit datetime in prod
                 echo_config,
+                instrument_to_annotations,
             )
             mml = _update(mml)
 
