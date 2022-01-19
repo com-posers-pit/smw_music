@@ -391,10 +391,9 @@ class Measure(Token):
     ###########################################################################
 
     def emit(self, state: MmlState, directives: List[str]):
-        num = self.number
         comment = ""
-        if state.measure_numbers and (num := self.number) > 0:
-            comment = f"; Measure {num}"
+        if state.measure_numbers:
+            comment = f"; Measure {self.number}"
 
         directives.append(f"{comment}{CRLF}")
 

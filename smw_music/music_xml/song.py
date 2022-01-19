@@ -256,11 +256,11 @@ class Song:
 
         measure_no = 0
         triplets = False
-        for measure_no, measure in enumerate(filter(_is_measure, part)):
+        for measure_idx, measure in enumerate(filter(_is_measure, part)):
             note_no = 0
-            channel_elem.append(Measure(measure_no))
-            if measure_no in sections:
-                channel_elem.append(sections[measure_no])
+            channel_elem.append(Measure(measure.number))
+            if measure_idx in sections:
+                channel_elem.append(sections[measure_idx])
 
             for subelem in measure:
                 if subelem.id in lines[0]:
@@ -273,11 +273,11 @@ class Song:
                     (music21.chord.Chord, music21.percussion.PercussionChord),
                 ):
                     raise _chord_error(
-                        note_no + 1, measure_no + 1, part_no + 1
+                        note_no + 1, measure.number, part_no + 1
                     )
 
                 if isinstance(subelem, (music21.stream.Voice)):
-                    raise _voice_error(measure_no + 1, part_no + 1)
+                    raise _voice_error(measure.number, part_no + 1)
 
                 if isinstance(subelem, music21.note.GeneralNote):
                     note_no += 1
@@ -303,7 +303,7 @@ class Song:
                     if subelem.id in slurs[1]:
                         channel_elem.append(Slur(False))
 
-                    note.measure_num = measure_no + 1
+                    note.measure_num = measure.number
                     note.note_num = note_no
                     channel_elem.append(note)
 
@@ -311,7 +311,7 @@ class Song:
                     channel_elem.append(Repeat.from_music_xml(subelem))
                 if isinstance(subelem, music21.note.Rest):
                     rest = Rest.from_music_xml(subelem)
-                    rest.measure_num = measure_no
+                    rest.measure_num = measure.number
                     rest.note_num = note_no
                     channel_elem.append(rest)
                 if isinstance(subelem, music21.expressions.TextExpression):
@@ -322,8 +322,6 @@ class Song:
                     channel_elem.append(
                         LoopDelim(False, loop_nos[lines[1].index(subelem.id)])
                     )
-
-        channel_elem.append(Measure(measure_no + 1))
 
         return channel_elem
 

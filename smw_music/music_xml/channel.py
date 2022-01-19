@@ -167,7 +167,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         octave_notelen = octave_notelen_str(
             self._mml_state.octave, self._mml_state.default_note_len
         )
-        self._directives = [octave_notelen]
+        self._directives = [octave_notelen, CRLF]
 
         for n, elem in enumerate(self.tokens):
             if isinstance(elem, RehearsalMark):

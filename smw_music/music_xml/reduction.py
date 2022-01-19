@@ -249,6 +249,34 @@ def _reference_loops(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
+def _reorder_measures(tokens: List[Token]) -> List[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+
+    # Measures objects show up at the beginning of a measure, we want them at
+    # the end (since they're printed at the end of a line).  This logic walks
+    # the token list and shifts them all right, puts the last one at the end
+    # and removes the first one.  The first measure gets replaced by a bare
+    # Token object, but that's fine because we delete it later.
+    measure = Token()
+    first_measure = None
+
+    for n, token in enumerate(tokens):
+        if isinstance(token, Measure):
+            if first_measure is None:
+                first_measure = n
+            measure, tokens[n] = tokens[n], measure
+
+    if first_measure is not None:
+        tokens.append(measure)
+        tokens.pop(first_measure)
+
+    return tokens
+
+
+###############################################################################
+
+
 def _repeat_analysis(tokens: List[Token]) -> List[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
@@ -336,6 +364,7 @@ def _superloopify(tokens: List[Token]) -> List[Token]:
 def reduce(
     tokens: list[Token], loop_analysis: bool, superloop_analysis: bool
 ) -> List[Token]:
+    tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
     if loop_analysis:
         tokens = _loopify(tokens)
