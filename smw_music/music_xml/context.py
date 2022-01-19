@@ -27,8 +27,8 @@ class SlurState(Enum):
 
 @dataclass
 class MmlState:  # pylint: disable=too-many-instance-attributes
-    octave: int
-    default_note_len: int
+    octave: int = 4
+    default_note_len: int = 8
     grace: bool = False
     measure_numbers: bool = False
     slur: SlurState = SlurState.SLUR_IDLE

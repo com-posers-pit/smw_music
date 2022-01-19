@@ -23,7 +23,7 @@ import music21  # type: ignore
 ###############################################################################
 
 from .context import MmlState, SlurState
-from .shared import CRLF, MusicXmlException
+from .shared import CRLF, MusicXmlException, octave_notelen_str
 
 ###############################################################################
 # Private variable/constant definitions
@@ -67,6 +67,21 @@ PERCUSSION_MAP = {
 }
 
 ###############################################################################
+# API function definitions
+###############################################################################
+
+
+def flatten(tokens: List["Token"]) -> List["Token"]:
+    rv: List["Token"] = []
+    for token in tokens:
+        if isinstance(token, Loop):
+            rv.extend(token.tokens)
+        else:
+            rv.append(token)
+    return rv
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -86,21 +101,8 @@ class Token:
 
 
 class Playable:
-    @property
-    def measure_num(self):
-        return self._measure_num
-
-    @measure_num.setter
-    def measure_num(self, val):
-        self._measure_num = val
-
-    @property
-    def note_num(self):
-        return self._note_num
-
-    @note_num.setter
-    def note_num(self, val):
-        self._note_num = val
+    measure_num: int
+    note_num: int
 
 
 ###############################################################################
@@ -286,11 +288,15 @@ class RehearsalMark(Token):
     # API method definitions
     ###########################################################################
 
-    def emit(self, _: MmlState, directives: List[str]):
+    def emit(self, state: MmlState, directives: List[str]):
         directives.append(CRLF)
         directives.append(f";===================={CRLF}")
         directives.append(f"; Section {self.mark}{CRLF}")
         directives.append(f";===================={CRLF}")
+        directives.append(CRLF)
+        directives.append(
+            octave_notelen_str(state.octave, state.default_note_len)
+        )
         directives.append(CRLF)
 
 

@@ -11,15 +11,16 @@
 
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, TypeVar
+from itertools import takewhile
+from typing import Dict, Iterable, List, Tuple, TypeVar
 
 ###############################################################################
 # Project imports
 ###############################################################################
 
 from .context import MmlState
-from .shared import CRLF
-from .tokens import Loop, Note, Playable, Rest, Token
+from .shared import CRLF, octave_notelen_str
+from .tokens import flatten, Loop, Note, Playable, RehearsalMark, Token
 
 ###############################################################################
 # Private variable/constant definitions
@@ -33,20 +34,27 @@ _T = TypeVar("_T")
 ###############################################################################
 
 
+def _default_octave_notelen(
+    tokens: List["Token"], section: bool = True
+) -> Tuple[int, int]:
+
+    if section:
+        tokens = list(
+            takewhile(lambda x: not isinstance(x, RehearsalMark), tokens)
+        )
+    tokens = [x for x in tokens if isinstance(x, Playable)]
+
+    octaves = [x.octave for x in tokens if isinstance(x, Note)]
+    octave = _most_common(octaves) if octaves else 4
+    notelen = _most_common([x.duration for x in tokens])
+
+    return (octave, notelen)
+
+
+###############################################################################
+
+
 def _most_common(container: Iterable[_T]) -> _T:
-    """
-    Get the most common element in an iterable.
-
-    Parameters
-    ----------
-    container : iterable
-        A list/dictionary/... containing duplicate elements
-
-    Return
-    ------
-    object
-        The most common element in `container`
-    """
     return Counter(container).most_common(1)[0][0]
 
 
@@ -102,7 +110,10 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _reset_state(self):
-        self._mml_state = MmlState(self.base_octave, self.base_note_length)
+        self._mml_state = MmlState()
+        self._update_state_defaults(
+            *_default_octave_notelen(flatten(self.tokens))
+        )
         self._mml_state.percussion = self.percussion
 
         self._accent = False
@@ -110,20 +121,12 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._staccato = False
 
     ###########################################################################
-    # Private property definitions
-    ###########################################################################
 
-    @property
-    def _playable(self) -> List[Playable]:
-        playable: List[Playable] = []
-        for token in self.tokens:
-            if isinstance(token, Playable):
-                playable.append(token)
-            elif isinstance(token, Loop):
-                for loop_tok in token.tokens:
-                    if isinstance(loop_tok, Playable):
-                        playable.append(loop_tok)
-        return playable
+    def _update_state_defaults(self, octave: int, notelen: int):
+        if self.percussion:
+            octave = 4  # Default percussion octave
+        self._mml_state.octave = octave
+        self._mml_state.default_note_len = notelen
 
     ###########################################################################
     # API method definitions
@@ -139,7 +142,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             Whenever an invalid percussion note is used, or when a musical note
             outside octaves 1-6  is used.
         """
-        for token in [x for x in self._playable if isinstance(x, Note)]:
+        for token in [x for x in flatten(self.tokens) if isinstance(x, Note)]:
             token.check(self.percussion)
 
     ###########################################################################
@@ -159,37 +162,19 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             The MML text for this channel
         """
         self._reset_state()
-        self._directives = [f"o{self._mml_state.octave}"]
-        self._directives.append(f"l{self._mml_state.default_note_len}")
         self._mml_state.measure_numbers = measure_numbers
 
-        for elem in self.tokens:
+        octave_notelen = octave_notelen_str(
+            self._mml_state.octave, self._mml_state.default_note_len
+        )
+        self._directives = [octave_notelen]
+
+        for n, elem in enumerate(self.tokens):
+            if isinstance(elem, RehearsalMark):
+                self._update_state_defaults(
+                    *_default_octave_notelen(self.tokens[n + 1 :])
+                )
             elem.emit(self._mml_state, self._directives)
 
         lines = " ".join(self._directives).splitlines()
         return CRLF.join(x.strip() for x in lines)
-
-    ###########################################################################
-    # API property definitions
-    ###########################################################################
-
-    @property
-    def base_note_length(self) -> int:
-        """Return this channel's most common note/rest length."""
-        return _most_common(
-            x.duration for x in self._playable if isinstance(x, (Note, Rest))
-        )
-
-    ###########################################################################
-
-    @property
-    def base_octave(self) -> int:
-        """Return this channel's most common octave."""
-        if self.percussion:
-            octave = 4
-        else:
-            octave = _most_common(
-                x.octave for x in self._playable if isinstance(x, Note)
-            )
-
-        return octave
