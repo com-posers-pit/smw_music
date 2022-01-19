@@ -12,7 +12,7 @@
 import pkgutil
 
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 ###############################################################################
 # Library imports
@@ -157,7 +157,7 @@ class Song:
     # API constructor definitions
     ###########################################################################
 
-    def __init__(self, metadata: Dict[str, str], channels: List["Channel"]):
+    def __init__(self, metadata: dict[str, str], channels: list["Channel"]):
         self.title = metadata.get("title", "???")
         self.composer = metadata.get("composer", "???")
         self.bpm = int(metadata.get("bpm", 120))
@@ -181,7 +181,7 @@ class Song:
             A new Song object representing the song described in `fname`
         """
         metadata = {}
-        parts: List[Channel] = []
+        parts: list[Channel] = []
         stream = music21.converter.parseFile(fname)
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
@@ -219,7 +219,7 @@ class Song:
     @classmethod
     def _find_rehearsal_marks(
         cls, stream: music21.stream.Score
-    ) -> Dict[int, RehearsalMark]:
+    ) -> dict[int, RehearsalMark]:
         marks = {}
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
@@ -238,12 +238,12 @@ class Song:
     def _parse_part(
         cls,
         part: music21.stream.Part,
-        sections: Dict[int, RehearsalMark],
+        sections: dict[int, RehearsalMark],
         part_no: int,
-    ) -> List[Token]:
-        channel_elem: List[Token] = []
-        slurs: List[List[int]] = [[], []]
-        lines: List[List[int]] = [[], []]
+    ) -> list[Token]:
+        channel_elem: list[Token] = []
+        slurs: list[list[int]] = [[], []]
+        lines: list[list[int]] = [[], []]
 
         slur_list = list(filter(_is_slur, part))
         slurs[0] = [x.getFirst().id for x in slur_list]

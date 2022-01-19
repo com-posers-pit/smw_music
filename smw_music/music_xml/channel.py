@@ -12,7 +12,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import cast, Dict, Iterable, List, Tuple, TypeVar
+from typing import cast, Iterable, TypeVar
 
 ###############################################################################
 # Project imports
@@ -35,8 +35,8 @@ _T = TypeVar("_T")
 
 
 def _default_octave_notelen(
-    tokens: List[Token], section: bool = True
-) -> Tuple[int, int]:
+    tokens: list[Token], section: bool = True
+) -> tuple[int, int]:
 
     if section:
         tokens = list(
@@ -87,11 +87,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     Parameterize grace note length?
     """
 
-    tokens: List[Token]
+    tokens: list[Token]
     percussion: bool
     _accent: bool = field(init=False, repr=False, compare=False)
-    _directives: List[str] = field(init=False, repr=False, compare=False)
-    _loops: Dict[int, List[Token]] = field(
+    _directives: list[str] = field(init=False, repr=False, compare=False)
+    _loops: dict[int, list[Token]] = field(
         init=False, repr=False, compare=False
     )
     _measure_numbers: bool = field(init=False, repr=False, compare=False)

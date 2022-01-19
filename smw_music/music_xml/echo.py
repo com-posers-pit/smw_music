@@ -12,7 +12,6 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import Set, Tuple
 
 
 ###############################################################################
@@ -80,9 +79,9 @@ class EchoConfig:
         FIR filter selection (0 and 1 supported)
     """
 
-    chan_list: Set[int]
-    vol_mag: Tuple[float, float]
-    vol_inv: Tuple[bool, bool]
+    chan_list: set[int]
+    vol_mag: tuple[float, float]
+    vol_inv: tuple[bool, bool]
     delay: int
     fb_mag: float
     fb_inv: bool

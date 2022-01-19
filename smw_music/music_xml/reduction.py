@@ -6,12 +6,6 @@
 """Song reduction logic."""
 
 ###############################################################################
-# Standard Library imports
-###############################################################################
-
-from typing import List
-
-###############################################################################
 # Project imports
 ###############################################################################
 
@@ -35,7 +29,7 @@ from .tokens import (
 ###############################################################################
 
 
-def _adjust_triplets(tokens: List[Token]) -> List[Token]:
+def _adjust_triplets(tokens: list[Token]) -> list[Token]:
     """
     Address idiosyncrasies the triplet parsing order.
 
@@ -50,17 +44,17 @@ def _adjust_triplets(tokens: List[Token]) -> List[Token]:
 
     Parameters
     ----------
-    tokens : List[Token]
+    tokens : list[Token]
         A list of parsed tokens
 
     Returns
     -------
-    List[Token]
+    list[Token]
         The input token list, but with triplet reordering applied.
     """
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
-    rv: List[Token] = []
+    rv: list[Token] = []
 
     pushable = (Annotation, Dynamic, RehearsalMark, Loop, Measure, Repeat)
 
@@ -105,7 +99,7 @@ def _adjust_triplets(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _deduplicate(tokens: List[Token]) -> List[Token]:
+def _deduplicate(tokens: list[Token]) -> list[Token]:
     tokens = _deduplicate_measures(tokens)
     return tokens
 
@@ -113,7 +107,7 @@ def _deduplicate(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _deduplicate_loops(tokens: List[Token]) -> List[Token]:
+def _deduplicate_loops(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -138,7 +132,7 @@ def _deduplicate_loops(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _deduplicate_measures(tokens: List[Token]) -> List[Token]:
+def _deduplicate_measures(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -160,7 +154,7 @@ def _deduplicate_measures(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _loopify(tokens: List[Token]) -> List[Token]:
+def _loopify(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -170,7 +164,7 @@ def _loopify(tokens: List[Token]) -> List[Token]:
         skipped = []
         if isinstance(token, LoopDelim) and token.start:
             loop_id = token.loop_id
-            loop_tokens: List[Token] = []
+            loop_tokens: list[Token] = []
             while tokens:
                 nxt = tokens.pop(0)
 
@@ -194,7 +188,7 @@ def _loopify(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _reference_loop(tokens: List[Token], loop: Loop) -> List[Token]:
+def _reference_loop(tokens: list[Token], loop: Loop) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
     rv = []
@@ -209,7 +203,7 @@ def _reference_loop(tokens: List[Token], loop: Loop) -> List[Token]:
     while tokens:
         repeats = 0
         match_count = 0
-        cand_skipped: List[Token] = []
+        cand_skipped: list[Token] = []
         skipped = []
         for token in tokens:
             if token == loop.tokens[match_count]:
@@ -237,7 +231,7 @@ def _reference_loop(tokens: List[Token], loop: Loop) -> List[Token]:
 ###############################################################################
 
 
-def _reference_loops(tokens: List[Token]) -> List[Token]:
+def _reference_loops(tokens: list[Token]) -> list[Token]:
     loops = [token for token in tokens if isinstance(token, Loop)]
 
     for loop in loops:
@@ -249,7 +243,7 @@ def _reference_loops(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _reorder_measures(tokens: List[Token]) -> List[Token]:
+def _reorder_measures(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
 
@@ -277,7 +271,7 @@ def _reorder_measures(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _repeat_analysis(tokens: List[Token]) -> List[Token]:
+def _repeat_analysis(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
 
@@ -287,7 +281,7 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 
     while tokens:
         token = tokens.pop(0)
-        skipped: List[Token] = []
+        skipped: list[Token] = []
 
         if isinstance(token, Playable):
             repeat_count = 1
@@ -313,9 +307,9 @@ def _repeat_analysis(tokens: List[Token]) -> List[Token]:
 ###############################################################################
 
 
-def _superloopify(tokens: List[Token]) -> List[Token]:
+def _superloopify(tokens: list[Token]) -> list[Token]:
 
-    elements: List[Token] = []
+    elements: list[Token] = []
 
     for token in tokens:
         if isinstance(
@@ -363,7 +357,7 @@ def _superloopify(tokens: List[Token]) -> List[Token]:
 
 def reduce(
     tokens: list[Token], loop_analysis: bool, superloop_analysis: bool
-) -> List[Token]:
+) -> list[Token]:
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
     if loop_analysis:
