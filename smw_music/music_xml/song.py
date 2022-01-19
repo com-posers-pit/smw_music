@@ -12,7 +12,7 @@
 import pkgutil
 
 from datetime import datetime
-from typing import Optional
+from typing import cast, Optional
 
 ###############################################################################
 # Library imports
@@ -235,28 +235,32 @@ class Song:
         marks = {}
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
-                for n, measure in enumerate(filter(_is_measure, elem)):
+                for measure in filter(_is_measure, elem):
                     for subelem in measure:
                         if isinstance(
                             subelem, music21.expressions.RehearsalMark
                         ):
-                            marks[n] = RehearsalMark.from_music_xml(subelem)
+                            marks[
+                                measure.number
+                            ] = RehearsalMark.from_music_xml(subelem)
                 break
         return marks
 
     ###########################################################################
 
-    def _instruments(self) -> list[str]:
-        instruments = []
+    def _instruments(self) -> set[str]:
+        instruments = set()
         for channel in self.channels:
-            annotations = [x for x in channel[:] if isinstance(x, Annotation)]
+            annotations = [
+                x for x in channel.tokens if isinstance(x, Annotation)
+            ]
             for annotation in [x.text for x in annotations]:
                 if annotation[0] == "@" and " " not in annotation:
                     instrument = annotation[1:]
                     try:
                         int(instrument)
                     except ValueError:
-                        instruments.append(instrument)
+                        instruments.add(instrument)
         return instruments
 
     ###########################################################################
@@ -281,13 +285,20 @@ class Song:
         lines[1] = [x.getLast().id for x in line_list]
         loop_nos = list(part_no * 100 + n for n in range(len(lines[0])))
 
-        measure_no = 0
         triplets = False
-        for measure_idx, measure in enumerate(filter(_is_measure, part)):
+        for subpart in part:
+            if isinstance(subpart, music21.instrument.Instrument):
+                channel_elem.append(
+                    Annotation("@" + subpart.instrumentName.replace(" ", ""))
+                )
+            if not isinstance(subpart, music21.stream.Measure):
+                continue
+
+            measure = cast(music21.stream.Measure, subpart)
             note_no = 0
             channel_elem.append(Measure(measure.number))
-            if measure_idx in sections:
-                channel_elem.append(sections[measure_idx])
+            if measure.number in sections:
+                channel_elem.append(sections[measure.number])
 
             for subelem in measure:
                 if subelem.id in lines[0]:
