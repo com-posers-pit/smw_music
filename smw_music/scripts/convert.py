@@ -37,8 +37,9 @@ def main(args=None):
     parser.add_argument("amk", type=str, help="Output AMK file")
     parser.add_argument(
         "--disable_global_legato",
-        action="store_true",
+        action="store_false",
         help="Disable the global legato setting",
+        dest="enable_global_legato",
     )
     parser.add_argument(
         "--loop_analysis",
@@ -57,8 +58,9 @@ def main(args=None):
     )
     parser.add_argument(
         "--disable_dt",
-        action="store_true",
+        action="store_false",
         help="Disable including datetime in MML file",
+        dest="enable_dt",
     )
     parser.add_argument(
         "--echo",
@@ -71,11 +73,11 @@ def main(args=None):
 
     Song.from_music_xml(args.music_xml).to_mml_file(
         args.amk,
-        not args.disable_global_legato,
+        args.enable_global_legato,
         args.loop_analysis,
         args.superloop_analysis,
         args.measure_numbers,
-        not args.disable_dt,
+        args.enable_dt,
         args.echo,
     )
 
