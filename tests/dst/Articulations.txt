@@ -5,6 +5,10 @@
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
 
+; PORTER: Instrument Definitions
+
+"Piano=0"
+
 #spc
 {
 #author  "None"
@@ -18,11 +22,11 @@
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-@0 v255 y10 qDEF
+v255 y10 qDEF
 
 ; Music
 o4 l4
-qACC_ON c1
+@Piano qACC_ON c1
 c2. r
 c2 r2
 c. r8 r2
