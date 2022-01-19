@@ -52,11 +52,6 @@ MuseScore {
     }
 
     CheckBox {
-      id: "measureNumbers"
-      text: qsTr("Include Measure Numbers")
-    }
-
-    CheckBox {
       id: "loopAnalysis"
       text: qsTr("Perform Loop Analysis")
     }
@@ -64,6 +59,16 @@ MuseScore {
     CheckBox {
       id: "superloopAnalysis"
       text: qsTr("Perform Superloop Analysis")
+    }
+
+    CheckBox {
+      id: "measureNumbers"
+      text: qsTr("Include Measure Numbers")
+    }
+
+    CheckBox {
+      id: "instrumentToAnnotations"
+      text: qsTr('Decode "To " annotations as instruments')
     }
 
     CheckBox {
@@ -303,6 +308,7 @@ MuseScore {
                    [loopAnalysis, "loop_analysis"],
                    [superloopAnalysis, "superloop_analysis"],
                    [measureNumbers, "measure_numbers"],
+                   [instrumentToAnnotations, "instrument_to_annotations"],
                    [echoEnabled, "echo_enabled"],
                    [echo_ch0, "echo_ch0"],
                    [echo_ch1, "echo_ch1"],
