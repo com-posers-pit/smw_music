@@ -68,10 +68,18 @@ def main(args=None):
         type=EchoConfig.from_csv,
         default=None,
     )
+    parser.add_argument(
+        "--disable_to_instruments",
+        action="store_false",
+        help='Disable decoding "To XYZ" to instrument macros',
+        dest="enable_to_instruments",
+    )
 
     args = parser.parse_args(args)
 
-    Song.from_music_xml(args.music_xml).to_mml_file(
+    Song.from_music_xml(
+        args.music_xml, args.enable_to_instruments
+    ).to_mml_file(
         args.amk,
         args.enable_global_legato,
         args.loop_analysis,
