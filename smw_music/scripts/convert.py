@@ -77,9 +77,7 @@ def main(args=None):
 
     args = parser.parse_args(args)
 
-    Song.from_music_xml(
-        args.music_xml, args.enable_to_instruments
-    ).to_mml_file(
+    Song.from_music_xml(args.music_xml).to_mml_file(
         args.amk,
         args.enable_global_legato,
         args.loop_analysis,
@@ -87,6 +85,7 @@ def main(args=None):
         args.measure_numbers,
         args.enable_dt,
         args.echo,
+        args.enable_to_instruments,
     )
 
 

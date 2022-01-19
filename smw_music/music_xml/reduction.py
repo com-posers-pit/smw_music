@@ -6,6 +6,13 @@
 """Song reduction logic."""
 
 ###############################################################################
+# Standard Library imports
+###############################################################################
+
+from collections.abc import Callable
+from typing import Optional
+
+###############################################################################
 # Project imports
 ###############################################################################
 
@@ -23,6 +30,12 @@ from .tokens import (
     Token,
     Triplet,
 )
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+AnnotationFilter = tuple[Callable[[str], bool], Callable[[str], str]]
 
 ###############################################################################
 # Private function definitions
@@ -144,6 +157,30 @@ def _deduplicate_measures(tokens: list[Token]) -> list[Token]:
         if isinstance(token, Measure):
             if tokens:
                 drop = isinstance(tokens[0], Measure)
+
+        if not drop:
+            rv.append(token)
+
+    return rv
+
+
+###############################################################################
+
+
+def _filter_annotations(
+    tokens: list[Token], filters: list[AnnotationFilter]
+) -> list[Token]:
+    rv = []
+
+    for token in tokens:
+        drop = False
+        if isinstance(token, Annotation):
+            for match, proc in filters:
+                if match(token.text):
+                    token = Annotation(proc(token.text))
+                    break
+            else:
+                drop = True
 
         if not drop:
             rv.append(token)
@@ -356,8 +393,21 @@ def _superloopify(tokens: list[Token]) -> list[Token]:
 
 
 def reduce(
-    tokens: list[Token], loop_analysis: bool, superloop_analysis: bool
+    tokens: list[Token],
+    loop_analysis: bool,
+    superloop_analysis: bool,
+    annotation_filters: Optional[list[AnnotationFilter]] = None,
 ) -> list[Token]:
+    if annotation_filters is None:
+        annotation_filters = []
+
+    annotation_filters += [
+        (
+            lambda x: x.startswith("AMK: "),
+            lambda x: x.removeprefix("AMK:").strip(),
+        )
+    ]
+    tokens = _filter_annotations(tokens, annotation_filters)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
     if loop_analysis:

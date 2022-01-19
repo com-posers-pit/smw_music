@@ -166,7 +166,7 @@ class Song:
     ###########################################################################
 
     @classmethod
-    def from_music_xml(cls, fname: str, enable_to_instruments: bool) -> "Song":
+    def from_music_xml(cls, fname: str) -> "Song":
         """
         Convert a MusicXML file to a Song.
 
@@ -174,10 +174,6 @@ class Song:
         ----------
         fname : str
             The (compressed or uncompressed) MusicXML file
-        enable_to_instruments : bool
-            True iff annotations that start with 'To' should be kept as
-            instrument macros
-
         Return
         ------
         Song
@@ -185,14 +181,6 @@ class Song:
         """
         metadata = {}
         parts: list[Channel] = []
-
-        if enable_to_instruments:
-            Annotation.matches.append(
-                (
-                    lambda x: x.startswith("To "),
-                    lambda x: "@" + x.removeprefix("To ").replace(" ", ""),
-                )
-            )
 
         stream = music21.converter.parseFile(fname)
         for elem in stream.flat:
@@ -289,7 +277,9 @@ class Song:
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
                 channel_elem.append(
-                    Annotation("@" + subpart.instrumentName.replace(" ", ""))
+                    Annotation(
+                        "AMK: @" + subpart.instrumentName.replace(" ", "")
+                    )
                 )
             if not isinstance(subpart, music21.stream.Measure):
                 continue
@@ -365,10 +355,25 @@ class Song:
 
     ###########################################################################
 
-    def _reduce(self, loop_analysis: bool, superloop_analysis: bool):
+    def _reduce(
+        self,
+        loop_analysis: bool,
+        superloop_analysis: bool,
+        enable_to_instruments: bool,
+    ):
+        if enable_to_instruments:
+            filters = [
+                (
+                    lambda x: x.startswith("To "),
+                    lambda x: "@" + x.removeprefix("To ").replace(" ", ""),
+                )
+            ]
+        else:
+            filters = None
+
         for chan in self.channels:
             chan.tokens = reduce(
-                chan.tokens, loop_analysis, superloop_analysis
+                chan.tokens, loop_analysis, superloop_analysis, filters
             )
 
     ###########################################################################
@@ -394,6 +399,7 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: Optional[EchoConfig] = None,
+        enable_to_instruments: bool = True,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -412,6 +418,10 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
+        enable_to_instruments : bool
+            True iff annotations that start with 'To' should be kept as
+            instrument macros
+
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -429,7 +439,7 @@ class Song:
             "vFFFF": 225,
         }
 
-        self._reduce(loop_analysis, superloop_analysis)
+        self._reduce(loop_analysis, superloop_analysis, enable_to_instruments)
 
         self._validate()
         channels = [x.generate_mml(measure_numbers) for x in self.channels]
@@ -473,6 +483,7 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: Optional[EchoConfig] = None,
+        enable_to_instruments: bool = True,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -493,6 +504,10 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
+        enable_to_instruments : bool
+            True iff annotations that start with 'To' should be kept as
+            instrument macros
+
         """
         with open(fname, "w", encoding="ascii") as fobj:
             print(
@@ -503,6 +518,7 @@ class Song:
                     measure_numbers,
                     include_dt,
                     echo_config,
+                    enable_to_instruments,
                 ),
                 end="",
                 file=fobj,

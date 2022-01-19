@@ -10,8 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from collections.abc import Callable
-from typing import ClassVar, Optional, Union
+from typing import Union
 
 ###############################################################################
 # Library imports
@@ -127,14 +126,6 @@ class Annotation(Token):
     """
 
     text: str
-    matches: ClassVar[
-        list[tuple[Callable[[str], bool], Callable[[str], str]]]
-    ] = [
-        (
-            lambda x: x.startswith("AMK: "),
-            lambda x: x.removeprefix("AMK:").strip(),
-        )
-    ]
 
     ###########################################################################
     # API constructor definitions
@@ -143,7 +134,7 @@ class Annotation(Token):
     @classmethod
     def from_music_xml(
         cls, elem: music21.expressions.TextExpression
-    ) -> Optional["Annotation"]:
+    ) -> "Annotation":
         """
         Convert a Text Expression to an Annotation object.
 
@@ -156,14 +147,9 @@ class Annotation(Token):
         ------
         Annotation
             A new Annotation object with its `text` attribute set to the
-            `elem`'s text content, or None.
+            `elem`'s text content.
         """
-        text = elem.content
-        rv = None
-        for match, proc in cls.matches:
-            if match(text):
-                rv = cls(proc(text))
-        return rv
+        return cls(elem.content)
 
     ###########################################################################
     # API method definitions
