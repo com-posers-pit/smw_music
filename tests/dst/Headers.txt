@@ -30,6 +30,7 @@ g a b > c
 ; Section A
 ;====================
 
+o3 l4
 g a b > c
 < c d e f
 
@@ -37,6 +38,7 @@ g a b > c
 ; Section B
 ;====================
 
+o3 l4
 g a b > c
 < c d e f
 g a b > c
@@ -47,12 +49,14 @@ g a b > c
 ; Section C
 ;====================
 
-< c d e f
+o4 l4
+c d e f
 
 ;====================
 ; Section D
 ;====================
 
+o3 l4
 g a b > c
 < c d e f
 g a b > c
@@ -78,6 +82,7 @@ g a b > c
 ; Section A
 ;====================
 
+o2 l4
 g a b > c
 < c d e f
 
@@ -85,6 +90,7 @@ g a b > c
 ; Section B
 ;====================
 
+o2 l4
 g a b > c
 < c d e f
 g a b > c
@@ -95,12 +101,14 @@ g a b > c
 ; Section C
 ;====================
 
-< c d e f
+o3 l4
+c d e f
 
 ;====================
 ; Section D
 ;====================
 
+o2 l4
 g a b > c
 < c d e f
 g a b > c
