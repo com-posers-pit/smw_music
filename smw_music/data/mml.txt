@@ -5,16 +5,24 @@
 #amk 2
 
 ; MusicXML->AMK v${version}
-% if datetime:
+%if datetime:
 ; Built: ${datetime}
 %endif
 
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
 
-% if percussion:
-; Defaults---fix these
+%if instruments or percussion:
+; PORTER: Instrument Definitions
 
+%endif
+%if instruments:
+  %for instrument in instruments:
+"${instrument}=0"
+  %endfor
+
+%endif
+%if percussion:
 "CR3=@22"
 "CR2=@22"
 "CR=@22"
@@ -48,7 +56,7 @@
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
 $F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 %endif
-% for n, channel in enumerate(channels):
+%for n, channel in enumerate(channels):
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -64,4 +72,4 @@ ${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
 
 ; Music
 ${channel}
-% endfor
+%endfor

@@ -166,7 +166,7 @@ class Song:
     ###########################################################################
 
     @classmethod
-    def from_music_xml(cls, fname: str) -> "Song":
+    def from_music_xml(cls, fname: str, enable_to_instruments: bool) -> "Song":
         """
         Convert a MusicXML file to a Song.
 
@@ -174,6 +174,9 @@ class Song:
         ----------
         fname : str
             The (compressed or uncompressed) MusicXML file
+        enable_to_instruments : bool
+            True iff annotations that start with 'To' should be kept as
+            instrument macros
 
         Return
         ------
@@ -182,6 +185,15 @@ class Song:
         """
         metadata = {}
         parts: list[Channel] = []
+
+        if enable_to_instruments:
+            Annotation.matches.append(
+                (
+                    lambda x: x.startswith("To "),
+                    lambda x: "@" + x.removeprefix("To ").replace(" ", ""),
+                )
+            )
+
         stream = music21.converter.parseFile(fname)
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
@@ -231,6 +243,21 @@ class Song:
                             marks[n] = RehearsalMark.from_music_xml(subelem)
                 break
         return marks
+
+    ###########################################################################
+
+    def _instruments(self) -> list[str]:
+        instruments = []
+        for channel in self.channels:
+            annotations = [x for x in channel[:] if isinstance(x, Annotation)]
+            for annotation in [x.text for x in annotations]:
+                if annotation[0] == "@" and " " not in annotation:
+                    instrument = annotation[1:]
+                    try:
+                        int(instrument)
+                    except ValueError:
+                        instruments.append(instrument)
+        return instruments
 
     ###########################################################################
 
@@ -416,6 +443,7 @@ class Song:
             datetime=build_dt,
             percussion=percussion,
             echo_config=echo_config,
+            instruments=self._instruments(),
         )
 
         rv = rv.replace(" ^", "^")
