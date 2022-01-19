@@ -103,6 +103,7 @@ class Token:
 class Playable:
     measure_num: int
     note_num: int
+    duration: int
 
 
 ###############################################################################

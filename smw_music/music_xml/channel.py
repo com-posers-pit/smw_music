@@ -12,7 +12,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import Dict, Iterable, List, Tuple, TypeVar
+from typing import cast, Dict, Iterable, List, Tuple, TypeVar
 
 ###############################################################################
 # Project imports
@@ -20,7 +20,7 @@ from typing import Dict, Iterable, List, Tuple, TypeVar
 
 from .context import MmlState
 from .shared import CRLF, octave_notelen_str
-from .tokens import flatten, Loop, Note, Playable, RehearsalMark, Token
+from .tokens import flatten, Note, Playable, RehearsalMark, Token
 
 ###############################################################################
 # Private variable/constant definitions
@@ -35,18 +35,18 @@ _T = TypeVar("_T")
 
 
 def _default_octave_notelen(
-    tokens: List["Token"], section: bool = True
+    tokens: List[Token], section: bool = True
 ) -> Tuple[int, int]:
 
     if section:
         tokens = list(
             takewhile(lambda x: not isinstance(x, RehearsalMark), tokens)
         )
-    tokens = [x for x in tokens if isinstance(x, Playable)]
+    playable = [x for x in tokens if isinstance(x, Playable)]
 
-    octaves = [x.octave for x in tokens if isinstance(x, Note)]
+    octaves = [cast(Note, x).octave for x in playable if isinstance(x, Note)]
     octave = _most_common(octaves) if octaves else 4
-    notelen = _most_common([x.duration for x in tokens])
+    notelen = _most_common([x.duration for x in playable])
 
     return (octave, notelen)
 
