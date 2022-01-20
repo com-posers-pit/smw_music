@@ -236,7 +236,7 @@ class Song:
 
     ###########################################################################
 
-    def _instruments(self) -> set[str]:
+    def _instruments(self) -> list[str]:
         instruments = set()
         for channel in self.channels:
             annotations = [
@@ -249,7 +249,7 @@ class Song:
                         int(instrument)
                     except ValueError:
                         instruments.add(instrument)
-        return instruments
+        return sorted(list(instruments))
 
     ###########################################################################
 
