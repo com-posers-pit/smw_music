@@ -9,7 +9,6 @@
 # Standard library imports
 ###############################################################################
 
-import os
 import tempfile
 import pathlib
 

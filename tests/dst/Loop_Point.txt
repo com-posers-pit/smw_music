@@ -21,6 +21,8 @@
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
 v255 y10 qDEF
 
@@ -39,6 +41,8 @@ d- d e- e
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
 v255 y10 qDEF
 
