@@ -72,6 +72,11 @@ MuseScore {
     }
 
     CheckBox {
+      id: "singleVolumes"
+      text: qsTr('Use single volume logic')
+    }
+
+    CheckBox {
       id: "echoEnabled"
       text: qsTr("Enable Echo")
     }
@@ -309,6 +314,7 @@ MuseScore {
                    [superloopAnalysis, "superloop_analysis"],
                    [measureNumbers, "measure_numbers"],
                    [instrumentToAnnotations, "instrument_to_annotations"],
+                   [singleVolumes, "single_volumes"],
                    [echoEnabled, "echo_enabled"],
                    [echo_ch0, "echo_ch0"],
                    [echo_ch1, "echo_ch1"],

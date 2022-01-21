@@ -45,6 +45,7 @@ def _uploader():
                 "instrument_to_annotations" in request.form
             )
             echo_en = "echo_enabled" in request.form
+            single_volumes = "single_volumes" in request.form
 
             if echo_en:
                 channels = set()
@@ -81,6 +82,7 @@ def _uploader():
                 True,  # Always emit datetime in prod
                 echo_config,
                 instrument_to_annotations,
+                single_volumes,
             )
             mml = _update(mml)
 
