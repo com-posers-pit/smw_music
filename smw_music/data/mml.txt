@@ -56,6 +56,15 @@
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
 $F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 %endif
+%if single_volumes:
+
+; Don't touch these.  This is a way to use a hex value in a volume command.
+; We want to use hex values because that's how volume fades work.  Update
+; the corresponding dynamics marks in each channel.
+%for key in volmap:
+${f'"v{key}= $E7 $_{key}"'}
+%endfor
+%endif
 %for n, channel in enumerate(channels):
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -66,7 +75,11 @@ ${" $F4$02" if global_legato else ""}\
 ${" /" if "/" not in channel else ""}
 
 ; Parameters
-${" ".join(f'"{key}=v{val}"' for key, val in volmap.items())}
+%if single_volumes:
+${" ".join(f'"_{key}={val:02x}"' for key, val in volmap.items())}
+%else:
+${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
+%endif
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
 v255 y10 qDEF
 

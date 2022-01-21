@@ -400,6 +400,7 @@ class Song:
         include_dt: bool = True,
         echo_config: Optional[EchoConfig] = None,
         enable_to_instruments: bool = True,
+        single_volumes: bool = True,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -421,22 +422,24 @@ class Song:
         enable_to_instruments : bool
             True iff annotations that start with 'To' should be kept as
             instrument macros
-
+        single_volumes: bool
+            True iff both static and dynamic dynamics derive from one set of
+            numbers
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
 
         volmap = {
-            "vPPPP": 26,
-            "vPPP": 38,
-            "vPP": 64,
-            "vP": 90,
-            "vMP": 115,
-            "vMF": 141,
-            "vF": 179,
-            "vFF": 217,
-            "vFFF": 230,
-            "vFFFF": 225,
+            "PPPP": 26,
+            "PPP": 38,
+            "PP": 64,
+            "P": 90,
+            "MP": 115,
+            "MF": 141,
+            "F": 179,
+            "FF": 217,
+            "FFF": 230,
+            "FFFF": 225,
         }
 
         self._reduce(loop_analysis, superloop_analysis, enable_to_instruments)
@@ -465,6 +468,7 @@ class Song:
             percussion=percussion,
             echo_config=echo_config,
             instruments=self._instruments(),
+            single_volumes=single_volumes,
         )
 
         rv = rv.replace(" ^", "^")
@@ -484,6 +488,7 @@ class Song:
         include_dt: bool = True,
         echo_config: Optional[EchoConfig] = None,
         enable_to_instruments: bool = True,
+        single_volume: bool = False,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -507,6 +512,9 @@ class Song:
         enable_to_instruments : bool
             True iff annotations that start with 'To' should be kept as
             instrument macros
+        single_volumes: bool
+            True iff both static and dynamic dynamics derive from one set of
+            numbers
 
         """
         with open(fname, "w", encoding="ascii") as fobj:
@@ -519,6 +527,7 @@ class Song:
                     include_dt,
                     echo_config,
                     enable_to_instruments,
+                    single_volume,
                 ),
                 end="",
                 file=fobj,
