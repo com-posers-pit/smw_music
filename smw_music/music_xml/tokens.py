@@ -163,6 +163,75 @@ class Annotation(Token):
 
 
 @dataclass
+class CrescDelim(Token):
+    """
+    A crescendo delimiter.
+
+    Parameters
+    ----------
+    start : bool
+        True iff this is the start of a loop
+    cresc: bool
+        True if this is a crescendo; False if a diminuendo.
+
+    Attributes
+    ----------
+    start : bool
+        True iff this is the start of a loop
+    cresc: bool
+        True if this is a crescendo; False if a diminuendo.
+    """
+
+    start: bool
+    cresc: bool
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, state: MmlState, directives: list[str]):
+        pass
+
+
+###############################################################################
+
+
+@dataclass
+class Crescendo(Token):
+    """
+    Crescendo/decrescendo
+
+    Parameters
+    ----------
+    duration: int
+        Crecendo length, in beats
+    target: str
+        Target dynamic
+
+
+    Attributes
+    ----------
+    duration: int
+        Crecendo length, in beats
+    target: str
+        Target dynamic
+    """
+
+    duration: int
+    target: str
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, _: MmlState, directives: list[str]):
+        directives.append(f"FADE${self.duration:02x}$_{self.target.upper()}")
+
+
+###############################################################################
+
+
+@dataclass
 class Dynamic(Token):
     """
     Dynamics marking.
@@ -212,6 +281,42 @@ class Dynamic(Token):
 
     def emit(self, _: MmlState, directives: list[str]):
         directives.append(f"v{self.level.upper()}")
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def down(self) -> str:
+        return {
+            "pppp": "pppp",
+            "ppp": "pppp",
+            "pp": "ppp",
+            "p": "pp",
+            "mp": "p",
+            "mf": "mp",
+            "f": "mf",
+            "ff": "f",
+            "fff": "ff",
+            "ffff": "fff",
+        }[self.level]
+
+    ###########################################################################
+
+    @property
+    def up(self) -> str:
+        return {
+            "pppp": "ppp",
+            "ppp": "pp",
+            "pp": "p",
+            "p": "mp",
+            "mp": "mf",
+            "mf": "f",
+            "f": "ff",
+            "ff": "fff",
+            "fff": "ffff",
+            "ffff": "ffff",
+        }[self.level]
 
 
 ###############################################################################

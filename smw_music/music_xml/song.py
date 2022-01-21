@@ -32,6 +32,7 @@ from .reduction import reduce
 from .shared import MusicXmlException
 from .tokens import (
     Annotation,
+    CrescDelim,
     Dynamic,
     RehearsalMark,
     LoopDelim,
@@ -53,6 +54,30 @@ from .. import __version__
 def _chord_error(note: int, measure: int, part: int) -> MusicXmlException:
     msg = f"Chord found, #{note} in measure {measure} in staff {part}"
     return MusicXmlException(msg)
+
+
+###############################################################################
+
+
+def _is_crescendo(elem: music21.stream.Stream) -> bool:
+    """
+    Test to see if a music21 stream element is a crescendo or diminuendo
+    object.
+
+    Parameters
+    ----------
+    elem : music21.stream.Stream
+        A music21 Stream element
+
+    Return
+    ------
+    bool
+        True iff `elem` is of type `music21.dynamics.Crescendo` or
+        `music21.dynamics.Diminuendo`.
+    """
+    return isinstance(
+        elem, (music21.dynamics.Crescendo, music21.dynamics.Diminuendo)
+    )
 
 
 ###############################################################################
@@ -284,6 +309,7 @@ class Song:
         channel_elem: list[Token] = []
         slurs: list[list[int]] = [[], []]
         lines: list[list[int]] = [[], []]
+        cresc: list[list[int]] = [[], []]
 
         slur_list = list(filter(_is_slur, part))
         slurs[0] = [x.getFirst().id for x in slur_list]
@@ -293,6 +319,13 @@ class Song:
         lines[0] = [x.getFirst().id for x in line_list]
         lines[1] = [x.getLast().id for x in line_list]
         loop_nos = list(part_no * 100 + n for n in range(len(lines[0])))
+
+        cresc_list = list(filter(_is_crescendo, part))
+        cresc[0] = [x.getFirst().id for x in cresc_list]
+        cresc[1] = [x.getLast().id for x in cresc_list]
+        cresc_type = [
+            isinstance(x, music21.dynamics.Crescendo) for x in cresc_list
+        ]
 
         triplets = False
         for subpart in part:
@@ -352,9 +385,25 @@ class Song:
                     if subelem.id in slurs[1]:
                         channel_elem.append(Slur(False))
 
+                    # Gross, fix this
+                    if subelem.id in cresc[0]:
+                        channel_elem.append(
+                            CrescDelim(
+                                True, cresc_type[cresc[0].index(subelem.id)]
+                            )
+                        )
+
                     note.measure_num = measure.number
                     note.note_num = note_no
                     channel_elem.append(note)
+
+                    # Also gross, fix this
+                    if subelem.id in cresc[1]:
+                        channel_elem.append(
+                            CrescDelim(
+                                False, cresc_type[cresc[1].index(subelem.id)]
+                            )
+                        )
 
                 if isinstance(subelem, music21.bar.Repeat):
                     channel_elem.append(Repeat.from_music_xml(subelem))

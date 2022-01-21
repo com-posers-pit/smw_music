@@ -11,6 +11,7 @@
 
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"FADE=$E8"
 
 %if instruments or percussion:
 ; PORTER: Instrument Definitions

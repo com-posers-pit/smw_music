@@ -18,6 +18,8 @@ from typing import Optional
 
 from .tokens import (
     Annotation,
+    CrescDelim,
+    Crescendo,
     Dynamic,
     Loop,
     LoopDelim,
@@ -106,6 +108,43 @@ def _adjust_triplets(tokens: list[Token]) -> list[Token]:
     # output is is backwards.  Correct that.  (consider switching to a deque if
     # it's faster and we care?)
     rv.reverse()
+    return rv
+
+
+###############################################################################
+
+
+def _crescendoify(tokens: list[Token]) -> list[Token]:
+    rv: list[Token] = []
+
+    for n, token in enumerate(tokens):
+        dyn = Dynamic("mf")  # just assume we start here, probably bogus
+        drop = False
+
+        if isinstance(token, Dynamic):
+            dyn = token
+
+        if isinstance(token, CrescDelim):
+            drop = True
+            if token.start:
+                cresc_done = False
+                duration = 0
+                target = dyn.up if token.cresc else dyn.down
+                # TODO: Handle triplets
+                for nxt in tokens[n + 1 :]:
+                    if isinstance(nxt, Playable) and not cresc_done:
+                        duration += 192 // nxt.duration
+                    if isinstance(nxt, CrescDelim) and not nxt.start:
+                        cresc_done = True
+                    if isinstance(nxt, Dynamic) and cresc_done:
+                        target = nxt.level
+                        break
+                duration = min(duration, 255)  # Limit for now
+                rv.append(Crescendo(duration, target))
+
+        if not drop:
+            rv.append(token)
+
     return rv
 
 
@@ -410,6 +449,7 @@ def reduce(
     tokens = _filter_annotations(tokens, annotation_filters)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
+    tokens = _crescendoify(tokens)
     if loop_analysis:
         tokens = _loopify(tokens)
         tokens = _reference_loops(tokens)
