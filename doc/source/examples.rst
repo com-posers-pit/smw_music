@@ -98,7 +98,7 @@ The tool supports the following features:
 - Optional instrument name detection
 
   - Any text that starts with ``To`` is converted to a macro and
-    inserted into the score with a default instrument number ``0``
+    inserted into the score.
 
       - This convention is supported by at least MuseScore, Sibelius,
         and Finale
@@ -113,6 +113,22 @@ The tool supports the following features:
 
   - Search for the word ``PORTER`` to find the instrument definitions
     section near the top of the document
+
+  - If an instrument name contains an entry in the table below, the
+    sample number is used.  Sample 0 is used by default.
+
+========== ========
+Instrument Sample #
+---------- --------
+Flute      0
+Marimba    3
+Cello      4
+Trumpet    6
+Bass       8
+Piano      13
+Guitar     17
+Default    0
+========== ========
 
 
 .. _Percussion:
