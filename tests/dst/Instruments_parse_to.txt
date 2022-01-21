@@ -4,13 +4,14 @@
 
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"FADE=$E8"
 
 ; PORTER: Instrument Definitions
 
 "Flute=0"
 "Harpsichord=0"
 "Organ=0"
-"Piano=0"
+"Piano=13"
 "Violin=0"
 
 #spc

@@ -4,10 +4,11 @@
 
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"FADE=$E8"
 
 ; PORTER: Instrument Definitions
 
-"BassDrum1=0"
+"BassDrum1=8"
 
 "CR3=@22"
 "CR2=@22"

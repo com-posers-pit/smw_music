@@ -131,12 +131,12 @@ def test_conversion(src, dst, args):
     [
         (
             "Bad_Percussion.mxl",
-            r"Bad percussion note #3 in measure 1 in staff 1",
+            r"Unsupported percussion note #3 in measure 1 in staff 1",
         ),
         ("Chords.mxl", r"Chord found, #1 in measure 2 in staff 1"),
         ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
-        ("TooHigh.mxl", r"Bad note #3 in measure 1 in staff 1"),
-        ("TooLow.mxl", r"Bad note #2 in measure 1 in staff 1"),
+        ("TooHigh.mxl", r"Unsupported note c7 #3 in measure 1 in staff 1"),
+        ("TooLow.mxl", r"Unsupported note a0 #2 in measure 1 in staff 1"),
         ("Voices.mxl", r"Multiple voices in measure 2 in staff 1"),
     ],
     ids=[
