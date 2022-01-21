@@ -74,6 +74,11 @@ def main(args=None):
         help='Disable decoding "To XYZ" to instrument macros',
         dest="enable_to_instruments",
     )
+    parser.add_argument(
+        "--single_volume",
+        action="store_true",
+        help="Dynamics levels and cresc./decresc. use same macros",
+    )
 
     args = parser.parse_args(args)
 
@@ -86,6 +91,7 @@ def main(args=None):
         args.enable_dt,
         args.echo,
         args.enable_to_instruments,
+        args.single_volume,
     )
 
 
