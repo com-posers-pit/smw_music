@@ -17,8 +17,8 @@
 
 %endif
 %if instruments:
-  %for instrument in instruments:
-"${instrument}=0"
+  %for key, val in instruments.items():
+"${key}=${val}"
   %endfor
 
 %endif

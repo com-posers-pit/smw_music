@@ -236,8 +236,19 @@ class Song:
 
     ###########################################################################
 
-    def _instruments(self) -> list[str]:
-        instruments = set()
+    def _instruments(self) -> dict[str, int]:
+        # Default instrument mapping, from Wakana's tutorial
+        inst_map = {
+            "flute": 0,
+            "marimba": 3,
+            "cello": 4,
+            "trumpet": 6,
+            "bass": 8,
+            "piano": 13,
+            "guitar": 17,
+        }
+
+        inst_set = set()
         for channel in self.channels:
             annotations = [
                 x for x in channel.tokens if isinstance(x, Annotation)
@@ -248,8 +259,18 @@ class Song:
                     try:
                         int(instrument)
                     except ValueError:
-                        instruments.add(instrument)
-        return sorted(list(instruments))
+                        inst_set.add(instrument)
+        instruments = sorted(list(inst_set))
+
+        rv = {}
+        for key in instruments:
+            rv[key] = 0
+            for inst, inst_id in inst_map.items():
+                if inst in key.lower():
+                    rv[key] = inst_id
+                    break
+
+        return rv
 
     ###########################################################################
 
