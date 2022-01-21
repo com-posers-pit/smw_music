@@ -618,13 +618,18 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
                 PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
             except KeyError as e:
                 raise MusicXmlException(
-                    f"Bad percussion note #{note} in measure {measure}"
+                    f"Unsupported percussion note #{note} in measure {measure}"
                 ) from e
         else:
-            if not 0 <= self.octave <= 6:
-                raise MusicXmlException(
-                    f"Bad note #{note} in measure {measure}"
-                )
+            octave = self.octave
+            name = self.name
+            bad = octave < 1
+            bad |= octave > 6
+            bad |= octave == 0 and name in ["a+", "b-", "b"]
+            if bad:
+                msg = f"Unsupported note {name}{octave} #{note} in "
+                msg += f"measure {measure}"
+                raise MusicXmlException(msg)
 
     ###########################################################################
 
