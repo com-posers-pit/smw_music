@@ -42,7 +42,7 @@ def _default_octave_notelen(
         tokens = list(
             takewhile(lambda x: not isinstance(x, RehearsalMark), tokens)
         )
-    playable = [x for x in tokens if isinstance(x, Playable)]
+    playable = [x for x in flatten(tokens) if isinstance(x, Playable)]
 
     octaves = [cast(Note, x).octave for x in playable if isinstance(x, Note)]
     octave = octaves[0] if octaves else -1

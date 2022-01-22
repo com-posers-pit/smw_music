@@ -75,7 +75,7 @@ def flatten(tokens: list["Token"]) -> list["Token"]:
     rv: list["Token"] = []
     for token in tokens:
         if isinstance(token, Loop):
-            rv.extend(token.tokens)
+            rv.extend(flatten(token.tokens))
         else:
             rv.append(token)
     return rv
