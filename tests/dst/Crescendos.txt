@@ -37,8 +37,8 @@ w180
 vMF y10 qDEF
 
 ; Music
-o4 l4
-@Piano < a b > c d
+o3 l4
+@Piano a b > c d
 FADE$c0$_F < a b > c d
 < a b > c d
 FADE$90$_MP < a b > c d
@@ -83,8 +83,8 @@ f g g+ a+
 vMF y10 qDEF
 
 ; Music
-o3 l4
-@Piano < a b > c d
+o2 l4
+@Piano a b > c d
 < a b > c d
 FADE$90$_F < a2 > c d
 < a b > c d

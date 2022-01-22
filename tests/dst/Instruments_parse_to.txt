@@ -41,8 +41,8 @@ w180
 vMF y10 qDEF
 
 ; Music
-o3 l4
-@Piano > c < g a b
+o4 l4
+@Piano c < g a b
 @Harpsichord > c < g a b
 > c < g a @Flute @5 b
 > c < g a b
@@ -61,8 +61,8 @@ o3 l4
 vMF y10 qDEF
 
 ; Music
-o3 l4
-@Piano > c @4 < g a b
+o4 l4
+@Piano c @4 < g a b
 @Organ > c < g a b
 > c < g a b
 @Violin > c < g a b
