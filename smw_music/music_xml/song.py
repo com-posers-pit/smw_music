@@ -471,6 +471,7 @@ class Song:
         echo_config: Optional[EchoConfig] = None,
         enable_to_instruments: bool = True,
         single_volumes: bool = True,
+        custom_samples: bool = True,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -495,6 +496,8 @@ class Song:
         single_volumes: bool
             True iff both static and dynamic dynamics derive from one set of
             numbers
+        custom_samples: bool
+            True iff the custom samples header should be included in the MML
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -539,6 +542,7 @@ class Song:
             echo_config=echo_config,
             instruments=self._instruments(),
             single_volumes=single_volumes,
+            custom_samples=custom_samples,
         )
 
         rv = rv.replace(" ^", "^")
@@ -559,6 +563,7 @@ class Song:
         echo_config: Optional[EchoConfig] = None,
         enable_to_instruments: bool = True,
         single_volume: bool = False,
+        custom_samples: bool = False,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -585,7 +590,8 @@ class Song:
         single_volumes: bool
             True iff both static and dynamic dynamics derive from one set of
             numbers
-
+        custom_samples: bool
+            True iff the custom samples header should be included in the MML
         """
         with open(fname, "w", encoding="ascii") as fobj:
             print(
@@ -598,6 +604,7 @@ class Song:
                     echo_config,
                     enable_to_instruments,
                     single_volume,
+                    custom_samples,
                 ),
                 end="",
                 file=fobj,

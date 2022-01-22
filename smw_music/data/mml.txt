@@ -12,6 +12,26 @@
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
 "FADE=$E8"
+%if custom_samples:
+
+#path "folder name"
+
+; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
+#samples
+{
+#optimized
+"BassGtr.brr"
+"BDrum.brr"
+"Snare.brr"
+"HiHat.brr"
+}
+
+#instruments
+{
+    "Sample1.brr"        $00 $00 $00 $00 $00 ;@30
+    "Sample2.brr"        $00 $00 $00 $00 $00 ;@31
+}
+%endif
 
 %if instruments or percussion:
 ; PORTER: Instrument Definitions
