@@ -9,9 +9,13 @@
 ; Built: ${datetime}
 %endif
 
-"LEGATO_ON=$F4$01"
-"LEGATO_OFF=$F4$01"
-"FADE=$E8"
+#spc
+{
+#author  "${song.composer}"
+#title   "${song.title}"
+#game    "PORTER: GAME TITLE HERE"
+#comment "PORTER: ADDITIONAL COMMENTS HERE"
+}
 %if custom_samples:
 
 #path "folder name"
@@ -34,7 +38,7 @@
 %endif
 
 %if instruments or percussion:
-; PORTER: Instrument Definitions
+; PORTER: INSTRUMENT DEFINITIONS HERE
 
 %endif
 %if instruments:
@@ -58,11 +62,6 @@
 "KD=@21"
 
 %endif
-#spc
-{
-#author  "${song.composer}"
-#title   "${song.title}"
-}
 %if echo_config:
 
 ; Echo settings
@@ -77,6 +76,9 @@
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
 $F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 %endif
+
+; PORTER: GLOBAL VOLUME HERE
+w180
 %if single_volumes:
 
 ; Don't touch these.  This is a way to use a hex value in a volume command.
@@ -86,8 +88,15 @@ $F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 ${f'"v{key}= $E7 $_{key}"'}
 %endfor
 %endif
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
 %for n, channel in enumerate(channels):
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff ${n + 1}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #${n}\
@@ -102,7 +111,7 @@ ${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
 ${" ".join(f'"_{key}={val:02x}"' for key, val in volmap.items())}
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 ${channel}
