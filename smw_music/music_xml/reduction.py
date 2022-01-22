@@ -393,6 +393,8 @@ def _repeat_analysis(tokens: list[Token]) -> list[Token]:
                 tokens = tokens[repeat_count + len(skipped) - 1 :]
             else:
                 skipped = []
+        elif isinstance(token, Loop):
+            token.tokens = _repeat_analysis(token.tokens)
 
         rv.append(token)
         rv.extend(skipped)
