@@ -35,61 +35,76 @@ from smw_music.scripts import convert
 @pytest.mark.parametrize(
     "src, dst, args",
     [
-        ("Articulations.mxl", "Articulations.txt", ["--disable_dt"]),
-        ("Crescendos.mxl", "Crescendos.txt", ["--disable_dt"]),
+        ("Articulations.mxl", "Articulations.txt", []),
+        ("Crescendos.mxl", "Crescendos.txt", []),
         (
             "Crescendos.mxl",
             "Crescendos_single_volume.txt",
-            ["--disable_dt", "--single_volume"],
+            ["--single_volume"],
         ),
-        ("Dots.mxl", "Dots.txt", ["--disable_dt"]),
-        ("Dynamics.mxl", "Dynamics.txt", ["--disable_dt"]),
-        ("Grace_Notes.mxl", "Grace_Notes.txt", ["--disable_dt"]),
-        ("Headers.mxl", "Headers.txt", ["--disable_dt"]),
+        ("Dots.mxl", "Dots.txt", []),
+        ("Dynamics.mxl", "Dynamics.txt", []),
+        ("Grace_Notes.mxl", "Grace_Notes.txt", []),
+        ("Headers.mxl", "Headers.txt", []),
         (
             "Instruments.mxl",
             "Instruments_no_parse_to.txt",
-            ["--disable_dt", "--disable_to_instruments"],
+            ["--disable_to_instruments"],
         ),
-        ("Instruments.mxl", "Instruments_parse_to.txt", ["--disable_dt"]),
-        ("Loop_Point.mxl", "Loop_Point.txt", ["--disable_dt"]),
-        ("Loops.mxl", "Loops.txt", ["--loop_analysis", "--disable_dt"]),
+        ("Instruments.mxl", "Instruments_parse_to.txt", []),
+        ("Loop_Point.mxl", "Loop_Point.txt", []),
+        (
+            "Loops.mxl",
+            "Loops.txt",
+            [
+                "--loop_analysis",
+            ],
+        ),
         (
             "Percussion.mxl",
             "Percussion.txt",
-            ["--disable_dt"],
+            [],
         ),
         (
             "Percussion.mxl",
             "Percussion_opt.txt",
-            ["--disable_dt", "--optimize_percussion"],
+            ["--optimize_percussion"],
         ),
         (
             "Pickup_Measure.mxl",
             "Pickup_Measure.txt",
-            ["--measure_numbers", "--disable_dt"],
+            [
+                "--measure_numbers",
+            ],
         ),
-        ("Repeats.mxl", "Repeats.txt", ["--loop_analysis", "--disable_dt"]),
-        ("Slurs.mxl", "Slurs.txt", ["--disable_dt"]),
-        ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", ["--disable_dt"]),
-        ("TiedArticulations.mxl", "TiedArticulations.txt", ["--disable_dt"]),
-        ("Ties.mxl", "Ties.txt", ["--disable_dt"]),
-        ("Triplets.mxl", "Triplets.txt", ["--disable_dt"]),
+        (
+            "Repeats.mxl",
+            "Repeats.txt",
+            [
+                "--loop_analysis",
+            ],
+        ),
+        ("Slurs.mxl", "Slurs.txt", []),
+        ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", []),
+        ("TiedArticulations.mxl", "TiedArticulations.txt", []),
+        ("Ties.mxl", "Ties.txt", []),
+        ("Triplets.mxl", "Triplets.txt", []),
         (
             "SMB_Castle_Theme.musicxml",
             "SMB_Castle_Theme.txt",
-            ["--disable_dt"],
+            [],
         ),
         (
             "SMB_Castle_Theme.musicxml",
             "SMB_Castle_Theme_measures.txt",
-            ["--measure_numbers", "--disable_dt"],
+            [
+                "--measure_numbers",
+            ],
         ),
         (
             "SMB_Castle_Theme.musicxml",
             "SMB_Castle_Theme_Echo.txt",
             [
-                "--disable_dt",
                 "--echo",
                 "2,3,4,0.109,Y,0.189,N,11,0.323,N,1",
             ],
@@ -97,7 +112,7 @@ from smw_music.scripts import convert
         (
             "SMB_Castle_Theme.musicxml",
             "SMB_Castle_Theme_custom_samples.txt",
-            ["--disable_dt", "--custom_samples"],
+            ["--custom_samples"],
         ),
     ],
     ids=[
@@ -136,6 +151,8 @@ def test_conversion(src, dst, args):
 
     fname = test_dir / "src" / src
 
+    # We always want the datetime stamp disabled for these tests
+    args += ["--disable_dt"]
     with tempfile.NamedTemporaryFile("r") as fobj:
         convert.main([str(fname), str(fobj.name)] + args)
         written = fobj.readlines()
