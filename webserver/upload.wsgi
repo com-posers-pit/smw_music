@@ -46,6 +46,7 @@ def _uploader():
             )
             echo_en = "echo_enabled" in request.form
             single_volumes = "single_volumes" in request.form
+            custom_samples = "custom_samples" in request.form
 
             if echo_en:
                 channels = set()
@@ -83,6 +84,7 @@ def _uploader():
                 echo_config,
                 instrument_to_annotations,
                 single_volumes,
+                custom_samples,
             )
             mml = _update(mml)
 

@@ -77,6 +77,11 @@ MuseScore {
     }
 
     CheckBox {
+      id: "customSamples"
+      text: qsTr('Using custom samples?')
+    }
+
+    CheckBox {
       id: "echoEnabled"
       text: qsTr("Enable Echo")
     }
@@ -315,6 +320,7 @@ MuseScore {
                    [measureNumbers, "measure_numbers"],
                    [instrumentToAnnotations, "instrument_to_annotations"],
                    [singleVolumes, "single_volumes"],
+                   [customSamples, "custom_samples"],
                    [echoEnabled, "echo_enabled"],
                    [echo_ch0, "echo_ch0"],
                    [echo_ch1, "echo_ch1"],
