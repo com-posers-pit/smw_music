@@ -86,15 +86,8 @@ def flatten(tokens: list["Token"]) -> list["Token"]:
 ###############################################################################
 
 
-class Token:
-    """Base class for MusicXML->MML tokens."""
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        raise NotImplementedError
+class Comment:
+    pass
 
 
 ###############################################################################
@@ -104,6 +97,20 @@ class Playable:
     measure_num: int
     note_num: int
     duration: int
+
+
+###############################################################################
+
+
+class Token:
+    """Base class for MusicXML->MML tokens."""
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, state: MmlState, directives: list[str]):
+        raise NotImplementedError
 
 
 ###############################################################################
@@ -323,7 +330,7 @@ class Dynamic(Token):
 
 
 @dataclass
-class RehearsalMark(Token):
+class RehearsalMark(Token, Comment):
     """
     An object representing a rehearsal mark.
 
@@ -467,7 +474,7 @@ class LoopRef(Token):
 
 
 @dataclass
-class Measure(Token):
+class Measure(Token, Comment):
     """
     An object representing the start of a new measure of music.
 

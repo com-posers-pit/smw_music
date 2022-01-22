@@ -18,6 +18,7 @@ from typing import Optional
 
 from .tokens import (
     Annotation,
+    Comment,
     CrescDelim,
     Crescendo,
     Dynamic,
@@ -263,12 +264,10 @@ def _loopify(tokens: list[Token]) -> list[Token]:
                     token = Loop(loop_tokens, loop_id, 1, False)
                     break
 
-                if isinstance(nxt, (Dynamic, Playable, Triplet, Slur)):
-                    loop_tokens.append(nxt)
-                elif isinstance(nxt, Annotation):
-                    loop_tokens.append(nxt)
-                else:
+                if isinstance(nxt, Comment):
                     skipped.append(nxt)
+                else:
+                    loop_tokens.append(nxt)
 
         rv.append(token)
         rv.extend(skipped)
