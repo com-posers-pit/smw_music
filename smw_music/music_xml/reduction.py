@@ -117,23 +117,38 @@ def _adjust_triplets(tokens: list[Token]) -> list[Token]:
 def _crescendoify(tokens: list[Token]) -> list[Token]:
     rv: list[Token] = []
 
+    triplet = False
+    drop_dyn = False
     for n, token in enumerate(tokens):
-        dyn = Dynamic("mf")  # just assume we start here, probably bogus
+        dyn = Dynamic("mf")  # just assume we start here, totally bogus
         drop = False
+
+        if isinstance(token, Triplet):
+            triplet = token.start
 
         if isinstance(token, Dynamic):
             dyn = token
+            drop = drop_dyn
+            drop_dyn = False
 
         if isinstance(token, CrescDelim):
             drop = True
+            cresc_triplet = triplet
+
             if token.start:
+                drop_dyn = True
                 cresc_done = False
                 duration = 0
                 target = dyn.up if token.cresc else dyn.down
-                # TODO: Handle triplets
+
                 for nxt in tokens[n + 1 :]:
+                    if isinstance(token, Triplet):
+                        cresc_triplet = token.start
                     if isinstance(nxt, Playable) and not cresc_done:
-                        duration += 192 // nxt.duration
+                        note_duration = nxt.duration
+                        if cresc_triplet:
+                            note_duration = note_duration * 3 // 2
+                        duration += 192 // note_duration
                     if isinstance(nxt, CrescDelim) and not nxt.start:
                         cresc_done = True
                     if isinstance(nxt, Dynamic) and cresc_done:
