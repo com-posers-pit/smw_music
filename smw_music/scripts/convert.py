@@ -84,6 +84,11 @@ def main(args=None):
         action="store_true",
         help="Include boilerplate for custom samples",
     )
+    parser.add_argument(
+        "--optimize_percussion",
+        action="store_true",
+        help="Remove repeated percussion instrument directives",
+    )
 
     args = parser.parse_args(args)
 
@@ -98,6 +103,7 @@ def main(args=None):
         args.enable_to_instruments,
         args.single_volume,
         args.custom_samples,
+        args.optimize_percussion,
     )
 
 
