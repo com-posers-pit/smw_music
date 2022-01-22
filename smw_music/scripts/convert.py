@@ -79,6 +79,11 @@ def main(args=None):
         action="store_true",
         help="Dynamics levels and cresc./decresc. use same macros",
     )
+    parser.add_argument(
+        "--custom_samples",
+        action="store_true",
+        help="Include boilerplate for custom samples",
+    )
 
     args = parser.parse_args(args)
 
@@ -92,6 +97,7 @@ def main(args=None):
         args.echo,
         args.enable_to_instruments,
         args.single_volume,
+        args.custom_samples,
     )
 
 
