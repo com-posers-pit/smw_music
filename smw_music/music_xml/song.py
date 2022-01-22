@@ -472,6 +472,7 @@ class Song:
         enable_to_instruments: bool = True,
         single_volumes: bool = True,
         custom_samples: bool = True,
+        optimize_percussion: bool = True,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -498,6 +499,9 @@ class Song:
             numbers
         custom_samples: bool
             True iff the custom samples header should be included in the MML
+        optimize_percussion: bool
+            True iff repeated percussion notes should not repeat their
+            instrument
         """
         # Magic BPM -> MML/SPC tempo conversion
         mml_tempo = int(self.bpm * 255 / 625)
@@ -518,7 +522,10 @@ class Song:
         self._reduce(loop_analysis, superloop_analysis, enable_to_instruments)
 
         self._validate()
-        channels = [x.generate_mml(measure_numbers) for x in self.channels]
+        channels = [
+            x.generate_mml(measure_numbers, optimize_percussion)
+            for x in self.channels
+        ]
 
         build_dt = ""
         if include_dt:
@@ -564,6 +571,7 @@ class Song:
         enable_to_instruments: bool = True,
         single_volume: bool = False,
         custom_samples: bool = False,
+        optimize_percussion: bool = True,
     ):
         """
         Output the MML representation of this Song to a file.
@@ -592,6 +600,9 @@ class Song:
             numbers
         custom_samples: bool
             True iff the custom samples header should be included in the MML
+        optimize_percussion: bool
+            True iff repeated percussion notes should not repeat their
+            instrument
         """
         with open(fname, "w", encoding="ascii") as fobj:
             print(
@@ -605,6 +616,7 @@ class Song:
                     enable_to_instruments,
                     single_volume,
                     custom_samples,
+                    optimize_percussion,
                 ),
                 end="",
                 file=fobj,

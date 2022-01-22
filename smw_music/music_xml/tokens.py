@@ -711,6 +711,12 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
                 directive = PERCUSSION_MAP[self.head][
                     self.name + str(self.octave + 1)
                 ]
+                if state.optimize_percussion:
+                    if directive == state.last_percussion:
+                        state.last_percussion = directive
+                        directive += "n"
+                    else:
+                        state.last_percussion = directive
 
         directive += self._calc_note_length(state)
 

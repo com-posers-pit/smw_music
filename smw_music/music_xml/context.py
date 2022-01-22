@@ -37,3 +37,5 @@ class MmlState:  # pylint: disable=too-many-instance-attributes
     percussion: bool = False
     accent: bool = False
     staccato: bool = False
+    optimize_percussion: bool = False
+    last_percussion: str = ""
