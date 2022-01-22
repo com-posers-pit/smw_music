@@ -1,0 +1,91 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
+
+; PORTER: Instrument Definitions
+
+"Piano=13"
+
+#spc
+{
+#author  "None"
+#title   "Crescendos"
+}
+
+; Don't touch these.  This is a way to use a hex value in a volume command.
+; We want to use hex values because that's how volume fades work.  Update
+; the corresponding dynamics marks in each channel.
+"vPPPP= $E7 $_PPPP"
+"vPPP= $E7 $_PPP"
+"vPP= $E7 $_PP"
+"vP= $E7 $_P"
+"vMP= $E7 $_MP"
+"vMF= $E7 $_MF"
+"vF= $E7 $_F"
+"vFF= $E7 $_FF"
+"vFFF= $E7 $_FFF"
+"vFFFF= $E7 $_FFFF"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48 $F4$02 /
+
+; Parameters
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+v255 y10 qDEF
+
+; Music
+o4 l4
+@Piano < a b > c d
+FADE$c0$_F < a b > c d
+< a b > c d
+FADE$90$_MP < a b > c d
+< a b > c d
+< a b > c d
+{ FADE$40$_F < a8 b8 > c8 < b16 > e16 r16 } r8 c d
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 $F4$02 /
+
+; Parameters
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+v255 y10 qDEF
+
+; Music
+o3 l4
+@Piano f vP FADE$90$_FF g g+ a+
+f g g+ a+
+f g g+ a+
+FADE$ff$_MP f g g+ a+
+f g g+ a+
+f g g+ a+
+f g g+ a+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#2 $F4$02 /
+
+; Parameters
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+v255 y10 qDEF
+
+; Music
+o3 l4
+@Piano < a b > c d
+< a b > c d
+FADE$90$_F < a2 > c d
+< a b > c d
+< a b > c d
+< a b > c d
+< a b > c d

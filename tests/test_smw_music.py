@@ -36,6 +36,12 @@ from smw_music.scripts import convert
     "src, dst, args",
     [
         ("Articulations.mxl", "Articulations.txt", ["--disable_dt"]),
+        ("Crescendos.mxl", "Crescendos.txt", ["--disable_dt"]),
+        (
+            "Crescendos.mxl",
+            "Crescendos_single_volume.txt",
+            ["--disable_dt", "--single_volume"],
+        ),
         ("Dots.mxl", "Dots.txt", ["--disable_dt"]),
         ("Dynamics.mxl", "Dynamics.txt", ["--disable_dt"]),
         ("Grace_Notes.mxl", "Grace_Notes.txt", ["--disable_dt"]),
@@ -86,6 +92,8 @@ from smw_music.scripts import convert
     ],
     ids=[
         "Articulations",
+        "Crescendos",
+        "Crescendos (single volume)",
         "Dots",
         "Dynamics",
         "Grace Notes",
