@@ -82,6 +82,11 @@ MuseScore {
     }
 
     CheckBox {
+      id: "optimizePercussion"
+      text: qsTr('Optimize percussion?')
+    }
+
+    CheckBox {
       id: "echoEnabled"
       text: qsTr("Enable Echo")
     }
@@ -321,6 +326,7 @@ MuseScore {
                    [instrumentToAnnotations, "instrument_to_annotations"],
                    [singleVolumes, "single_volumes"],
                    [customSamples, "custom_samples"],
+                   [optimizePercussion, "optimize_percussion"],
                    [echoEnabled, "echo_enabled"],
                    [echo_ch0, "echo_ch0"],
                    [echo_ch1, "echo_ch1"],
