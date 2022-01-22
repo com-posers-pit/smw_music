@@ -57,7 +57,12 @@ from smw_music.scripts import convert
         (
             "Percussion.mxl",
             "Percussion.txt",
-            ["--loop_analysis", "--disable_dt"],
+            ["--disable_dt"],
+        ),
+        (
+            "Percussion.mxl",
+            "Percussion_opt.txt",
+            ["--disable_dt", "--optimize_percussion"],
         ),
         (
             "Pickup_Measure.mxl",
@@ -108,6 +113,7 @@ from smw_music.scripts import convert
         "Loop Point",
         "Loops",
         "Percussion",
+        "Percussion (optimized)",
         "Pickup Measure",
         "Repeats",
         "Slurs",

@@ -53,8 +53,8 @@ vMF y10 qDEF
 o4 l4
 @BassDrum1 KD SN KD SN
 HT MT LT KD
-KD KD KD KD8. SN16
-KD KD KD KD8. SN16
+KDn KDn KDn KDn8. SN16
+KD KDn KDn KDn8. SN16
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Staff 2
@@ -73,5 +73,5 @@ vMF y10 qDEF
 o4 l16
 @BassDrum1 CH4 OH4 CR4 RD4
 CR34 CR24 RD24 r4
-CH CH CH CH CH CH CH CH CH CH CH CH CH CH CH CH
-CH CH CH CH CH CH CH CH CH CH CH CH CH CH CH CH
+CH CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn
+CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn
