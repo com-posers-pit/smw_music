@@ -89,6 +89,11 @@ from smw_music.scripts import convert
                 "2,3,4,0.109,Y,0.189,N,11,0.323,N,1",
             ],
         ),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_custom_samples.txt",
+            ["--disable_dt", "--custom_samples"],
+        ),
     ],
     ids=[
         "Articulations",
@@ -113,6 +118,7 @@ from smw_music.scripts import convert
         "SMB Castle Theme (uncompressed)",
         "SMB Castle Theme (measure #s)",
         "SMB Castle Theme (echo enabled)",
+        "SMB Castle Theme (custom samples)",
     ],
 )
 def test_conversion(src, dst, args):
