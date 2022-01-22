@@ -261,6 +261,12 @@ def _loopify(tokens: list[Token]) -> list[Token]:
                 nxt = tokens.pop(0)
 
                 if isinstance(nxt, LoopDelim) and not nxt.start:
+                    # Consume closing triplet tokens
+                    nxt = tokens[0]
+                    if isinstance(nxt, Triplet) and not nxt.start:
+                        loop_tokens.append(nxt)
+                        tokens.pop(0)
+
                     token = Loop(loop_tokens, loop_id, 1, False)
                     break
 
