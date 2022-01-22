@@ -18,7 +18,9 @@ CRLF = "\r\n"
 
 
 def octave_notelen_str(octave: int, notelen: int) -> str:
-    return f"o{octave} l{notelen}"
+    rv = "" if octave == -1 else f"o{octave} "
+    rv += f"l{notelen}"
+    return rv
 
 
 ###############################################################################

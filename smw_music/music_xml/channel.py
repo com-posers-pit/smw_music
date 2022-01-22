@@ -45,7 +45,7 @@ def _default_octave_notelen(
     playable = [x for x in tokens if isinstance(x, Playable)]
 
     octaves = [cast(Note, x).octave for x in playable if isinstance(x, Note)]
-    octave = _most_common(octaves) if octaves else 4
+    octave = octaves[0] if octaves else -1
     notelen = _most_common([x.duration for x in playable]) if playable else 1
 
     return (octave, notelen)
@@ -124,7 +124,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _update_state_defaults(self, octave: int, notelen: int):
         if self.percussion:
-            octave = 4  # Default percussion octave
+            octave = -1
         self._mml_state.octave = octave
         self._mml_state.default_note_len = notelen
 
