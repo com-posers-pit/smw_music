@@ -318,7 +318,7 @@ class Song:
         line_list = list(filter(_is_line, part))
         lines[0] = [x.getFirst().id for x in line_list]
         lines[1] = [x.getLast().id for x in line_list]
-        loop_nos = list(part_no * 100 + n for n in range(len(lines[0])))
+        loop_nos = list((part_no + 1) * 100 + n for n in range(len(lines[0])))
 
         cresc_list = list(filter(_is_crescendo, part))
         cresc[0] = [x.getFirst().id for x in cresc_list]

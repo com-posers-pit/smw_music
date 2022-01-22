@@ -39,6 +39,6 @@ vMF y10 qDEF
 ; Music
 o3 l4
 @Piano a b > c d
-(0)[ c d e f]3
-(1)[ < a b > c d] (0) (1)
-(0)3
+(100)[ c d e f]3
+(101)[ < a b > c d] (100) (101)
+(100)3

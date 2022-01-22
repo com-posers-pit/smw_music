@@ -52,8 +52,8 @@ vMF y10 qDEF
 ; Music
 o3 l1
 @Piano r
-(0)[ r8 vMF { FADE$40$_P [[ f+16]]9 }] r2
-r (0)
+(100)[ r8 vMF { FADE$40$_P [[ f+16]]9 }] r2
+r (100)
 r2
-r (0)
+r (100)
 r2
