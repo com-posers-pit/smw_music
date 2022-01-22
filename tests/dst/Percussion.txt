@@ -2,11 +2,15 @@
 
 ; MusicXML->AMK v0.1.2
 
-"LEGATO_ON=$F4$01"
-"LEGATO_OFF=$F4$01"
-"FADE=$E8"
+#spc
+{
+#author  "None"
+#title   "Percussion"
+#game    "PORTER: GAME TITLE HERE"
+#comment "PORTER: ADDITIONAL COMMENTS HERE"
+}
 
-; PORTER: Instrument Definitions
+; PORTER: INSTRUMENT DEFINITIONS HERE
 
 "BassDrum1=8"
 
@@ -24,13 +28,16 @@
 "KD=@21 KDn"   "KDn=o4 f"
 
 
+; PORTER: GLOBAL VOLUME HERE
+w180
 
-#spc
-{
-#author  "None"
-#title   "Percussion"
-}
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48 $F4$02 /
@@ -40,13 +47,15 @@
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o4 l4
 @BassDrum1 KD SN KD SN
 HT MT LT KD
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #1 $F4$02 /
@@ -56,7 +65,7 @@ HT MT LT KD
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o4 l4

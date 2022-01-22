@@ -2,11 +2,15 @@
 
 ; MusicXML->AMK v0.1.2
 
-"LEGATO_ON=$F4$01"
-"LEGATO_OFF=$F4$01"
-"FADE=$E8"
+#spc
+{
+#author  "None"
+#title   "Instruments"
+#game    "PORTER: GAME TITLE HERE"
+#comment "PORTER: ADDITIONAL COMMENTS HERE"
+}
 
-; PORTER: Instrument Definitions
+; PORTER: INSTRUMENT DEFINITIONS HERE
 
 "Flute=0"
 "Harpsichord=0"
@@ -14,12 +18,17 @@
 "Piano=13"
 "Violin=0"
 
-#spc
-{
-#author  "None"
-#title   "Instruments"
-}
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48 $F4$02 /
@@ -29,7 +38,7 @@
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o3 l4
@@ -39,6 +48,8 @@ o3 l4
 > c < g a b
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #1 $F4$02 /
 
@@ -47,7 +58,7 @@ o3 l4
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o3 l4

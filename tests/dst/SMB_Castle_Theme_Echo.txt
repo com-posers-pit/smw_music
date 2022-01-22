@@ -2,19 +2,18 @@
 
 ; MusicXML->AMK v0.1.2
 
-"LEGATO_ON=$F4$01"
-"LEGATO_OFF=$F4$01"
-"FADE=$E8"
-
-; PORTER: Instrument Definitions
-
-"Piano=13"
-
 #spc
 {
 #author  "Koji Kondo"
 #title   "SMB Castle Theme"
+#game    "PORTER: GAME TITLE HERE"
+#comment "PORTER: ADDITIONAL COMMENTS HERE"
 }
+
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+"Piano=13"
+
 
 ; Echo settings
 
@@ -28,6 +27,16 @@
 $EF$ECHO_CHAN$ECHO_LVOL$ECHO_RVOL
 $F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t36 $F4$02 /
@@ -37,7 +46,7 @@ $F1$ECHO_DEL$ECHO_FB$ECHO_FILT
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o4 l32
@@ -49,6 +58,8 @@ o4 l32
 > f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #1 $F4$02 /
 
@@ -57,7 +68,7 @@ o4 l32
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o3 l32

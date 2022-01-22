@@ -2,20 +2,29 @@
 
 ; MusicXML->AMK v0.1.2
 
-"LEGATO_ON=$F4$01"
-"LEGATO_OFF=$F4$01"
-"FADE=$E8"
-
-; PORTER: Instrument Definitions
-
-"Piano=13"
-
 #spc
 {
 #author  "None"
 #title   "Crescendos"
+#game    "PORTER: GAME TITLE HERE"
+#comment "PORTER: ADDITIONAL COMMENTS HERE"
 }
 
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+"Piano=13"
+
+
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48 $F4$02 /
@@ -25,7 +34,7 @@
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o4 l4
@@ -38,6 +47,8 @@ FADE$90$_MP < a b > c d
 { FADE$40$_F < a8 b8 > c8 < b16 > e16 r16 } r8 c d
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #1 $F4$02 /
 
@@ -46,7 +57,7 @@ FADE$90$_MP < a b > c d
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o3 l4
@@ -59,6 +70,8 @@ f g g+ a+
 f g g+ a+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 3
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #2 $F4$02 /
 
@@ -67,7 +80,7 @@ f g g+ a+
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
-v255 y10 qDEF
+vMF y10 qDEF
 
 ; Music
 o3 l4
