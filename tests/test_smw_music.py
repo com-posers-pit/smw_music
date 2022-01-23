@@ -101,6 +101,16 @@ from smw_music.scripts import convert
         ),
         (
             "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_full.txt",
+            [
+                "--measure_numbers",
+                "--loop_analysis",
+                "--single_volume",
+                "--optimize_percussion",
+            ],
+        ),
+        (
+            "SMB_Castle_Theme.musicxml",
             "SMB_Castle_Theme_measures.txt",
             [
                 "--measure_numbers",
@@ -143,6 +153,7 @@ from smw_music.scripts import convert
         "Ties",
         "Triplets",
         "SMB Castle Theme (uncompressed)",
+        "SMB Castle Theme (kitchen sink)",
         "SMB Castle Theme (measure #s)",
         "SMB Castle Theme (echo enabled)",
         "SMB Castle Theme (custom samples)",

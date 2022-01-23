@@ -12,7 +12,22 @@
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
+"BassDrum1=8"
+"BassGuitar=8"
 "Piano=13"
+
+"CR3=@22 CR3n" "CR3n=o6 c"
+"CR2=@22 CR2n" "CR2n=o5 b"
+"CR=@22 CRn"   "CRn=o5 a"
+"CH=@22 CHn"   "CHn=o5 g"
+"OH=@22 OHn"   "OHn=o5 f"
+"RD=@22 RDn"   "RDn=o5 e"
+"RD2=@22 RD2n" "RD2n=o5 d"
+"HT=@24 HTn"   "HTn=o5 e"
+"MT=@23 MTn"   "MTn=o5 d"
+"SN=@10 SNn"   "SNn=o5 c"
+"LT=@21 LTn"   "LTn=o4 a"
+"KD=@21 KDn"   "KDn=o4 f"
 
 
 ; Echo settings
@@ -50,7 +65,13 @@ vMF y10 qDEF
 
 ; Music
 o4 l32
-@Piano @9 w255 v150 d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+@Piano d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
 > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
 > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
 > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
@@ -72,9 +93,71 @@ vMF y10 qDEF
 
 ; Music
 o3 l32
-@Piano @9 v150 a+ r a r g+ r a r a+ r b r a+ r a r
+@Piano a+ r a r g+ r a r a+ r b r a+ r a r
 a+ r a r g+ r a r a+ r b r a+ r a r
 a r g+ r a r a+ r a r a+ r a r g+ r
 a r g+ r a r a+ r a r a+ r a r g+ r
 > c+ r d r c+ r c r c+ r c r < b r > c r
 c+ r d r c+ r c r c+ r c r < b r > c r
+< a+ r a r g+ r a r a+ r b r a+ r a r
+a+ r a r g+ r a r a+ r b r a+ r a r
+a r g+ r a r a+ r a r a+ r a r g+ r
+a r g+ r a r a+ r a r a+ r a r g+ r
+> c+ r d r c+ r c r c+ r c r < b r > c r
+c+ r d r c+ r c r c+ r c r < b r > c r
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 3
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#2 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+vMF y10 qDEF
+
+; Music
+o2 l4
+@BassGuitar d+2
+d f+
+f2
+e a+
+a e
+d+ e
+d+2
+d f+
+f2
+e a+
+a e
+d+ e
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 4
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#3 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+
+"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+vMF y10 qDEF
+
+; Music
+l8
+@BassDrum1 r2
+r2
+r2
+r2
+r2
+r2
+KD SN MT SN
+KD SN MT16 MT16 SN16 MT16
+KD SN MT SN
+KD SN MT16 MT16 SN16 MT16
+KD SN MT SN
+KD SN MT16 MT16 SN16 MT16
