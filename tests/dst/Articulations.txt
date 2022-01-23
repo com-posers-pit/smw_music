@@ -33,7 +33,7 @@ w180
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
 "_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
 
-"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
 vMF y10 qDEF
 
 ; Music
@@ -49,7 +49,7 @@ c16. r32 r8 r r2
 c16 r16 r8 r r2
 c32. r64 r16 r8 r r2
 c32 r32 r16 r8 r r2
-qACC_OFF qSTAC_ON c1
+qDEF qSTAC_ON c1
 c2. r
 c2 r2
 c. r8 r2
@@ -60,21 +60,21 @@ c16. r32 r8 r r2
 c16 r16 r8 r r2
 c32. r64 r16 r8 r r2
 c32 r32 r16 r8 r r2
-qSTAC_OFF qACC_ON c c r2
-c qACC_OFF qSTAC_ON c r2
-qSTAC_OFF qACC_ON c qACC_OFF c r2
-qSTAC_ON c qSTAC_OFF qACC_ON c r2
-qACC_OFF qSTAC_ON c c r2
-c qSTAC_OFF c r2
+qDEF qACC_ON c c r2
+c qDEF qSTAC_ON c r2
+qDEF qACC_ON c qDEF c r2
+qSTAC_ON c qDEF qACC_ON c r2
+qDEF qSTAC_ON c c r2
+c qDEF c r2
 c qACC_ON c r2
-qACC_OFF c qSTAC_ON c r2
-qSTAC_OFF c c r2
+qDEF c qSTAC_ON c r2
+qDEF c c r2
 qACC_ON c r c r
-c r qACC_OFF qSTAC_ON c r
-qSTAC_OFF qACC_ON c r qACC_OFF c r
-qSTAC_ON c r qSTAC_OFF qACC_ON c r
-qACC_OFF qSTAC_ON c r c r
-c r qSTAC_OFF c r
+c r qDEF qSTAC_ON c r
+qDEF qACC_ON c r qDEF c r
+qSTAC_ON c r qDEF qACC_ON c r
+qDEF qSTAC_ON c r c r
+c r qDEF c r
 c r qACC_ON c r
-qACC_OFF c r qSTAC_ON c r
-qSTAC_OFF c r c r
+qDEF c r qSTAC_ON c r
+qDEF c r c r
