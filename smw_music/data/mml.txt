@@ -99,7 +99,7 @@ ${f'"v{key}= $E7 $_{key}"'}
 
 #${n}\
 ${f" t{tempo}" if n == 0 else ''}\
-${" $F4$02" if global_legato else ""}\
+${" $F4$02" if (n == 0) and global_legato else ""}\
 ${" /" if "/" not in channel else ""}
 
 ; Parameters
