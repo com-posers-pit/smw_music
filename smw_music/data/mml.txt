@@ -24,16 +24,14 @@
 #samples
 {
 #optimized
-"BassGtr.brr"
-"BDrum.brr"
-"Snare.brr"
-"HiHat.brr"
+"Sample1.brr"
+"Sample2.brr"
 }
 
 #instruments
 {
-    "Sample1.brr"        $00 $00 $00 $00 $00 ;@30
-    "Sample2.brr"        $00 $00 $00 $00 $00 ;@31
+    "Sample1.brr"        $00$00 $00 $00$00 ;@30
+    "Sample2.brr"        $00$00 $00 $00$00 ;@31
 }
 %endif
 
