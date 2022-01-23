@@ -51,7 +51,7 @@ The tool supports the following features:
 
 - Staccato and accented articulations.
   These use the
-  ``qACC_ON`` / ``qACC_OFF`` / ``qSTAC_ON`` / ``qSTAC_OFF`` / ``qDEF``
+  ``qACC_ON`` / ``qSTAC_ON`` / ``qDEF``
   macros.
   Articulations do not change across tied notes.
 
@@ -63,6 +63,9 @@ The tool supports the following features:
   These are implemented as ``vPPPP`` through ``vFFFF`` macros.
   They are given default values at the beginning of each stave.
 
+- Crescendos and decrescendos.
+  These use the ``FADE`` macro.
+
 - Porter-defined loops.
   A loop is defined by a horizontal line element that covers a set of
   notes.
@@ -71,8 +74,9 @@ The tool supports the following features:
 
 - Loop repeats and references are automatically detected and inserted.
 
-- Optionally, runs of more than 3 repeated notes/rests outside of a
-  user-defined loop are converted into a superloop.
+- Optionally, runs of more than 3 repeated notes/rests are converted
+  into a superloop.
+  These can be inside or outside user-defined loops.
 
 - A single repeat-start bar is converted into a loop point directive
   ``/``
@@ -94,6 +98,8 @@ The tool supports the following features:
 - Build date+time and tool version logging in a header comment.
 
 - Echo configuration calculation and insertion
+
+- Optional boilerplate text insertion for custom instruments samples.
 
 - Optional instrument name detection
 
