@@ -750,10 +750,10 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         if not state.tie:
             if not self.accent and state.accent:
                 state.accent = False
-                directives.append("qACC_OFF")
+                directives.append("qDEF")
             if not self.staccato and state.staccato:
                 state.staccato = False
-                directives.append("qSTAC_OFF")
+                directives.append("qDEF")
 
             if self.accent and not state.accent:
                 state.accent = True

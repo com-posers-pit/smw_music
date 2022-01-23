@@ -108,7 +108,7 @@ ${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
 %endif
 ${" ".join(f'"_{key}={val:02x}"' for key, val in volmap.items())}
 
-"qDEF=q7A" "qSTAC_ON=q5A" "qSTAC_OFF=qDEF" "qACC_ON=q7F" "qACC_OFF=qDEF"
+"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
 vMF y10 qDEF
 
 ; Music
