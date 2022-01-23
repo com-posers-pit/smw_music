@@ -211,7 +211,12 @@ def _deduplicate_measures(tokens: list[Token]) -> list[Token]:
 
         if isinstance(token, Measure):
             if tokens:
-                drop = isinstance(tokens[0], Measure)
+                nxt = tokens[0]
+                if isinstance(nxt, Measure):
+                    drop = True
+                    nxt.left_join(token)
+                else:
+                    drop = False
 
         if not drop:
             rv.append(token)

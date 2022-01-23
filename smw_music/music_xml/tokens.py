@@ -489,7 +489,19 @@ class Measure(Token, Comment):
         The measure number
     """
 
-    number: int = 0
+    number: Union[list[int], int] = 0
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def range(self) -> list[int]:
+        if isinstance(self.number, list):
+            rv = self.number
+        else:
+            rv = [self.number]
+        return rv
 
     ###########################################################################
     # API method definitions
@@ -498,9 +510,17 @@ class Measure(Token, Comment):
     def emit(self, state: MmlState, directives: list[str]):
         comment = ""
         if state.measure_numbers:
-            comment = f"; Measure {self.number}"
+            if len(self.range) == 1:
+                comment = f"; Measure {self.number}"
+            else:
+                comment = f"; Measures {self.range[0]}-{self.range[-1]}"
 
         directives.append(f"{comment}{CRLF}")
+
+    ###########################################################################
+
+    def left_join(self, prev: "Measure"):
+        self.number = [prev.range[0], self.range[-1]]
 
 
 ###############################################################################
