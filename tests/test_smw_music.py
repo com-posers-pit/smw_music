@@ -63,6 +63,7 @@ from smw_music.scripts import convert
             "Loops.txt",
             [
                 "--loop_analysis",
+                "--measure_numbers",
             ],
         ),
         (

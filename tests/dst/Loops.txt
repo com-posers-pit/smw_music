@@ -38,7 +38,10 @@ vMF y10 qDEF
 
 ; Music
 o3 l4
-@Piano a b > c d
-(100)[ c d e f]3
-(101)[ < a b > c d] (100) (101)
-(100)3
+@Piano a b > c d ; Measure 1
+(100)[ c d e f]3 ; Measures 2-4
+(101)[ < a b > c d] (100) (101) ; Measures 5-6
+(100)3 ; Measures 7-10
+(102)[ < a b b a b > c d < b] ; Measures 11-12
+a b b (101) ; Measure 13
+b ; Measure 14
