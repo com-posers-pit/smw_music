@@ -454,6 +454,32 @@ def _superloopify(tokens: list[Token]) -> list[Token]:
 
 
 ###############################################################################
+
+
+def _swap_repeat_annotations(tokens: list[Token]) -> list[Token]:
+    # Copy the input list (we're modifying, don't want to upset the caller)
+    tokens = list(tokens)
+
+    rv = []
+
+    while tokens:
+        token = tokens.pop()
+
+        if isinstance(token, Repeat):
+            while tokens:
+                nxt = tokens[-1]
+                if isinstance(nxt, Annotation):
+                    rv.append(tokens.pop())
+                else:
+                    break
+
+        rv.append(token)
+
+    rv.reverse()
+    return rv
+
+
+###############################################################################
 # API function definitions
 ###############################################################################
 
@@ -474,6 +500,7 @@ def reduce(
         )
     ]
     tokens = _filter_annotations(tokens, annotation_filters)
+    tokens = _swap_repeat_annotations(tokens)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
     tokens = _crescendoify(tokens)
