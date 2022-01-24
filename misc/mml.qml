@@ -38,6 +38,12 @@ MuseScore {
         id: "chooseOutput"
         text: "MML Output File"
         onClicked: fileDialog.open()
+
+        background: Rectangle {
+            color: chooseOutput.down ? "#AAAAAA" : "#CCCCCC"
+            border.width: 1
+            radius: 2
+        }
       }
 
       Text {
@@ -244,6 +250,12 @@ MuseScore {
       id: "convertBtn"
       text: "Convert"
       onClicked: convert()
+
+      background: Rectangle {
+        color: chooseOutput.down ? "#AAAAAA" : "#CCCCCC"
+        border.width: 1
+        radius: 2
+      }
     }
   }
 
