@@ -8,7 +8,7 @@
 # Standard Library imports
 ###############################################################################
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import auto, Enum
 
 ###############################################################################
@@ -38,3 +38,4 @@ class MmlState:  # pylint: disable=too-many-instance-attributes
     staccato: bool = False
     optimize_percussion: bool = False
     last_percussion: str = ""
+    custom_percussion: dict[str, dict[str, str]] = field(default_factory=dict)

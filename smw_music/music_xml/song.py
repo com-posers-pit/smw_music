@@ -9,6 +9,7 @@
 # Standard Library imports
 ###############################################################################
 
+import configparser
 import pkgutil
 
 from datetime import datetime
@@ -191,17 +192,25 @@ class Song:
         The song's tempo in beats per minute
     channels : list
         A list of up to 8 channels of music in this song.
+    custom_percussion : dict
+        A dictionary of dictionaries contain {notehead: {notename: instrument}}
+        maps
     """
 
     ###########################################################################
     # API constructor definitions
     ###########################################################################
 
-    def __init__(self, metadata: dict[str, str], channels: list["Channel"]):
+    def __init__(
+        self,
+        metadata: dict[str, str],
+        channels: list["Channel"],
+    ):
         self.title = metadata.get("title", "???")
         self.composer = metadata.get("composer", "???")
         self.bpm = int(metadata.get("bpm", 120))
         self.channels = channels[:8]
+        self.custom_percussion = {}
 
     ###########################################################################
 
@@ -214,6 +223,7 @@ class Song:
         ----------
         fname : str
             The (compressed or uncompressed) MusicXML file
+
         Return
         ------
         Song
@@ -460,7 +470,7 @@ class Song:
     def _validate(self):
         for n, channel in enumerate(self.channels):
             try:
-                channel.check()
+                channel.check(self.custom_percussion)
             except MusicXmlException as e:
                 raise MusicXmlException(
                     e.args[0] + f" in staff {n + 1}"
@@ -565,6 +575,17 @@ class Song:
         rv = rv.replace(" ]", "]")
 
         return rv
+
+    ###########################################################################
+
+    def load_percussion(self, fname: str):
+        parser = configparser.ConfigParser()
+        with open(fname, "r", encoding="ascii") as fobj:
+            parser.read(fobj)
+
+        self.custom_percussion = {
+            k: dict(v) for k, v in parser if k != "DEFAULT"
+        }
 
     ###########################################################################
 

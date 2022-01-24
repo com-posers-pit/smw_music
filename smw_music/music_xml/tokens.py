@@ -10,7 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Union
 
 ###############################################################################
 # Library imports
@@ -642,12 +642,18 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def check(self):
+    def check(
+        self, custom_percussion: Optional[dict[str, dict[str, str]]] = None
+    ):
         note = self.note_num
         measure = self.measure_num
         if self.percussion:
+            lut = PERCUSSION_MAP
+            if custom_percussion is not None:
+                lut += custom_percussion
+
             try:
-                PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
+                _ = lut[self.head][self.name + str(self.octave + 1)]
             except KeyError as e:
                 raise MusicXmlException(
                     f"Unsupported percussion note #{note} in measure {measure}"
@@ -740,6 +746,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             if not self.percussion:
                 directive = self.name
             else:
+                print("percussion")
                 directive = PERCUSSION_MAP[self.head][
                     self.name + str(self.octave + 1)
                 ]

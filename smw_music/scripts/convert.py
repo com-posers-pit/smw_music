@@ -89,10 +89,18 @@ def main(args=None):
         action="store_true",
         help="Remove repeated percussion instrument directives",
     )
+    parser.add_argument(
+        "--custom_percussion",
+        help="Custom percussion definition file",
+    )
 
     args = parser.parse_args(args)
 
-    Song.from_music_xml(args.music_xml).to_mml_file(
+    song = Song.from_music_xml(args.music_xml)
+    if args.custom_percussion:
+        song.load_percussion(args.custom_percussion)
+
+    song.to_mml_file(
         args.amk,
         args.enable_global_legato,
         args.loop_analysis,

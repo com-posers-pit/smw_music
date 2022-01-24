@@ -12,7 +12,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import cast, Iterable, TypeVar
+from typing import cast, Iterable, Optional, TypeVar
 
 ###############################################################################
 # Project imports
@@ -128,7 +128,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def check(self):
+    def check(
+        self, custom_percussion: Optional[dict[str, dict[str, str]]] = None
+    ):
         """
         Confirm that the channel's notes are acceptable.
 
@@ -139,7 +141,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             outside octaves 1-6  is used.
         """
         for token in [x for x in flatten(self.tokens) if isinstance(x, Note)]:
-            token.check()
+            token.check(custom_percussion)
 
     ###########################################################################
 
