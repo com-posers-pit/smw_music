@@ -44,7 +44,11 @@ def _default_octave_notelen(
         )
     playable = [x for x in flatten(tokens) if isinstance(x, Playable)]
 
-    octaves = [cast(Note, x).octave for x in playable if isinstance(x, Note)]
+    octaves = [
+        cast(Note, x).octave
+        for x in playable
+        if isinstance(x, Note) and not x.percussion
+    ]
     octave = octaves[0] if octaves else -1
     notelen = _most_common([x.duration for x in playable]) if playable else 1
 
@@ -72,15 +76,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ----------
     tokens: list
         A list of valid channel tokens
-    percussion: bool
-        Ture iff this is a percussion channel
 
     Attributes
     ----------
     tokens: list
         A list of elements in this tokens
-    percussion: bool
-        Ture iff this is a percussion channel
 
     Todo
     ----
@@ -88,7 +88,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     """
 
     tokens: list[Token]
-    percussion: bool
     _accent: bool = field(init=False, repr=False, compare=False)
     _directives: list[str] = field(init=False, repr=False, compare=False)
     _loops: dict[int, list[Token]] = field(
@@ -114,7 +113,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._update_state_defaults(
             *_default_octave_notelen(flatten(self.tokens))
         )
-        self._mml_state.percussion = self.percussion
 
         self._accent = False
         self._loops = {}
@@ -123,8 +121,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _update_state_defaults(self, octave: int, notelen: int):
-        if self.percussion:
-            octave = -1
         self._mml_state.octave = octave
         self._mml_state.default_note_len = notelen
 
@@ -143,7 +139,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             outside octaves 1-6  is used.
         """
         for token in [x for x in flatten(self.tokens) if isinstance(x, Note)]:
-            token.check(self.percussion)
+            token.check()
 
     ###########################################################################
 

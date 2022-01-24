@@ -35,6 +35,7 @@ from .tokens import (
     CrescDelim,
     Dynamic,
     RehearsalMark,
+    Loop,
     LoopDelim,
     Measure,
     Note,
@@ -54,6 +55,20 @@ from .. import __version__
 def _chord_error(note: int, measure: int, part: int) -> MusicXmlException:
     msg = f"Chord found, #{note} in measure {measure} in staff {part}"
     return MusicXmlException(msg)
+
+
+###############################################################################
+
+
+def _has_percussion(tokens: list[Token]) -> bool:
+    rv = False
+    for token in tokens:
+        if isinstance(token, Note) and token.percussion:
+            rv = True
+            break
+        if isinstance(token, Loop):
+            rv = _has_percussion(token.tokens)
+    return rv
 
 
 ###############################################################################
@@ -219,14 +234,8 @@ class Song:
 
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
-                percussion = False
-                for n in elem.flatten():
-                    if isinstance(n, music21.clef.PercussionClef):
-                        percussion = True
-                        break
-
                 part = cls._parse_part(elem, sections, len(parts))
-                parts.append(Channel(part, percussion))
+                parts.append(Channel(part))
 
         return cls(metadata, parts)
 
@@ -531,7 +540,7 @@ class Song:
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        percussion = any(x.percussion for x in self.channels)
+        percussion = any(_has_percussion(x.tokens) for x in self.channels)
 
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")

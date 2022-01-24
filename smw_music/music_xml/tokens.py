@@ -574,6 +574,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         True iff this is an accented note
     staccato: bool
         True iff this is an staccato note
+    percussion: bool
+        True iff this is a percussion note
 
     Todo
     ----
@@ -589,6 +591,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     grace: bool = False
     accent: bool = False
     staccato: bool = False
+    percussion: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -622,6 +625,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
         accent = music21.articulations.Accent in articulations
         staccato = music21.articulations.Staccato in articulations
+        percussion = isinstance(elem, music21.note.Unpitched)
 
         return cls(
             name.lower().replace("#", "+"),
@@ -633,14 +637,15 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             elem.duration.isGrace,
             accent,
             staccato,
+            percussion,
         )
 
     ###########################################################################
 
-    def check(self, percussion: bool):
+    def check(self):
         note = self.note_num
         measure = self.measure_num
-        if percussion:
+        if self.percussion:
             try:
                 PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
             except KeyError as e:
@@ -726,13 +731,13 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         if self.grace:
             state.grace = True
 
-        if not state.percussion:
+        if not self.percussion:
             self._emit_octave(state, directives)
 
         if state.tie:
             directive = "^"
         else:
-            if not state.percussion:
+            if not self.percussion:
                 directive = self.name
             else:
                 directive = PERCUSSION_MAP[self.head][

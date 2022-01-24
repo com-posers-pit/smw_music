@@ -34,7 +34,6 @@ class MmlState:  # pylint: disable=too-many-instance-attributes
     slur: SlurState = SlurState.SLUR_IDLE
     tie: bool = False
     legato: bool = False
-    percussion: bool = False
     accent: bool = False
     staccato: bool = False
     optimize_percussion: bool = False
