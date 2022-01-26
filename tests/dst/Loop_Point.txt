@@ -2,12 +2,11 @@
 
 ; MusicXML->AMK v0.1.2
 
-#spc
-{
-#author  "None"
-#title   "Loop Point"
-#game    "PORTER: GAME TITLE HERE"
-#comment "PORTER: ADDITIONAL COMMENTS HERE"
+#spc {
+    #author  "None"
+    #title   "Loop Point"
+    #game    "PORTER: GAME TITLE HERE"
+    #comment "PORTER: ADDITIONAL COMMENTS HERE"
 }
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
