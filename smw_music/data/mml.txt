@@ -9,27 +9,24 @@
 ; Built: ${datetime}
 %endif
 
-#spc
-{
-#author  "${song.composer}"
-#title   "${song.title}"
-#game    "PORTER: GAME TITLE HERE"
-#comment "PORTER: ADDITIONAL COMMENTS HERE"
+#spc {
+    #author  "${song.composer}"
+    #title   "${song.title}"
+    #game    "PORTER: GAME TITLE HERE"
+    #comment "PORTER: ADDITIONAL COMMENTS HERE"
 }
 %if custom_samples:
 
 ; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
 #path "folder name"
 
-#samples
-{
-#optimized
-"Sample1.brr"
-"Sample2.brr"
+#samples {
+    #optimized
+    "Sample1.brr"
+    "Sample2.brr"
 }
 
-#instruments
-{
+#instruments {
     "Sample1.brr"        $00$00 $00 $00$00 ;@30
     "Sample2.brr"        $00$00 $00 $00$00 ;@31
 }
