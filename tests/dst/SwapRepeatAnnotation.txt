@@ -31,7 +31,7 @@ w180
 
 ; Parameters
 "vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1a" "_PPP=26" "_PP=40" "_P=5a" "_MP=73" "_MF=8d" "_F=b3" "_FF=d9" "_FFF=e6" "_FFFF=e1"
+"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
 vMF y10 qDEF
