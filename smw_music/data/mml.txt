@@ -96,7 +96,7 @@ ${" /" if "/" not in channel else ""}
 %if not single_volumes:
 ${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
 %endif
-${" ".join(f'"_{key}={val:02x}"' for key, val in volmap.items())}
+${" ".join(f'"_{key}={val:02X}"' for key, val in volmap.items())}
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
 vMF y10 qDEF
