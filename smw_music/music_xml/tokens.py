@@ -330,67 +330,6 @@ class Dynamic(Token):
 
 
 @dataclass
-class RehearsalMark(Token, Comment):
-    """
-    An object representing a rehearsal mark.
-
-    Parameters
-    ----------
-    mark : str
-        The rehearsal mark's text
-
-    Attributes
-    ----------
-    mark : str
-        The rehearsal mark's text
-    """
-
-    mark: str
-
-    ###########################################################################
-    # API constructor definitions
-    ###########################################################################
-
-    @classmethod
-    def from_music_xml(
-        cls, elem: music21.expressions.RehearsalMark
-    ) -> "RehearsalMark":
-        """
-        Convert a music21 RehearsalMark to a RehearsalMark object.
-
-        Parameters
-        ----------
-        elem : music21.expressions.RehearsalMark
-            A music21 representation of a RehearsalMark
-
-        Return
-        ------
-        RehearsalMark
-            A new RehearsalMark object with its `mark` attribute set to the
-            `elem`'s text content.
-        """
-        return cls(elem.content)
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        directives.append(CRLF)
-        directives.append(f";===================={CRLF}")
-        directives.append(f"; Section {self.mark}{CRLF}")
-        directives.append(f";===================={CRLF}")
-        directives.append(CRLF)
-        directives.append(
-            octave_notelen_str(state.octave, state.default_note_len)
-        )
-        directives.append(CRLF)
-
-
-###############################################################################
-
-
-@dataclass
 class Loop(Token):
     tokens: list[Token]
     loop_id: int
@@ -777,6 +716,67 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             state.grace = False
 
         self._stop_legato(state, directives)
+
+
+###############################################################################
+
+
+@dataclass
+class RehearsalMark(Token, Comment):
+    """
+    An object representing a rehearsal mark.
+
+    Parameters
+    ----------
+    mark : str
+        The rehearsal mark's text
+
+    Attributes
+    ----------
+    mark : str
+        The rehearsal mark's text
+    """
+
+    mark: str
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(
+        cls, elem: music21.expressions.RehearsalMark
+    ) -> "RehearsalMark":
+        """
+        Convert a music21 RehearsalMark to a RehearsalMark object.
+
+        Parameters
+        ----------
+        elem : music21.expressions.RehearsalMark
+            A music21 representation of a RehearsalMark
+
+        Return
+        ------
+        RehearsalMark
+            A new RehearsalMark object with its `mark` attribute set to the
+            `elem`'s text content.
+        """
+        return cls(elem.content)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, state: MmlState, directives: list[str]):
+        directives.append(CRLF)
+        directives.append(f";===================={CRLF}")
+        directives.append(f"; Section {self.mark}{CRLF}")
+        directives.append(f";===================={CRLF}")
+        directives.append(CRLF)
+        directives.append(
+            octave_notelen_str(state.octave, state.default_note_len)
+        )
+        directives.append(CRLF)
 
 
 ###############################################################################
