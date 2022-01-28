@@ -20,16 +20,16 @@ w180
 ; Don't touch these.  This is a way to use a hex value in a volume command.
 ; We want to use hex values because that's how volume fades work.  Update
 ; the corresponding dynamics marks in each channel.
-"vPPPP= $E7 $_PPPP"
-"vPPP= $E7 $_PPP"
-"vPP= $E7 $_PP"
-"vP= $E7 $_P"
-"vMP= $E7 $_MP"
-"vMF= $E7 $_MF"
-"vF= $E7 $_F"
-"vFF= $E7 $_FF"
-"vFFF= $E7 $_FFF"
-"vFFFF= $E7 $_FFFF"
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
 
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
