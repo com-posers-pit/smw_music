@@ -5,8 +5,8 @@
 #spc {
     #author  "Koji Kondo"
     #title   "SMB Castle Theme"
-    #game    "PORTER: GAME TITLE HERE"
-    #comment "PORTER: ADDITIONAL COMMENTS HERE"
+    #game    "GAME NAME HERE"
+    #comment "Ported by: PORTER NAME HERE"
 }
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE

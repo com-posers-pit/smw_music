@@ -3,10 +3,10 @@
 ; MusicXML->AMK v0.1.2
 
 #spc {
-    #author  "None"
+    #author  "COMPOSER HERE"
     #title   "Slurs"
-    #game    "PORTER: GAME TITLE HERE"
-    #comment "PORTER: ADDITIONAL COMMENTS HERE"
+    #game    "GAME NAME HERE"
+    #comment "Ported by: PORTER NAME HERE"
 }
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
