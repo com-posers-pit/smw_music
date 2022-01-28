@@ -59,6 +59,47 @@ def _chord_error(note: int, measure: int, part: int) -> MusicXmlException:
 ###############################################################################
 
 
+def _get_cresc(
+    part: music21.stream.Part,
+) -> tuple[list[list[int]], list[bool]]:
+    cresc: list[list[int]] = [[], []]
+    cresc_list = list(filter(_is_crescendo, part))
+    cresc[0] = [x.getFirst().id for x in cresc_list]
+    cresc[1] = [x.getLast().id for x in cresc_list]
+    cresc_type = [
+        isinstance(x, music21.dynamics.Crescendo) for x in cresc_list
+    ]
+
+    return (cresc, cresc_type)
+
+
+###############################################################################
+
+
+def _get_lines(part: music21.stream.Part) -> list[list[int]]:
+    lines: list[list[int]] = [[], []]
+    line_list = list(filter(_is_line, part))
+    lines[0] = [x.getFirst().id for x in line_list]
+    lines[1] = [x.getLast().id for x in line_list]
+
+    return lines
+
+
+###############################################################################
+
+
+def _get_slurs(part: music21.stream.Part) -> list[list[int]]:
+    slurs: list[list[int]] = [[], []]
+    slur_list = list(filter(_is_slur, part))
+    slurs[0] = [x.getFirst().id for x in slur_list]
+    slurs[1] = [x.getLast().id for x in slur_list]
+
+    return slurs
+
+
+###############################################################################
+
+
 def _is_crescendo(elem: music21.stream.Stream) -> bool:
     """
     Test to see if a music21 stream element is a crescendo or diminuendo
@@ -316,25 +357,11 @@ class Song:
         part_no: int,
     ) -> list[Token]:
         channel_elem: list[Token] = []
-        slurs: list[list[int]] = [[], []]
-        lines: list[list[int]] = [[], []]
-        cresc: list[list[int]] = [[], []]
 
-        slur_list = list(filter(_is_slur, part))
-        slurs[0] = [x.getFirst().id for x in slur_list]
-        slurs[1] = [x.getLast().id for x in slur_list]
-
-        line_list = list(filter(_is_line, part))
-        lines[0] = [x.getFirst().id for x in line_list]
-        lines[1] = [x.getLast().id for x in line_list]
+        slurs = _get_slurs(part)
+        lines = _get_lines(part)
         loop_nos = list((part_no + 1) * 100 + n for n in range(len(lines[0])))
-
-        cresc_list = list(filter(_is_crescendo, part))
-        cresc[0] = [x.getFirst().id for x in cresc_list]
-        cresc[1] = [x.getLast().id for x in cresc_list]
-        cresc_type = [
-            isinstance(x, music21.dynamics.Crescendo) for x in cresc_list
-        ]
+        cresc, cresc_type = _get_cresc(part)
 
         triplets = False
         for subpart in part:
