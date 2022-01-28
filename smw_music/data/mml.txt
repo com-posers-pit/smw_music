@@ -73,7 +73,7 @@ w180
 ; We want to use hex values because that's how volume fades work.  Update
 ; the corresponding dynamics marks in each channel.
 %for key in volmap:
-${f'"v{key}= $E7 $_{key}"'}
+${f'"v{key: <4} = $E7$_{key}"'}
 %endfor
 %endif
 
