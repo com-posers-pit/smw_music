@@ -65,6 +65,8 @@ from smw_music.scripts import convert
                 "--loop_analysis",
             ],
         ),
+        ("Metadata.mxl", "Metadata.txt", []),
+        ("No_Metadata.mxl", "No_Metadata.txt", []),
         (
             "Percussion.mxl",
             "Percussion.txt",
@@ -144,6 +146,8 @@ from smw_music.scripts import convert
         "Instruments (w/ To parsing)",
         "Loop Point",
         "Loops",
+        "Metadata",
+        "No Metadata",
         "Percussion",
         "Percussion (optimized)",
         "Pickup Measure",

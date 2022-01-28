@@ -1,0 +1,40 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+#spc {
+    #author  "O.G. Composer"
+    #title   "Metadata"
+    #game    "POLYBIUS"
+    #comment "Ported by: T. Porter, Esq."
+}
+
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+"Piano=13"
+
+
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"FADE=$E8"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48 $F4$02 /
+
+; Parameters
+"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
+"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
+
+"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
+vMF y10 qDEF
+
+; Music
+l1
+@Piano r
