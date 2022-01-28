@@ -12,8 +12,8 @@
 #spc {
     #author  "${song.composer}"
     #title   "${song.title}"
-    #game    "PORTER: GAME TITLE HERE"
-    #comment "PORTER: ADDITIONAL COMMENTS HERE"
+    #game    "${song.game}"
+    #comment "Ported by: ${song.porter}"
 }
 %if custom_samples:
 

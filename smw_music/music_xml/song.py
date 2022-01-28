@@ -161,7 +161,8 @@ class Song:
     ----------
     metadata: dict
         A dictionary containing the song's title (key "title"), composer (key
-        "composer"), and tempo (key "bpm").
+        "composer"), porter (key "porter") and game name (key "game") and tempo
+        (key "bpm").
     channels: list
         A list of `Channel` objects, the first 8 of which are used in this
         song.
@@ -172,6 +173,10 @@ class Song:
         The song's title, or '???' if one was not provided
     composer : str
         The song's composer, or '???' if one was not provided
+    porter : str
+        The song's porter, or '???' if one was not provided
+    game : str
+        The song's source game, or '???' if one was not provided
     bpm : int
         The song's tempo in beats per minute
     channels : list
@@ -185,6 +190,8 @@ class Song:
     def __init__(self, metadata: dict[str, str], channels: list["Channel"]):
         self.title = metadata.get("title", "???")
         self.composer = metadata.get("composer", "???")
+        self.porter = metadata.get("porter", "???")
+        self.game = metadata.get("game", "???")
         self.bpm = int(metadata.get("bpm", 120))
         self.channels = channels[:8]
 
@@ -210,8 +217,10 @@ class Song:
         stream = music21.converter.parseFile(fname)
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
-                metadata["composer"] = elem.composer
-                metadata["title"] = elem.title
+                metadata["composer"] = elem.composer or "COMPOSER HERE"
+                metadata["title"] = elem.title or "TITLE HERE"
+                metadata["porter"] = elem.lyricist or "PORTER NAME HERE"
+                metadata["game"] = elem.copyright or "GAME NAME HERE"
             if isinstance(elem, music21.tempo.MetronomeMark):
                 metadata["bpm"] = elem.getQuarterBPM()
 
