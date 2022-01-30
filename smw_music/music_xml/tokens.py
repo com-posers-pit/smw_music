@@ -770,7 +770,7 @@ class RehearsalMark(Token, Comment):
     def emit(self, state: MmlState, directives: list[str]):
         directives.append(CRLF)
         directives.append(f";===================={CRLF}")
-        directives.append(f"; Section {self.mark}{CRLF}")
+        directives.append(f"; {self.mark}{CRLF}")
         directives.append(f";===================={CRLF}")
         directives.append(CRLF)
         directives.append(
