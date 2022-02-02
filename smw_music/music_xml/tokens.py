@@ -214,6 +214,8 @@ class Crescendo(Token):
         Crecendo length, in beats
     target: str
         Target dynamic
+    cresc: bool
+        True if this is a crescendo; False if a diminuendo.
 
 
     Attributes
@@ -222,17 +224,21 @@ class Crescendo(Token):
         Crecendo length, in beats
     target: str
         Target dynamic
+    cresc: bool
+        True if this is a crescendo; False if a diminuendo.
     """
 
     duration: int
     target: str
+    cresc: bool
 
     ###########################################################################
     # API method definitions
     ###########################################################################
 
     def emit(self, _: MmlState, directives: list[str]):
-        directives.append(f"FADE${self.duration:02x}$_{self.target.upper()}")
+        cmd = "CRESC" if self.cresc else "DIM"
+        directives.append(f"{cmd}${self.duration:02x}$_{self.target.upper()}")
 
 
 ###############################################################################

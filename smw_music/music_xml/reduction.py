@@ -143,7 +143,7 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                 target = dyn.up if token.cresc else dyn.down
 
                 for nxt in tokens[n + 1 :]:
-                    if isinstance(token, Triplet):
+                    if isinstance(nxt, Triplet):
                         cresc_triplet = token.start
                     if isinstance(nxt, Playable) and not cresc_done:
                         note_duration = nxt.duration
@@ -156,7 +156,7 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                         target = nxt.level
                         break
                 duration = min(duration, 255)  # Limit for now
-                rv.append(Crescendo(duration, target))
+                rv.append(Crescendo(duration, target, token.cresc))
 
         if not drop:
             rv.append(token)

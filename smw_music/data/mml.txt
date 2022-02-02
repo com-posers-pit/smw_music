@@ -80,7 +80,8 @@ ${f'"v{key: <4} = $E7$_{key}"'}
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
-"FADE=$E8"
+"CRESC=$E8"
+"DIM=$E8"
 %for n, channel in enumerate(channels):
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
