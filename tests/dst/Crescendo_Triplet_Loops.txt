@@ -34,7 +34,8 @@ w180
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
-"FADE=$E8"
+"CRESC=$E8"
+"DIM=$E8"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Staff 1
@@ -51,7 +52,7 @@ vMF y10 qDEF
 ; Music
 o3 l1
 @Piano r
-(100)[ r8 vMF { FADE$40$_P [[ f+16]]9 }] r2
+(100)[ r8 vMF { DIM$40$_P [[ f+16]]9 }] r2
 r (100)
 r2
 r (100)
