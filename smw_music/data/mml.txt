@@ -38,7 +38,15 @@
 %endif
 %if instruments:
   %for key, val in instruments.items():
-"${key}=${val}"
+"${key}=${val} ${key.upper()}_DYN"
+  %endfor
+
+<%
+    field_sz = max((len(key) + 4) for key in instruments)
+    vol_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
+%>
+  %for key in instruments:
+"${f'{key.upper() + "_DYN":{field_sz}}'} = ${vol_str}"
   %endfor
 
 %endif
@@ -95,9 +103,9 @@ ${" /" if "/" not in channel else ""}
 
 ; Parameters
 %if not single_volumes:
-${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
+; ${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
 %endif
-${" ".join(f'"_{key}={val:02X}"' for key, val in volmap.items())}
+; ${" ".join(f'"_{key}={val:02X}"' for key, val in volmap.items())}
 
 "qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
 vMF y10 qDEF
