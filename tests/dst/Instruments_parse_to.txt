@@ -11,15 +11,58 @@
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
-"Flute=0"
-"Harpsichord=0"
-"Organ=0"
-"Piano=13"
-"Violin=0"
+; Instrument voice definitions
+"Flute_voice=0"
+"Harpsichord_voice=0"
+"Organ_voice=0"
+"Piano_voice=13"
+"Violin_voice=0"
+
+; Instrument dynamics definitions
+"Flute_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Organ_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Piano_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Violin_dyn      = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+
+; Instrument articulation definitions
+"Flute_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Organ_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Piano_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Violin_artic      = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+
+; Instrument pan definitions
+"Flute_pan       = "
+"Harpsichord_pan = "
+"Organ_pan       = "
+"Piano_pan       = "
+"Violin_pan      = "
+
+; Instrument definitions (don't touch these)
+"Flute = Flute_voice Flute_dyn Flute_artic Flute_pan"
+"Harpsichord = Harpsichord_voice Harpsichord_dyn Harpsichord_artic Harpsichord_pan"
+"Organ = Organ_voice Organ_dyn Organ_artic Organ_pan"
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
+"Violin = Violin_voice Violin_dyn Violin_artic Violin_pan"
 
 
 ; PORTER: GLOBAL VOLUME HERE
 w180
+
+; Don't touch these.  This is a way to use a hex value in a volume command.
+; We want to use hex values because that's how volume fades work.  Update
+; the corresponding dynamics marks in each channel.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
 
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
@@ -33,13 +76,6 @@ w180
 
 #0 t48 $F4$02 /
 
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
-
 ; Music
 o4 l4
 @Piano c < g a b
@@ -52,13 +88,6 @@ o4 l4
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #1 $F4$02 /
-
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
 
 ; Music
 o4 l4

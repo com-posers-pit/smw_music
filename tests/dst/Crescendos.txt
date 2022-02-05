@@ -11,11 +11,38 @@
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
-"Piano=13"
+; Instrument voice definitions
+"Piano_voice=13"
+
+; Instrument dynamics definitions
+"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+
+; Instrument articulation definitions
+"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+
+; Instrument pan definitions
+"Piano_pan = "
+
+; Instrument definitions (don't touch these)
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 
 
 ; PORTER: GLOBAL VOLUME HERE
 w180
+
+; Don't touch these.  This is a way to use a hex value in a volume command.
+; We want to use hex values because that's how volume fades work.  Update
+; the corresponding dynamics marks in each channel.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
 
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
@@ -28,13 +55,6 @@ w180
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48 $F4$02 /
-
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
 
 ; Music
 o3 l4
@@ -52,13 +72,6 @@ DIM$90$_MP < a b > c d
 
 #1 $F4$02 /
 
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
-
 ; Music
 o3 l4
 @Piano f vP CRESC$90$_FF g g+ a+
@@ -74,13 +87,6 @@ f g g+ a+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #2 $F4$02 /
-
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
 
 ; Music
 o2 l4

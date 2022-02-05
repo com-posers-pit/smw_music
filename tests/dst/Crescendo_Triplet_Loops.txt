@@ -11,7 +11,20 @@
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
-"Piano=13"
+; Instrument voice definitions
+"Piano_voice=13"
+
+; Instrument dynamics definitions
+"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+
+; Instrument articulation definitions
+"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+
+; Instrument pan definitions
+"Piano_pan = "
+
+; Instrument definitions (don't touch these)
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 
 
 ; PORTER: GLOBAL VOLUME HERE
@@ -42,12 +55,6 @@ w180
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48 $F4$02 /
-
-; Parameters
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
 
 ; Music
 o3 l1

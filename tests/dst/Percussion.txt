@@ -11,8 +11,22 @@
 
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
-"BassDrum1=8"
+; Instrument voice definitions
+"BassDrum1_voice=8"
 
+; Instrument dynamics definitions
+"BassDrum1_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+
+; Instrument articulation definitions
+"BassDrum1_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+
+; Instrument pan definitions
+"BassDrum1_pan = "
+
+; Instrument definitions (don't touch these)
+"BassDrum1 = BassDrum1_voice BassDrum1_dyn BassDrum1_artic BassDrum1_pan"
+
+; Percussion definitions
 "CR3=@22 CR3n" "CR3n=o6 c"
 "CR2=@22 CR2n" "CR2n=o5 b"
 "CR=@22 CRn"   "CRn=o5 a"
@@ -30,6 +44,20 @@
 ; PORTER: GLOBAL VOLUME HERE
 w180
 
+; Don't touch these.  This is a way to use a hex value in a volume command.
+; We want to use hex values because that's how volume fades work.  Update
+; the corresponding dynamics marks in each channel.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
+
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
@@ -41,13 +69,6 @@ w180
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #0 t48 $F4$02 /
-
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
 
 ; Music
 l4
@@ -61,13 +82,6 @@ KD KD KD KD8. SN16
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #1 $F4$02 /
-
-; Parameters
-"vPPPP=v26" "vPPP=v38" "vPP=v64" "vP=v90" "vMP=v115" "vMF=v141" "vF=v179" "vFF=v217" "vFFF=v230" "vFFFF=v225"
-"_PPPP=1A" "_PPP=26" "_PP=40" "_P=5A" "_MP=73" "_MF=8D" "_F=B3" "_FF=D9" "_FFF=E6" "_FFFF=E1"
-
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
 
 ; Music
 l16

@@ -38,14 +38,9 @@ from smw_music.scripts import convert
         ("Articulations.mxl", "Articulations.txt", []),
         ("Crescendos.mxl", "Crescendos.txt", []),
         (
-            "Crescendos.mxl",
-            "Crescendos_single_volume.txt",
-            ["--single_volume"],
-        ),
-        (
             "Crescendo_Triplet_Loops.mxl",
             "Crescendo_Triplet_Loops.txt",
-            ["--loop_analysis", "--single_volume"],
+            ["--loop_analysis"],
         ),
         ("Dots.mxl", "Dots.txt", []),
         ("Dynamics.mxl", "Dynamics.txt", []),
@@ -108,7 +103,6 @@ from smw_music.scripts import convert
             [
                 "--measure_numbers",
                 "--loop_analysis",
-                "--single_volume",
                 "--optimize_percussion",
             ],
         ),
@@ -136,7 +130,6 @@ from smw_music.scripts import convert
     ids=[
         "Articulations",
         "Crescendos",
-        "Crescendos (single volume)",
         "Crescendo+Triplet+Loop",
         "Dots",
         "Dynamics",
