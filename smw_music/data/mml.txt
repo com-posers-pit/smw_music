@@ -36,20 +36,33 @@
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 %endif
-%if instruments:
-  %for key, val in instruments.items():
-"${key}=${val} ${key.upper()}_DYN"
-  %endfor
-
+; Instrument voice definitions
+%for key, val in instruments.items():
+"${key}_voice=${val}"
+%endfor
 <%
-    field_sz = max((len(key) + 4) for key in instruments)
+    dyn = lambda x: x + "_dyn"
+    field_sz = max((len(dyn(key))) for key in instruments)
     vol_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
 %>
-  %for key in instruments:
-"${f'{key.upper() + "_DYN":{field_sz}}'} = ${vol_str}"
-  %endfor
+; Instrument dynamics definitions
+%for key in instruments:
+"${f'{dyn(key):{field_sz}}'} = ${vol_str}"
+%endfor
+<%
+    artic = lambda x: x + "_artic"
+    field_sz = max((len(artic(key))) for key in instruments)
+    artic_str = '\\"qDEF=q7A\\" \\"qSTAC=q5A\\" \\"qACC=q7F\\"'
+%>
+; Instrument articulation definitions
+%for key in instruments:
+"${f'{artic(key):{field_sz}}'} = ${artic_str}"
+%endfor
 
-%endif
+%for key in instruments:
+"${key} = ${key}_voice ${dyn(key)} ${artic(key)}"
+%endfor
+
 %if percussion:
 "CR3=@22 CR3n" "CR3n=o6 c"
 "CR2=@22 CR2n" "CR2n=o5 b"
@@ -75,7 +88,6 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 
 ; PORTER: GLOBAL VOLUME HERE
 w180
-%if single_volumes:
 
 ; Don't touch these.  This is a way to use a hex value in a volume command.
 ; We want to use hex values because that's how volume fades work.  Update
@@ -83,7 +95,6 @@ w180
 %for key in volmap:
 ${f'"v{key: <4} = $E7$_{key}"'}
 %endfor
-%endif
 
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
@@ -102,13 +113,8 @@ ${" $F4$02" if global_legato else ""}\
 ${" /" if "/" not in channel else ""}
 
 ; Parameters
-%if not single_volumes:
-; ${" ".join(f'"v{key}=v{val}"' for key, val in volmap.items())}
-%endif
-; ${" ".join(f'"_{key}={val:02X}"' for key, val in volmap.items())}
 
-"qDEF=q7A" "qSTAC_ON=q5A" "qACC_ON=q7F"
-vMF y10 qDEF
+y10
 
 ; Music
 ${channel}

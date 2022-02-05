@@ -702,11 +702,11 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
             if self.accent and not state.accent:
                 state.accent = True
-                directives.append("qACC_ON")
+                directives.append("qACC")
 
             if self.staccato and not state.staccato:
                 state.staccato = True
-                directives.append("qSTAC_ON")
+                directives.append("qSTAC")
 
         if self.tie == "start":
             state.tie = True

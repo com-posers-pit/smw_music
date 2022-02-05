@@ -75,11 +75,6 @@ def main(args=None):
         dest="enable_to_instruments",
     )
     parser.add_argument(
-        "--single_volume",
-        action="store_true",
-        help="Dynamics levels and cresc./decresc. use same macros",
-    )
-    parser.add_argument(
         "--custom_samples",
         action="store_true",
         help="Include boilerplate for custom samples",
@@ -101,7 +96,6 @@ def main(args=None):
         args.enable_dt,
         args.echo,
         args.enable_to_instruments,
-        args.single_volume,
         args.custom_samples,
         args.optimize_percussion,
     )
