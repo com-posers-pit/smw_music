@@ -22,8 +22,7 @@ import music21  # type: ignore
 # Project imports
 ###############################################################################
 
-from .context import MmlState, SlurState
-from .shared import CRLF, MusicXmlException, octave_notelen_str
+from .shared import MusicXmlException
 
 ###############################################################################
 # Private variable/constant definitions
@@ -105,13 +104,6 @@ class Playable:
 class Token:
     """Base class for MusicXML->MML tokens."""
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        raise NotImplementedError
-
 
 ###############################################################################
 
@@ -158,13 +150,6 @@ class Annotation(Token):
         """
         return cls(elem.content)
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, _: MmlState, directives: list[str]):
-        directives.append(self.text)
-
 
 ###############################################################################
 
@@ -191,13 +176,6 @@ class CrescDelim(Token):
 
     start: bool
     cresc: bool
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        pass
 
 
 ###############################################################################
@@ -231,14 +209,6 @@ class Crescendo(Token):
     duration: int
     target: str
     cresc: bool
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, _: MmlState, directives: list[str]):
-        cmd = "CRESC" if self.cresc else "DIM"
-        directives.append(f"{cmd}${self.duration:02x}$_{self.target.upper()}")
 
 
 ###############################################################################
@@ -289,13 +259,6 @@ class Dynamic(Token):
         return cls(elem.value)
 
     ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, _: MmlState, directives: list[str]):
-        directives.append(f"v{self.level.upper()}")
-
-    ###########################################################################
     # API property definitions
     ###########################################################################
 
@@ -342,27 +305,6 @@ class Loop(Token):
     repeats: int
     superloop: bool
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        if self.superloop:
-            open_dir = "[["
-            close_dir = "]]"
-        else:
-            open_dir = f"({self.loop_id})["
-            close_dir = "]"
-        if self.repeats > 1:
-            close_dir += str(self.repeats)
-
-        directives.append(open_dir)
-
-        for token in self.tokens:
-            token.emit(state, directives)
-
-        directives.append(close_dir)
-
 
 ###############################################################################
 
@@ -390,13 +332,6 @@ class LoopDelim(Token):
     start: bool
     loop_id: int
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        pass
-
 
 ###############################################################################
 
@@ -405,14 +340,6 @@ class LoopDelim(Token):
 class LoopRef(Token):
     loop_id: int
     repeats: int
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, _: MmlState, directives: list[str]):
-        repeats = f"{self.repeats}" if self.repeats > 1 else ""
-        directives.append(f"({self.loop_id}){repeats}")
 
 
 ###############################################################################
@@ -450,18 +377,6 @@ class Measure(Token, Comment):
 
     ###########################################################################
     # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        comment = ""
-        if state.measure_numbers:
-            if len(self.range) == 1:
-                comment = f"; Measure {self.number}"
-            else:
-                comment = f"; Measures {self.range[0]}-{self.range[-1]}"
-
-        directives.append(f"{comment}{CRLF}")
-
     ###########################################################################
 
     def left_join(self, prev: "Measure"):
@@ -603,126 +518,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
                 msg += f"measure {measure}"
                 raise MusicXmlException(msg)
 
-    ###########################################################################
-
-    def _start_legato(self, state: MmlState, directives: list[str]):
-        if not state.legato:
-            if (state.slur == SlurState.SLUR_ACTIVE) or state.grace:
-                state.legato = True
-                directives.append("LEGATO_ON")
-
-    ###########################################################################
-
-    def _stop_legato(self, state: MmlState, directives: list[str]):
-        if state.legato:
-            if not (
-                state.grace
-                or (state.slur == SlurState.SLUR_ACTIVE)
-                or state.tie
-            ):
-                state.legato = False
-                directives.append("LEGATO_OFF")
-
-    ###########################################################################
-
-    def _calc_note_length(self, state: MmlState) -> str:
-        grace_length = 8
-        note_length = ""
-
-        if state.slur == SlurState.SLUR_END:
-            state.slur = SlurState.SLUR_IDLE
-            duration = 192 // self.duration
-            duration = int(duration * (2 - 0.5 ** self.dots))
-            state.legato = False
-            note_length = f"=1 LEGATO_OFF ^={duration - 1}"
-        else:
-            if not state.grace and not self.grace:
-                if self.duration != state.default_note_len:
-                    note_length = str(self.duration)
-                note_length += self.dots * "."
-            else:
-                if self.grace:
-                    note_length = f"={grace_length}"
-                else:
-                    duration = 192 // self.duration
-                    duration = int(duration * (2 - 0.5 ** self.dots))
-                    note_length = f"={duration - grace_length}"
-
-        return note_length
-
-    ###########################################################################
-
-    def _emit_octave(self, state: MmlState, directives: list[str]):
-        cur_octave = state.octave
-        octave = self.octave
-        if octave != cur_octave:
-            if octave == cur_octave - 1:
-                directive = "<"
-            elif octave == cur_octave + 1:
-                directive = ">"
-            else:
-                directive = f"o{octave}"
-            directives.append(directive)
-            state.octave = octave
-
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        if self.grace:
-            state.grace = True
-
-        if not state.percussion:
-            self._emit_octave(state, directives)
-
-        if state.tie:
-            directive = "^"
-        else:
-            if not state.percussion:
-                directive = self.name
-            else:
-                directive = PERCUSSION_MAP[self.head][
-                    self.name + str(self.octave + 1)
-                ]
-                if state.optimize_percussion:
-                    if directive == state.last_percussion:
-                        state.last_percussion = directive
-                        directive += "n"
-                    else:
-                        state.last_percussion = directive
-
-        directive += self._calc_note_length(state)
-
-        if not state.tie:
-            if not self.accent and state.accent:
-                state.accent = False
-                directives.append("qDEF")
-            if not self.staccato and state.staccato:
-                state.staccato = False
-                directives.append("qDEF")
-
-            if self.accent and not state.accent:
-                state.accent = True
-                directives.append("qACC")
-
-            if self.staccato and not state.staccato:
-                state.staccato = True
-                directives.append("qSTAC")
-
-        if self.tie == "start":
-            state.tie = True
-
-        self._start_legato(state, directives)
-
-        directives.append(directive)
-
-        if self.tie == "stop":
-            state.tie = False
-
-        if not self.grace:
-            state.grace = False
-
-        self._stop_legato(state, directives)
-
 
 ###############################################################################
 
@@ -769,21 +564,6 @@ class RehearsalMark(Token, Comment):
         """
         return cls(elem.content)
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        directives.append(CRLF)
-        directives.append(f";===================={CRLF}")
-        directives.append(f"; {self.mark}{CRLF}")
-        directives.append(f";===================={CRLF}")
-        directives.append(CRLF)
-        directives.append(
-            octave_notelen_str(state.octave, state.default_note_len)
-        )
-        directives.append(CRLF)
-
 
 ###############################################################################
 
@@ -826,14 +606,6 @@ class Repeat(Token):
             A new Repeat object with its attributes defined by `elem`
         """
         return cls(elem.direction == "start")
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, _: MmlState, directives: list[str]):
-        if self.start:
-            directives.append("/")
 
 
 ###############################################################################
@@ -886,18 +658,6 @@ class Rest(Token, Playable):
             elem.duration.dots,
         )
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        directive = "r"
-        if self.duration != state.default_note_len:
-            directive += str(self.duration)
-        directive += self.dots * "."
-
-        directives.append(directive)
-
 
 ###############################################################################
 
@@ -920,15 +680,6 @@ class Slur(Token):
 
     start: bool
 
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, state: MmlState, directives: list[str]):
-        state.slur = (
-            SlurState.SLUR_ACTIVE if self.start else SlurState.SLUR_END
-        )
-
 
 ###############################################################################
 
@@ -950,10 +701,3 @@ class Triplet(Token):
     """
 
     start: bool
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def emit(self, _: MmlState, directives: list[str]):
-        directives.append("{" if self.start else "}")

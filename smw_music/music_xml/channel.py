@@ -18,7 +18,7 @@ from typing import cast, Iterable, TypeVar
 # Project imports
 ###############################################################################
 
-from .context import MmlState
+from .mml import MmlExporter
 from .shared import CRLF, octave_notelen_str
 from .tokens import flatten, Note, Playable, RehearsalMark, Token
 
@@ -89,14 +89,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     tokens: list[Token]
     percussion: bool
-    _accent: bool = field(init=False, repr=False, compare=False)
     _directives: list[str] = field(init=False, repr=False, compare=False)
-    _loops: dict[int, list[Token]] = field(
-        init=False, repr=False, compare=False
-    )
-    _measure_numbers: bool = field(init=False, repr=False, compare=False)
-    _staccato: bool = field(init=False, repr=False, compare=False)
-    _mml_state: MmlState = field(init=False, repr=False, compare=False)
+    _exporter: MmlExporter = field(init=False, repr=False, compare=False)
 
     ###########################################################################
     # Data model method definitions
@@ -110,23 +104,19 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def _reset_state(self):
-        self._mml_state = MmlState()
+        self._exporter = MmlExporter()
         self._update_state_defaults(
             *_default_octave_notelen(flatten(self.tokens))
         )
-        self._mml_state.percussion = self.percussion
-
-        self._accent = False
-        self._loops = {}
-        self._staccato = False
+        self._exporter.percussion = self.percussion
 
     ###########################################################################
 
     def _update_state_defaults(self, octave: int, notelen: int):
         if self.percussion:
             octave = -1
-        self._mml_state.octave = octave
-        self._mml_state.default_note_len = notelen
+        self._exporter.octave = octave
+        self._exporter.default_note_len = notelen
 
     ###########################################################################
     # API method definitions
@@ -167,20 +157,20 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             The MML text for this channel
         """
         self._reset_state()
-        self._mml_state.measure_numbers = measure_numbers
-        self._mml_state.optimize_percussion = optimize_percussion
+        self._exporter.measure_numbers = measure_numbers
+        self._exporter.optimize_percussion = optimize_percussion
 
         octave_notelen = octave_notelen_str(
-            self._mml_state.octave, self._mml_state.default_note_len
+            self._exporter.octave, self._exporter.default_note_len
         )
-        self._directives = [octave_notelen, CRLF]
+        self._exporter.directives = [octave_notelen, CRLF]
 
-        for n, elem in enumerate(self.tokens):
-            if isinstance(elem, RehearsalMark):
+        for n, token in enumerate(self.tokens):
+            if isinstance(token, RehearsalMark):
                 self._update_state_defaults(
                     *_default_octave_notelen(flatten(self.tokens[n + 1 :]))
                 )
-            elem.emit(self._mml_state, self._directives)
+            self._exporter._emit(token)
 
-        lines = " ".join(self._directives).splitlines()
+        lines = " ".join(self._exporter.directives).splitlines()
         return CRLF.join(x.strip() for x in lines)
