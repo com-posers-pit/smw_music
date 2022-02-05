@@ -36,34 +36,44 @@
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 %endif
+<%
+    voice = lambda x: x + "_voice"
+    dyn = lambda x: x + "_dyn"
+    dyn_sz = max((len(dyn(key))) for key in instruments)
+    dyn_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
+    artic = lambda x: x + "_artic"
+    artic_sz = max((len(artic(key))) for key in instruments)
+    artic_str = '\\"qDEF=q7A\\" \\"qSTAC=q5A\\" \\"qACC=q7F\\"'
+    pan = lambda x: x + "_pan"
+    pan_sz = max((len(pan(key))) for key in instruments)
+%>\
 ; Instrument voice definitions
 %for key, val in instruments.items():
-"${key}_voice=${val}"
-%endfor
-<%
-    dyn = lambda x: x + "_dyn"
-    field_sz = max((len(dyn(key))) for key in instruments)
-    vol_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
-%>
-; Instrument dynamics definitions
-%for key in instruments:
-"${f'{dyn(key):{field_sz}}'} = ${vol_str}"
-%endfor
-<%
-    artic = lambda x: x + "_artic"
-    field_sz = max((len(artic(key))) for key in instruments)
-    artic_str = '\\"qDEF=q7A\\" \\"qSTAC=q5A\\" \\"qACC=q7F\\"'
-%>
-; Instrument articulation definitions
-%for key in instruments:
-"${f'{artic(key):{field_sz}}'} = ${artic_str}"
+"${voice(key)}=${val}"
 %endfor
 
+; Instrument dynamics definitions
 %for key in instruments:
-"${key} = ${key}_voice ${dyn(key)} ${artic(key)}"
+"${f'{dyn(key):{dyn_sz}}'} = ${dyn_str}"
+%endfor
+
+; Instrument articulation definitions
+%for key in instruments:
+"${f'{artic(key):{artic_sz}}'} = ${artic_str}"
+%endfor
+
+; Instrument pan definitions
+%for key in instruments:
+"${f'{pan(key):{pan_sz}}'} = "
+%endfor
+
+; Instrument definitions (don't touch these)
+%for key in instruments:
+"${key} = ${voice(key)} ${dyn(key)} ${artic(key)} ${pan(key)}"
 %endfor
 
 %if percussion:
+; Percussion definitions
 "CR3=@22 CR3n" "CR3n=o6 c"
 "CR2=@22 CR2n" "CR2n=o5 b"
 "CR=@22 CRn"   "CRn=o5 a"
@@ -111,10 +121,6 @@ ${f'"v{key: <4} = $E7$_{key}"'}
 ${f" t{tempo}" if n == 0 else ''}\
 ${" $F4$02" if global_legato else ""}\
 ${" /" if "/" not in channel else ""}
-
-; Parameters
-
-y10
 
 ; Music
 ${channel}
