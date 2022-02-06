@@ -10,6 +10,7 @@
 ###############################################################################
 
 from dataclasses import dataclass
+from enum import auto, Enum
 from typing import Union
 
 ###############################################################################
@@ -82,6 +83,16 @@ def flatten(tokens: list["Token"]) -> list["Token"]:
 
 ###############################################################################
 # API class definitions
+###############################################################################
+
+
+class Artic(Enum):
+    NORMAL = auto()
+    ACCENT = auto()
+    STACCATO = auto()
+    ACCSTAC = auto()
+
+
 ###############################################################################
 
 
@@ -416,10 +427,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         "start" to start a tie, "stop" to end a tie, "" if no tie
     grace: bool
         True iff this is a grace note
-    accent: bool
-        True iff this is an accented note
-    staccato: bool
-        True iff this is an staccato note
+    articulation: Artic
+        Articulation style
 
     Attributes
     ----------
@@ -438,10 +447,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         "start" to start a tie, "stop" to end a tie, "" if no tie
     grace: bool
         True iff this is a grace note
-    accent: bool
-        True iff this is an accented note
-    staccato: bool
-        True iff this is an staccato note
+    articulation: Artic
+        Articulation style
 
     Todo
     ----
@@ -455,8 +462,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     dots: int = 0
     tie: str = ""
     grace: bool = False
-    accent: bool = False
-    staccato: bool = False
+    articulation: Artic = Artic.NORMAL
 
     ###########################################################################
     # API constructor definitions
@@ -490,6 +496,10 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
         accent = music21.articulations.Accent in articulations
         staccato = music21.articulations.Staccato in articulations
+        if accent:
+            articulation = Artic.ACCSTAC if staccato else Artic.ACCENT
+        else:
+            articulation = Artic.STACCATO if staccato else Artic.NORMAL
 
         return cls(
             name.lower().replace("#", "+"),
@@ -499,8 +509,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
             elem.duration.isGrace,
-            accent,
-            staccato,
+            articulation,
         )
 
     ###########################################################################

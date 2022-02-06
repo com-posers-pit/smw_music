@@ -52,7 +52,7 @@ w180
     dyn_sz = max((len(dyn(key))) for key in instruments)
     dyn_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
     artic_sz = max((len(artic(key))) for key in instruments)
-    artic_str = '\\"qDEF=q7A\\" \\"qSTAC=q5A\\" \\"qACC=q7F\\"'
+    artic_str = '\\"qDEF=q7A\\" \\"qSTAC=q5A\\" \\"qACC=q7F\\" \\"qACCSTAC=q5F\\"'
     pan_sz = max((len(pan(key))) for key in instruments)
 %>\
 ; Instrument voice definitions

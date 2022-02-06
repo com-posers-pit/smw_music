@@ -21,6 +21,7 @@ from functools import singledispatchmethod
 from .shared import CRLF, notelen_str
 from .tokens import (
     Annotation,
+    Artic,
     CrescDelim,
     Crescendo,
     Dynamic,
@@ -105,8 +106,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     tie: bool = False
     legato: bool = False
     percussion: bool = False
-    accent: bool = False
-    staccato: bool = False
+    articulation: Artic = Artic.NORMAL
     optimize_percussion: bool = False
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
@@ -268,21 +268,15 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
         directive += self._calc_note_length(token)
 
-        if not self.tie:
-            if not token.accent and self.accent:
-                self.accent = False
-                self._append("qDEF")
-            if not token.staccato and self.staccato:
-                self.staccato = False
-                self._append("qDEF")
-
-            if token.accent and not self.accent:
-                self.accent = True
-                self._append("qACC")
-
-            if token.staccato and not self.staccato:
-                self.staccato = True
-                self._append("qSTAC")
+        if not self.tie and (token.articulation != self.articulation):
+            lut = {
+                Artic.NORMAL: "qDEF",
+                Artic.ACCENT: "qACC",
+                Artic.STACCATO: "qSTAC",
+                Artic.ACCSTAC: "qACCSTAC",
+            }
+            self._append(lut[token.articulation])
+            self.articulation = token.articulation
 
         if token.tie == "start":
             self.tie = True
