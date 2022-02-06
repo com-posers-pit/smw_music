@@ -30,18 +30,18 @@ w180
 "BassDrum1_pan = "
 
 ; Percussion definitions
-"CR3=@22 CR3n" "CR3n=o6 c"
-"CR2=@22 CR2n" "CR2n=o5 b"
-"CR=@22 CRn"   "CRn=o5 a"
-"CH=@22 CHn"   "CHn=o5 g"
-"OH=@22 OHn"   "OHn=o5 f"
-"RD=@22 RDn"   "RDn=o5 e"
-"RD2=@22 RD2n" "RD2n=o5 d"
-"HT=@24 HTn"   "HTn=o5 e"
-"MT=@23 MTn"   "MTn=o5 d"
-"SN=@10 SNn"   "SNn=o5 c"
-"LT=@21 LTn"   "LTn=o4 a"
-"KD=@21 KDn"   "KDn=o4 f"
+"CR3_=@22 CR3_n" "CR3_n=o6 c"
+"CR2_=@22 CR2_n" "CR2_n=o5 b"
+"CR  =@22 CRn"   "CRn  =o5 a"
+"CH  =@22 CHn"   "CHn  =o5 g"
+"OH  =@22 OHn"   "OHn  =o5 f"
+"RD  =@22 RDn"   "RDn  =o5 e"
+"RD2_=@22 RD2_n" "RD2_n=o5 d"
+"HT  =@24 HTn"   "HTn  =o5 e"
+"MT  =@23 MTn"   "MTn  =o5 d"
+"SN  =@10 SNn"   "SNn  =o5 c"
+"LT  =@21 LTn"   "LTn  =o4 a"
+"KD  =@21 KDn"   "KDn  =o4 f"
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -93,6 +93,6 @@ KD KDn KDn KDn8. SN16
 
 l16
 @BassDrum1 CH4 OH4 CR4 RD4
-CR34 CR24 RD24 r4
+CR3_4 CR2_4 RD2_4 r4
 CH CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn
 CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn CHn
