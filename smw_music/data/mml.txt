@@ -21,7 +21,7 @@
 #path "folder name"
 
 #samples {
-    #optimized
+    #optimized ;Don't touch/delete this line, just replace the sample brr files below
     "Sample1.brr"
     "Sample2.brr"
 }
