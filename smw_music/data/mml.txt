@@ -32,6 +32,9 @@
 }
 %endif
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
 %if instruments or percussion:
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
@@ -68,11 +71,6 @@
 "${f'{pan(key):{pan_sz}}'} = "
 %endfor
 
-; Instrument definitions (don't touch these)
-%for key in instruments:
-"${key.name} = ${voice(key)} ${dyn(key)} ${artic(key)} ${pan(key)}"
-%endfor
-
 %if percussion:
 ; Percussion definitions
 "CR3=@22 CR3n" "CR3n=o6 c"
@@ -97,12 +95,19 @@ ${f'$EF${echo_config.channel_reg:02X}${echo_config.left_vol_reg:02X}${echo_confi
 ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:02X}'}
 %endif
 
-; PORTER: GLOBAL VOLUME HERE
-w180
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Don't touch these.  This is a way to use a hex value in a volume command.
-; We want to use hex values because that's how volume fades work.  Update
-; the corresponding dynamics marks in each channel.
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+%for key in instruments:
+"${key.name} = ${voice(key)} ${dyn(key)} ${artic(key)} ${pan(key)}"
+%endfor
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
 %for key in volmap:
 ${f'"v{key: <4} = $E7$_{key}"'}
 %endfor
@@ -110,6 +115,7 @@ ${f'"v{key: <4} = $E7$_{key}"'}
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
 "CRESC=$E8"
 "DIM=$E8"
 %for n, channel in enumerate(channels):
@@ -120,9 +126,8 @@ ${f'"v{key: <4} = $E7$_{key}"'}
 
 #${n}\
 ${f" t{tempo}" if n == 0 else ''}\
-${" $F4$02" if global_legato else ""}\
-${" /" if "/" not in channel else ""}
+${" GLOBAL_LEGATO" if global_legato and (n == 0) else ""}\
+${" /" if "/" not in channel else ""}\
 
-; Music
 ${channel}
 %endfor

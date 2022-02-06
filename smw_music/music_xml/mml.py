@@ -9,7 +9,7 @@
 # Standard Library imports
 ###############################################################################
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import auto, Enum
 from functools import singledispatchmethod
 
@@ -106,6 +106,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     staccato: bool = False
     optimize_percussion: bool = False
     last_percussion: str = ""
+    directives: list[str] = field(default_factory=list)
 
     ###########################################################################
 
@@ -202,8 +203,9 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         self.directives.append(f"; {token.mark}{CRLF}")
         self.directives.append(f";===================={CRLF}")
         self.directives.append(CRLF)
-        self.directives.append(notelen_str(self.default_note_len))
-        self.directives.append(CRLF)
+        if self.default_note_len:
+            self.directives.append(notelen_str(self.default_note_len))
+            self.directives.append(CRLF)
 
     ###########################################################################
 

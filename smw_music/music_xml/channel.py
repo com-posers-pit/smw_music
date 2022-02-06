@@ -12,7 +12,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import cast, Iterable, TypeVar
+from typing import Iterable, TypeVar
 
 ###############################################################################
 # Project imports
@@ -35,14 +35,13 @@ _T = TypeVar("_T")
 
 
 def _default_notelen(tokens: list[Token], section: bool = True) -> int:
-
     if section:
         tokens = list(
             takewhile(lambda x: not isinstance(x, RehearsalMark), tokens)
         )
     playable = [x for x in flatten(tokens) if isinstance(x, Playable)]
 
-    notelen = _most_common([x.duration for x in playable]) if playable else 1
+    notelen = _most_common([x.duration for x in playable]) if playable else 0
 
     return notelen
 
@@ -101,8 +100,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _reset_state(self, instr_octave_map: dict[str, int]) -> None:
         self._exporter = MmlExporter(instr_octave_map)
-        self._update_state_defaults(_default_notelen(flatten(self.tokens)))
         self._exporter.percussion = self.percussion
+
+        notelen = _default_notelen(flatten(self.tokens))
+        self._update_state_defaults(notelen)
+
+        if notelen:
+            self._exporter.directives = [notelen_str(notelen), CRLF]
 
     ###########################################################################
 
@@ -153,9 +157,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._reset_state(instr_octave_map)
         self._exporter.measure_numbers = measure_numbers
         self._exporter.optimize_percussion = optimize_percussion
-
-        notelen = notelen_str(self._exporter.default_note_len)
-        self._exporter.directives = [notelen, CRLF]
 
         for n, token in enumerate(self.tokens):
             if isinstance(token, RehearsalMark):
