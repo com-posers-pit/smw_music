@@ -32,11 +32,11 @@ w180
 "Violin_dyn      = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
 
 ; Instrument articulation definitions
-"Flute_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
-"Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
-"Organ_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
-"Piano_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
-"Violin_artic      = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Flute_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Organ_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Piano_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Violin_artic      = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 
 ; Instrument pan definitions
 "Flute_pan       = "
