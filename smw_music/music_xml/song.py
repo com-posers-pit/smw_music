@@ -34,10 +34,11 @@ from .tokens import (
     Annotation,
     CrescDelim,
     Dynamic,
-    RehearsalMark,
+    Instrument,
     LoopDelim,
     Measure,
     Note,
+    RehearsalMark,
     Repeat,
     Rest,
     Slur,
@@ -311,7 +312,7 @@ class Song:
 
     ###########################################################################
 
-    def _instruments(self) -> dict[str, int]:
+    def _instruments(self) -> dict[tuple[Instrument, int]]:
         # Default instrument mapping, from Wakana's tutorial
         inst_map = {
             "flute": 0,
@@ -319,33 +320,20 @@ class Song:
             "cello": 4,
             "trumpet": 6,
             "bass": 8,
+            "bassguitar": 8,
             "piano": 13,
             "guitar": 17,
         }
 
         inst_set = set()
         for channel in self.channels:
-            annotations = [
-                x for x in channel.tokens if isinstance(x, Annotation)
-            ]
-            for annotation in [x.text for x in annotations]:
-                if annotation[0] == "@" and " " not in annotation:
-                    instrument = annotation[1:]
-                    try:
-                        int(instrument)
-                    except ValueError:
-                        inst_set.add(instrument)
+            inst_set |= set(
+                filter(lambda x: isinstance(x, Instrument), channel.tokens)
+            )
         instruments = sorted(list(inst_set))
+        samples = map(lambda x: inst_map.get(x.name.lower(), 0), instruments)
 
-        rv = {}
-        for key in instruments:
-            rv[key] = 0
-            for inst, inst_id in inst_map.items():
-                if inst in key.lower():
-                    rv[key] = inst_id
-                    break
-
-        return rv
+        return dict(zip(instruments, samples))
 
     ###########################################################################
 
@@ -367,9 +355,7 @@ class Song:
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
                 channel_elem.append(
-                    Annotation(
-                        "AMK: @" + subpart.instrumentName.replace(" ", "")
-                    )
+                    Instrument(subpart.instrumentName.replace(" ", ""))
                 )
             if not isinstance(subpart, music21.stream.Measure):
                 continue
@@ -465,21 +451,10 @@ class Song:
         self,
         loop_analysis: bool,
         superloop_analysis: bool,
-        enable_to_instruments: bool,
     ):
-        if enable_to_instruments:
-            filters = [
-                (
-                    lambda x: x.startswith("To "),
-                    lambda x: "@" + x.removeprefix("To ").replace(" ", ""),
-                )
-            ]
-        else:
-            filters = None
-
         for chan in self.channels:
             chan.tokens = reduce(
-                chan.tokens, loop_analysis, superloop_analysis, filters
+                chan.tokens, loop_analysis, superloop_analysis
             )
 
     ###########################################################################
@@ -505,7 +480,6 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: Optional[EchoConfig] = None,
-        enable_to_instruments: bool = True,
         custom_samples: bool = True,
         optimize_percussion: bool = True,
     ) -> str:
@@ -526,9 +500,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        enable_to_instruments : bool
-            True iff annotations that start with 'To' should be kept as
-            instrument macros
         custom_samples: bool
             True iff the custom samples header should be included in the MML
         optimize_percussion: bool
@@ -551,7 +522,7 @@ class Song:
             "FFFF": 225,
         }
 
-        self._reduce(loop_analysis, superloop_analysis, enable_to_instruments)
+        self._reduce(loop_analysis, superloop_analysis)
 
         self._validate()
         channels = [
@@ -599,7 +570,6 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: Optional[EchoConfig] = None,
-        enable_to_instruments: bool = True,
         custom_samples: bool = False,
         optimize_percussion: bool = True,
     ):
@@ -622,9 +592,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        enable_to_instruments : bool
-            True iff annotations that start with 'To' should be kept as
-            instrument macros
         custom_samples: bool
             True iff the custom samples header should be included in the MML
         optimize_percussion: bool
@@ -640,7 +607,6 @@ class Song:
                     measure_numbers,
                     include_dt,
                     echo_config,
-                    enable_to_instruments,
                     custom_samples,
                     optimize_percussion,
                 ),

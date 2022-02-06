@@ -22,6 +22,7 @@ from .tokens import (
     CrescDelim,
     Crescendo,
     Dynamic,
+    Instrument,
     Loop,
     LoopDelim,
     LoopRef,
@@ -33,12 +34,6 @@ from .tokens import (
     Token,
     Triplet,
 )
-
-###############################################################################
-# Private function definitions
-###############################################################################
-
-AnnotationFilter = tuple[Callable[[str], bool], Callable[[str], str]]
 
 ###############################################################################
 # Private function definitions
@@ -227,17 +222,28 @@ def _deduplicate_measures(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
-def _filter_annotations(
-    tokens: list[Token], filters: list[AnnotationFilter]
-) -> list[Token]:
+def _filter_annotations(tokens: list[Token]) -> list[Token]:
     rv = []
+
+    filters = [
+        (
+            lambda x: x.startswith("To "),
+            lambda x: Instrument(
+                x.removeprefix("To").strip().replace(" ", "")
+            ),
+        ),
+        (
+            lambda x: x.startswith("AMK: "),
+            lambda x: Annotation(x.removeprefix("AMK:").strip()),
+        ),
+    ]
 
     for token in tokens:
         drop = False
         if isinstance(token, Annotation):
             for match, proc in filters:
                 if match(token.text):
-                    token = Annotation(proc(token.text))
+                    token = proc(token.text)
                     break
             else:
                 drop = True
@@ -468,7 +474,7 @@ def _swap_repeat_annotations(tokens: list[Token]) -> list[Token]:
         if isinstance(token, Repeat):
             while tokens:
                 nxt = tokens[-1]
-                if isinstance(nxt, Annotation):
+                if isinstance(nxt, (Annotation, Instrument)):
                     rv.append(tokens.pop())
                 else:
                     break
@@ -488,18 +494,8 @@ def reduce(
     tokens: list[Token],
     loop_analysis: bool,
     superloop_analysis: bool,
-    annotation_filters: Optional[list[AnnotationFilter]] = None,
 ) -> list[Token]:
-    if annotation_filters is None:
-        annotation_filters = []
-
-    annotation_filters += [
-        (
-            lambda x: x.startswith("AMK: "),
-            lambda x: x.removeprefix("AMK:").strip(),
-        )
-    ]
-    tokens = _filter_annotations(tokens, annotation_filters)
+    tokens = _filter_annotations(tokens)
     tokens = _swap_repeat_annotations(tokens)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)

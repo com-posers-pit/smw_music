@@ -9,8 +9,8 @@
 # Standard Library imports
 ###############################################################################
 
-from dataclasses import dataclass
-from typing import Union
+from dataclasses import dataclass, field
+from typing import Optional, Union
 
 ###############################################################################
 # Library imports
@@ -293,6 +293,14 @@ class Dynamic(Token):
             "fff": "ffff",
             "ffff": "ffff",
         }[self.level]
+
+
+###############################################################################
+
+
+@dataclass(frozen=True, order=True)
+class Instrument(Token):
+    name: str
 
 
 ###############################################################################

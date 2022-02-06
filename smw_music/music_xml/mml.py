@@ -24,6 +24,7 @@ from .tokens import (
     CrescDelim,
     Crescendo,
     Dynamic,
+    Instrument,
     Loop,
     LoopDelim,
     LoopRef,
@@ -153,6 +154,12 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     @_emit.register
     def _(self, token: Dynamic) -> None:
         self.directives.append(f"v{token.level.upper()}")
+
+    ###########################################################################
+
+    @_emit.register
+    def _(self, token: Instrument) -> None:
+        self.directives.append(f"@{token.name}")
 
     ###########################################################################
 

@@ -69,12 +69,6 @@ def main(args=None):
         default=None,
     )
     parser.add_argument(
-        "--disable_to_instruments",
-        action="store_false",
-        help='Disable decoding "To XYZ" to instrument macros',
-        dest="enable_to_instruments",
-    )
-    parser.add_argument(
         "--custom_samples",
         action="store_true",
         help="Include boilerplate for custom samples",
@@ -95,7 +89,6 @@ def main(args=None):
         args.measure_numbers,
         args.enable_dt,
         args.echo,
-        args.enable_to_instruments,
         args.custom_samples,
         args.optimize_percussion,
     )
