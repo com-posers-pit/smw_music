@@ -312,7 +312,7 @@ class Song:
 
     ###########################################################################
 
-    def _instruments(self) -> dict[tuple[Instrument, int]]:
+    def _instruments(self) -> dict[str, int]:
         # Default instrument mapping, from Wakana's tutorial
         inst_map = {
             "flute": 0,
@@ -326,13 +326,13 @@ class Song:
             "guitar": 17,
         }
 
-        inst_set = set()
+        inst_set: set[str] = set()
         for channel in self.channels:
             inst_set |= set(
-                filter(lambda x: isinstance(x, Instrument), channel.tokens)
+                x.name for x in channel.tokens if isinstance(x, Instrument)
             )
-        instruments = sorted(list(inst_set))
-        samples = map(lambda x: inst_map.get(x.name.lower(), 0), instruments)
+        instruments = sorted(inst_set)
+        samples = map(lambda x: inst_map.get(x.lower(), 0), instruments)
 
         return dict(zip(instruments, samples))
 

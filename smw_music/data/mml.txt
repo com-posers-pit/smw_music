@@ -43,10 +43,10 @@ w180
 
 %endif
 <%
-    voice = lambda x: x.name + "_voice"
-    dyn = lambda x: x.name + "_dyn"
-    artic = lambda x: x.name + "_artic"
-    pan = lambda x: x.name + "_pan"
+    voice = lambda x: x + "_voice"
+    dyn = lambda x: x + "_dyn"
+    artic = lambda x: x + "_artic"
+    pan = lambda x: x + "_pan"
 
     dyn_sz = max((len(dyn(key))) for key in instruments)
     dyn_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
@@ -105,7 +105,7 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 ; Instrument definitions.  Smoosh together the instrument voice definition
 ; with its dynamics, articulation, and pan definitions
 %for key in instruments:
-"${key.name} = ${voice(key)} ${dyn(key)} ${artic(key)} ${pan(key)}"
+"${key} = ${voice(key)} ${dyn(key)} ${artic(key)} ${pan(key)}"
 %endfor
 
 ; This is a way to use a hex value in a volume command.  We want to use hex

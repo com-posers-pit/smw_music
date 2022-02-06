@@ -71,8 +71,8 @@ PERCUSSION_MAP = {
 class Exporter:
     directives: list[str]
 
-    def _append(self, token: Token) -> None:
-        self.directives.append(token)
+    def _append(self, directive: str) -> None:
+        self.directives.append(directive)
 
     def _emit(self, token: Token) -> None:
         raise NotImplementedError
