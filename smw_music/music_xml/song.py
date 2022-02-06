@@ -29,7 +29,7 @@ from mako.template import Template  # type: ignore
 from .channel import Channel
 from .echo import EchoConfig
 from .reduction import reduce
-from .shared import MusicXmlException
+from .shared import CRLF, MusicXmlException
 from .tokens import (
     Annotation,
     CrescDelim,
@@ -558,7 +558,10 @@ class Song:
         rv = rv.replace(" ^", "^")
         rv = rv.replace(" ]", "]")
 
-        return rv
+        # This last bit removes any empty lines at the end (these don't
+        # normally show up, but can if the last section in the last staff is
+        # empty.
+        return rv.rstrip() + CRLF
 
     ###########################################################################
 

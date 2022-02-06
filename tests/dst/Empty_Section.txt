@@ -1,0 +1,81 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+#spc {
+    #author  "COMPOSER HERE"
+    #title   "Empty Section"
+    #game    "GAME NAME HERE"
+    #comment "Ported by: PORTER NAME HERE"
+}
+
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: TEMPO HERE
+"SET_TEMPO=t48"
+
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+; Instrument voice definitions
+"Piano_voice=13 o3"
+
+; Instrument dynamics definitions
+"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+
+; Instrument articulation definitions
+"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+
+; Instrument pan definitions
+"Piano_pan = "
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
+"CRESC=$E8"
+"DIM=$E8"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 SET_TEMPO GLOBAL_LEGATO /
+
+l4
+@Piano (100)[ a b > c d]3
+
+;====================
+; A
+;====================
+
+l4
+
+d c < b a (100)4
+
+;====================
+; B
+;====================
