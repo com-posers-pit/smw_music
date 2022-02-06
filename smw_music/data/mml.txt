@@ -42,6 +42,7 @@ w180
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 %endif
+%if instruments:
 <%
     voice = lambda x: x + "_voice"
     dyn = lambda x: x + "_dyn"
@@ -74,6 +75,7 @@ w180
 "${f'{pan(key):{pan_sz}}'} = "
 %endfor
 
+%endif
 %if percussion:
 ; Percussion definitions
 "CR3_=@22 CR3_n" "CR3_n=o6 c"

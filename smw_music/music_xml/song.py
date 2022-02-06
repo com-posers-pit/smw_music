@@ -455,7 +455,7 @@ class Song:
     ):
         for chan in self.channels:
             chan.tokens = reduce(
-                chan.tokens, loop_analysis, superloop_analysis
+                chan.tokens, loop_analysis, superloop_analysis, chan.percussion
             )
 
     ###########################################################################

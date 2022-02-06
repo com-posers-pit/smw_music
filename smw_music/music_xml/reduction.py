@@ -508,7 +508,12 @@ def reduce(
     tokens: list[Token],
     loop_analysis: bool,
     superloop_analysis: bool,
+    percussion: bool,
 ) -> list[Token]:
+    # A blah hack to kill annotations in percussion channels... this will go
+    # away.
+    if percussion:
+        tokens = [x for x in tokens if not isinstance(x, Instrument)]
     tokens = _filter_annotations(tokens)
     tokens = _remove_unused_instruments(tokens)
     tokens = _swap_repeat_annotations(tokens)
