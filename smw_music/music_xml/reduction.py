@@ -6,13 +6,6 @@
 """Song reduction logic."""
 
 ###############################################################################
-# Standard Library imports
-###############################################################################
-
-from collections.abc import Callable
-from typing import Optional
-
-###############################################################################
 # Project imports
 ###############################################################################
 
@@ -27,6 +20,7 @@ from .tokens import (
     LoopDelim,
     LoopRef,
     Measure,
+    Note,
     Playable,
     RehearsalMark,
     Repeat,
@@ -350,6 +344,26 @@ def _reference_loops(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
+def _remove_unused_instruments(tokens: list[Token]) -> list[Token]:
+    rv = []
+    for n, token in enumerate(tokens):
+        keep = True
+        if isinstance(token, Instrument):
+            for nxt in tokens[n + 1 :]:
+                if isinstance(nxt, Note):
+                    break
+                if isinstance(nxt, Instrument):
+                    keep = False
+
+        if keep:
+            rv.append(token)
+
+    return rv
+
+
+###############################################################################
+
+
 def _reorder_measures(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
@@ -496,6 +510,7 @@ def reduce(
     superloop_analysis: bool,
 ) -> list[Token]:
     tokens = _filter_annotations(tokens)
+    tokens = _remove_unused_instruments(tokens)
     tokens = _swap_repeat_annotations(tokens)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
