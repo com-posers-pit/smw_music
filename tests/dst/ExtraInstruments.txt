@@ -25,11 +25,11 @@ w180
 "Trombone_voice=0 o3"
 
 ; Instrument dynamics definitions
-"Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
-"HorninF_dyn     = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
-"Organ_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
-"Recorder_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
-"Trombone_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"HorninF_dyn     = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Organ_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Recorder_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Trombone_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 
 ; Instrument articulation definitions
 "Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""

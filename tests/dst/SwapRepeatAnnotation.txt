@@ -22,8 +22,8 @@ w180
 "Piano_voice=13 o3"
 
 ; Instrument dynamics definitions
-"Flute_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
-"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Flute_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 
 ; Instrument articulation definitions
 "Flute_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
