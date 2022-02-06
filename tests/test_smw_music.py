@@ -185,6 +185,8 @@ def test_conversion(src, dst, args):
             r"Unsupported percussion note #3 in measure 1 in staff 1",
         ),
         ("Chords.mxl", r"Chord found, #1 in measure 2 in staff 1"),
+        ("Chords.mxl", r"Chord found, #2 in measure 2 in staff 1"),
+        ("Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
         ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
         ("TooHigh.mxl", r"Unsupported note c7 #3 in measure 1 in staff 1"),
         ("TooLow.mxl", r"Unsupported note a0 #2 in measure 1 in staff 1"),
@@ -192,7 +194,9 @@ def test_conversion(src, dst, args):
     ],
     ids=[
         "Bad percussion",
-        "Chord",
+        "Chord 1",
+        "Chord 2",
+        "Chord 3",
         "Percussion Chord",
         "Note too high",
         "Note too low",
@@ -202,6 +206,41 @@ def test_conversion(src, dst, args):
 def test_invalid(src, text):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "src" / "bad" / src
+
+    with tempfile.NamedTemporaryFile("r") as fobj:
+        with pytest.raises(MusicXmlException, match=text):
+            convert.main([str(fname), str(fobj.name)])
+
+
+###############################################################################
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        (r"Chord found, #1 in measure 2 in staff 1"),
+        (r"Chord found, #2 in measure 2 in staff 1"),
+        (r"Chord found, #3 in measure 2 in staff 1"),
+        (r"Multiple voices in measure 6 in staff 1"),
+        (r"Unsupported note c7 #3 in measure 3 in staff 1"),
+        (r"Unsupported note a0 #2 in measure 4 in staff 1"),
+        (r"Chord found, #3 in measure 3 in staff 2"),
+        (r"Unsupported percussion note #3 in measure 1 in staff 2"),
+    ],
+    ids=[
+        "Chord 1",
+        "Chord 2",
+        "Chord 3",
+        "Multiple Voices",
+        "Note too high",
+        "Note too low",
+        "Percussion Chord",
+        "Bad percussion",
+    ],
+)
+def test_multiple_invalid(text):
+    test_dir = pathlib.Path("tests")
+    fname = test_dir / "src" / "bad" / "Errors.mxl"
 
     with tempfile.NamedTemporaryFile("r") as fobj:
         with pytest.raises(MusicXmlException, match=text):
