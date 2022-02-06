@@ -18,13 +18,16 @@ w180
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"Harpsichord_voice=0 o3"
-"HorninF_voice=0 o3"
-"Organ_voice=0 o3"
-"Recorder_voice=0 o3"
-"Trombone_voice=0 o3"
+; Only change the instrument octave numbers on the right of the equals signs
+"Harpsichord_voice =   0 o3"
+"HorninF_voice     =   0 o3"
+"Organ_voice       =   0 o3"
+"Recorder_voice    =   0 o3"
+"Trombone_voice    =   0 o3"
 
 ; Instrument dynamics definitions
+; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
+; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
 "Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 "HorninF_dyn     = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 "Organ_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
@@ -32,6 +35,7 @@ w180
 "Trombone_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 
 ; Instrument articulation definitions
+; Just like dynamics, only touch numbers after the 'q' after each equals sign.
 "Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 "HorninF_artic     = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 "Organ_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
@@ -39,12 +43,14 @@ w180
 "Trombone_artic    = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 
 ; Instrument pan definitions
+; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_LEFT, PAN_RIGHT, or
+; pick your own using a y command.  These are blank by default because not
+; everyone uses them and it ; saves space to leave them out.
 "Harpsichord_pan = "
 "HorninF_pan     = "
 "Organ_pan       = "
 "Recorder_pan    = "
 "Trombone_pan    = "
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Macro magic.  Look, but don't touch.
@@ -73,11 +79,16 @@ w180
 "vFFFF = $E7$_FFFF"
 
 ; Magic hex values are no fun, we'll give them nicer names
-"LEGATO_ON=$F4$01"
-"LEGATO_OFF=$F4$01"
-"GLOBAL_LEGATO=$F4$02"
-"CRESC=$E8"
-"DIM=$E8"
+"LEGATO_ON     = $F4$01"
+"LEGATO_OFF    = $F4$01"
+"GLOBAL_LEGATO = $F4$02"
+"CRESC         = $E8"
+"DIM           = $E8"
+"PAN_LEFT      = y20"
+"PAN_MID_LEFT  = y15"
+"PAN_CENTER    = y10"
+"PAN_MID_RIGHT = y05"
+"PAN_RIGHT     = y00"
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Staff 1
