@@ -34,6 +34,7 @@ from .tokens import (
     Annotation,
     CrescDelim,
     Dynamic,
+    Error,
     Instrument,
     LoopDelim,
     Measure,
@@ -49,14 +50,6 @@ from .. import __version__
 
 ###############################################################################
 # Private function definitions
-###############################################################################
-
-
-def _chord_error(note: int, measure: int, part: int) -> MusicXmlException:
-    msg = f"Chord found, #{note} in measure {measure} in staff {part}"
-    return MusicXmlException(msg)
-
-
 ###############################################################################
 
 
@@ -180,14 +173,6 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
         True iff `elem` is of type `music21.spanner.Slur`
     """
     return isinstance(elem, music21.spanner.Slur)
-
-
-###############################################################################
-
-
-def _voice_error(measure: int, part: int) -> MusicXmlException:
-    msg = f"Multiple voices in measure {measure} in staff {part}"
-    return MusicXmlException(msg)
 
 
 ###############################################################################
@@ -377,12 +362,13 @@ class Song:
                     subelem,
                     (music21.chord.Chord, music21.percussion.PercussionChord),
                 ):
-                    raise _chord_error(
-                        note_no + 1, measure.number, part_no + 1
-                    )
+                    msg = f"Chord found, #{note_no + 1} "
+                    msg += f"in measure {measure.number}"
+                    channel_elem.append(Error(msg))
 
                 if isinstance(subelem, (music21.stream.Voice)):
-                    raise _voice_error(measure.number, part_no + 1)
+                    msg = f"Multiple voices in measure {measure.number}"
+                    channel_elem.append(Error(msg))
 
                 if isinstance(subelem, music21.note.GeneralNote):
                     note_no += 1
@@ -461,13 +447,14 @@ class Song:
     ###########################################################################
 
     def _validate(self):
+        errors = []
         for n, channel in enumerate(self.channels):
-            try:
-                channel.check()
-            except MusicXmlException as e:
-                raise MusicXmlException(
-                    e.args[0] + f" in staff {n + 1}"
-                ) from e
+            msgs = channel.check()
+            for msg in msgs:
+                errors.append(f"{msg} in staff {n + 1}")
+
+        if errors:
+            raise MusicXmlException("\n".join(errors))
 
     ###########################################################################
     # API method definitions

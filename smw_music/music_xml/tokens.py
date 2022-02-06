@@ -309,7 +309,15 @@ class Dynamic(Token):
 ###############################################################################
 
 
-@dataclass(frozen=True, order=True)
+@dataclass
+class Error(Token):
+    msg: str
+
+
+###############################################################################
+
+
+@dataclass(order=True)
 class Instrument(Token):
     name: str
 
@@ -514,16 +522,17 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def check(self, percussion: bool):
+    def check(self, percussion: bool) -> list[str]:
+        msgs = []
         note = self.note_num
         measure = self.measure_num
         if percussion:
             try:
                 PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
-            except KeyError as e:
-                raise MusicXmlException(
+            except KeyError:
+                msgs.append(
                     f"Unsupported percussion note #{note} in measure {measure}"
-                ) from e
+                )
         else:
             octave = self.octave
             name = self.name
@@ -533,7 +542,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             if bad:
                 msg = f"Unsupported note {name}{octave} #{note} in "
                 msg += f"measure {measure}"
-                raise MusicXmlException(msg)
+                msgs.append(msg)
+        return msgs
 
 
 ###############################################################################

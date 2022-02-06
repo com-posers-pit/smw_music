@@ -20,7 +20,7 @@ from typing import Iterable, TypeVar
 
 from .mml import MmlExporter
 from .shared import CRLF, notelen_str
-from .tokens import flatten, Note, Playable, RehearsalMark, Token
+from .tokens import Error, flatten, Note, Playable, RehearsalMark, Token
 
 ###############################################################################
 # Private variable/constant definitions
@@ -117,7 +117,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def check(self):
+    def check(self) -> list[str]:
         """
         Confirm that the channel's notes are acceptable.
 
@@ -127,8 +127,13 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             Whenever an invalid percussion note is used, or when a musical note
             outside octaves 1-6  is used.
         """
-        for token in [x for x in flatten(self.tokens) if isinstance(x, Note)]:
-            token.check(self.percussion)
+        msgs = []
+        tokens = flatten(self.tokens)
+        for token in filter(lambda x: isinstance(x, Error), tokens):
+            msgs.append(token.msg)
+        for token in filter(lambda x: isinstance(x, Note), tokens):
+            msgs.extend(token.check(self.percussion))
+        return msgs
 
     ###########################################################################
 
