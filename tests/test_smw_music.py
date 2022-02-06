@@ -46,11 +46,6 @@ from smw_music.scripts import convert
         ("Dynamics.mxl", "Dynamics.txt", []),
         ("Grace_Notes.mxl", "Grace_Notes.txt", []),
         ("Headers.mxl", "Headers.txt", []),
-        (
-            "Instruments.mxl",
-            "Instruments_no_parse_to.txt",
-            ["--disable_to_instruments"],
-        ),
         ("Instruments.mxl", "Instruments_parse_to.txt", []),
         ("Loop_Point.mxl", "Loop_Point.txt", []),
         (
@@ -135,7 +130,6 @@ from smw_music.scripts import convert
         "Dynamics",
         "Grace Notes",
         "Headers",
-        "Instruments (w/o To parsing)",
         "Instruments (w/ To parsing)",
         "Loop Point",
         "Loops",
