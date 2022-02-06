@@ -67,7 +67,7 @@ w180
 
 l4
 @Piano a b > c d
-CRESC$c0$_F < a b > c d
+CRESC$C0$_F < a b > c d
 < a b > c d
 DIM$90$_MP < a b > c d
 < a b > c d
@@ -84,7 +84,7 @@ l4
 @Piano f vP CRESC$90$_FF g g+ a+
 f g g+ a+
 f g g+ a+
-DIM$ff$_MP f g g+ a+
+DIM$FF$_MP f g g+ a+
 f g g+ a+
 f g g+ a+
 f g g+ a+
@@ -103,3 +103,18 @@ CRESC$90$_F < a2 > c d
 < a b > c d
 < a b > c d
 < a b > c d
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 4
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#3 /
+
+l4
+@Piano vMF CRESC$C0$_F a b > c d
+vMF < a b > c vP CRESC$90$_MP d
+< a b > c d
+vF DIM$90$_MF < a b > c vF d
+< a b > c d
+vFFF DIM$90$_FF < a b > c r
+vP d < b > c d
