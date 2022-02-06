@@ -73,23 +73,13 @@ MuseScore {
     }
 
     CheckBox {
-      id: "instrumentToAnnotations"
-      text: qsTr('Decode "To " annotations as instruments')
-    }
-
-    CheckBox {
-      id: "singleVolumes"
-      text: qsTr('Use single volume logic')
-    }
-
-    CheckBox {
       id: "customSamples"
       text: qsTr('Using custom samples?')
     }
 
     CheckBox {
       id: "optimizePercussion"
-      text: qsTr('Optimize percussion?')
+      text: qsTr('Custom percussion?')
     }
 
     CheckBox {
@@ -335,8 +325,6 @@ MuseScore {
                    [loopAnalysis, "loop_analysis"],
                    [superloopAnalysis, "superloop_analysis"],
                    [measureNumbers, "measure_numbers"],
-                   [instrumentToAnnotations, "instrument_to_annotations"],
-                   [singleVolumes, "single_volumes"],
                    [customSamples, "custom_samples"],
                    [optimizePercussion, "optimize_percussion"],
                    [echoEnabled, "echo_enabled"],

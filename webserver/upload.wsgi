@@ -41,11 +41,7 @@ def _uploader():
             loop_analysis = "loop_analysis" in request.form
             superloop_analysis = "superloop_analysis" in request.form
             measure_numbers = "measure_numbers" in request.form
-            instrument_to_annotations = (
-                "instrument_to_annotations" in request.form
-            )
             echo_en = "echo_enabled" in request.form
-            single_volumes = "single_volumes" in request.form
             custom_samples = "custom_samples" in request.form
             optimize_percussion = "optimize_percussion" in request.form
 
@@ -83,8 +79,6 @@ def _uploader():
                 measure_numbers,
                 True,  # Always emit datetime in prod
                 echo_config,
-                instrument_to_annotations,
-                single_volumes,
                 custom_samples,
                 optimize_percussion,
             )
