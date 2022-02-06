@@ -31,7 +31,7 @@ w180
 "Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 
 ; Instrument pan definitions
-; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_LEFT, PAN_RIGHT, or
+; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
 ; pick your own using a y command.  These are blank by default because not
 ; everyone uses them and it ; saves space to leave them out.
 "Piano_pan = "
