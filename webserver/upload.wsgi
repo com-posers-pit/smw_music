@@ -29,6 +29,7 @@ def _upload_file():
     return render_template("upload.html")
 
 
+@application.route("/musescore", methods=["GET", "POST"])
 @application.route("/mml_uploader", methods=["GET", "POST"])
 def _uploader():
     response = make_response(":-P", 400)
