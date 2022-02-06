@@ -18,7 +18,7 @@ from functools import singledispatchmethod
 # Project imports
 ###############################################################################
 
-from .shared import CRLF, octave_notelen_str
+from .shared import CRLF, notelen_str
 from .tokens import (
     Annotation,
     CrescDelim,
@@ -37,22 +37,6 @@ from .tokens import (
     Token,
     Triplet,
 )
-
-###############################################################################
-# Private variable/constant definitions
-###############################################################################
-
-# Music XML uses 4 for a whole note, 5 for a half note, etc.  AMK uses 1 for a
-# whole note, 2 for a half note, etc.
-_MUSIC_XML_DURATION = {
-    4: 1,
-    5: 2,
-    6: 4,
-    7: 8,
-    8: 16,
-    9: 32,
-    10: 64,
-}
 
 ###############################################################################
 # API constant definitions
@@ -109,6 +93,7 @@ class SlurState(Enum):
 
 @dataclass
 class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
+    instr_octave_map: dict[str, int]
     octave: int = 4
     default_note_len: int = 8
     grace: bool = False
@@ -159,7 +144,9 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @_emit.register
     def _(self, token: Instrument) -> None:
-        self.directives.append(f"@{token.name}")
+        instr = token.name
+        self.directives.append(f"@{instr}")
+        self.octave = self.instr_octave_map.get(instr, 3)
 
     ###########################################################################
 
@@ -215,9 +202,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         self.directives.append(f"; {token.mark}{CRLF}")
         self.directives.append(f";===================={CRLF}")
         self.directives.append(CRLF)
-        self.directives.append(
-            octave_notelen_str(self.octave, self.default_note_len)
-        )
+        self.directives.append(notelen_str(self.default_note_len))
         self.directives.append(CRLF)
 
     ###########################################################################
@@ -256,7 +241,6 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @_emit.register
     def _(self, token: Note) -> None:
-
         if token.grace:
             self.grace = True
 
@@ -362,12 +346,14 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     def _emit_octave(self, token: Note) -> None:
         cur_octave = self.octave
         octave = token.octave
-        if octave != cur_octave:
-            if octave == cur_octave - 1:
-                directive = "<"
-            elif octave == cur_octave + 1:
-                directive = ">"
-            else:
-                directive = f"o{octave}"
+        octave_diff = octave - cur_octave
+
+        directive = ""
+        if octave_diff > 0:
+            directive = octave_diff * ">"
+        else:
+            directive = (-octave_diff) * "<"
+
+        self.octave = octave
+        if directive:
             self.directives.append(directive)
-            self.octave = octave

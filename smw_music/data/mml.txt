@@ -50,7 +50,7 @@
 %>\
 ; Instrument voice definitions
 %for key, val in instruments.items():
-"${voice(key)}=${val}"
+"${voice(key)}=${val} o3"
 %endfor
 
 ; Instrument dynamics definitions

@@ -321,6 +321,7 @@ class Song:
             "trumpet": 6,
             "bass": 8,
             "bassguitar": 8,
+            "electricbass": 8,
             "piano": 13,
             "guitar": 17,
         }
@@ -526,7 +527,7 @@ class Song:
 
         self._validate()
         channels = [
-            x.generate_mml(measure_numbers, optimize_percussion)
+            x.generate_mml({}, measure_numbers, optimize_percussion)
             for x in self.channels
         ]
 

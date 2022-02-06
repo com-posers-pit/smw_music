@@ -296,7 +296,7 @@ def _reference_loop(tokens: list[Token], loop: Loop) -> list[Token]:
 
     pushable = (RehearsalMark, Measure)
 
-    # Copy everythign before the loop to the output
+    # Copy everything before the loop to the output
     while tokens[0] != loop:
         rv.append(tokens.pop(0))
     rv.append(tokens.pop(0))

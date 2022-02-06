@@ -19,7 +19,7 @@ from typing import cast, Iterable, TypeVar
 ###############################################################################
 
 from .mml import MmlExporter
-from .shared import CRLF, octave_notelen_str
+from .shared import CRLF, notelen_str
 from .tokens import flatten, Note, Playable, RehearsalMark, Token
 
 ###############################################################################
@@ -34,9 +34,7 @@ _T = TypeVar("_T")
 ###############################################################################
 
 
-def _default_octave_notelen(
-    tokens: list[Token], section: bool = True
-) -> tuple[int, int]:
+def _default_notelen(tokens: list[Token], section: bool = True) -> int:
 
     if section:
         tokens = list(
@@ -44,11 +42,9 @@ def _default_octave_notelen(
         )
     playable = [x for x in flatten(tokens) if isinstance(x, Playable)]
 
-    octaves = [cast(Note, x).octave for x in playable if isinstance(x, Note)]
-    octave = octaves[0] if octaves else -1
     notelen = _most_common([x.duration for x in playable]) if playable else 1
 
-    return (octave, notelen)
+    return notelen
 
 
 ###############################################################################
@@ -103,19 +99,14 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # Private method definitions
     ###########################################################################
 
-    def _reset_state(self):
-        self._exporter = MmlExporter()
-        self._update_state_defaults(
-            *_default_octave_notelen(flatten(self.tokens))
-        )
+    def _reset_state(self, instr_octave_map: dict[str, int]) -> None:
+        self._exporter = MmlExporter(instr_octave_map)
+        self._update_state_defaults(_default_notelen(flatten(self.tokens)))
         self._exporter.percussion = self.percussion
 
     ###########################################################################
 
-    def _update_state_defaults(self, octave: int, notelen: int):
-        if self.percussion:
-            octave = -1
-        self._exporter.octave = octave
+    def _update_state_defaults(self, notelen: int):
         self._exporter.default_note_len = notelen
 
     ###########################################################################
@@ -138,7 +129,10 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def generate_mml(
-        self, measure_numbers: bool = True, optimize_percussion: bool = True
+        self,
+        instr_octave_map: dict[str, int],
+        measure_numbers: bool = True,
+        optimize_percussion: bool = True,
     ) -> str:
         """
         Generate this channel's AddMusicK MML text.
@@ -156,19 +150,17 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         str
             The MML text for this channel
         """
-        self._reset_state()
+        self._reset_state(instr_octave_map)
         self._exporter.measure_numbers = measure_numbers
         self._exporter.optimize_percussion = optimize_percussion
 
-        octave_notelen = octave_notelen_str(
-            self._exporter.octave, self._exporter.default_note_len
-        )
-        self._exporter.directives = [octave_notelen, CRLF]
+        notelen = notelen_str(self._exporter.default_note_len)
+        self._exporter.directives = [notelen, CRLF]
 
         for n, token in enumerate(self.tokens):
             if isinstance(token, RehearsalMark):
                 self._update_state_defaults(
-                    *_default_octave_notelen(flatten(self.tokens[n + 1 :]))
+                    _default_notelen(flatten(self.tokens[n + 1 :]))
                 )
             self._exporter._emit(token)
 
