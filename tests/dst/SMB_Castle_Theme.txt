@@ -18,22 +18,18 @@ w180
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"BassDrum1_voice=0 o3"
 "BassGuitar_voice=8 o3"
 "Piano_voice=13 o3"
 
 ; Instrument dynamics definitions
-"BassDrum1_dyn  = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
 "BassGuitar_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
 "Piano_dyn      = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
 
 ; Instrument articulation definitions
-"BassDrum1_artic  = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
 "BassGuitar_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
 "Piano_artic      = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
 
 ; Instrument pan definitions
-"BassDrum1_pan  = "
 "BassGuitar_pan = "
 "Piano_pan      = "
 
@@ -58,7 +54,6 @@ w180
 
 ; Instrument definitions.  Smoosh together the instrument voice definition
 ; with its dynamics, articulation, and pan definitions
-"BassDrum1 = BassDrum1_voice BassDrum1_dyn BassDrum1_artic BassDrum1_pan"
 "BassGuitar = BassGuitar_voice BassGuitar_dyn BassGuitar_artic BassGuitar_pan"
 "Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 
@@ -150,7 +145,7 @@ d+ e
 #3 /
 
 l8
-@BassDrum1 r2
+r2
 r2
 r2
 r2
