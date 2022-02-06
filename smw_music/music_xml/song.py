@@ -309,6 +309,7 @@ class Song:
             "electricbass": 8,
             "piano": 13,
             "guitar": 17,
+            "electricguitar": 17,
         }
 
         inst_set: set[str] = set()
@@ -507,7 +508,7 @@ class Song:
             "F": 179,
             "FF": 217,
             "FFF": 230,
-            "FFFF": 225,
+            "FFFF": 245,
         }
 
         self._reduce(loop_analysis, superloop_analysis)
