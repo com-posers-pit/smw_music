@@ -174,11 +174,11 @@ from smw_music.music_xml import EchoConfig
 def test_echo(csv, exp):
     cfg = EchoConfig.from_csv(csv)
     assert cfg.chan_list == exp[0], "Channel list"
-    assert pytest.approx(cfg.vol_mag[0], exp[1][0]), "Left Volume"
-    assert pytest.approx(cfg.vol_mag[1], exp[1][1]), "Right Volume"
+    assert cfg.vol_mag[0] == pytest.approx(exp[1][0]), "Left Volume"
+    assert cfg.vol_mag[1] == pytest.approx(exp[1][1]), "Right Volume"
     assert cfg.vol_inv == exp[2], "Volume phase invert"
     assert cfg.delay == exp[3], "Delay"
-    assert pytest.approx(cfg.fb_mag == exp[4]), "Feedback magnitude"
+    assert cfg.fb_mag == pytest.approx(exp[4]), "Feedback magnitude"
     assert cfg.fb_inv == exp[5], "Feedback phase invert"
     assert cfg.fir_filt == exp[6], "FIR filter selection"
     assert cfg.channel_reg == exp[7], "Channel register"
