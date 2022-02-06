@@ -24,7 +24,7 @@ w180
 "Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
 
 ; Instrument articulation definitions
-"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 
 ; Instrument pan definitions
 "Piano_pan = "
@@ -65,44 +65,88 @@ w180
 
 #0 SET_TEMPO GLOBAL_LEGATO /
 
+@Piano
+;====================
+; Accents
+;====================
+
+l2
+> qACC c1
+c. r4
+c r
+c4. r8 r
+c4 r4 r
+c8. r16 r4 r
+c8 r8 r4 r
+c16. r32 r8 r4 r
+c16 r16 r8 r4 r
+c32. r64 r16 r8 r4 r
+c32 r32 r16 r8 r4 r
+
+;====================
+; Staccatos
+;====================
+
+l2
+qSTAC c1
+c. r4
+c r
+c4. r8 r
+c4 r4 r
+c8. r16 r4 r
+c8 r8 r4 r
+c16. r32 r8 r4 r
+c16 r16 r8 r4 r
+c32. r64 r16 r8 r4 r
+c32 r32 r16 r8 r4 r
+
+;====================
+; Accented Staccatos
+;====================
+
+l2
+qACCSTAC c1
+c. r4
+c r
+c4. r8 r
+c4 r4 r
+c8. r16 r4 r
+c8 r8 r4 r
+c16. r32 r8 r4 r
+c16 r16 r8 r4 r
+c32. r64 r16 r8 r4 r
+c32 r32 r16 r8 r4 r
+
+;====================
+; Changes
+;====================
+
 l4
-@Piano > qACC c1
-c2. r
-c2 r2
-c. r8 r2
-c r r2
-c8. r16 r r2
-c8 r8 r r2
-c16. r32 r8 r r2
-c16 r16 r8 r r2
-c32. r64 r16 r8 r r2
-c32 r32 r16 r8 r r2
-qDEF qSTAC c1
-c2. r
-c2 r2
-c. r8 r2
-c r r2
-c8. r16 r r2
-c8 r8 r r2
-c16. r32 r8 r r2
-c16 r16 r8 r r2
-c32. r64 r16 r8 r r2
-c32 r32 r16 r8 r r2
-qDEF qACC c c r2
-c qDEF qSTAC c r2
-qDEF qACC c qDEF c r2
-qSTAC c qDEF qACC c r2
-qDEF qSTAC c c r2
+qACC c c r2
+c qSTAC c r2
+qACC c qACCSTAC c r2
+qACC c qDEF c r2
+qSTAC c qACC c r2
+qSTAC c c r2
+c qACCSTAC c r2
+qSTAC c qDEF c r2
+qACCSTAC c qACC c r2
+qACCSTAC c qSTAC c r2
+qACCSTAC c c r2
 c qDEF c r2
 c qACC c r2
 qDEF c qSTAC c r2
+qDEF c qACCSTAC c r2
 qDEF c c r2
 qACC c r c r
-c r qDEF qSTAC c r
-qDEF qACC c r qDEF c r
-qSTAC c r qDEF qACC c r
-qDEF qSTAC c r c r
-c r qDEF c r
+c r qSTAC c r
+qACC c r qACCSTAC c r
+qACC c r qDEF c r
+qSTAC c r qACC c r
+qSTAC c r c r
+c r qACCSTAC c r
+qSTAC c r qDEF c r
 c r qACC c r
 qDEF c r qSTAC c r
+qDEF c r qACCSTAC c r
 qDEF c r c r
