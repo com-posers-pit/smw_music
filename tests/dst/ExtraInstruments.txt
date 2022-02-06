@@ -1,0 +1,105 @@
+#amk 2
+
+; MusicXML->AMK v0.1.2
+
+#spc {
+    #author  "COMPOSER HERE"
+    #title   "Extra Instruments"
+    #game    "GAME NAME HERE"
+    #comment "Ported by: PORTER NAME HERE"
+}
+
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+; Instrument voice definitions
+"Harpsichord_voice=0"
+"HorninF_voice=0"
+"Organ_voice=0"
+"Recorder_voice=0"
+"Trombone_voice=0"
+
+; Instrument dynamics definitions
+"Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"HorninF_dyn     = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Organ_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Recorder_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+"Trombone_dyn    = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
+
+; Instrument articulation definitions
+"Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"HorninF_artic     = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Organ_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Recorder_artic    = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+"Trombone_artic    = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\""
+
+; Instrument pan definitions
+"Harpsichord_pan = "
+"HorninF_pan     = "
+"Organ_pan       = "
+"Recorder_pan    = "
+"Trombone_pan    = "
+
+; Instrument definitions (don't touch these)
+"Harpsichord = Harpsichord_voice Harpsichord_dyn Harpsichord_artic Harpsichord_pan"
+"HorninF = HorninF_voice HorninF_dyn HorninF_artic HorninF_pan"
+"Organ = Organ_voice Organ_dyn Organ_artic Organ_pan"
+"Recorder = Recorder_voice Recorder_dyn Recorder_artic Recorder_pan"
+"Trombone = Trombone_voice Trombone_dyn Trombone_artic Trombone_pan"
+
+
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; Don't touch these.  This is a way to use a hex value in a volume command.
+; We want to use hex values because that's how volume fades work.  Update
+; the corresponding dynamics marks in each channel.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON=$F4$01"
+"LEGATO_OFF=$F4$01"
+"CRESC=$E8"
+"DIM=$E8"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 t48 $F4$02 /
+
+; Music
+o3 l4
+@HorninF a b > c d
+@Trombone o2 d e f g
+r1
+r1
+r1
+r1
+r1
+@Recorder o4 a b > c d
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 $F4$02 /
+
+; Music
+o3 l4
+r1
+@Organ a b > c d
+< a b > c d
+< a b > c d
+r1
+@Harpsichord r1
+< a b > c d
+r1
