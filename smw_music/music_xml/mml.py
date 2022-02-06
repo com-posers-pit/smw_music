@@ -71,6 +71,9 @@ PERCUSSION_MAP = {
 class Exporter:
     directives: list[str]
 
+    def _append(self, token: Token) -> None:
+        self.directives.append(token)
+
     def _emit(self, token: Token) -> None:
         raise NotImplementedError
 
@@ -118,7 +121,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @_emit.register
     def _(self, token: Annotation) -> None:
-        self.directives.append(token.text)
+        self._append(token.text)
 
     ###########################################################################
 
@@ -131,22 +134,20 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     @_emit.register
     def _(self, token: Crescendo) -> None:
         cmd = "CRESC" if token.cresc else "DIM"
-        self.directives.append(
-            f"{cmd}${token.duration:02x}$_{token.target.upper()}"
-        )
+        self._append(f"{cmd}${token.duration:02x}$_{token.target.upper()}")
 
     ###########################################################################
 
     @_emit.register
     def _(self, token: Dynamic) -> None:
-        self.directives.append(f"v{token.level.upper()}")
+        self._append(f"v{token.level.upper()}")
 
     ###########################################################################
 
     @_emit.register
     def _(self, token: Instrument) -> None:
         instr = token.name
-        self.directives.append(f"@{instr}")
+        self._append(f"@{instr}")
         self.octave = self.instr_octave_map.get(instr, 3)
 
     ###########################################################################
@@ -162,11 +163,11 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if token.repeats > 1:
             close_dir += str(token.repeats)
 
-        self.directives.append(open_dir)
+        self._append(open_dir)
 
         self.generate(token.tokens)
 
-        self.directives.append(close_dir)
+        self._append(close_dir)
 
     ###########################################################################
 
@@ -179,7 +180,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     @_emit.register
     def _(self, token: LoopRef) -> None:
         repeats = f"{token.repeats}" if token.repeats > 1 else ""
-        self.directives.append(f"({token.loop_id}){repeats}")
+        self._append(f"({token.loop_id}){repeats}")
 
     ###########################################################################
 
@@ -192,27 +193,27 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             else:
                 comment = f"; Measures {token.range[0]}-{token.range[-1]}"
 
-        self.directives.append(f"{comment}{CRLF}")
+        self._append(f"{comment}{CRLF}")
 
     ###########################################################################
 
     @_emit.register
     def _(self, token: RehearsalMark) -> None:
-        self.directives.append(CRLF)
-        self.directives.append(f";===================={CRLF}")
-        self.directives.append(f"; {token.mark}{CRLF}")
-        self.directives.append(f";===================={CRLF}")
-        self.directives.append(CRLF)
+        self._append(CRLF)
+        self._append(f";===================={CRLF}")
+        self._append(f"; {token.mark}{CRLF}")
+        self._append(f";===================={CRLF}")
+        self._append(CRLF)
         if self.default_note_len:
-            self.directives.append(notelen_str(self.default_note_len))
-            self.directives.append(CRLF)
+            self._append(notelen_str(self.default_note_len))
+            self._append(CRLF)
 
     ###########################################################################
 
     @_emit.register
     def _(self, token: Repeat) -> None:
         if token.start:
-            self.directives.append("/")
+            self._append("/")
 
     ###########################################################################
 
@@ -223,7 +224,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             directive += str(token.duration)
         directive += token.dots * "."
 
-        self.directives.append(directive)
+        self._append(directive)
 
     ###########################################################################
 
@@ -237,7 +238,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @_emit.register
     def _(self, token: Triplet) -> None:
-        self.directives.append("{" if token.start else "}")
+        self._append("{" if token.start else "}")
 
     ###########################################################################
 
@@ -270,25 +271,25 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if not self.tie:
             if not token.accent and self.accent:
                 self.accent = False
-                self.directives.append("qDEF")
+                self._append("qDEF")
             if not token.staccato and self.staccato:
                 self.staccato = False
-                self.directives.append("qDEF")
+                self._append("qDEF")
 
             if token.accent and not self.accent:
                 self.accent = True
-                self.directives.append("qACC")
+                self._append("qACC")
 
             if token.staccato and not self.staccato:
                 self.staccato = True
-                self.directives.append("qSTAC")
+                self._append("qSTAC")
 
         if token.tie == "start":
             self.tie = True
 
         self._start_legato()
 
-        self.directives.append(directive)
+        self._append(directive)
 
         if token.tie == "stop":
             self.tie = False
@@ -304,7 +305,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if not self.legato:
             if (self.slur == SlurState.SLUR_ACTIVE) or self.grace:
                 self.legato = True
-                self.directives.append("LEGATO_ON")
+                self._append("LEGATO_ON")
 
     ###########################################################################
 
@@ -314,7 +315,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
                 self.grace or (self.slur == SlurState.SLUR_ACTIVE) or self.tie
             ):
                 self.legato = False
-                self.directives.append("LEGATO_OFF")
+                self._append("LEGATO_OFF")
 
     ###########################################################################
 
@@ -358,4 +359,4 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
         self.octave = octave
         if directive:
-            self.directives.append(directive)
+            self._append(directive)
