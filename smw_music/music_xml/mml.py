@@ -134,7 +134,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     @_emit.register
     def _(self, token: Crescendo) -> None:
         cmd = "CRESC" if token.cresc else "DIM"
-        self._append(f"{cmd}${token.duration:02x}$_{token.target.upper()}")
+        self._append(f"{cmd}${token.duration:02X}$_{token.target.upper()}")
 
     ###########################################################################
 

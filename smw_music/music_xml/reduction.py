@@ -109,8 +109,8 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
 
     triplet = False
     drop_dyn = False
+    dyn = Dynamic("mf")  # just assume we start here, totally bogus
     for n, token in enumerate(tokens):
-        dyn = Dynamic("mf")  # just assume we start here, totally bogus
         drop = False
 
         if isinstance(token, Triplet):
@@ -142,7 +142,13 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                     if isinstance(nxt, CrescDelim) and not nxt.start:
                         cresc_done = True
                     if isinstance(nxt, Dynamic) and cresc_done:
-                        target = nxt.level
+                        if dyn.level != nxt.level:
+                            target = nxt.level
+                        else:
+                            drop_dyn = False
+                        break
+                    if isinstance(nxt, Playable) and cresc_done:
+                        drop_dyn = False
                         break
                 duration = min(duration, 255)  # Limit for now
                 rv.append(Crescendo(duration, target, token.cresc))
