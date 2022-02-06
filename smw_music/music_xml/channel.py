@@ -12,7 +12,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import Iterable, TypeVar
+from typing import cast, Iterable, TypeVar
 
 ###############################################################################
 # Project imports
@@ -130,9 +130,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         msgs = []
         tokens = flatten(self.tokens)
         for token in filter(lambda x: isinstance(x, Error), tokens):
-            msgs.append(token.msg)
+            msgs.append(cast(Error, token).msg)
         for token in filter(lambda x: isinstance(x, Note), tokens):
-            msgs.extend(token.check(self.percussion))
+            msgs.extend(cast(Note, token).check(self.percussion))
         return msgs
 
     ###########################################################################
