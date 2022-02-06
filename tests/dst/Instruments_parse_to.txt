@@ -9,14 +9,20 @@
     #comment "Ported by: PORTER NAME HERE"
 }
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: TEMPO HERE
+"SET_TEMPO=t48"
+
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"Flute_voice=0"
-"Harpsichord_voice=0"
-"Organ_voice=0"
-"Piano_voice=13"
-"Violin_voice=0"
+"Flute_voice=0 o3"
+"Harpsichord_voice=0 o3"
+"Organ_voice=0 o3"
+"Piano_voice=13 o3"
+"Violin_voice=0 o3"
 
 ; Instrument dynamics definitions
 "Flute_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
@@ -39,20 +45,22 @@
 "Piano_pan       = "
 "Violin_pan      = "
 
-; Instrument definitions (don't touch these)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
 "Flute = Flute_voice Flute_dyn Flute_artic Flute_pan"
 "Harpsichord = Harpsichord_voice Harpsichord_dyn Harpsichord_artic Harpsichord_pan"
 "Organ = Organ_voice Organ_dyn Organ_artic Organ_pan"
 "Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 "Violin = Violin_voice Violin_dyn Violin_artic Violin_pan"
 
-
-; PORTER: GLOBAL VOLUME HERE
-w180
-
-; Don't touch these.  This is a way to use a hex value in a volume command.
-; We want to use hex values because that's how volume fades work.  Update
-; the corresponding dynamics marks in each channel.
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
 "vPPPP = $E7$_PPPP"
 "vPPP  = $E7$_PPP"
 "vPP   = $E7$_PP"
@@ -67,6 +75,7 @@ w180
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
 "CRESC=$E8"
 "DIM=$E8"
 
@@ -74,11 +83,10 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 t48 $F4$02 /
+#0 SET_TEMPO GLOBAL_LEGATO /
 
-; Music
-o4 l4
-@Piano c < g a b
+l4
+@Piano > c < g a b
 @Harpsichord > c < g a b
 > c < g a @Flute @5 b
 > c < g a b
@@ -87,11 +95,10 @@ o4 l4
 ; Staff 2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#1 $F4$02 /
+#1 /
 
-; Music
-o4 l4
-@Piano c @4 < g a b
+l4
+@Piano > c @4 < g a b
 @Organ > c < g a b
 > c < g a b
 @Violin > c < g a b

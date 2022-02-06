@@ -9,12 +9,18 @@
     #comment "Ported by: PORTER NAME HERE"
 }
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: TEMPO HERE
+"SET_TEMPO=t36"
+
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"BassDrum1_voice=0"
-"BassGuitar_voice=8"
-"Piano_voice=13"
+"BassDrum1_voice=0 o3"
+"BassGuitar_voice=8 o3"
+"Piano_voice=13 o3"
 
 ; Instrument dynamics definitions
 "BassDrum1_dyn  = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
@@ -31,11 +37,6 @@
 "BassGuitar_pan = "
 "Piano_pan      = "
 
-; Instrument definitions (don't touch these)
-"BassDrum1 = BassDrum1_voice BassDrum1_dyn BassDrum1_artic BassDrum1_pan"
-"BassGuitar = BassGuitar_voice BassGuitar_dyn BassGuitar_artic BassGuitar_pan"
-"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
-
 ; Percussion definitions
 "CR3=@22 CR3n" "CR3n=o6 c"
 "CR2=@22 CR2n" "CR2n=o5 b"
@@ -51,12 +52,19 @@
 "KD=@21 KDn"   "KDn=o4 f"
 
 
-; PORTER: GLOBAL VOLUME HERE
-w180
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Don't touch these.  This is a way to use a hex value in a volume command.
-; We want to use hex values because that's how volume fades work.  Update
-; the corresponding dynamics marks in each channel.
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+"BassDrum1 = BassDrum1_voice BassDrum1_dyn BassDrum1_artic BassDrum1_pan"
+"BassGuitar = BassGuitar_voice BassGuitar_dyn BassGuitar_artic BassGuitar_pan"
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
 "vPPPP = $E7$_PPPP"
 "vPPP  = $E7$_PPP"
 "vPP   = $E7$_PP"
@@ -71,6 +79,7 @@ w180
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
 "CRESC=$E8"
 "DIM=$E8"
 
@@ -78,11 +87,10 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 t36 $F4$02 /
+#0 SET_TEMPO GLOBAL_LEGATO /
 
-; Music
-o4 l32
-@Piano d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+l32
+@Piano > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
 > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
 > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
 > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
@@ -99,10 +107,9 @@ o4 l32
 ; Staff 2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#1 $F4$02 /
+#1 /
 
-; Music
-o3 l32
+l32
 @Piano a+ r a r g+ r a r a+ r b r a+ r a r
 a+ r a r g+ r a r a+ r b r a+ r a r
 a r g+ r a r a+ r a r a+ r a r g+ r
@@ -120,11 +127,10 @@ c+ r d r c+ r c r c+ r c r < b r > c r
 ; Staff 3
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#2 $F4$02 /
+#2 /
 
-; Music
-o2 l4
-@BassGuitar d+2
+l4
+@BassGuitar < d+2
 d f+
 f2
 e a+
@@ -141,9 +147,8 @@ d+ e
 ; Staff 4
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#3 $F4$02 /
+#3 /
 
-; Music
 l8
 @BassDrum1 r2
 r2

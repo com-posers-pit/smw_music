@@ -9,14 +9,20 @@
     #comment "Ported by: PORTER NAME HERE"
 }
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: TEMPO HERE
+"SET_TEMPO=t48"
+
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"Harpsichord_voice=0"
-"HorninF_voice=0"
-"Organ_voice=0"
-"Recorder_voice=0"
-"Trombone_voice=0"
+"Harpsichord_voice=0 o3"
+"HorninF_voice=0 o3"
+"Organ_voice=0 o3"
+"Recorder_voice=0 o3"
+"Trombone_voice=0 o3"
 
 ; Instrument dynamics definitions
 "Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
@@ -39,20 +45,22 @@
 "Recorder_pan    = "
 "Trombone_pan    = "
 
-; Instrument definitions (don't touch these)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
 "Harpsichord = Harpsichord_voice Harpsichord_dyn Harpsichord_artic Harpsichord_pan"
 "HorninF = HorninF_voice HorninF_dyn HorninF_artic HorninF_pan"
 "Organ = Organ_voice Organ_dyn Organ_artic Organ_pan"
 "Recorder = Recorder_voice Recorder_dyn Recorder_artic Recorder_pan"
 "Trombone = Trombone_voice Trombone_dyn Trombone_artic Trombone_pan"
 
-
-; PORTER: GLOBAL VOLUME HERE
-w180
-
-; Don't touch these.  This is a way to use a hex value in a volume command.
-; We want to use hex values because that's how volume fades work.  Update
-; the corresponding dynamics marks in each channel.
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
 "vPPPP = $E7$_PPPP"
 "vPPP  = $E7$_PPP"
 "vPP   = $E7$_PP"
@@ -67,6 +75,7 @@ w180
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
 "CRESC=$E8"
 "DIM=$E8"
 
@@ -74,32 +83,30 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 t48 $F4$02 /
+#0 SET_TEMPO GLOBAL_LEGATO /
 
-; Music
-o3 l4
+l4
 @HorninF a b > c d
-@Trombone o2 d e f g
+@Trombone < d e f g
 r1
 r1
 r1
 r1
 r1
-@Recorder o4 a b > c d
+@Recorder > a b > c d
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Staff 2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#1 $F4$02 /
+#1 /
 
-; Music
-o3 l4
+l4
 r1
 @Organ a b > c d
 < a b > c d
 < a b > c d
 r1
 @Harpsichord r1
-< a b > c d
+a b > c d
 r1

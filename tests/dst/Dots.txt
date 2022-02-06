@@ -9,10 +9,16 @@
     #comment "Ported by: PORTER NAME HERE"
 }
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: TEMPO HERE
+"SET_TEMPO=t48"
+
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"Piano_voice=13"
+"Piano_voice=13 o3"
 
 ; Instrument dynamics definitions
 "Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
@@ -23,16 +29,18 @@
 ; Instrument pan definitions
 "Piano_pan = "
 
-; Instrument definitions (don't touch these)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
 "Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 
-
-; PORTER: GLOBAL VOLUME HERE
-w180
-
-; Don't touch these.  This is a way to use a hex value in a volume command.
-; We want to use hex values because that's how volume fades work.  Update
-; the corresponding dynamics marks in each channel.
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
 "vPPPP = $E7$_PPPP"
 "vPPP  = $E7$_PPP"
 "vPP   = $E7$_PP"
@@ -47,6 +55,7 @@ w180
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
 "CRESC=$E8"
 "DIM=$E8"
 
@@ -54,11 +63,10 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 t48 $F4$02 /
+#0 SET_TEMPO GLOBAL_LEGATO /
 
-; Music
-o4 l2
-@Piano @9 w255 v255 c1.
+l2
+@Piano @9 w255 v255 > c1.
 c. r.
 c4. r4. r.
 c8. r8. r4. r.

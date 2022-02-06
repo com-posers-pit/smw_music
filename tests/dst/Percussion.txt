@@ -9,10 +9,16 @@
     #comment "Ported by: PORTER NAME HERE"
 }
 
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: TEMPO HERE
+"SET_TEMPO=t48"
+
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
-"BassDrum1_voice=0"
+"BassDrum1_voice=0 o3"
 
 ; Instrument dynamics definitions
 "BassDrum1_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=E1\""
@@ -22,9 +28,6 @@
 
 ; Instrument pan definitions
 "BassDrum1_pan = "
-
-; Instrument definitions (don't touch these)
-"BassDrum1 = BassDrum1_voice BassDrum1_dyn BassDrum1_artic BassDrum1_pan"
 
 ; Percussion definitions
 "CR3=@22 CR3n" "CR3n=o6 c"
@@ -41,12 +44,17 @@
 "KD=@21 KDn"   "KDn=o4 f"
 
 
-; PORTER: GLOBAL VOLUME HERE
-w180
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-; Don't touch these.  This is a way to use a hex value in a volume command.
-; We want to use hex values because that's how volume fades work.  Update
-; the corresponding dynamics marks in each channel.
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+"BassDrum1 = BassDrum1_voice BassDrum1_dyn BassDrum1_artic BassDrum1_pan"
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
 "vPPPP = $E7$_PPPP"
 "vPPP  = $E7$_PPP"
 "vPP   = $E7$_PP"
@@ -61,6 +69,7 @@ w180
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON=$F4$01"
 "LEGATO_OFF=$F4$01"
+"GLOBAL_LEGATO=$F4$02"
 "CRESC=$E8"
 "DIM=$E8"
 
@@ -68,9 +77,8 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 t48 $F4$02 /
+#0 SET_TEMPO GLOBAL_LEGATO /
 
-; Music
 l4
 @BassDrum1 KD SN KD SN
 HT MT LT KD
@@ -81,9 +89,8 @@ KD KD KD KD8. SN16
 ; Staff 2
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#1 $F4$02 /
+#1 /
 
-; Music
 l16
 @BassDrum1 CH4 OH4 CR4 RD4
 CR34 CR24 RD24 r4
