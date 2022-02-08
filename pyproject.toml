@@ -33,6 +33,7 @@ python = "^3.9"
 music21 = "^7.1.0"
 Mako = "^1.1.6"
 Flask = {version = "^2.0.2", optional = true}
+PyQt6 = "^6.2.3"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.3.2"
@@ -45,6 +46,7 @@ webserver = ["flask"]
 
 [tool.poetry.scripts]
 smw_music_xml_to_amk = "smw_music.scripts.convert:main"
+smw_music_xml_to_amk_ui = "smw_music.scripts.dashboard:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
