@@ -13,6 +13,7 @@ smw_music_xml_to_amk "src/Crescendo_Triplet_Loops.mxl" "dst/Crescendo_Triplet_Lo
 smw_music_xml_to_amk "src/Dots.mxl" "dst/Dots.txt" --disable_dt
 smw_music_xml_to_amk "src/Dynamics.mxl" "dst/Dynamics.txt" --disable_dt
 smw_music_xml_to_amk "src/Empty_Section.mxl" "dst/Empty_Section.txt" --disable_dt --loop_analysis
+smw_music_xml_to_amk "src/EndingTriplet.mxl" "dst/EndingTriplet.txt" --disable_dt
 smw_music_xml_to_amk "src/ExtraInstruments.mxl" "dst/ExtraInstruments.txt" --disable_dt
 smw_music_xml_to_amk "src/Grace_Notes.mxl" "dst/Grace_Notes.txt" --disable_dt
 smw_music_xml_to_amk "src/Headers.mxl" "dst/Headers.txt" --disable_dt
