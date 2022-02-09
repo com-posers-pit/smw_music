@@ -44,43 +44,56 @@ w180
 %endif
 %if instruments:
 <%
-    voice = lambda x: x + "_voice"
-    dyn = lambda x: x + "_dyn"
-    artic = lambda x: x + "_artic"
-    pan = lambda x: x + "_pan"
+    voice = lambda x: x.name + "_voice"
+    dyn = lambda x: x.name + "_dyn"
+    artic = lambda x: x.name + "_artic"
+    pan = lambda x: x.name + "_pan"
 
-    voice_sz = max((len(voice(key))) for key in instruments)
-    dyn_sz = max((len(dyn(key))) for key in instruments)
-    dyn_str = " ".join(f'\\"_{vol}={val:02X}\\"' for vol, val in volmap.items())
-    artic_sz = max((len(artic(key))) for key in instruments)
-    artic_str = '\\"qDEF=q7A\\" \\"qSTAC=q5A\\" \\"qACC=q7F\\" \\"qACCSTAC=q5F\\"'
-    pan_sz = max((len(pan(key))) for key in instruments)
+    voice_sz = max((len(voice(inst))) for inst in instruments)
+    dyn_sz = max((len(dyn(inst))) for inst in instruments)
+    artic_sz = max((len(artic(inst))) for inst in instruments)
+    pan_sz = max((len(pan(inst))) for inst in instruments)
+
+    def dyn_str(inst):
+        rv = []
+        for vol, val in inst.dynamics.items():
+            rv.append(f'\\"_{vol}={val:02X}\\"')
+        return ' '.join(rv)
+
+    def artic_str(inst):
+        rv = []
+        for artic, val in inst.quant.items():
+            rv.append(f'\\"q{artic}=q{val:02X}\\"')
+        return ' '.join(rv)
+
+    def pan_str(inst):
+        return '' if inst.pan is None else f'y{inst.pan}'
 %>\
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
-%for key, val in instruments.items():
-"${f'{voice(key):{voice_sz}}'} = ${f'{val:3}'} o3"
+%for inst in instruments:
+"${f'{voice(inst):{voice_sz}}'} = ${f'{inst.instrument:3} o{inst.octave}'}"
 %endfor
 
 ; Instrument dynamics definitions
 ; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
 ; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
-%for key in instruments:
-"${f'{dyn(key):{dyn_sz}}'} = ${dyn_str}"
+%for inst in instruments:
+"${f'{dyn(inst):{dyn_sz}}'} = ${dyn_str(inst)}"
 %endfor
 
 ; Instrument articulation definitions
 ; Just like dynamics, only touch numbers after the 'q' after each equals sign.
-%for key in instruments:
-"${f'{artic(key):{artic_sz}}'} = ${artic_str}"
+%for inst in instruments:
+"${f'{artic(inst):{artic_sz}}'} = ${artic_str(inst)}"
 %endfor
 
 ; Instrument pan definitions
 ; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
 ; pick your own using a y command.  These are blank by default because not
 ; everyone uses them and it ; saves space to leave them out.
-%for key in instruments:
-"${f'{pan(key):{pan_sz}}'} = "
+%for inst in instruments:
+"${f'{pan(inst):{pan_sz}} = {pan_str(inst)}'}"
 %endfor
 
 %endif
@@ -113,15 +126,15 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 
 ; Instrument definitions.  Smoosh together the instrument voice definition
 ; with its dynamics, articulation, and pan definitions
-%for key in instruments:
-"${key} = ${voice(key)} ${dyn(key)} ${artic(key)} ${pan(key)}"
+%for inst in instruments:
+"${inst.name} = ${voice(inst)} ${dyn(inst)} ${artic(inst)} ${pan(inst)}"
 %endfor
 
 ; This is a way to use a hex value in a volume command.  We want to use hex
 ; values because that's how volume fades work.  Update the corresponding
 ; dynamics marks in each instrument.
-%for key in volmap:
-${f'"v{key: <4} = $E7$_{key}"'}
+%for dyn in dynamics:
+${f'"v{dyn: <4} = $E7$_{dyn}"'}
 %endfor
 
 ; Magic hex values are no fun, we'll give them nicer names
