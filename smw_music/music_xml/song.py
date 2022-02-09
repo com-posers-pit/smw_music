@@ -430,6 +430,8 @@ class Song:
                     channel_elem.append(
                         LoopDelim(False, loop_nos[lines[1].index(subelem.id)])
                     )
+        if triplets:
+            channel_elem.append(Triplet(False))
 
         return channel_elem
 
