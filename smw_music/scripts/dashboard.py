@@ -16,7 +16,9 @@ from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QComboBox,
+    QFileDialog,
     QFrame,
     QGridLayout,
     QHBoxLayout,
@@ -29,6 +31,130 @@ from PyQt6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
+###############################################################################
+# Project imports
+###############################################################################
+
+from ..music_xml.song import Song
+
+###############################################################################
+# Private Class Definitions
+###############################################################################
+
+
+class FilePicker(QFrame):
+    def __init__(
+        self,
+        text: str,
+        save: bool,
+        caption: str,
+        filt: str,
+        parent: QWidget = None,
+    ) -> None:
+        super().__init__(parent)
+        self.fname = ""
+        self._save = save
+        self._caption = caption
+        self._filter = filt
+        self._layout = QHBoxLayout(self)
+        self._button = QPushButton(text, self)
+        self._edit = QLineEdit(self)
+
+        self._layout.addWidget(self._button)
+        self._layout.addWidget(self._edit)
+
+        self._button.clicked.connect(self._open_dialog)
+        self._edit.textChanged.connect(self._update_fname)
+        self.setLayout(self._layout)
+
+    def _open_dialog(self) -> None:
+        if not self._save:
+            fname, _ = QFileDialog.getOpenFileName(
+                self, caption=self._caption, filter=self._filter
+            )
+        else:
+            fname, _ = QFileDialog.getSaveFileName(
+                self, caption=self._caption, filter=self._filter
+            )
+        self._edit.setText(fname)
+
+    def _update_fname(self) -> None:
+        self.fname = self._edit.text()
+
+
+###############################################################################
+
+
+class ControlPanel(QFrame):
+    def __init__(self, parent: QWidget = None) -> None:
+        super().__init__(parent)
+        self.song = None
+
+        self._layout = QVBoxLayout(self)
+
+        self._musicxml_picker = FilePicker(
+            "MusicXML",
+            False,
+            "Input MusicXML File",
+            "MusicXML (*.mxl *.musicxml)",
+            self,
+        )
+        self._mml_picker = FilePicker("MML", True, "Output MML File", "", self)
+        self._load = QPushButton("Load MusicXML", self)
+        self._generate = QPushButton("Generate MML", self)
+        self._global_legato = QCheckBox("Global Legato", self)
+        self._loop_analysis = QCheckBox("Loop Analysis", self)
+        self._superloop_analysis = QCheckBox("Superloop Analysis", self)
+        self._measure_numbers = QCheckBox("Measure Numbers", self)
+        self._custom_samples = QCheckBox("Custom Samples", self)
+        self._custom_percussion = QCheckBox("Custom Percussion", self)
+
+        self._load.clicked.connect(self._load_musicxml)
+        self._generate.clicked.connect(self._generate_mml)
+
+        self._layout.addWidget(self._musicxml_picker)
+        self._layout.addWidget(self._load)
+        self._layout.addWidget(self._global_legato)
+        self._layout.addWidget(self._loop_analysis)
+        self._layout.addWidget(self._superloop_analysis)
+        self._layout.addWidget(self._measure_numbers)
+        self._layout.addWidget(self._custom_samples)
+        self._layout.addWidget(self._custom_percussion)
+        self._layout.addWidget(self._mml_picker)
+        self._layout.addWidget(self._generate)
+
+        self.setLayout(self._layout)
+
+    ###########################################################################
+
+    def _load_musicxml(self) -> None:
+        fname = self._musicxml_picker.fname
+        print("loading")
+        print(fname)
+        if fname:
+            self.song = Song.from_music_xml(fname)
+            print(self.song)
+
+    ###########################################################################
+
+    def _generate_mml(self) -> None:
+        print("generating")
+        if self.song is not None:
+            print("generating")
+            self.song.to_mml_file(
+                self._mml_picker.fname,
+                self._global_legato.isChecked(),
+                self._loop_analysis.isChecked(),
+                self._superloop_analysis.isChecked(),
+                self._measure_numbers.isChecked(),
+                True,
+                False,
+                self._custom_samples.isChecked(),
+                self._custom_percussion.isChecked(),
+            )
+            print("done")
+
 
 ###############################################################################
 
@@ -59,8 +185,7 @@ class DynamicsPanel(QFrame):
             self.sliders[dyn] = slider
         self.reset()
 
-        self._interpolate = QPushButton("Interpolate", self)
-        self._interpolate.clicked.connect(self.interpolate)
+        self._interpolate = QCheckBox("Interpolate", self)
         self._layout.addWidget(self._interpolate)
 
         self.setLayout(self._layout)
@@ -312,6 +437,7 @@ class Controller(QFrame):
         self._artic_settings = {}
         layout = QHBoxLayout(self)
 
+        self._control_panel = ControlPanel(self)
         list_widget = QListWidget(self)
         self._tabs = QTabWidget(self)
         self._dynamics = DynamicsPanel(self)
@@ -325,7 +451,9 @@ class Controller(QFrame):
 
         self._tabs.addTab(self._dynamics, "Dynamics")
         self._tabs.addTab(self._artics, "Articulations")
+        self._tabs.addTab(QWidget(self), "Echo")
 
+        layout.addWidget(self._control_panel)
         layout.addWidget(list_widget)
         layout.addWidget(self._tabs)
 
@@ -356,6 +484,7 @@ class Controller(QFrame):
 
 def main():
     app = QApplication([])
+    app.setApplicationName("MusicXML -> MML")
     window = Controller()
     window.show()
     app.exec()
