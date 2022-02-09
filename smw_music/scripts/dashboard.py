@@ -143,24 +143,28 @@ class ArticPanel(QFrame):
 
 class ArticSlider(QFrame):
     def __init__(
-        self, label: str, delay: int = 7, vol: int = 15, parent: QWidget = None
+        self,
+        label: str,
+        length: int = 7,
+        vol: int = 15,
+        parent: QWidget = None,
     ) -> None:
         super().__init__(parent)
         self._update_in_progress = False
 
         self._label = QLabel(label, self)
-        self._delay_slider = QSlider(Qt.Orientation.Vertical, self)
+        self._length_slider = QSlider(Qt.Orientation.Vertical, self)
         self._vol_slider = QSlider(Qt.Orientation.Vertical, self)
-        self._delay_display = QLabel(self)
+        self._length_display = QLabel(self)
         self._vol_display = QLabel(self)
         self._display = QLabel(self)
 
-        self._delay_slider.setRange(0, 7)
+        self._length_slider.setRange(0, 7)
         self._vol_slider.setRange(0, 15)
 
         self._attach_signals()
 
-        self._delay_slider.setValue(delay)
+        self._length_slider.setValue(length)
         self._vol_slider.setValue(vol)
 
         self._do_layout()
@@ -168,7 +172,7 @@ class ArticSlider(QFrame):
     ###########################################################################
 
     def _attach_signals(self) -> None:
-        self._delay_slider.valueChanged.connect(self._slider_updated)
+        self._length_slider.valueChanged.connect(self._slider_updated)
         self._vol_slider.valueChanged.connect(self._slider_updated)
 
     ###########################################################################
@@ -176,11 +180,11 @@ class ArticSlider(QFrame):
     def _do_layout(self) -> None:
         layout = QGridLayout(self)
         layout.addWidget(self._label, 0, 0, 1, 2)
-        layout.addWidget(QLabel("Delay", self), 1, 0)
+        layout.addWidget(QLabel("Length", self), 1, 0)
         layout.addWidget(QLabel("Volume", self), 1, 1)
-        layout.addWidget(self._delay_slider, 2, 0)
+        layout.addWidget(self._length_slider, 2, 0)
         layout.addWidget(self._vol_slider, 2, 1)
-        layout.addWidget(self._delay_display, 3, 0)
+        layout.addWidget(self._length_display, 3, 0)
         layout.addWidget(self._vol_display, 3, 1)
         layout.addWidget(self._display, 4, 0, 1, 2)
 
@@ -189,24 +193,24 @@ class ArticSlider(QFrame):
     ###########################################################################
 
     def _slider_updated(self, _: int) -> None:
-        self._delay_display.setText(f"{self._delay_slider.value():01X}")
+        self._length_display.setText(f"{self._length_slider.value():01X}")
         self._vol_display.setText(f"{self._vol_slider.value():02X}")
         self._display.setText(f"x{self.value:02X}")
 
     ###########################################################################
 
     def update(self, val: int) -> None:
-        self._delay_slider.setValue(val >> 4)
+        self._length_slider.setValue(val >> 4)
         self._vol_slider.setValue(val & 0xF)
 
     ###########################################################################
 
     @property
     def value(self) -> int:
-        delay = self._delay_slider.value()
+        length = self._length_slider.value()
         vol = self._vol_slider.value() & 0xF
 
-        return (delay << 4) | vol
+        return (length << 4) | vol
 
 
 ###############################################################################
