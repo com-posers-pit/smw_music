@@ -189,6 +189,14 @@ def test_conversion(src, dst, args):
         ("Chords.mxl", r"Chord found, #1 in measure 2 in staff 1"),
         ("Chords.mxl", r"Chord found, #2 in measure 2 in staff 1"),
         ("Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
+        (
+            "ComplexNoteLength.mxl",
+            r"Unsupported note #1 in Measure 2 in staff 1",
+        ),
+        (
+            "ComplexNoteLength.mxl",
+            r"Unsupported note #1 in Measure 7 in staff 1",
+        ),
         ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
         ("TooHigh.mxl", r"Unsupported note c7 #3 in measure 1 in staff 1"),
         ("TooLow.mxl", r"Unsupported note a0 #2 in measure 1 in staff 1"),
@@ -199,6 +207,8 @@ def test_conversion(src, dst, args):
         "Chord 1",
         "Chord 2",
         "Chord 3",
+        "Bad 5/4 whole rest",
+        "Bad 5/8 whole rest",
         "Percussion Chord",
         "Note too high",
         "Note too low",
