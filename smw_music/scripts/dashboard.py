@@ -24,6 +24,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QLineEdit,
+    QListWidgetItem,
     QListWidget,
     QMessageBox,
     QPushButton,
@@ -46,194 +47,7 @@ from ..music_xml import MusicXmlException
 ###############################################################################
 
 
-class Model:
-    def __init__(self) -> None:
-        pass
-
-
-###############################################################################
-
-
-class FilePicker(QFrame):
-    def __init__(
-        self,
-        text: str,
-        save: bool,
-        caption: str,
-        filt: str,
-        parent: QWidget = None,
-    ) -> None:
-        super().__init__(parent)
-        self.fname = ""
-        self._save = save
-        self._caption = caption
-        self._filter = filt
-        self._layout = QHBoxLayout(self)
-        self._button = QPushButton(text, self)
-        self._edit = QLineEdit(self)
-
-        self._layout.addWidget(self._button)
-        self._layout.addWidget(self._edit)
-
-        self._button.clicked.connect(self._open_dialog)
-        self._edit.textChanged.connect(self._update_fname)
-        self.setLayout(self._layout)
-
-    def _open_dialog(self) -> None:
-        if not self._save:
-            fname, _ = QFileDialog.getOpenFileName(
-                self, caption=self._caption, filter=self._filter
-            )
-        else:
-            fname, _ = QFileDialog.getSaveFileName(
-                self, caption=self._caption, filter=self._filter
-            )
-        self._edit.setText(fname)
-
-    def _update_fname(self) -> None:
-        self.fname = self._edit.text()
-
-
-###############################################################################
-
-
-class ControlPanel(QFrame):
-    def __init__(self, parent: QWidget = None) -> None:
-        super().__init__(parent)
-        self.song = None
-
-        self._layout = QVBoxLayout(self)
-
-        self._musicxml_picker = FilePicker(
-            "MusicXML",
-            False,
-            "Input MusicXML File",
-            "MusicXML (*.mxl *.musicxml)",
-            self,
-        )
-        self._mml_picker = FilePicker("MML", True, "Output MML File", "", self)
-        self._load = QPushButton("Load MusicXML", self)
-        self._generate = QPushButton("Generate MML", self)
-        self._global_legato = QCheckBox("Global Legato", self)
-        self._loop_analysis = QCheckBox("Loop Analysis", self)
-        self._superloop_analysis = QCheckBox("Superloop Analysis", self)
-        self._measure_numbers = QCheckBox("Measure Numbers", self)
-        self._custom_samples = QCheckBox("Custom Samples", self)
-        self._custom_percussion = QCheckBox("Custom Percussion", self)
-
-        self._load.clicked.connect(self._load_musicxml)
-        self._generate.clicked.connect(self._generate_mml)
-
-        self._layout.addWidget(self._musicxml_picker)
-        self._layout.addWidget(self._load)
-        self._layout.addWidget(self._global_legato)
-        self._layout.addWidget(self._loop_analysis)
-        self._layout.addWidget(self._superloop_analysis)
-        self._layout.addWidget(self._measure_numbers)
-        self._layout.addWidget(self._custom_samples)
-        self._layout.addWidget(self._custom_percussion)
-        self._layout.addWidget(self._mml_picker)
-        self._layout.addWidget(self._generate)
-
-        self.setLayout(self._layout)
-
-    ###########################################################################
-
-    def _load_musicxml(self) -> None:
-        fname = self._musicxml_picker.fname
-        if fname:
-            self.song = Song.from_music_xml(fname)
-
-    ###########################################################################
-
-    def _generate_mml(self) -> None:
-        if self.song is None:
-            QMessageBox.critical(self, "", "Please load a song")
-        elif not self._mml_picker.fname:
-            QMessageBox.critical(self, "", "Please pick an MML output file")
-        else:
-            try:
-                self.song.to_mml_file(
-                    self._mml_picker.fname,
-                    self._global_legato.isChecked(),
-                    self._loop_analysis.isChecked(),
-                    self._superloop_analysis.isChecked(),
-                    self._measure_numbers.isChecked(),
-                    True,
-                    False,
-                    self._custom_samples.isChecked(),
-                    self._custom_percussion.isChecked(),
-                )
-            except MusicXmlException as e:
-                QMessageBox.critical(self, "Conversion Error", str(e))
-
-
-###############################################################################
-
-
-class DynamicsPanel(QFrame):
-    def __init__(self, parent: QWidget = None) -> None:
-        super().__init__(parent)
-
-        self._layout = QHBoxLayout(self)
-
-        dynamics = [
-            "PPPP",
-            "PPP",
-            "PP",
-            "P",
-            "MP",
-            "MF",
-            "F",
-            "FF",
-            "FFF",
-            "FFFF",
-        ]
-
-        self.sliders = {}
-        for dyn in dynamics:
-            slider = VolSlider(dyn, parent=self)
-            self._layout.addWidget(slider)
-            self.sliders[dyn] = slider
-        self.reset()
-
-        self._interpolate = QCheckBox("Interpolate", self)
-        self._layout.addWidget(self._interpolate)
-
-        self.setLayout(self._layout)
-
-    ###########################################################################
-
-    def reset(self) -> None:
-        for n, slider in enumerate(self.sliders.values()):
-            slider.update(255 * (n + 0.5) / len(self.sliders.items()))
-
-    ###########################################################################
-
-    def interpolate(self) -> None:
-        pppp = self.sliders["PPPP"].value
-        ffff = self.sliders["FFFF"].value
-
-        delta = (ffff - pppp) / (len(self.sliders) - 1)
-        for n, dyn in enumerate(self.sliders.values()):
-            dyn.update(n * delta + pppp)
-
-    ###########################################################################
-
-    def get_values(self) -> list[int]:
-        return [x.value for x in self.sliders.values()]
-
-    ###########################################################################
-
-    def set_values(self, vals: list[int]) -> None:
-        for dyn, val in zip(self.sliders.values(), vals):
-            dyn.update(val)
-
-
-###############################################################################
-
-
-class ArticPanel(QFrame):
+class _ArticPanel(QFrame):
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -256,17 +70,19 @@ class ArticPanel(QFrame):
         self.setLayout(self._layout)
 
     ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def get_values(self) -> list[int]:
+        return [x.value for x in self.sliders.values()]
+
+    ###########################################################################
 
     def reset(self) -> None:
         self.sliders["Default"].update(0x7A)
         self.sliders["Accent"].update(0x7F)
         self.sliders["Staccato"].update(0x5A)
         self.sliders["Accent+Staccato"].update(0x5F)
-
-    ###########################################################################
-
-    def get_values(self) -> list[int]:
-        return [x.value for x in self.sliders.values()]
 
     ###########################################################################
 
@@ -307,6 +123,27 @@ class ArticSlider(QFrame):
         self._do_layout()
 
     ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def update(self, val: int) -> None:
+        self._length_slider.setValue(val >> 4)
+        self._vol_slider.setValue(val & 0xF)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def value(self) -> int:
+        length = self._length_slider.value()
+        vol = self._vol_slider.value() & 0xF
+
+        return (length << 4) | vol
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
 
     def _attach_signals(self) -> None:
         self._length_slider.valueChanged.connect(self._slider_updated)
@@ -334,26 +171,282 @@ class ArticSlider(QFrame):
         self._vol_display.setText(f"{self._vol_slider.value():02X}")
         self._display.setText(f"x{self.value:02X}")
 
+
+###############################################################################
+
+
+class _Controller(QFrame):
+    def __init__(self, parent: QWidget = None) -> None:
+        super().__init__(parent)
+
+        self._dyn_settings = {}
+        self._artic_settings = {}
+
+        self._control_panel = _ControlPanel(self)
+        self._instrument_panel = QFrame(self)
+        self._instruments = QListWidget(self)
+        self._tabs = QTabWidget(self)
+        self._dynamics = _DynamicsPanel(self)
+        self._artics = _ArticPanel(self)
+
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Instruments", self))
+        layout.addWidget(self._instruments)
+        self._instrument_panel.setLayout(layout)
+
+        self._instruments.currentItemChanged.connect(self._stash_reload)
+
+        self._tabs.addTab(self._dynamics, "Dynamics")
+        self._tabs.addTab(self._artics, "Articulations")
+        self._tabs.addTab(QWidget(self), "Echo")
+
+        layout = QHBoxLayout(self)
+        layout.addWidget(self._control_panel)
+        layout.addWidget(self._instrument_panel)
+        layout.addWidget(self._tabs)
+        self.setLayout(layout)
+
+    ###########################################################################
+    # API method definitions
     ###########################################################################
 
-    def update(self, val: int) -> None:
-        self._length_slider.setValue(val >> 4)
-        self._vol_slider.setValue(val & 0xF)
+    def update_instruments(self, instruments: list[InstrumentConfig]) -> None:
+        self._instruments.clear()
+        self._dyn_settings.clear()
+        self._artic_settings.clear()
+        for instrument in instruments:
+            name = instrument.name
+            self._dyn_settings[name] = instrument.dynamics
+            self._artic_settings[name] = instrument.quant
+
+            self._instruments.addItem(instrument.name)
+        self._instruments.setCurrentRow(0)
 
     ###########################################################################
+    # Private method definitions
+    ###########################################################################
 
-    @property
-    def value(self) -> int:
-        length = self._length_slider.value()
-        vol = self._vol_slider.value() & 0xF
+    def _stash_reload(
+        self, curr: QListWidgetItem, prev: QListWidgetItem
+    ) -> None:
+        for settings, control in [
+            (self._dyn_settings, self._dynamics),
+            (self._artic_settings, self._artics),
+        ]:
 
-        return (length << 4) | vol
+            if prev is not None:
+                settings[prev.text()] = control.get_values()
+
+            if curr is not None:
+                try:
+                    control.set_values(settings[curr.text()])
+                except KeyError:
+                    control.reset()
 
 
 ###############################################################################
 
 
-class VolSlider(QFrame):
+class _ControlPanel(QFrame):
+    def __init__(self, parent: QWidget = None) -> None:
+        super().__init__(parent)
+        self.song = None
+
+        self._layout = QVBoxLayout(self)
+
+        self._musicxml_picker = _FilePicker(
+            "MusicXML",
+            False,
+            "Input MusicXML File",
+            "MusicXML (*.mxl *.musicxml)",
+            self,
+        )
+        self._mml_picker = _FilePicker(
+            "MML", True, "Output MML File", "", self
+        )
+        self._load = QPushButton("Load MusicXML", self)
+        self._generate = QPushButton("Generate MML", self)
+        self._global_legato = QCheckBox("Global Legato", self)
+        self._loop_analysis = QCheckBox("Loop Analysis", self)
+        self._superloop_analysis = QCheckBox("Superloop Analysis", self)
+        self._measure_numbers = QCheckBox("Measure Numbers", self)
+        self._custom_samples = QCheckBox("Custom Samples", self)
+        self._custom_percussion = QCheckBox("Custom Percussion", self)
+
+        self._load.clicked.connect(self._load_musicxml)
+        self._generate.clicked.connect(self._generate_mml)
+
+        self._layout.addWidget(self._musicxml_picker)
+        self._layout.addWidget(self._load)
+        self._layout.addWidget(self._global_legato)
+        self._layout.addWidget(self._loop_analysis)
+        self._layout.addWidget(self._superloop_analysis)
+        self._layout.addWidget(self._measure_numbers)
+        self._layout.addWidget(self._custom_samples)
+        self._layout.addWidget(self._custom_percussion)
+        self._layout.addWidget(self._mml_picker)
+        self._layout.addWidget(self._generate)
+
+        self.setLayout(self._layout)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _generate_mml(self) -> None:
+        if self.song is None:
+            QMessageBox.critical(self, "", "Please load a song")
+        elif not self._mml_picker.fname:
+            QMessageBox.critical(self, "", "Please pick an MML output file")
+        else:
+            try:
+                self.song.to_mml_file(
+                    self._mml_picker.fname,
+                    self._global_legato.isChecked(),
+                    self._loop_analysis.isChecked(),
+                    self._superloop_analysis.isChecked(),
+                    self._measure_numbers.isChecked(),
+                    True,
+                    False,
+                    self._custom_samples.isChecked(),
+                    self._custom_percussion.isChecked(),
+                )
+            except MusicXmlException as e:
+                QMessageBox.critical(self, "Conversion Error", str(e))
+
+    ###########################################################################
+
+    def _load_musicxml(self) -> None:
+        fname = self._musicxml_picker.fname
+        if fname:
+            self.song = Song.from_music_xml(fname)
+
+
+###############################################################################
+
+
+class _DynamicsPanel(QFrame):
+    def __init__(self, parent: QWidget = None) -> None:
+        super().__init__(parent)
+
+        self._layout = QHBoxLayout(self)
+
+        dynamics = [
+            "PPPP",
+            "PPP",
+            "PP",
+            "P",
+            "MP",
+            "MF",
+            "F",
+            "FF",
+            "FFF",
+            "FFFF",
+        ]
+
+        self.sliders = {}
+        for dyn in dynamics:
+            slider = _VolSlider(dyn, parent=self)
+            self._layout.addWidget(slider)
+            self.sliders[dyn] = slider
+        self.reset()
+
+        self._interpolate = QCheckBox("Interpolate", self)
+        self._layout.addWidget(self._interpolate)
+
+        self.setLayout(self._layout)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def interpolate(self) -> None:
+        pppp = self.sliders["PPPP"].value
+        ffff = self.sliders["FFFF"].value
+
+        delta = (ffff - pppp) / (len(self.sliders) - 1)
+        for n, dyn in enumerate(self.sliders.values()):
+            dyn.update(n * delta + pppp)
+
+    ###########################################################################
+
+    def get_values(self) -> list[int]:
+        return [x.value for x in self.sliders.values()]
+
+    ###########################################################################
+
+    def reset(self) -> None:
+        for n, slider in enumerate(self.sliders.values()):
+            slider.update(255 * (n + 0.5) / len(self.sliders.items()))
+
+    ###########################################################################
+
+    def set_values(self, vals: list[int]) -> None:
+        for dyn, val in zip(self.sliders.values(), vals):
+            dyn.update(val)
+
+
+###############################################################################
+
+
+class _FilePicker(QFrame):
+    def __init__(
+        self,
+        text: str,
+        save: bool,
+        caption: str,
+        filt: str,
+        parent: QWidget = None,
+    ) -> None:
+        super().__init__(parent)
+        self.fname = ""
+        self._save = save
+        self._caption = caption
+        self._filter = filt
+        self._layout = QHBoxLayout(self)
+        self._button = QPushButton(text, self)
+        self._edit = QLineEdit(self)
+
+        self._layout.addWidget(self._button)
+        self._layout.addWidget(self._edit)
+
+        self._button.clicked.connect(self._open_dialog)
+        self._edit.textChanged.connect(self._update_fname)
+        self.setLayout(self._layout)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _open_dialog(self) -> None:
+        if not self._save:
+            fname, _ = QFileDialog.getOpenFileName(
+                self, caption=self._caption, filter=self._filter
+            )
+        else:
+            fname, _ = QFileDialog.getSaveFileName(
+                self, caption=self._caption, filter=self._filter
+            )
+        self._edit.setText(fname)
+
+    ###########################################################################
+
+    def _update_fname(self) -> None:
+        self.fname = self._edit.text()
+
+
+###############################################################################
+
+
+class _Model:
+    def __init__(self) -> None:
+        pass
+
+
+###############################################################################
+
+
+class _VolSlider(QFrame):
     def __init__(
         self, label: str, pct: float = 0, parent: QWidget = None
     ) -> None:
@@ -384,35 +477,7 @@ class VolSlider(QFrame):
         self._do_layout()
 
     ###########################################################################
-
-    def _attach_signals(self) -> None:
-        self._slider.valueChanged.connect(self._slider_updated)
-        self._control.editingFinished.connect(self._control_updated)
-
-    ###########################################################################
-
-    def _do_layout(self) -> None:
-        layout = QVBoxLayout()
-
-        layout.addWidget(self._label)
-        layout.addWidget(self._slider)
-        layout.addWidget(self._control_box)
-        layout.addWidget(self._display)
-
-        self.setLayout(layout)
-
-    ###########################################################################
-
-    def _control_updated(self) -> None:
-        text = self._control.text()
-        val = int(255 * float(text) / 100)
-        self.update(val, True, False)
-
-    ###########################################################################
-
-    def _slider_updated(self, val: int) -> None:
-        self.update(val, False, True)
-
+    # API method definitions
     ###########################################################################
 
     def update(
@@ -432,76 +497,44 @@ class VolSlider(QFrame):
         self._update_in_progress = False
 
     ###########################################################################
+    # API property definitions
+    ###########################################################################
 
     @property
     def value(self) -> int:
         return self._slider.value()
 
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
 
-###############################################################################
+    def _attach_signals(self) -> None:
+        self._slider.valueChanged.connect(self._slider_updated)
+        self._control.editingFinished.connect(self._control_updated)
 
+    ###########################################################################
 
-class Controller(QFrame):
-    def __init__(self, parent: QWidget = None) -> None:
-        super().__init__(parent)
+    def _control_updated(self) -> None:
+        text = self._control.text()
+        val = int(255 * float(text) / 100)
+        self.update(val, True, False)
 
-        self._dyn_settings = {}
-        self._artic_settings = {}
+    ###########################################################################
 
-        self._control_panel = ControlPanel(self)
-        self._instrument_panel = QFrame(self)
-        self._instruments = QListWidget(self)
-        self._tabs = QTabWidget(self)
-        self._dynamics = DynamicsPanel(self)
-        self._artics = ArticPanel(self)
+    def _do_layout(self) -> None:
+        layout = QVBoxLayout()
 
-        layout = QVBoxLayout(self)
-        layout.addWidget(QLabel("Instruments", self))
-        layout.addWidget(self._instruments)
-        self._instrument_panel.setLayout(layout)
+        layout.addWidget(self._label)
+        layout.addWidget(self._slider)
+        layout.addWidget(self._control_box)
+        layout.addWidget(self._display)
 
-        self._instruments.currentItemChanged.connect(self.stash_reload)
-
-        self._tabs.addTab(self._dynamics, "Dynamics")
-        self._tabs.addTab(self._artics, "Articulations")
-        self._tabs.addTab(QWidget(self), "Echo")
-
-        layout = QHBoxLayout(self)
-        layout.addWidget(self._control_panel)
-        layout.addWidget(self._instrument_panel)
-        layout.addWidget(self._tabs)
         self.setLayout(layout)
 
     ###########################################################################
 
-    def stash_reload(self, curr, prev) -> None:
-        for settings, control in [
-            (self._dyn_settings, self._dynamics),
-            (self._artic_settings, self._artics),
-        ]:
-
-            if prev is not None:
-                settings[prev.text()] = control.get_values()
-
-            if curr is not None:
-                try:
-                    control.set_values(settings[curr.text()])
-                except KeyError:
-                    control.reset()
-
-    ###########################################################################
-
-    def update_instruments(self, instruments: list[InstrumentConfig]) -> None:
-        self._instruments.clear()
-        self._dyn_settings.clear()
-        self._artic_settings.clear()
-        for instrument in instruments:
-            name = instrument.name
-            self._dyn_settings[name] = instrument.dynamics
-            self._artic_settings[name] = instrument.quant
-
-            self._instruments.addItem(instrument.name)
-        self._instruments.setCurrentRow(0)
+    def _slider_updated(self, val: int) -> None:
+        self.update(val, False, True)
 
 
 ###############################################################################
@@ -512,7 +545,7 @@ class Controller(QFrame):
 def main():
     app = QApplication([])
     app.setApplicationName("MusicXML -> MML")
-    window = Controller()
+    window = _Controller()
     window.show()
     app.exec()
 
