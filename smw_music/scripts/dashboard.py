@@ -187,6 +187,7 @@ class ArticSlider(QFrame):
 class _Controller(QFrame):
     generate_mml = pyqtSignal(str)
     song_changed = pyqtSignal(str)
+    song_updated = pyqtSignal(Song)
     update_config = pyqtSignal(bool, bool, bool, bool, bool, bool)
 
     def __init__(self, model: "_Model", parent: QWidget = None) -> None:
@@ -212,17 +213,8 @@ class _Controller(QFrame):
     # API method definitions
     ###########################################################################
 
-    def update_instruments(self, instruments: list[InstrumentConfig]) -> None:
-        self._instruments.clear()
-        self._dyn_settings.clear()
-        self._artic_settings.clear()
-        for instrument in instruments:
-            name = instrument.name
-            self._dyn_settings[name] = instrument.dynamics
-            self._artic_settings[name] = instrument.quant
-
-            self._instruments.addItem(instrument.name)
-        self._instruments.setCurrentRow(0)
+    def song_updated(self, song: Song) -> None:
+        self._update_instruments(song.instruments)
 
     ###########################################################################
     # Private method definitions
@@ -265,6 +257,20 @@ class _Controller(QFrame):
                     control.set_values(settings[curr.text()])
                 except KeyError:
                     control.reset()
+
+    ###########################################################################
+
+    def _update_instruments(self, instruments: list[InstrumentConfig]) -> None:
+        self._instruments.clear()
+        self._dyn_settings.clear()
+        self._artic_settings.clear()
+        for instrument in instruments:
+            name = instrument.name
+            # self._dyn_settings[name] = instrument.dynamics
+            # self._artic_settings[name] = instrument.quant
+
+            self._instruments.addItem(instrument.name)
+        self._instruments.setCurrentRow(0)
 
 
 ###############################################################################
@@ -557,13 +563,14 @@ class _Model(QObject):
 
     def set_song(self, fname: str) -> None:
         self.song = Song.from_music_xml(fname)
+        self._signal()
 
     ###########################################################################
 
     def update_artic(self, inst: str, artic: str, val: int) -> None:
         try:
             self.song.instruments[inst].quant[artic] = val
-            self.song_updated.emit(self.song)
+            self._signal()
         except KeyError:
             pass
 
@@ -572,9 +579,16 @@ class _Model(QObject):
     def update_dynamics(self, inst: str, dyn: str, val: int) -> None:
         try:
             self.song.instruments[inst].dynamics[dyn] = val
-            self.song_updated.emit(self.song)
+            self._signal()
         except KeyError:
             pass
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _signal(self) -> None:
+        self.song_updated.emit(self.song)
 
 
 ###############################################################################
@@ -693,6 +707,7 @@ def main():
     window.generate_mml.connect(model.generate_mml)
     window.song_changed.connect(model.set_song)
     window.update_config.connect(model.set_config)
+    model.song_updated.connect(window.song_updated)
 
     window.show()
     app.exec()
