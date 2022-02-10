@@ -133,6 +133,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             msgs.append(cast(Error, token).msg)
         for token in filter(lambda x: isinstance(x, Note), tokens):
             msgs.extend(cast(Note, token).check(self.percussion))
+        for token in filter(lambda x: isinstance(x, Playable), tokens):
+            msgs.extend(cast(Playable, token).duration_check())
         return msgs
 
     ###########################################################################

@@ -102,6 +102,17 @@ class Playable:
     note_num: int
     duration: int
 
+    ###########################################################################
+
+    def duration_check(self) -> list[str]:
+        msgs = []
+        if self.duration == 0:
+            msg = f"Unsupported note #{self.note_num} in "
+            msg += f"Measure {self.measure_num}"
+            msgs.append(msg)
+
+        return msgs
+
 
 ###############################################################################
 
@@ -505,7 +516,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
         return cls(
             name.lower().replace("#", "+"),
-            _MUSIC_XML_DURATION[elem.duration.ordinal],
+            _MUSIC_XML_DURATION.get(elem.duration.ordinal, 0),
             octave - 1,
             elem.notehead,
             elem.duration.dots,
@@ -675,7 +686,7 @@ class Rest(Token, Playable):
             A new Rest object with its attributes defined by `elem`
         """
         return cls(
-            _MUSIC_XML_DURATION[elem.duration.ordinal],
+            _MUSIC_XML_DURATION.get(elem.duration.ordinal, 0),
             elem.duration.dots,
         )
 
