@@ -528,7 +528,6 @@ class _Model(QObject):
     ###########################################################################
 
     def generate_mml(self, fname: str) -> None:
-        print("trying to generate")
         self.song.to_mml_file(
             fname,
             self.global_legato,
@@ -602,16 +601,10 @@ class _VolSlider(QFrame):
         self._update_in_progress = False
 
         self._label = label
-        self._slider = QSlider(Qt.Orientation.Vertical)
-        self._display = QLabel()
 
-        self._control_box = QWidget()
-        layout = QHBoxLayout(self._control_box)
-        self._control = QLineEdit(self._control_box)
-        layout.addWidget(self._control)
-        self._control_label = QLabel("%", self._control_box)
-        layout.addWidget(self._control_label)
-        self._control_box.setLayout(layout)
+        self._slider = QSlider(Qt.Orientation.Vertical)
+        self._control = QLineEdit()
+        self._display = QLabel()
 
         self._slider.setRange(0, 255)
 
