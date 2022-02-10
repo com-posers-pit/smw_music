@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QMessageBox,
     QPushButton,
     QSlider,
     QTabWidget,
@@ -36,10 +37,20 @@ from PyQt6.QtWidgets import (
 # Project imports
 ###############################################################################
 
+from ..music_xml.instrument import InstrumentConfig
 from ..music_xml.song import Song
+from ..music_xml import MusicXmlException
 
 ###############################################################################
 # Private Class Definitions
+###############################################################################
+
+
+class Model:
+    def __init__(self) -> None:
+        pass
+
+
 ###############################################################################
 
 
@@ -130,30 +141,31 @@ class ControlPanel(QFrame):
 
     def _load_musicxml(self) -> None:
         fname = self._musicxml_picker.fname
-        print("loading")
-        print(fname)
         if fname:
             self.song = Song.from_music_xml(fname)
-            print(self.song)
 
     ###########################################################################
 
     def _generate_mml(self) -> None:
-        print("generating")
-        if self.song is not None:
-            print("generating")
-            self.song.to_mml_file(
-                self._mml_picker.fname,
-                self._global_legato.isChecked(),
-                self._loop_analysis.isChecked(),
-                self._superloop_analysis.isChecked(),
-                self._measure_numbers.isChecked(),
-                True,
-                False,
-                self._custom_samples.isChecked(),
-                self._custom_percussion.isChecked(),
-            )
-            print("done")
+        if self.song is None:
+            QMessageBox.critical(self, "", "Please load a song")
+        elif not self._mml_picker.fname:
+            QMessageBox.critical(self, "", "Please pick an MML output file")
+        else:
+            try:
+                self.song.to_mml_file(
+                    self._mml_picker.fname,
+                    self._global_legato.isChecked(),
+                    self._loop_analysis.isChecked(),
+                    self._superloop_analysis.isChecked(),
+                    self._measure_numbers.isChecked(),
+                    True,
+                    False,
+                    self._custom_samples.isChecked(),
+                    self._custom_percussion.isChecked(),
+                )
+            except MusicXmlException as e:
+                QMessageBox.critical(self, "Conversion Error", str(e))
 
 
 ###############################################################################
@@ -179,7 +191,7 @@ class DynamicsPanel(QFrame):
         ]
 
         self.sliders = {}
-        for n, dyn in enumerate(dynamics):
+        for dyn in dynamics:
             slider = VolSlider(dyn, parent=self)
             self._layout.addWidget(slider)
             self.sliders[dyn] = slider
@@ -435,28 +447,29 @@ class Controller(QFrame):
 
         self._dyn_settings = {}
         self._artic_settings = {}
-        layout = QHBoxLayout(self)
 
         self._control_panel = ControlPanel(self)
-        list_widget = QListWidget(self)
+        self._instrument_panel = QFrame(self)
+        self._instruments = QListWidget(self)
         self._tabs = QTabWidget(self)
         self._dynamics = DynamicsPanel(self)
         self._artics = ArticPanel(self)
 
-        list_widget.addItem("Flute")
-        list_widget.addItem("Piano")
-        list_widget.addItem("Guitar")
-        list_widget.setCurrentRow(0)
-        list_widget.currentItemChanged.connect(self.stash_reload)
+        layout = QVBoxLayout(self)
+        layout.addWidget(QLabel("Instruments", self))
+        layout.addWidget(self._instruments)
+        self._instrument_panel.setLayout(layout)
+
+        self._instruments.currentItemChanged.connect(self.stash_reload)
 
         self._tabs.addTab(self._dynamics, "Dynamics")
         self._tabs.addTab(self._artics, "Articulations")
         self._tabs.addTab(QWidget(self), "Echo")
 
+        layout = QHBoxLayout(self)
         layout.addWidget(self._control_panel)
-        layout.addWidget(list_widget)
+        layout.addWidget(self._instrument_panel)
         layout.addWidget(self._tabs)
-
         self.setLayout(layout)
 
     ###########################################################################
@@ -475,6 +488,20 @@ class Controller(QFrame):
                     control.set_values(settings[curr.text()])
                 except KeyError:
                     control.reset()
+
+    ###########################################################################
+
+    def update_instruments(self, instruments: list[InstrumentConfig]) -> None:
+        self._instruments.clear()
+        self._dyn_settings.clear()
+        self._artic_settings.clear()
+        for instrument in instruments:
+            name = instrument.name
+            self._dyn_settings[name] = instrument.dynamics
+            self._artic_settings[name] = instrument.quant
+
+            self._instruments.addItem(instrument.name)
+        self._instruments.setCurrentRow(0)
 
 
 ###############################################################################
