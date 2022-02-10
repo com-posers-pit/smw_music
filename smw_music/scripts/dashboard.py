@@ -185,6 +185,10 @@ class ArticSlider(QFrame):
 
 
 class _Controller(QFrame):
+    generate_mml = pyqtSignal(str)
+    song_changed = pyqtSignal(str)
+    update_config = pyqtSignal(bool, bool, bool, bool, bool, bool)
+
     def __init__(self, model: "_Model", parent: QWidget = None) -> None:
         super().__init__(parent)
         self._model = model
@@ -192,11 +196,14 @@ class _Controller(QFrame):
         self._dyn_settings = {}
         self._artic_settings = {}
 
-        self._control_panel = _ControlPanel(model)
+        self._control_panel = _ControlPanel()
         self._instruments = QListWidget()
         self._dynamics = _DynamicsPanel()
         self._artics = _ArticPanel()
 
+        self._control_panel.generate_mml.connect(self.generate_mml)
+        self._control_panel.song_changed.connect(self.song_changed)
+        self._control_panel.update_config.connect(self.update_config)
         self._instruments.currentItemChanged.connect(self._stash_reload)
 
         self._do_layout()
@@ -264,14 +271,14 @@ class _Controller(QFrame):
 
 
 class _ControlPanel(QFrame):
-    song_changed = pyqtSignal(Song)
+    generate_mml = pyqtSignal(str)
+    song_changed = pyqtSignal(str)
+    update_config = pyqtSignal(bool, bool, bool, bool, bool, bool)
 
     ###########################################################################
 
-    def __init__(self, model: "_Model", parent: QWidget = None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
-        self._model = model
-
         self._musicxml_picker = _FilePicker(
             "MusicXML",
             False,
@@ -290,13 +297,24 @@ class _ControlPanel(QFrame):
         self._custom_samples = QCheckBox("Custom Samples")
         self._custom_percussion = QCheckBox("Custom Percussion")
 
-        self._musicxml_picker.file_changed.connect(self._load_musicxml)
-        self._generate.clicked.connect(self._generate_mml)
-
+        self._attach()
         self._do_layout()
 
     ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _attach(self) -> None:
+        self._global_legato.stateChanged.connect(self._update_config)
+        self._loop_analysis.stateChanged.connect(self._update_config)
+        self._superloop_analysis.stateChanged.connect(self._update_config)
+        self._measure_numbers.stateChanged.connect(self._update_config)
+        self._custom_samples.stateChanged.connect(self._update_config)
+        self._custom_percussion.stateChanged.connect(self._update_config)
+
+        self._musicxml_picker.file_changed.connect(self._load_musicxml)
+        self._generate.clicked.connect(self._generate_mml)
+
     ###########################################################################
 
     def _do_layout(self) -> None:
@@ -311,42 +329,38 @@ class _ControlPanel(QFrame):
         layout.addWidget(self._custom_percussion)
         layout.addWidget(self._mml_picker)
         layout.addWidget(self._generate)
+        layout.addWidget(QPushButton("Convert"))
+        layout.addWidget(QPushButton("Playback"))
 
         self.setLayout(layout)
 
     ###########################################################################
 
     def _generate_mml(self) -> None:
-        if self.song is None:
-            QMessageBox.critical(self, "", "Please load a song")
-        elif not self._mml_picker.fname:
+        print("generating mml")
+        if not self._mml_picker.fname:
             QMessageBox.critical(self, "", "Please pick an MML output file")
         else:
-            try:
-                self.song.to_mml_file(
-                    self._mml_picker.fname,
-                    self._global_legato.isChecked(),
-                    self._loop_analysis.isChecked(),
-                    self._superloop_analysis.isChecked(),
-                    self._measure_numbers.isChecked(),
-                    True,
-                    False,
-                    self._custom_samples.isChecked(),
-                    self._custom_percussion.isChecked(),
-                )
-            except MusicXmlException as e:
-                QMessageBox.critical(self, "Conversion Error", str(e))
+            self.generate_mml.emit(self._mml_picker.fname)
 
     ###########################################################################
 
     def _load_musicxml(self) -> None:
         fname = self._musicxml_picker.fname
         if fname:
-            try:
-                self._model.set_song(fname)
-                self.song_changed.emit(self.song)
-            except Exception as e:
-                QMessageBox.critical(self, "Load Error", str(e))
+            self.song_changed.emit(fname)
+
+    ###########################################################################
+
+    def _update_config(self, _: int) -> None:
+        self.update_config.emit(
+            self._global_legato.isChecked(),
+            self._loop_analysis.isChecked(),
+            self._superloop_analysis.isChecked(),
+            self._measure_numbers.isChecked(),
+            self._custom_samples.isChecked(),
+            self._custom_percussion.isChecked(),
+        )
 
 
 ###############################################################################
@@ -495,9 +509,50 @@ class _Model(QObject):
     def __init__(self) -> None:
         super().__init__()
         self.song = None
+        self.mml_fname = ""
+        self.global_legato = False
+        self.loop_analysis = False
+        self.superloop_analysis = False
+        self.measure_numbers = False
+        self.custom_samples = False
+        self.custom_percussion = False
 
     ###########################################################################
     # API method definitions
+    ###########################################################################
+
+    def generate_mml(self, fname: str) -> None:
+        print("trying to generate")
+        self.song.to_mml_file(
+            fname,
+            self.global_legato,
+            self.loop_analysis,
+            self.superloop_analysis,
+            self.measure_numbers,
+            True,
+            False,
+            self.custom_samples,
+            self.custom_percussion,
+        )
+
+    ###########################################################################
+
+    def set_config(
+        self,
+        global_legato: bool,
+        loop_analysis: bool,
+        superloop_analysis: bool,
+        measure_numbers: bool,
+        custom_samples: bool,
+        custom_percussion: bool,
+    ) -> None:
+        self.global_legato = global_legato
+        self.loop_analysis = loop_analysis
+        self.superloop_analysis = superloop_analysis
+        self.measure_numbers = measure_numbers
+        self.custom_samples = custom_samples
+        self.custom_percussion = custom_percussion
+
     ###########################################################################
 
     def set_song(self, fname: str) -> None:
@@ -634,6 +689,11 @@ def main():
     app.setApplicationName("MusicXML -> MML")
     model = _Model()
     window = _Controller(model)
+
+    window.generate_mml.connect(model.generate_mml)
+    window.song_changed.connect(model.set_song)
+    window.update_config.connect(model.set_config)
+
     window.show()
     app.exec()
 
