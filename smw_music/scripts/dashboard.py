@@ -187,16 +187,13 @@ class ArticSlider(QFrame):
 class _Controller(QFrame):
     generate_mml = pyqtSignal(str)
     song_changed = pyqtSignal(str)
-    song_updated = pyqtSignal(Song)
     update_config = pyqtSignal(bool, bool, bool, bool, bool, bool)
+    update_volumes = pyqtSignal(str, dict)
 
-    def __init__(self, model: "_Model", parent: QWidget = None) -> None:
+    def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
-        self._model = model
 
-        self._dyn_settings = {}
-        self._artic_settings = {}
-
+        self._song = None
         self._control_panel = _ControlPanel()
         self._instruments = QListWidget()
         self._dynamics = _DynamicsPanel()
@@ -205,7 +202,7 @@ class _Controller(QFrame):
         self._control_panel.generate_mml.connect(self.generate_mml)
         self._control_panel.song_changed.connect(self.song_changed)
         self._control_panel.update_config.connect(self.update_config)
-        self._instruments.currentItemChanged.connect(self._stash_reload)
+        self._instruments.currentItemChanged.connect(self._change_instrument)
 
         self._do_layout()
 
@@ -238,25 +235,6 @@ class _Controller(QFrame):
         layout.addWidget(inst_panel)
         layout.addWidget(tabs)
         self.setLayout(layout)
-
-    ###########################################################################
-
-    def _stash_reload(
-        self, curr: QListWidgetItem, prev: QListWidgetItem
-    ) -> None:
-        for settings, control in [
-            (self._dyn_settings, self._dynamics),
-            (self._artic_settings, self._artics),
-        ]:
-
-            if prev is not None:
-                settings[prev.text()] = control.get_values()
-
-            if curr is not None:
-                try:
-                    control.set_values(settings[curr.text()])
-                except KeyError:
-                    control.reset()
 
     ###########################################################################
 
@@ -695,7 +673,7 @@ def main():
     app = QApplication([])
     app.setApplicationName("MusicXML -> MML")
     model = _Model()
-    window = _Controller(model)
+    window = _Controller()
 
     window.generate_mml.connect(model.generate_mml)
     window.song_changed.connect(model.set_song)
