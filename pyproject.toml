@@ -47,7 +47,7 @@ webserver = ["flask"]
 
 [tool.poetry.scripts]
 smw_music_xml_to_amk = "smw_music.scripts.convert:main"
-smw_music_xml_to_amk_ui = "smw_music.scripts.dashboard:main"
+smw_music_xml_to_amk_ui = "smw_music.scripts.dashboard.app:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
