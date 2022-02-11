@@ -59,6 +59,11 @@ class Controller(QWidget):
     # API method definitions
     ###########################################################################
 
+    def change_inst_config(self, config: InstrumentConfig) -> None:
+        print(config)
+
+    ###########################################################################
+
     def log_mml_results(self, results: str) -> None:
         if results:
             QMessageBox.critical(self, "Conversion Error", results)
@@ -67,7 +72,7 @@ class Controller(QWidget):
 
     ###########################################################################
 
-    def song_updated(self, song: Song) -> None:
+    def update_song(self, song: Song) -> None:
         self._update_instruments(song.instruments)
 
     ###########################################################################
@@ -79,7 +84,7 @@ class Controller(QWidget):
         self._control_panel.mml_requested.connect(self.mml_requested)
         self._control_panel.config_changed.connect(self.config_changed)
 
-        # self._instruments.currentItemChanged.connect(self._change_instrument)
+        self._instruments.currentTextChanged.connect(self.instrument_changed)
         # self._dynamics.volume_changed.connect()
 
     ###########################################################################

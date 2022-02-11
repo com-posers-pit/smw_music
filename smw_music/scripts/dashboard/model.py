@@ -23,7 +23,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 # Package imports
 ###############################################################################
 
-from ...music_xml import MusicXmlException
+from ...music_xml import InstrumentConfig, MusicXmlException
 from ...music_xml.song import Song
 
 ###############################################################################
@@ -32,8 +32,11 @@ from ...music_xml.song import Song
 
 
 class Model(QObject):
-    song_updated = pyqtSignal(Song)
-    mml_generated = pyqtSignal(str, arguments=["response"])
+    inst_config_changed: pyqtSignal = pyqtSignal(
+        InstrumentConfig, arguments=["config"]
+    )
+    mml_generated: pyqtSignal = pyqtSignal(str, arguments=["response"])
+    song_changed: pyqtSignal = pyqtSignal(Song)
 
     ###########################################################################
 
@@ -76,6 +79,9 @@ class Model(QObject):
 
     def set_instrument(self, inst: str) -> None:
         self.active_instrument = inst
+        self.inst_config_changed.emit(
+            self.song.instruments[self.active_instrument]
+        )
 
     ###########################################################################
 
@@ -124,4 +130,4 @@ class Model(QObject):
     ###########################################################################
 
     def _signal(self) -> None:
-        self.song_updated.emit(self.song)
+        self.song_changed.emit(self.song)

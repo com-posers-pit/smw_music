@@ -51,11 +51,13 @@ def main() -> None:
 
     _setup_menus(app, window)
 
+    controller.config_changed.connect(model.set_config)
+    controller.instrument_changed.connect(model.set_instrument)
     controller.mml_requested.connect(model.generate_mml)
     controller.song_changed.connect(model.set_song)
-    controller.config_changed.connect(model.set_config)
-    model.song_updated.connect(controller.song_updated)
+    model.inst_config_changed.connect(controller.change_inst_config)
     model.mml_generated.connect(controller.log_mml_results)
+    model.song_changed.connect(controller.update_song)
 
     window.setCentralWidget(controller)
     window.show()
