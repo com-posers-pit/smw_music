@@ -7,6 +7,11 @@
 
 """Music XML -> AMK Converter."""
 
+###############################################################################
+# Standard library imports
+###############################################################################
+
+from dataclasses import dataclass
 
 ###############################################################################
 # Library imports
@@ -36,12 +41,11 @@ from PyQt6.QtWidgets import (
 )
 
 ###############################################################################
-# Project imports
+# Package imports
 ###############################################################################
 
 from ..music_xml.instrument import InstrumentConfig
 from ..music_xml.song import Song
-from ..music_xml import MusicXmlException
 
 ###############################################################################
 # Private Class Definitions
@@ -49,6 +53,13 @@ from ..music_xml import MusicXmlException
 
 
 class _ArticPanel(QFrame):
+    artic_changed: pyqtSignal = pyqtSignal(
+        str, int, int, arguments=["artic", "length", "volume"]
+    )
+    _sliders: dict[str, "_ArticSlider"]
+
+    ###########################################################################
+
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -59,111 +70,100 @@ class _ArticPanel(QFrame):
             "Accent+Staccato",
         ]
 
-        self.sliders = {}
-        for artic in artics:
-            slider = ArticSlider(artic)
-            self.sliders[artic] = slider
-
-        self.reset()
-
-        self._do_layout()
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def get_values(self) -> list[int]:
-        return [x.value for x in self.sliders.values()]
-
-    ###########################################################################
-
-    def reset(self) -> None:
-        self.sliders["Default"].update(0x7A)
-        self.sliders["Accent"].update(0x7F)
-        self.sliders["Staccato"].update(0x5A)
-        self.sliders["Accent+Staccato"].update(0x5F)
-
-    ###########################################################################
-
-    def set_values(self, vals: list[int]) -> None:
-        for artic, val in zip(self.sliders.values(), vals):
-            artic.update(val)
-
-    ###########################################################################
-    # Private method definitions
-    ###########################################################################
-
-    def _do_layout(self) -> None:
-        layout = QHBoxLayout()
-        for slider in self.sliders.values():
-            layout.addWidget(slider)
-        self.reset()
-        self.setLayout(layout)
-
-
-###############################################################################
-
-
-class ArticSlider(QFrame):
-    def __init__(
-        self,
-        label: str,
-        length: int = 7,
-        vol: int = 15,
-        parent: QWidget = None,
-    ) -> None:
-        super().__init__(parent)
-        self._update_in_progress = False
-        self._label = label
-
-        self._length_slider = QSlider(Qt.Orientation.Vertical)
-        self._vol_slider = QSlider(Qt.Orientation.Vertical)
-        self._length_display = QLabel()
-        self._vol_display = QLabel()
-        self._display = QLabel()
-
-        self._length_slider.setRange(0, 7)
-        self._vol_slider.setRange(0, 15)
+        self._sliders = {artic: _ArticSlider(artic) for artic in artics}
 
         self._attach_signals()
-
-        self._length_slider.setValue(length)
-        self._vol_slider.setValue(vol)
-
         self._do_layout()
 
     ###########################################################################
     # API method definitions
     ###########################################################################
 
-    def update(self, val: int) -> None:
-        self._length_slider.setValue(val >> 4)
-        self._vol_slider.setValue(val & 0xF)
-
-    ###########################################################################
-    # API property definitions
-    ###########################################################################
-
-    @property
-    def value(self) -> int:
-        length = self._length_slider.value()
-        vol = self._vol_slider.value() & 0xF
-
-        return (length << 4) | vol
+    def update_artics(self, artics: dict[str, int]) -> None:
+        for artic, val in artics:
+            self._sliders[artic].update(val)
 
     ###########################################################################
     # Private method definitions
     ###########################################################################
 
     def _attach_signals(self) -> None:
-        self._length_slider.valueChanged.connect(self._slider_updated)
-        self._vol_slider.valueChanged.connect(self._slider_updated)
+        for artic, slider in self._sliders.items():
+            slider.artic_changed.connect(
+                lambda length, volume, artic=artic: self.artic_changed.emit(
+                    artic, length, volume
+                )
+            )
 
     ###########################################################################
 
     def _do_layout(self) -> None:
+        layout = QHBoxLayout()
+        for slider in self._sliders.values():
+            layout.addWidget(slider)
+        self.setLayout(layout)
+
+
+###############################################################################
+
+
+class _ArticSlider(QFrame):
+    artic_changed: pyqtSignal = pyqtSignal(
+        int, int, arguments=["length", "volume"]
+    )
+    _length_slider: QSlider
+    _vol_slider: QSlider
+    _length_display: QLabel
+    _vol_display: QLabel
+    _display: QLabel
+
+    ###########################################################################
+
+    def __init__(
+        self,
+        label: str,
+        parent: QWidget = None,
+    ) -> None:
+        super().__init__(parent)
+
+        self._length_slider: QSlider = QSlider(Qt.Orientation.Vertical)
+        self._vol_slider: QSlider = QSlider(Qt.Orientation.Vertical)
+        self._length_display: QLabel = QLabel()
+        self._vol_display: QLabel = QLabel()
+        self._display: QLabel = QLabel()
+
+        self._length_slider.setRange(0, 7)
+        self._vol_slider.setRange(0, 15)
+
+        self._attach_signals()
+        self._do_layout(label)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def update(self, length: int, vol: int) -> None:
+        self._length_slider.setValue(length)
+        self._vol_slider.setValue(vol)
+        self._length_display.setText(f"{length:X}")
+        self._vol_display.setText(f"{vol:X}")
+        self._display.setText(f"{length:X}{vol:X}")
+        self.artic_changed.emit(length, vol)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _attach_signals(self) -> None:
+        self._length_slider.valueChanged.connect(self._update_state)
+        self._vol_slider.valueChanged.connect(self._update_state)
+
+    ###########################################################################
+
+    def _do_layout(self, label: str) -> None:
         layout = QGridLayout()
-        layout.addWidget(QLabel(self._label), 0, 0, 1, 2)
+
+        layout.addWidget(QLabel(label), 0, 0, 1, 2)
         layout.addWidget(QLabel("Length"), 1, 0)
         layout.addWidget(QLabel("Volume"), 1, 1)
         layout.addWidget(self._length_slider, 2, 0)
@@ -176,34 +176,34 @@ class ArticSlider(QFrame):
 
     ###########################################################################
 
-    def _slider_updated(self, _: int) -> None:
-        self._length_display.setText(f"{self._length_slider.value():01X}")
-        self._vol_display.setText(f"{self._vol_slider.value():02X}")
-        self._display.setText(f"x{self.value:02X}")
+    def _update_state(self, _: int) -> None:
+        length = self._length_slider.value()
+        volume = self._vol_slider.value()
+        self.update(length, volume)
 
 
 ###############################################################################
 
 
 class _Controller(QFrame):
-    generate_mml = pyqtSignal(str)
-    song_changed = pyqtSignal(str)
-    update_config = pyqtSignal(bool, bool, bool, bool, bool, bool)
-    update_volumes = pyqtSignal(str, dict)
+    config_changed: pyqtSignal = pyqtSignal(bool, bool, bool, bool, bool, bool)
+    instrument_changed: pyqtSignal = pyqtSignal(str, arguments=["inst_name"])
+    inst_params_updated: pyqtSignal = pyqtSignal(str, str, int)
+    mml_requested: pyqtSignal = pyqtSignal(str, arguments=["fname"])
+    song_changed: pyqtSignal = pyqtSignal(str, arguments=["fname"])
+    volume_changed: pyqtSignal = pyqtSignal(str, int)
+
+    ###########################################################################
 
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
-        self._song = None
         self._control_panel = _ControlPanel()
         self._instruments = QListWidget()
         self._dynamics = _DynamicsPanel()
         self._artics = _ArticPanel()
 
-        self._control_panel.generate_mml.connect(self.generate_mml)
-        self._control_panel.song_changed.connect(self.song_changed)
-        self._control_panel.update_config.connect(self.update_config)
-        # self._instruments.currentItemChanged.connect(self._change_instrument)
+        self._attach_signals()
 
         self._do_layout()
 
@@ -216,6 +216,16 @@ class _Controller(QFrame):
 
     ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _attach_signals(self) -> None:
+        self._control_panel.song_changed.connect(self.song_changed)
+        self._control_panel.generate_mml.connect(self.generate_mml)
+        self._control_panel.update_config.connect(self.update_config)
+
+        # self._instruments.currentItemChanged.connect(self._change_instrument)
+        self._dynamics.change_volume.connect()
+
     ###########################################################################
 
     def _do_layout(self) -> None:
@@ -254,9 +264,18 @@ class _Controller(QFrame):
 
 
 class _ControlPanel(QFrame):
-    generate_mml = pyqtSignal(str)
-    song_changed = pyqtSignal(str)
-    update_config = pyqtSignal(bool, bool, bool, bool, bool, bool)
+    config_changed = pyqtSignal(str, bool, arguments=["param", "state"])
+    request_mml = pyqtSignal(str, arguments=["fname"])
+    song_changed = pyqtSignal(str, arguments=["fname"])
+    _musicxml_picker: "_FilePicker"
+    _mml_picker: "_FilePicker"
+    _generate: QPushButton
+    _global_legato: QCheckBox
+    _loop_analysis: QCheckBox
+    _superloop_analysis: QCheckBox
+    _measure_numbers: QCheckBox
+    _custom_samples: QCheckBox
+    _custom_percussion: QCheckBox
 
     ###########################################################################
 
@@ -312,8 +331,8 @@ class _ControlPanel(QFrame):
         layout.addWidget(self._custom_percussion)
         layout.addWidget(self._mml_picker)
         layout.addWidget(self._generate)
-        layout.addWidget(QPushButton("Convert"))
-        layout.addWidget(QPushButton("Playback"))
+        # layout.addWidget(QPushButton("Convert"))
+        # layout.addWidget(QPushButton("Playback"))
 
         self.setLayout(layout)
 
@@ -324,7 +343,7 @@ class _ControlPanel(QFrame):
         if not self._mml_picker.fname:
             QMessageBox.critical(self, "", "Please pick an MML output file")
         else:
-            self.generate_mml.emit(self._mml_picker.fname)
+            self.request_mml.emit(self._mml_picker.fname)
 
     ###########################################################################
 
@@ -336,7 +355,7 @@ class _ControlPanel(QFrame):
     ###########################################################################
 
     def _update_config(self, _: int) -> None:
-        self.update_config.emit(
+        self.config_changed.emit(
             self._global_legato.isChecked(),
             self._loop_analysis.isChecked(),
             self._superloop_analysis.isChecked(),
@@ -350,6 +369,8 @@ class _ControlPanel(QFrame):
 
 
 class _DynamicsPanel(QFrame):
+    change_volume = pyqtSignal(str, int)
+
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -370,43 +391,21 @@ class _DynamicsPanel(QFrame):
         for dyn in dynamics:
             slider = _VolSlider(dyn)
             self._sliders[dyn] = slider
-        self.reset()
 
         self._interpolate = QCheckBox("Interpolate")
 
         self._do_layout()
 
     ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def interpolate(self) -> None:
-        pppp = self._sliders["PPPP"].value
-        ffff = self._sliders["FFFF"].value
-
-        delta = (ffff - pppp) / (len(self._sliders) - 1)
-        for n, dyn in enumerate(self._sliders.values()):
-            dyn.update(n * delta + pppp)
-
-    ###########################################################################
-
-    def get_values(self) -> list[int]:
-        return [x.value for x in self._sliders.values()]
-
-    ###########################################################################
-
-    def reset(self) -> None:
-        for n, slider in enumerate(self._sliders.values()):
-            slider.update(255 * (n + 0.5) / len(self._sliders.items()))
-
-    ###########################################################################
-
-    def set_values(self, vals: list[int]) -> None:
-        for dyn, val in zip(self._sliders.values(), vals):
-            dyn.update(val)
-
-    ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _attach_signals(self) -> None:
+        for dyn, slider in self._sliders.items():
+            slider.change_volume.connect(
+                lambda x, dyn=dyn: self.change_volume(dyn, x)
+            )
+
     ###########################################################################
 
     def _do_layout(self) -> None:
@@ -425,6 +424,12 @@ class _DynamicsPanel(QFrame):
 
 class _FilePicker(QFrame):
     file_changed = pyqtSignal(str)
+    fname: str
+    _save: bool
+    _caption: str
+    _filter: str
+    _button: QPushButton
+    _edit: QLineEdit
 
     ###########################################################################
 
@@ -444,13 +449,18 @@ class _FilePicker(QFrame):
         self._button = QPushButton(text)
         self._edit = QLineEdit()
 
-        self._button.clicked.connect(self._open_dialog)
-        self._edit.textChanged.connect(self._update_fname)
+        self._attach_signals()
 
         self._do_layout()
 
     ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _attach_signals(self) -> None:
+        self._button.clicked.connect(self._open_dialog)
+        self._edit.textChanged.connect(self._update_fname)
+
     ###########################################################################
 
     def _do_layout(self) -> None:
@@ -499,6 +509,7 @@ class _Model(QObject):
         self.measure_numbers = False
         self.custom_samples = False
         self.custom_percussion = False
+        self.active_instrument = None
 
     ###########################################################################
     # API method definitions
@@ -516,6 +527,11 @@ class _Model(QObject):
             self.custom_samples,
             self.custom_percussion,
         )
+
+    ###########################################################################
+
+    def set_instrument(self, inst: str) -> None:
+        self.active_instrument = inst
 
     ###########################################################################
 
@@ -571,12 +587,16 @@ class _Model(QObject):
 
 
 class _VolSlider(QFrame):
-    def __init__(
-        self, label: str, pct: float = 0, parent: QWidget = None
-    ) -> None:
-        super().__init__(parent)
-        self._update_in_progress = False
+    volume_changed = pyqtSignal(int)
+    _label: QLabel
+    _slider: QSlider
+    _control: QLineEdit
+    _display: QLabel
 
+    ###########################################################################
+
+    def __init__(self, label: str, parent: QWidget = None) -> None:
+        super().__init__(parent)
         self._label = label
 
         self._slider = QSlider(Qt.Orientation.Vertical)
@@ -584,58 +604,29 @@ class _VolSlider(QFrame):
         self._display = QLabel()
 
         self._slider.setRange(0, 255)
-
-        validator = QDoubleValidator(0, 100, 1)
-        self._control.setValidator(validator)
+        self._control.setValidator(QDoubleValidator(0, 100, 1))
 
         self._attach_signals()
-
-        self._slider.setValue(int(255 * pct / 100))
-
         self._do_layout()
 
     ###########################################################################
     # API method definitions
     ###########################################################################
 
-    def update(
-        self, val: float, slider: bool = True, control: bool = True
-    ) -> None:
-        if self._update_in_progress:
-            return
-
-        self._update_in_progress = True
-        val = int(val)
-        if slider:
-            self._slider.setValue(val)
-        if control:
-            self._control.setText(f"{100 * val / 255:5.1f}")
-        self._display.setText(f"x{val:02X}")
-
-        self._update_in_progress = False
-
-    ###########################################################################
-    # API property definitions
-    ###########################################################################
-
-    @property
-    def value(self) -> int:
-        return self._slider.value()
+    def set_volume(self, vol: int) -> None:
+        self._slider.setValue(vol)
+        self._control.setText(f"{100 * vol / 255:5.1f}")
+        self._display.setText(f"x{vol:02X}")
 
     ###########################################################################
     # Private method definitions
     ###########################################################################
 
     def _attach_signals(self) -> None:
-        self._slider.valueChanged.connect(self._slider_updated)
-        self._control.editingFinished.connect(self._control_updated)
-
-    ###########################################################################
-
-    def _control_updated(self) -> None:
-        text = self._control.text()
-        val = int(255 * float(text) / 100)
-        self.update(val, True, False)
+        self._slider.valueChanged.connect(self._update_state)
+        self._control.editingFinished.connect(
+            lambda x: self._update_state(int(255 * float(x) / 100))
+        )
 
     ###########################################################################
 
@@ -659,8 +650,9 @@ class _VolSlider(QFrame):
 
     ###########################################################################
 
-    def _slider_updated(self, val: int) -> None:
-        self.update(val, False, True)
+    def _update_state(self, vol: int) -> None:
+        self.set_volume(vol)
+        self.volume_changed.emit(vol)
 
 
 ###############################################################################
