@@ -21,17 +21,11 @@ from .controller import Controller
 from .model import Model
 
 ###############################################################################
-# API function definitions
+# Private function definitions
 ###############################################################################
 
 
-def main():
-    app = QApplication([])
-    app.setApplicationName("MusicXML -> MML")
-    model = Model()
-    window = QMainWindow()
-    controller = Controller()
-
+def _setup_menus(app: QApplication, window: QMainWindow) -> None:
     file_menu = window.menuBar().addMenu("&File")
     file_menu.addAction("&Load project")
     file_menu.addAction("&Save project")
@@ -42,10 +36,26 @@ def main():
     help_menu.addAction("About")
     help_menu.addAction("About Qt", app.aboutQt)
 
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def main() -> None:
+    app = QApplication([])
+    app.setApplicationName("MusicXML -> MML")
+    model = Model()
+    window = QMainWindow()
+    controller = Controller()
+
+    _setup_menus(app, window)
+
     controller.mml_requested.connect(model.generate_mml)
     controller.song_changed.connect(model.set_song)
     controller.config_changed.connect(model.set_config)
     model.song_updated.connect(controller.song_updated)
+    model.mml_generated.connect(controller.log_mml_results)
 
     window.setCentralWidget(controller)
     window.show()
