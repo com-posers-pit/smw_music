@@ -158,7 +158,7 @@ class FilePicker(QWidget):
             dlg = QFileDialog.getSaveFileName
         else:
             dlg = QFileDialog.getOpenFileName
-        fname, retcode = dlg(self, caption=self._caption, filter=self._filter)
+        fname, _ = dlg(self, caption=self._caption, filter=self._filter)
         if fname:
             self._edit.setText(fname)
 

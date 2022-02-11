@@ -23,6 +23,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 # Package imports
 ###############################################################################
 
+from ...music_xml import MusicXmlException
 from ...music_xml.song import Song
 
 ###############################################################################
@@ -32,6 +33,7 @@ from ...music_xml.song import Song
 
 class Model(QObject):
     song_updated = pyqtSignal(Song)
+    mml_generated = pyqtSignal(str, arguments=["response"])
 
     ###########################################################################
 
@@ -52,17 +54,23 @@ class Model(QObject):
     ###########################################################################
 
     def generate_mml(self, fname: str) -> None:
-        self.song.to_mml_file(
-            fname,
-            self.global_legato,
-            self.loop_analysis,
-            self.superloop_analysis,
-            self.measure_numbers,
-            True,
-            False,
-            self.custom_samples,
-            self.custom_percussion,
-        )
+        try:
+            self.song.to_mml_file(
+                fname,
+                self.global_legato,
+                self.loop_analysis,
+                self.superloop_analysis,
+                self.measure_numbers,
+                True,
+                False,
+                self.custom_samples,
+                self.custom_percussion,
+            )
+        except MusicXmlException as e:
+            msg = str(e)
+        else:
+            msg = ""
+        self.mml_generated.emit(msg)
 
     ###########################################################################
 

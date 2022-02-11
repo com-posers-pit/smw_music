@@ -14,6 +14,7 @@ from PyQt6.QtWidgets import (
     QHBoxLayout,
     QLabel,
     QListWidget,
+    QMessageBox,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -56,6 +57,14 @@ class Controller(QWidget):
 
     ###########################################################################
     # API method definitions
+    ###########################################################################
+
+    def log_mml_results(self, results: str) -> None:
+        if results:
+            QMessageBox.critical(self, "Conversion Error", results)
+        else:
+            QMessageBox.information(self, "Conversion Success", "Done")
+
     ###########################################################################
 
     def song_updated(self, song: Song) -> None:

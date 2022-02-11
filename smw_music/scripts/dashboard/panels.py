@@ -170,7 +170,6 @@ class ControlPanel(QWidget):
     ###########################################################################
 
     def _generate_mml(self) -> None:
-        print("generating mml")
         if not self._mml_picker.fname:
             QMessageBox.critical(self, "", "Please pick an MML output file")
         else:
