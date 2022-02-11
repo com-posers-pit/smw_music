@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
     QLineEdit,
     QListWidgetItem,
     QListWidget,
+    QMainWindow,
     QMessageBox,
     QPushButton,
     QSlider,
@@ -202,7 +203,7 @@ class _Controller(QFrame):
         self._control_panel.generate_mml.connect(self.generate_mml)
         self._control_panel.song_changed.connect(self.song_changed)
         self._control_panel.update_config.connect(self.update_config)
-        self._instruments.currentItemChanged.connect(self._change_instrument)
+        # self._instruments.currentItemChanged.connect(self._change_instrument)
 
         self._do_layout()
 
@@ -240,8 +241,6 @@ class _Controller(QFrame):
 
     def _update_instruments(self, instruments: list[InstrumentConfig]) -> None:
         self._instruments.clear()
-        self._dyn_settings.clear()
-        self._artic_settings.clear()
         for instrument in instruments:
             name = instrument.name
             # self._dyn_settings[name] = instrument.dynamics
@@ -673,12 +672,18 @@ def main():
     app = QApplication([])
     app.setApplicationName("MusicXML -> MML")
     model = _Model()
-    window = _Controller()
+    window = QMainWindow()
+    controller = _Controller()
 
-    window.generate_mml.connect(model.generate_mml)
-    window.song_changed.connect(model.set_song)
-    window.update_config.connect(model.set_config)
-    model.song_updated.connect(window.song_updated)
+    window.menuBar().addMenu("File")
+    window.menuBar().addMenu("About")
+
+    controller.generate_mml.connect(model.generate_mml)
+    controller.song_changed.connect(model.set_song)
+    controller.update_config.connect(model.set_config)
+    model.song_updated.connect(controller.song_updated)
+
+    window.setCentralWidget(controller)
 
     window.show()
     app.exec()
