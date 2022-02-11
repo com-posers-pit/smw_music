@@ -32,8 +32,14 @@ def main():
     window = QMainWindow()
     controller = Controller()
 
-    window.menuBar().addMenu("File")
-    window.menuBar().addMenu("About")
+    file_menu = window.menuBar().addMenu("&File")
+    file_menu.addAction("&Load project")
+    file_menu.addAction("&Save project")
+    file_menu.addSeparator()
+    file_menu.addAction("&Quit", app.quit)
+
+    help_menu = window.menuBar().addMenu("&Help")
+    help_menu.addAction("About Qt", app.aboutQt)
 
     controller.mml_requested.connect(model.generate_mml)
     controller.song_changed.connect(model.set_song)
