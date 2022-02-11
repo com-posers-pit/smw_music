@@ -155,11 +155,12 @@ class FilePicker(QWidget):
 
     def _open_dialog(self) -> None:
         if self._save:
-            dlg = QFileDialog.getSAveFilename
+            dlg = QFileDialog.getSaveFileName
         else:
-            dlg = QFileDialog.getOpenFilename
-        fname, _ = dlg(self, caption=self._caption, filter=self._filter)
-        self._edit.setText(fname)
+            dlg = QFileDialog.getOpenFileName
+        fname, retcode = dlg(self, caption=self._caption, filter=self._filter)
+        if fname:
+            self._edit.setText(fname)
 
     ###########################################################################
 

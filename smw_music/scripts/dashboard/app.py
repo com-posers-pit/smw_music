@@ -39,6 +39,7 @@ def main():
     file_menu.addAction("&Quit", app.quit)
 
     help_menu = window.menuBar().addMenu("&Help")
+    help_menu.addAction("About")
     help_menu.addAction("About Qt", app.aboutQt)
 
     controller.mml_requested.connect(model.generate_mml)
@@ -47,7 +48,6 @@ def main():
     model.song_updated.connect(controller.song_updated)
 
     window.setCentralWidget(controller)
-
     window.show()
     app.exec()
 
