@@ -350,26 +350,6 @@ def _reference_loops(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
-def _remove_unused_instruments(tokens: list[Token]) -> list[Token]:
-    rv = []
-    for n, token in enumerate(tokens):
-        keep = True
-        if isinstance(token, Instrument):
-            for nxt in tokens[n + 1 :]:
-                if isinstance(nxt, Note):
-                    break
-                if isinstance(nxt, Instrument):
-                    keep = False
-
-        if keep:
-            rv.append(token)
-
-    return rv
-
-
-###############################################################################
-
-
 def _reorder_measures(tokens: list[Token]) -> list[Token]:
     # Copy the input list (we're modifying, don't want to upset the caller)
     tokens = list(tokens)
@@ -516,12 +496,6 @@ def reduce(
     superloop_analysis: bool,
     percussion: bool,
 ) -> list[Token]:
-    # A blah hack to kill annotations in percussion channels... this will go
-    # away.
-    if percussion:
-        tokens = [x for x in tokens if not isinstance(x, Instrument)]
-    tokens = _filter_annotations(tokens)
-    tokens = _remove_unused_instruments(tokens)
     tokens = _swap_repeat_annotations(tokens)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)
@@ -535,3 +509,31 @@ def reduce(
         tokens = _repeat_analysis(tokens)
     tokens = _deduplicate(tokens)
     return tokens
+
+
+###############################################################################
+
+
+def remove_unused_instruments(
+    percussion: bool, tokens: list[Token]
+) -> list[Token]:
+    # A blah hack to kill annotations in percussion channels... this will go
+    # away.
+    if percussion:
+        tokens = [x for x in tokens if not isinstance(x, Instrument)]
+    tokens = _filter_annotations(tokens)
+
+    rv = []
+    for n, token in enumerate(tokens):
+        keep = True
+        if isinstance(token, Instrument):
+            for nxt in tokens[n + 1 :]:
+                if isinstance(nxt, Note):
+                    break
+                if isinstance(nxt, Instrument):
+                    keep = False
+
+        if keep:
+            rv.append(token)
+
+    return rv

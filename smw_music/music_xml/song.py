@@ -29,7 +29,7 @@ from mako.template import Template  # type: ignore
 from .channel import Channel
 from .echo import EchoConfig
 from .instrument import DEFAULT_DYN, inst_from_name, InstrumentConfig
-from .reduction import reduce
+from .reduction import reduce, remove_unused_instruments
 from .shared import CRLF, MusicXmlException
 from .tokens import (
     Annotation,
@@ -278,6 +278,7 @@ class Song:
                         break
 
                 part = cls._parse_part(elem, sections, len(parts))
+                part = remove_unused_instruments(percussion, part)
                 parts.append(Channel(part, percussion))
 
         return cls(metadata, parts)
@@ -502,7 +503,6 @@ class Song:
         mml_tempo = int(self.bpm * 255 / 625)
 
         self._reduce(loop_analysis, superloop_analysis)
-        self._collect_instruments()
 
         self._validate()
         channels = [
