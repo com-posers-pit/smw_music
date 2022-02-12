@@ -30,6 +30,17 @@ from PyQt6.QtWidgets import (  # type: ignore
 from ...log import debug, info
 
 ###############################################################################
+# Private function definitions
+###############################################################################
+
+# h/t: https://stackoverflow.com/questions/47285303
+def _fix_width(edit: QLineEdit) -> None:
+    font_metrics = edit.fontMetrics()
+    width = font_metrics.boundingRect("1000.0").width()
+    edit.setFixedWidth(width)
+
+
+###############################################################################
 # API Class Definitions
 ###############################################################################
 
@@ -211,6 +222,7 @@ class VolSlider(QWidget):
 
         self._slider.setRange(0, 255)
         self._control.setValidator(QDoubleValidator(0, 100, 1))
+        _fix_width(self._control)
 
         self._attach_signals()
         self._do_layout(label)
