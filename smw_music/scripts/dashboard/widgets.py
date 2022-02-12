@@ -158,7 +158,7 @@ class FilePicker(QWidget):
     @debug()
     def _attach_signals(self) -> None:
         self._button.clicked.connect(self._open_dialog)
-        self._edit.textChanged.connect(self._update_fname)
+        self._edit.editingFinished.connect(self._update_fname)
 
     ###########################################################################
 
@@ -182,13 +182,15 @@ class FilePicker(QWidget):
         fname, _ = dlg(self, caption=self._caption, filter=self._filter)
         if fname:
             self._edit.setText(fname)
+            self._update_fname()
 
     ###########################################################################
 
     @debug()
-    def _update_fname(self, fname: str) -> None:
-        self.fname = fname
-        self.file_changed.emit(self.fname)
+    def _update_fname(self) -> None:
+        self.fname = self._edit.text()
+        if self.fname:
+            self.file_changed.emit(self.fname)
 
 
 ###############################################################################
@@ -233,9 +235,7 @@ class VolSlider(QWidget):
     @debug()
     def _attach_signals(self) -> None:
         self._slider.valueChanged.connect(self.set_volume)
-        self._control.editingFinished.connect(
-            lambda x: self.set_volume(int(255 * float(x) / 100))
-        )
+        self._control.editingFinished.connect(self._update_from_control)
 
     ###########################################################################
 
@@ -257,3 +257,14 @@ class VolSlider(QWidget):
         layout.addWidget(self._display)
 
         self.setLayout(layout)
+
+    ###########################################################################
+
+    @debug()
+    def _update_from_control(self):
+        try:
+            volume = int(255 * float(self._control.text()) / 100)
+        except ValueError:
+            pass
+        else:
+            self.set_volume(volume)
