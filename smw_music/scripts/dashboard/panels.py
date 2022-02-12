@@ -241,6 +241,7 @@ class DynamicsPanel(QWidget):
 
         # self._interpolate = QCheckBox("Interpolate")
 
+        self._attach_signals()
         self._do_layout()
 
     ###########################################################################

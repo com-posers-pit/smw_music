@@ -92,7 +92,7 @@ class Controller(QWidget):
         self._control_panel.config_changed.connect(self.config_changed)
 
         self._instruments.currentTextChanged.connect(self.instrument_changed)
-        # self._dynamics.volume_changed.connect()
+        self._dynamics.volume_changed.connect(self.volume_changed)
 
     ###########################################################################
 

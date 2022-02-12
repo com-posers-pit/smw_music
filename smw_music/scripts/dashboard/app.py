@@ -76,6 +76,7 @@ def main() -> None:
     controller.instrument_changed.connect(model.set_instrument)
     controller.mml_requested.connect(model.generate_mml)
     controller.song_changed.connect(model.set_song)
+    controller.volume_changed.connect(model.update_dynamics)
     model.inst_config_changed.connect(controller.change_inst_config)
     model.response_generated.connect(controller.log_response)
     model.song_changed.connect(controller.update_song)
