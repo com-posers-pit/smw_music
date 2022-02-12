@@ -239,15 +239,25 @@ class Song:
         ----------
         fname : str
             The (compressed or uncompressed) MusicXML file
+
         Return
         ------
         Song
             A new Song object representing the song described in `fname`
+
+        Raises
+        ------
+        MusicXmlException:
+            Whenever a conversion is not possible
         """
         metadata = {}
         parts: list[Channel] = []
 
-        stream = music21.converter.parseFile(fname)
+        try:
+            stream = music21.converter.parseFile(fname)
+        except music21.converter.ConverterFileException as e:
+            raise MusicXmlException(str(e)) from e
+
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
                 metadata["composer"] = elem.composer or "COMPOSER HERE"
