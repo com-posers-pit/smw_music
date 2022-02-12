@@ -9,8 +9,8 @@
 # Library imports
 ###############################################################################
 
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import (
+from PyQt6.QtCore import pyqtSignal  # type: ignore
+from PyQt6.QtWidgets import (  # type: ignore
     QCheckBox,
     QHBoxLayout,
     QMessageBox,
@@ -61,7 +61,7 @@ class ArticPanel(QWidget):
 
     @info()
     def update_artics(self, artics: dict[str, int]) -> None:
-        for artic, val in artics:
+        for artic, val in artics.items():
             self._sliders[artic].update(val)
 
     ###########################################################################

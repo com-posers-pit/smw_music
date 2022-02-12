@@ -9,9 +9,9 @@
 # Library imports
 ###############################################################################
 
-from PyQt6.QtCore import pyqtSignal, Qt
-from PyQt6.QtGui import QDoubleValidator
-from PyQt6.QtWidgets import (
+from PyQt6.QtCore import pyqtSignal, Qt  # type: ignore
+from PyQt6.QtGui import QDoubleValidator  # type: ignore
+from PyQt6.QtWidgets import (  # type: ignore
     QFileDialog,
     QGridLayout,
     QHBoxLayout,

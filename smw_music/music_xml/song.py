@@ -224,7 +224,7 @@ class Song:
         self.game = metadata.get("game", "???")
         self.bpm = int(metadata.get("bpm", 120))
         self.channels = channels[:8]
-        self.instruments = []
+        self.instruments: list[InstrumentConfig] = []
 
         self._collect_instruments()
 

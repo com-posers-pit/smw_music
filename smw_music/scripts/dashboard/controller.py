@@ -9,8 +9,8 @@
 # Library imports
 ###############################################################################
 
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtWidgets import (
+from PyQt6.QtCore import pyqtSignal  # type: ignore
+from PyQt6.QtWidgets import (  # type: ignore
     QHBoxLayout,
     QLabel,
     QListWidget,
