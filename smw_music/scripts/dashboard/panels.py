@@ -239,7 +239,7 @@ class DynamicsPanel(QWidget):
             slider = VolSlider(dyn)
             self._sliders[dyn] = slider
 
-        self._interpolate = QCheckBox("Interpolate")
+        # self._interpolate = QCheckBox("Interpolate")
 
         self._do_layout()
 
@@ -259,7 +259,7 @@ class DynamicsPanel(QWidget):
     @debug()
     def _attach_signals(self) -> None:
         for dyn, slider in self._sliders.items():
-            slider.change_volume.connect(
+            slider.volume_changed.connect(
                 lambda x, dyn=dyn: self.volume_changed.emit(dyn, x)
             )
 
@@ -272,6 +272,6 @@ class DynamicsPanel(QWidget):
         for slider in self._sliders.values():
             layout.addWidget(slider)
 
-        layout.addWidget(self._interpolate)
+        # layout.addWidget(self._interpolate)
 
         self.setLayout(layout)
