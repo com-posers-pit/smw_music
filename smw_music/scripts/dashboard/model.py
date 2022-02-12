@@ -37,7 +37,9 @@ class Model(QObject):
     inst_config_changed: pyqtSignal = pyqtSignal(
         InstrumentConfig, arguments=["config"]
     )
-    mml_generated: pyqtSignal = pyqtSignal(str, arguments=["response"])
+    response_generated: pyqtSignal = pyqtSignal(
+        bool, str, str, arguments=["error", "title", "response"]
+    )
     song_changed: pyqtSignal = pyqtSignal(Song)
 
     song: Optional[Song]
@@ -72,6 +74,8 @@ class Model(QObject):
 
     @info()
     def generate_mml(self, fname: str) -> None:
+        title = "MML Generation"
+        error = True
         if self.song is None:
             msg = "Song not loaded"
         else:
@@ -90,8 +94,9 @@ class Model(QObject):
             except MusicXmlException as e:
                 msg = str(e)
             else:
-                msg = ""
-        self.mml_generated.emit(msg)
+                error = False
+                msg = "Done"
+        self.response_generated.emit(error, title, msg)
 
     ###########################################################################
 
@@ -127,8 +132,12 @@ class Model(QObject):
 
     @info()
     def set_song(self, fname: str) -> None:
-        self.song = Song.from_music_xml(fname)
-        self._signal()
+        try:
+            self.song = Song.from_music_xml(fname)
+        except MusicXmlException as e:
+            self.response_generated.emit(True, "Song load", str(e))
+        else:
+            self._signal()
 
     ###########################################################################
 

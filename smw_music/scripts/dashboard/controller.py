@@ -69,11 +69,11 @@ class Controller(QWidget):
     ###########################################################################
 
     @info()
-    def log_mml_results(self, results: str) -> None:
-        if results:
-            QMessageBox.critical(self, "Conversion Error", results)
+    def log_response(self, error: bool, title: str, results: str) -> None:
+        if error:
+            QMessageBox.critical(self, title, results)
         else:
-            QMessageBox.information(self, "Conversion Success", "Done")
+            QMessageBox.information(self, title, results)
 
     ###########################################################################
 
