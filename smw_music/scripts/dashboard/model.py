@@ -72,7 +72,7 @@ class Model(QObject):
     # API method definitions
     ###########################################################################
 
-    @info()
+    @info(True)
     def generate_mml(self, fname: str) -> None:
         title = "MML Generation"
         error = True
@@ -130,7 +130,7 @@ class Model(QObject):
 
     ###########################################################################
 
-    @info()
+    @info(True)
     def set_song(self, fname: str) -> None:
         try:
             self.song = Song.from_music_xml(fname)
@@ -141,14 +141,14 @@ class Model(QObject):
 
     ###########################################################################
 
-    @info()
-    def update_artic(self, artic: str, val: int) -> None:
+    @info(True)
+    def update_artic(self, artic: str, quant: int) -> None:
         if self.song is not None:
-            self.active_instrument.quant[artic] = val
+            self.active_instrument.quant[artic] = quant
 
     ###########################################################################
 
-    @info()
+    @info(True)
     def update_dynamics(self, dyn: str, val: int) -> None:
         if self.song is not None:
             self.active_instrument.dynamics[dyn] = val

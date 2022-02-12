@@ -72,6 +72,7 @@ def main() -> None:
 
     _setup_menus(app, window)
 
+    controller.artic_changed.connect(model.update_artic)
     controller.config_changed.connect(model.set_config)
     controller.instrument_changed.connect(model.set_instrument)
     controller.mml_requested.connect(model.generate_mml)

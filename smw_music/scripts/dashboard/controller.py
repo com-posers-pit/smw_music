@@ -35,12 +35,14 @@ from .panels import ArticPanel, ControlPanel, DynamicsPanel
 
 
 class Controller(QWidget):
+    artic_changed: pyqtSignal = pyqtSignal(
+        str, int, arguments=["artic", "quant"]
+    )
     config_changed: pyqtSignal = pyqtSignal(bool, bool, bool, bool, bool, bool)
     instrument_changed: pyqtSignal = pyqtSignal(str, arguments=["inst_name"])
-    inst_params_updated: pyqtSignal = pyqtSignal(str, str, int)
     mml_requested: pyqtSignal = pyqtSignal(str, arguments=["fname"])
     song_changed: pyqtSignal = pyqtSignal(str, arguments=["fname"])
-    volume_changed: pyqtSignal = pyqtSignal(str, int)
+    volume_changed: pyqtSignal = pyqtSignal(str, int, arguments=["dyn", "val"])
 
     ###########################################################################
 
@@ -93,6 +95,7 @@ class Controller(QWidget):
 
         self._instruments.currentTextChanged.connect(self.instrument_changed)
         self._dynamics.volume_changed.connect(self.volume_changed)
+        self._artics.artic_changed.connect(self.artic_changed)
 
     ###########################################################################
 

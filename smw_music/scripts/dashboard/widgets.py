@@ -35,9 +35,7 @@ from ...log import debug, info
 
 
 class ArticSlider(QWidget):
-    artic_changed: pyqtSignal = pyqtSignal(
-        int, int, arguments=["length", "volume"]
-    )
+    artic_changed: pyqtSignal = pyqtSignal(int, arguments=["quant"])
     _length_slider: QSlider
     _vol_slider: QSlider
     _length_display: QLabel
@@ -66,20 +64,18 @@ class ArticSlider(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info()
-    def update(self, length: int, vol: int) -> None:
+    @info(True)
+    def update(self, quant: int) -> None:
+        length = 0x7 & (quant >> 4)
+        vol = 0xF & quant
+
         self._length_slider.setValue(length)
         self._vol_slider.setValue(vol)
         self._length_display.setText(f"{length:X}")
         self._vol_display.setText(f"{vol:X}")
-        self._display.setText(f"{length:X}{vol:X}")
-        self.artic_changed.emit(length, vol)
+        self._display.setText(f"{quant:02X}")
 
-    ###########################################################################
-
-    @info()
-    def update_quant(self, quant: int) -> None:
-        self.update(quant >> 4, quant & 0xF)
+        self.artic_changed.emit(quant)
 
     ###########################################################################
     # Private method definitions
@@ -113,7 +109,9 @@ class ArticSlider(QWidget):
     def _update_state(self, _: int) -> None:
         length = self._length_slider.value()
         volume = self._vol_slider.value()
-        self.update(length, volume)
+        quant = ((0x7 & length) << 4) | (0xF & volume)
+
+        self.update(quant)
 
 
 ###############################################################################
@@ -221,7 +219,7 @@ class VolSlider(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info()
+    @info(True)
     def set_volume(self, vol: int) -> None:
         self._slider.setValue(vol)
         self._control.setText(f"{100 * vol / 255:5.1f}")

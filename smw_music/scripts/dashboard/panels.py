@@ -33,7 +33,7 @@ from .widgets import ArticSlider, FilePicker, VolSlider
 
 class ArticPanel(QWidget):
     artic_changed: pyqtSignal = pyqtSignal(
-        str, int, int, arguments=["artic", "length", "volume"]
+        str, int, arguments=["artic", "quant"]
     )
     _sliders: dict[str, ArticSlider]
 
@@ -62,7 +62,7 @@ class ArticPanel(QWidget):
     @info()
     def update(self, artics: dict[str, int]) -> None:
         for artic, val in artics.items():
-            self._sliders[artic].update_quant(val)
+            self._sliders[artic].update(val)
 
     ###########################################################################
     # Private method definitions
@@ -72,8 +72,8 @@ class ArticPanel(QWidget):
     def _attach_signals(self) -> None:
         for artic, slider in self._sliders.items():
             slider.artic_changed.connect(
-                lambda length, volume, artic=artic: self.artic_changed.emit(
-                    artic, length, volume
+                lambda quant, artic=artic: self.artic_changed.emit(
+                    artic, quant
                 )
             )
 
