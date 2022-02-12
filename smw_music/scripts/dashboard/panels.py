@@ -44,13 +44,13 @@ class ArticPanel(QWidget):
         super().__init__(parent)
 
         artics = [
-            "Default",
-            "Accent",
-            "Staccato",
-            "Accent+Staccato",
+            ("Default", "DEF"),
+            ("Accent", "ACC"),
+            ("Staccato", "STAC"),
+            ("Accent+Staccato", "ACCSTAC"),
         ]
 
-        self._sliders = {artic: ArticSlider(artic) for artic in artics}
+        self._sliders = {key: ArticSlider(artic) for artic, key in artics}
 
         self._attach_signals()
         self._do_layout()
@@ -60,9 +60,9 @@ class ArticPanel(QWidget):
     ###########################################################################
 
     @info()
-    def update_artics(self, artics: dict[str, int]) -> None:
+    def update(self, artics: dict[str, int]) -> None:
         for artic, val in artics.items():
-            self._sliders[artic].update(val)
+            self._sliders[artic].update_quant(val)
 
     ###########################################################################
     # Private method definitions
@@ -242,6 +242,15 @@ class DynamicsPanel(QWidget):
         self._interpolate = QCheckBox("Interpolate")
 
         self._do_layout()
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    @info()
+    def update(self, config: dict[str, int]) -> None:
+        for dyn, vol in config.items():
+            self._sliders[dyn].set_volume(vol)
 
     ###########################################################################
     # Private method definitions

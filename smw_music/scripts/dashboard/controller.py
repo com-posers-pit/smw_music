@@ -61,9 +61,10 @@ class Controller(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info()
+    @info(True)
     def change_inst_config(self, config: InstrumentConfig) -> None:
-        pass
+        self._dynamics.update(config.dynamics)
+        self._artics.update(config.quant)
 
     ###########################################################################
 

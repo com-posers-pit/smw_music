@@ -76,6 +76,12 @@ class ArticSlider(QWidget):
         self.artic_changed.emit(length, vol)
 
     ###########################################################################
+
+    @info()
+    def update_quant(self, quant: int) -> None:
+        self.update(quant >> 4, quant & 0xF)
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
