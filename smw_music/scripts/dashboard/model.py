@@ -23,6 +23,7 @@ from PyQt6.QtCore import pyqtSignal, QObject
 # Package imports
 ###############################################################################
 
+from ...log import debug, info
 from ...music_xml import InstrumentConfig, MusicXmlException
 from ...music_xml.song import Song
 
@@ -40,6 +41,7 @@ class Model(QObject):
 
     ###########################################################################
 
+    @debug
     def __init__(self) -> None:
         super().__init__()
         self.song = None
@@ -56,6 +58,7 @@ class Model(QObject):
     # API method definitions
     ###########################################################################
 
+    @info
     def generate_mml(self, fname: str) -> None:
         try:
             self.song.to_mml_file(
@@ -77,6 +80,7 @@ class Model(QObject):
 
     ###########################################################################
 
+    @info
     def set_instrument(self, inst: str) -> None:
         self.active_instrument = inst
         self.inst_config_changed.emit(
@@ -85,6 +89,7 @@ class Model(QObject):
 
     ###########################################################################
 
+    @info
     def set_config(
         self,
         global_legato: bool,
@@ -103,12 +108,14 @@ class Model(QObject):
 
     ###########################################################################
 
+    @info
     def set_song(self, fname: str) -> None:
         self.song = Song.from_music_xml(fname)
         self._signal()
 
     ###########################################################################
 
+    @info
     def update_artic(self, inst: str, artic: str, val: int) -> None:
         try:
             self.song.instruments[inst].quant[artic] = val
@@ -118,6 +125,7 @@ class Model(QObject):
 
     ###########################################################################
 
+    @info
     def update_dynamics(self, inst: str, dyn: str, val: int) -> None:
         try:
             self.song.instruments[inst].dynamics[dyn] = val
@@ -129,5 +137,6 @@ class Model(QObject):
     # Private method definitions
     ###########################################################################
 
+    @debug
     def _signal(self) -> None:
         self.song_changed.emit(self.song)
