@@ -44,7 +44,7 @@ class Controller(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -61,13 +61,13 @@ class Controller(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info
+    @info()
     def change_inst_config(self, config: InstrumentConfig) -> None:
         pass
 
     ###########################################################################
 
-    @info
+    @info()
     def log_mml_results(self, results: str) -> None:
         if results:
             QMessageBox.critical(self, "Conversion Error", results)
@@ -76,7 +76,7 @@ class Controller(QWidget):
 
     ###########################################################################
 
-    @info
+    @info()
     def update_song(self, song: Song) -> None:
         self._update_instruments(song.instruments)
 
@@ -84,7 +84,7 @@ class Controller(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         self._control_panel.song_changed.connect(self.song_changed)
         self._control_panel.mml_requested.connect(self.mml_requested)
@@ -95,7 +95,7 @@ class Controller(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self) -> None:
         inst_panel = QWidget()
 
@@ -117,7 +117,7 @@ class Controller(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _update_instruments(self, instruments: list[InstrumentConfig]) -> None:
         self._instruments.clear()
         for instrument in instruments:

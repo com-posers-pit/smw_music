@@ -39,7 +39,7 @@ class ArticPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -59,7 +59,7 @@ class ArticPanel(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info
+    @info()
     def update_artics(self, artics: dict[str, int]) -> None:
         for artic, val in artics:
             self._sliders[artic].update(val)
@@ -68,7 +68,7 @@ class ArticPanel(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         for artic, slider in self._sliders.items():
             slider.artic_changed.connect(
@@ -79,7 +79,7 @@ class ArticPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self) -> None:
         layout = QHBoxLayout()
         for slider in self._sliders.values():
@@ -117,7 +117,7 @@ class ControlPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
         self._musicxml_picker = FilePicker(
@@ -143,7 +143,7 @@ class ControlPanel(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         self._global_legato.stateChanged.connect(self._update_config)
         self._loop_analysis.stateChanged.connect(self._update_config)
@@ -157,7 +157,7 @@ class ControlPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self) -> None:
         layout = QVBoxLayout()
 
@@ -177,7 +177,7 @@ class ControlPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _generate_mml(self, fname: str) -> None:
         if not fname:
             QMessageBox.critical(self, "", "Please pick an MML output file")
@@ -186,14 +186,14 @@ class ControlPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _load_musicxml(self, fname: str) -> None:
         if fname:
             self.song_changed.emit(fname)
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _update_config(self, _: int) -> None:
         self.config_changed.emit(
             self._global_legato.isChecked(),
@@ -217,7 +217,7 @@ class DynamicsPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(self, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -247,7 +247,7 @@ class DynamicsPanel(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         for dyn, slider in self._sliders.items():
             slider.change_volume.connect(
@@ -256,7 +256,7 @@ class DynamicsPanel(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self) -> None:
         layout = QHBoxLayout()
 

@@ -46,7 +46,7 @@ class ArticSlider(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(self, label: str, parent: QWidget = None) -> None:
         super().__init__(parent)
 
@@ -66,7 +66,7 @@ class ArticSlider(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info
+    @info()
     def update(self, length: int, vol: int) -> None:
         self._length_slider.setValue(length)
         self._vol_slider.setValue(vol)
@@ -79,14 +79,14 @@ class ArticSlider(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         self._length_slider.valueChanged.connect(self._update_state)
         self._vol_slider.valueChanged.connect(self._update_state)
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self, label: str) -> None:
         layout = QGridLayout()
 
@@ -103,7 +103,7 @@ class ArticSlider(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _update_state(self, _: int) -> None:
         length = self._length_slider.value()
         volume = self._vol_slider.value()
@@ -124,7 +124,7 @@ class FilePicker(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(
         self,
         text: str,
@@ -149,14 +149,14 @@ class FilePicker(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         self._button.clicked.connect(self._open_dialog)
         self._edit.textChanged.connect(self._update_fname)
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self) -> None:
         layout = QHBoxLayout()
 
@@ -167,7 +167,7 @@ class FilePicker(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _open_dialog(self, _: bool) -> None:
         if self._save:
             dlg = QFileDialog.getSaveFileName
@@ -179,7 +179,7 @@ class FilePicker(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _update_fname(self, fname: str) -> None:
         self.fname = fname
         self.file_changed.emit(self.fname)
@@ -196,7 +196,7 @@ class VolSlider(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def __init__(self, label: str, parent: QWidget = None) -> None:
         super().__init__(parent)
         self._slider = QSlider(Qt.Orientation.Vertical)
@@ -213,7 +213,7 @@ class VolSlider(QWidget):
     # API method definitions
     ###########################################################################
 
-    @info
+    @info()
     def set_volume(self, vol: int) -> None:
         self._slider.setValue(vol)
         self._control.setText(f"{100 * vol / 255:5.1f}")
@@ -224,7 +224,7 @@ class VolSlider(QWidget):
     # Private method definitions
     ###########################################################################
 
-    @debug
+    @debug()
     def _attach_signals(self) -> None:
         self._slider.valueChanged.connect(self.set_volume)
         self._control.editingFinished.connect(
@@ -233,7 +233,7 @@ class VolSlider(QWidget):
 
     ###########################################################################
 
-    @debug
+    @debug()
     def _do_layout(self, label: str) -> None:
         control_panel = QWidget()
 
