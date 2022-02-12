@@ -6,12 +6,20 @@
 """Dashboard UI Widgets."""
 
 ###############################################################################
+# Standard library imports
+###############################################################################
+
+from typing import Any
+
+###############################################################################
 # Library imports
 ###############################################################################
 
 from PyQt6.QtCore import pyqtSignal, Qt  # type: ignore
 from PyQt6.QtGui import QDoubleValidator  # type: ignore
 from PyQt6.QtWidgets import (  # type: ignore
+    QDial,
+    QCheckBox,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
@@ -200,6 +208,96 @@ class FilePicker(QWidget):
         self.fname = self._edit.text()
         if self.fname:
             self.file_changed.emit(self.fname)
+
+
+###############################################################################
+
+
+class PanControl(QWidget):
+    pan_changed: pyqtSignal = pyqtSignal(
+        bool, int, arguments=["enable", "pan"]
+    )
+    _slider: QDial
+    _display: QLabel
+    _enable: QCheckBox
+
+    ###########################################################################
+
+    @debug()
+    def __init__(self, parent: QWidget = None) -> None:
+        super().__init__(parent)
+
+        self._slider = QDial()
+        self._display = QLabel()
+        self._enable = QCheckBox("Enabled")
+
+        self._slider.setRange(0, 20)
+        self._slider.setValue(10)
+
+        self._attach_signals()
+        self._do_layout()
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    @info(True)
+    def set_pan(self, enabled: bool, pan: int) -> None:
+        self._enable.setChecked(enabled)
+        self._pan = pan
+        if pan == 10:
+            text = "C"
+        elif pan < 10:
+            text = f"{10*(10 - pan)}% R"
+        else:
+            text = f"{10*(pan - 10)}% L"
+        self._display.setText(text)
+
+        self.pan_changed.emit(enabled, pan)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @debug()
+    def _attach_signals(self) -> None:
+        self._enable.stateChanged.connect(self._update_state)
+        self._slider.valueChanged.connect(self._update_state)
+
+    ###########################################################################
+
+    @debug()
+    def _do_layout(
+        self,
+    ) -> None:
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel("Pan"))
+        layout.addWidget(self._slider)
+        layout.addWidget(self._display)
+        layout.addWidget(self._enable)
+
+        self.setLayout(layout)
+
+    ###########################################################################
+
+    @debug()
+    def _update_state(self, _: Any) -> None:
+        enabled = self._enable.isChecked()
+        self.set_pan(enabled, self._pan)
+
+    ###########################################################################
+
+    @property
+    def _pan(self) -> int:
+        return self._slider.maximum() - self._slider.value()
+
+    ###########################################################################
+
+    @_pan.setter
+    def _pan(self, pan: int) -> None:
+        pan = self._slider.maximum() - pan
+        self._slider.setValue(pan)
 
 
 ###############################################################################

@@ -6,6 +6,12 @@
 """Dashboard Panels."""
 
 ###############################################################################
+# Standard library imports
+###############################################################################
+
+from typing import Optional
+
+###############################################################################
 # Library imports
 ###############################################################################
 
@@ -24,7 +30,7 @@ from PyQt6.QtWidgets import (  # type: ignore
 ###############################################################################
 
 from ...log import debug, info
-from .widgets import ArticSlider, FilePicker, VolSlider
+from .widgets import ArticSlider, FilePicker, PanControl, VolSlider
 
 ###############################################################################
 # API Class Definitions
@@ -35,7 +41,11 @@ class ArticPanel(QWidget):
     artic_changed: pyqtSignal = pyqtSignal(
         str, int, arguments=["artic", "quant"]
     )
+    pan_changed: pyqtSignal = pyqtSignal(
+        bool, int, arguments=["enable", "pan"]
+    )
     _sliders: dict[str, ArticSlider]
+    _pan: PanControl
 
     ###########################################################################
 
@@ -51,6 +61,7 @@ class ArticPanel(QWidget):
         ]
 
         self._sliders = {key: ArticSlider(artic) for artic, key in artics}
+        self._pan = PanControl()
 
         self._attach_signals()
         self._do_layout()
@@ -65,6 +76,15 @@ class ArticPanel(QWidget):
             self._sliders[artic].update(val)
 
     ###########################################################################
+
+    @info()
+    def update_pan(self, pan: Optional[int]) -> None:
+        if pan is None:
+            self._pan.set_pan(False, 10)
+        else:
+            self._pan.set_pan(True, pan)
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -76,6 +96,7 @@ class ArticPanel(QWidget):
                     artic, quant
                 )
             )
+        self._pan.pan_changed.connect(self.pan_changed)
 
     ###########################################################################
 
@@ -84,6 +105,7 @@ class ArticPanel(QWidget):
         layout = QHBoxLayout()
         for slider in self._sliders.values():
             layout.addWidget(slider)
+        layout.addWidget(self._pan)
         self.setLayout(layout)
 
 

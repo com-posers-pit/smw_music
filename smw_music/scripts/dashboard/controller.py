@@ -41,6 +41,9 @@ class Controller(QWidget):
     config_changed: pyqtSignal = pyqtSignal(bool, bool, bool, bool, bool, bool)
     instrument_changed: pyqtSignal = pyqtSignal(str, arguments=["inst_name"])
     mml_requested: pyqtSignal = pyqtSignal(str, arguments=["fname"])
+    pan_changed: pyqtSignal = pyqtSignal(
+        bool, int, arguments=["enable", "pan"]
+    )
     song_changed: pyqtSignal = pyqtSignal(str, arguments=["fname"])
     volume_changed: pyqtSignal = pyqtSignal(str, int, arguments=["dyn", "val"])
 
@@ -67,6 +70,7 @@ class Controller(QWidget):
     def change_inst_config(self, config: InstrumentConfig) -> None:
         self._dynamics.update(config.dynamics)
         self._artics.update(config.quant)
+        self._artics.update_pan(config.pan)
 
     ###########################################################################
 
@@ -93,9 +97,10 @@ class Controller(QWidget):
         self._control_panel.mml_requested.connect(self.mml_requested)
         self._control_panel.config_changed.connect(self.config_changed)
 
-        self._instruments.currentTextChanged.connect(self.instrument_changed)
-        self._dynamics.volume_changed.connect(self.volume_changed)
         self._artics.artic_changed.connect(self.artic_changed)
+        self._artics.pan_changed.connect(self.pan_changed)
+        self._dynamics.volume_changed.connect(self.volume_changed)
+        self._instruments.currentTextChanged.connect(self.instrument_changed)
 
     ###########################################################################
 
@@ -110,7 +115,7 @@ class Controller(QWidget):
 
         tabs = QTabWidget()
         tabs.addTab(self._dynamics, "Dynamics")
-        tabs.addTab(self._artics, "Articulations")
+        tabs.addTab(self._artics, "Articulations/Pan")
         tabs.addTab(QWidget(), "Echo")
 
         layout = QHBoxLayout()
@@ -125,9 +130,6 @@ class Controller(QWidget):
     def _update_instruments(self, instruments: list[InstrumentConfig]) -> None:
         self._instruments.clear()
         for instrument in instruments:
-            name = instrument.name
-            # self._dyn_settings[name] = instrument.dynamics
-            # self._artic_settings[name] = instrument.quant
-
             self._instruments.addItem(instrument.name)
+
         self._instruments.setCurrentRow(0)

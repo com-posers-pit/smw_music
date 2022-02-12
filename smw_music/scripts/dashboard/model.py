@@ -131,6 +131,13 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
+    def set_pan(self, enabled: bool, pan: int) -> None:
+        if self.song is not None:
+            self.active_instrument.pan = pan if enabled else None
+
+    ###########################################################################
+
+    @info(True)
     def set_song(self, fname: str) -> None:
         try:
             self.song = Song.from_music_xml(fname)
