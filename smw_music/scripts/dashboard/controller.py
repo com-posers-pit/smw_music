@@ -35,6 +35,7 @@ from ...music_xml.echo import EchoConfig
 from ...music_xml.instrument import InstrumentConfig
 from ...music_xml.song import Song
 from .panels import ArticPanel, ControlPanel, DynamicsPanel, EchoPanel
+from .widgets import VolSlider
 
 ###############################################################################
 # API Class Definitions
@@ -66,6 +67,7 @@ class Controller(QWidget):
     _dynamics: DynamicsPanel
     _artics: ArticPanel
     _echo: EchoPanel
+    _volume: VolSlider
 
     ###########################################################################
 
@@ -78,6 +80,7 @@ class Controller(QWidget):
         self._dynamics = DynamicsPanel()
         self._artics = ArticPanel()
         self._echo = EchoPanel()
+        self._volume = VolSlider("Global Volume", hex_disp=False)
 
         self._attach_signals()
 
@@ -107,6 +110,7 @@ class Controller(QWidget):
     @info()
     def update_song(self, song: Song) -> None:
         self._update_instruments(song.instruments)
+        self._volume.set_volume(song.volume)
 
     ###########################################################################
     # Private method definitions
@@ -125,6 +129,10 @@ class Controller(QWidget):
         self._dynamics.volume_changed.connect(self.volume_changed)
         self._instruments.currentTextChanged.connect(self.instrument_changed)
 
+        self._volume.volume_changed.connect(
+            lambda x: self.volume_changed.emit("global", x)
+        )
+
     ###########################################################################
 
     @debug()
@@ -136,10 +144,16 @@ class Controller(QWidget):
         layout.addWidget(self._instruments)
         inst_panel.setLayout(layout)
 
+        global_widget = QWidget()
+        layout = QHBoxLayout()
+        layout.addWidget(self._volume)
+        layout.addWidget(self._echo)
+        global_widget.setLayout(layout)
+
         tabs = QTabWidget()
         tabs.addTab(self._dynamics, "Dynamics")
         tabs.addTab(self._artics, "Articulations/Pan")
-        tabs.addTab(self._echo, "Echo")
+        tabs.addTab(global_widget, "Global")
 
         layout = QHBoxLayout()
         layout.addWidget(self._control_panel)

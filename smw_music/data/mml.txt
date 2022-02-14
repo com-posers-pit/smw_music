@@ -33,7 +33,7 @@
 %endif
 
 ; PORTER: GLOBAL VOLUME HERE
-w180
+w${song.volume}
 
 ; PORTER: TEMPO HERE
 "SET_TEMPO=${f"t{tempo}"}"

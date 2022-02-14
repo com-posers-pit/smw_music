@@ -415,12 +415,20 @@ class VolSlider(QWidget):
     _slider: QSlider
     _control: QLineEdit
     _display: QLabel
+    _fmt: str
 
     ###########################################################################
 
     @debug()
-    def __init__(self, label: str, parent: QWidget = None) -> None:
+    def __init__(
+        self,
+        label: str,
+        init: int = 0,
+        hex_disp: bool = True,
+        parent: QWidget = None,
+    ) -> None:
         super().__init__(parent)
+        self._fmt = "x{:02x}" if hex_disp else "{}"
         self._slider = QSlider(Qt.Orientation.Vertical)
         self._control = QLineEdit()
         self._display = QLabel()
@@ -430,6 +438,9 @@ class VolSlider(QWidget):
         _fix_width(self._control)
 
         self._attach_signals()
+
+        self.set_volume(init)
+
         self._do_layout(label)
 
     ###########################################################################
@@ -440,7 +451,7 @@ class VolSlider(QWidget):
     def set_volume(self, vol: int) -> None:
         self._slider.setValue(vol)
         self._control.setText(f"{100 * vol / 255:5.1f}")
-        self._display.setText(f"x{vol:02X}")
+        self._display.setText(self._fmt.format(vol))
         self.volume_changed.emit(vol)
 
     ###########################################################################

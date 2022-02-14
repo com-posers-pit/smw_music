@@ -189,8 +189,8 @@ class Song:
     ----------
     metadata: dict
         A dictionary containing the song's title (key "title"), composer (key
-        "composer"), porter (key "porter") and game name (key "game") and tempo
-        (key "bpm").
+        "composer"), porter (key "porter") and game name (key "game"), tempo
+        (key "bpm"), and global volume (key "volume"0.
     channels: list
         A list of `Channel` objects, the first 8 of which are used in this
         song.
@@ -211,6 +211,8 @@ class Song:
         A list of up to 8 channels of music in this song.
     instruments: list
         A list of InstrumentConfig objects for each detected instrument
+    volume: int
+        Global volume
     """
 
     ###########################################################################
@@ -223,6 +225,7 @@ class Song:
         self.porter = metadata.get("porter", "???")
         self.game = metadata.get("game", "???")
         self.bpm = int(metadata.get("bpm", 120))
+        self.volume = int(metadata.get("volume", 180))
         self.channels = channels[:8]
         self.instruments: list[InstrumentConfig] = []
 

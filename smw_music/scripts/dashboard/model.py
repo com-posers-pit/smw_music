@@ -158,7 +158,10 @@ class Model(QObject):
     @info(True)
     def update_dynamics(self, dyn: str, val: int) -> None:
         if self.song is not None:
-            self.active_instrument.dynamics[dyn] = val
+            if dyn == "global":
+                self.song.volume = val
+            else:
+                self.active_instrument.dynamics[dyn] = val
 
     ###########################################################################
     # Private method definitions
