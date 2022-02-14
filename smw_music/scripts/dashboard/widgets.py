@@ -303,6 +303,113 @@ class PanControl(QWidget):
 ###############################################################################
 
 
+class PctSlider(QWidget):
+    pct_changed: pyqtSignal = pyqtSignal(
+        float, bool, arguments=["percent", "invert"]
+    )
+    _control: QLineEdit
+    _display: QLabel
+    _invert: QCheckBox
+    _slider: QSlider
+
+    ###########################################################################
+
+    @debug()
+    def __init__(self, label: str, parent: QWidget = None) -> None:
+        super().__init__(parent)
+        self._slider = QSlider(Qt.Orientation.Vertical)
+        self._control = QLineEdit()
+        self._display = QLabel()
+        self._invert = QCheckBox("Surround")
+
+        self._attach_signals()
+
+        self._slider.setRange(0, 1000)
+        self._control.setValidator(QDoubleValidator(0, 100, 1))
+        _fix_width(self._control)
+        self.set_pct(0, False)
+
+        self._do_layout(label)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    @info(True)
+    def set_pct(self, pct: float, invert: bool) -> None:
+        pct = max(0, min(100, pct))
+        if invert:
+            display = round(256 - 128 * pct / 100) & 0xFF
+        else:
+            display = round(127 * pct / 100)
+
+        self._slider.setValue(int(10 * pct))
+        self._control.setText(f"{pct:4.1f}")
+        self._display.setText(f"x{display:02X}")
+        self.pct_changed.emit(pct, invert)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def state(self) -> tuple[float, bool]:
+        return (float(self._control.text()), self._invert.isChecked())
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @debug()
+    def _attach_signals(self) -> None:
+        self._slider.valueChanged.connect(self._update_from_slider)
+        self._control.editingFinished.connect(self._update_from_control)
+        self._invert.clicked.connect(self._update_from_control)
+
+    ###########################################################################
+
+    @debug()
+    def _do_layout(self, label: str) -> None:
+        control_panel = QWidget()
+
+        layout = QHBoxLayout()
+        layout.addWidget(self._control)
+        layout.addWidget(QLabel("%"))
+
+        control_panel.setLayout(layout)
+
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel(label))
+        layout.addWidget(self._slider)
+        layout.addWidget(control_panel)
+        layout.addWidget(self._invert)
+        layout.addWidget(self._display)
+
+        self.setLayout(layout)
+
+    ###########################################################################
+
+    @debug()
+    def _update_from_control(self, _: bool = False) -> None:
+        try:
+            pct = float(self._control.text())
+        except ValueError:
+            pass
+        else:
+            self.set_pct(pct, self._invert.isChecked())
+
+    ###########################################################################
+
+    @debug()
+    def _update_from_slider(self, val: int) -> None:
+        pct = val / 10
+        self.set_pct(pct, self._invert.isChecked())
+
+
+###############################################################################
+
+
 class VolSlider(QWidget):
     volume_changed = pyqtSignal(int)
     _slider: QSlider

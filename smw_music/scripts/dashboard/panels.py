@@ -9,7 +9,7 @@
 # Standard library imports
 ###############################################################################
 
-from typing import Optional
+from typing import cast, Optional, Union
 
 ###############################################################################
 # Library imports
@@ -18,9 +18,13 @@ from typing import Optional
 from PyQt6.QtCore import pyqtSignal  # type: ignore
 from PyQt6.QtWidgets import (  # type: ignore
     QCheckBox,
+    QGridLayout,
     QHBoxLayout,
+    QLabel,
     QMessageBox,
     QPushButton,
+    QRadioButton,
+    QSlider,
     QVBoxLayout,
     QWidget,
 )
@@ -30,7 +34,8 @@ from PyQt6.QtWidgets import (  # type: ignore
 ###############################################################################
 
 from ...log import debug, info
-from .widgets import ArticSlider, FilePicker, PanControl, VolSlider
+from ...music_xml.echo import EchoConfig
+from .widgets import ArticSlider, FilePicker, PanControl, PctSlider, VolSlider
 
 ###############################################################################
 # API Class Definitions
@@ -299,3 +304,173 @@ class DynamicsPanel(QWidget):
         # layout.addWidget(self._interpolate)
 
         self.setLayout(layout)
+
+
+###############################################################################
+
+
+class EchoPanel(QWidget):
+    _chan_enables: list[QCheckBox]
+    _delay: QSlider
+    _delay_display: QLabel
+    _lvol: PctSlider
+    _rvol: PctSlider
+    _fbvol: PctSlider
+    _filter: tuple[QRadioButton, QRadioButton]
+    _enable: QCheckBox
+
+    ###########################################################################
+
+    @debug()
+    def __init__(self, parent: QWidget = None) -> None:
+        super().__init__(parent)
+
+        self._enable = QCheckBox("Echo Enabled")
+        self._chan_enables = [QCheckBox(str(n)) for n in range(8)]
+        self._lvol = PctSlider("Left Volume")
+        self._rvol = PctSlider("Right Volume")
+        self._fbvol = PctSlider("Feedback")
+        self._delay = QSlider()
+        self._delay_display = QLabel()
+        self._filter = (QRadioButton("0"), QRadioButton("1"))
+
+        self._attach_signals()
+
+        self._delay.setRange(0, 15)
+        self._delay.setValue(0)
+        self._update_delay_display(0)
+        self._filter[1].click()
+        self._update_enables(False)
+        self.update(None)
+
+        self._do_layout()
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    @info(True)
+    def update(self, config: Optional[EchoConfig]) -> None:
+        enable = config is not None
+        self._enable.setChecked(enable)
+
+        if enable:
+            config = cast(EchoConfig, config)
+            for n, widget in enumerate(self._chan_enables):
+                widget.setChecked(n in config.chan_list)
+            self._lvol.set_pct(config.vol_mag[0], config.vol_inv[0])
+            self._rvol.set_pct(config.vol_mag[1], config.vol_inv[1])
+            self._fbvol.set_pct(config.fb_mag, config.fb_inv)
+
+            if config.fir_filt == 0:
+                self._filter[0].setChecked(True)
+            else:
+                self._filter[1].setChecked(True)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def config(self) -> Optional[EchoConfig]:
+        rv = None
+        if self._enable.isChecked():
+            channels = set()
+            for n, enable in enumerate(self._chan_enables):
+                if enable.isChecked():
+                    channels.add(n)
+
+            lvol = self._lvol.state
+            rvol = self._rvol.state
+            fbvol = self._fbvol.state
+            delay = self._delay.value()
+            fir_filt = 0 if self._filter[0].isChecked() else 1
+
+            rv = EchoConfig(
+                channels,
+                (lvol[0] / 100, rvol[0] / 100),
+                (lvol[1], rvol[1]),
+                delay,
+                fbvol[0] / 100,
+                fbvol[1],
+                fir_filt,
+            )
+
+        return rv
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @debug()
+    def _attach_signals(self) -> None:
+        self._delay.valueChanged.connect(self._update_delay_display)
+        self._enable.stateChanged.connect(self._update_enables)
+
+    ###########################################################################
+
+    @debug()
+    def _do_layout(self) -> None:
+        # Enable check boxes
+        enable_widget = QWidget()
+        layout = QGridLayout()
+
+        layout.addWidget(self._enable, 0, 0, 1, 2)
+        layout.addWidget(QLabel("Channel Enables"), 1, 0, 1, 2)
+
+        for n, enable in enumerate(self._chan_enables):
+            layout.addWidget(enable, 2 + n // 2, n % 2)
+
+        row = 3 + len(self._chan_enables) // 2
+        layout.addWidget(QLabel("Filter"), row, 0, 1, 2)
+        layout.addWidget(self._filter[0], row + 1, 0)
+        layout.addWidget(self._filter[1], row + 1, 1)
+
+        enable_widget.setLayout(layout)
+
+        # Delay group
+        delay_widget = QWidget()
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel("Delay"))
+        layout.addWidget(self._delay)
+        layout.addWidget(self._delay_display)
+
+        delay_widget.setLayout(layout)
+
+        # Panel
+        layout = QHBoxLayout()
+
+        layout.addWidget(enable_widget)
+        layout.addWidget(self._lvol)
+        layout.addWidget(self._rvol)
+        layout.addWidget(self._fbvol)
+        layout.addWidget(delay_widget)
+
+        self.setLayout(layout)
+
+    ###########################################################################
+
+    @debug()
+    def _update_delay_display(self, val: int) -> None:
+        self._delay_display.setText(f"{16*val}ms")
+
+    ###########################################################################
+
+    @debug()
+    def _update_enables(self, enable: Union[bool, int]) -> None:
+        enable = bool(enable)
+        widgets = (
+            self._chan_enables
+            + [
+                self._lvol,
+                self._rvol,
+                self._fbvol,
+                self._delay,
+                self._delay_display,
+            ]
+            + list(self._filter)
+        )
+
+        for widget in widgets:
+            widget.setEnabled(enable)

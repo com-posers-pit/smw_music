@@ -11,8 +11,7 @@
 # Standard library imports
 ###############################################################################
 
-from dataclasses import dataclass
-from typing import Optional
+from typing import cast, Optional, Union
 
 ###############################################################################
 # Library imports
@@ -26,6 +25,7 @@ from PyQt6.QtCore import pyqtSignal, QObject  # type: ignore
 
 from ...log import debug, info
 from ...music_xml import InstrumentConfig, MusicXmlException
+from ...music_xml.echo import EchoConfig
 from ...music_xml.song import Song
 
 ###############################################################################
@@ -73,7 +73,7 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def generate_mml(self, fname: str) -> None:
+    def generate_mml(self, fname: str, echo: Optional[EchoConfig]) -> None:
         title = "MML Generation"
         error = True
         if self.song is None:
@@ -87,7 +87,7 @@ class Model(QObject):
                     self.superloop_analysis,
                     self.measure_numbers,
                     True,
-                    None,
+                    echo,
                     self.custom_samples,
                     self.custom_percussion,
                 )

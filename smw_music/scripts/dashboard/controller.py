@@ -6,6 +6,12 @@
 """Dashboard Controller."""
 
 ###############################################################################
+# Standard library imports
+###############################################################################
+
+from typing import Optional
+
+###############################################################################
 # Library imports
 ###############################################################################
 
@@ -25,9 +31,10 @@ from PyQt6.QtWidgets import (  # type: ignore
 ###############################################################################
 
 from ...log import info, debug
+from ...music_xml.echo import EchoConfig
 from ...music_xml.instrument import InstrumentConfig
 from ...music_xml.song import Song
-from .panels import ArticPanel, ControlPanel, DynamicsPanel
+from .panels import ArticPanel, ControlPanel, DynamicsPanel, EchoPanel
 
 ###############################################################################
 # API Class Definitions
@@ -40,12 +47,25 @@ class Controller(QWidget):
     )
     config_changed: pyqtSignal = pyqtSignal(bool, bool, bool, bool, bool, bool)
     instrument_changed: pyqtSignal = pyqtSignal(str, arguments=["inst_name"])
-    mml_requested: pyqtSignal = pyqtSignal(str, arguments=["fname"])
+    mml_requested: pyqtSignal = pyqtSignal(
+        str,
+        object,  # object type lets us pass None or an EchoConfig
+        arguments=[
+            "fname",
+            "config",
+        ],
+    )
     pan_changed: pyqtSignal = pyqtSignal(
         bool, int, arguments=["enable", "pan"]
     )
     song_changed: pyqtSignal = pyqtSignal(str, arguments=["fname"])
     volume_changed: pyqtSignal = pyqtSignal(str, int, arguments=["dyn", "val"])
+
+    _control_panel: ControlPanel
+    _instruments: QListWidget
+    _dynamics: DynamicsPanel
+    _artics: ArticPanel
+    _echo: EchoPanel
 
     ###########################################################################
 
@@ -57,6 +77,7 @@ class Controller(QWidget):
         self._instruments = QListWidget()
         self._dynamics = DynamicsPanel()
         self._artics = ArticPanel()
+        self._echo = EchoPanel()
 
         self._attach_signals()
 
@@ -94,7 +115,9 @@ class Controller(QWidget):
     @debug()
     def _attach_signals(self) -> None:
         self._control_panel.song_changed.connect(self.song_changed)
-        self._control_panel.mml_requested.connect(self.mml_requested)
+        self._control_panel.mml_requested.connect(
+            lambda x: self.mml_requested.emit(x, self._echo.config)
+        )
         self._control_panel.config_changed.connect(self.config_changed)
 
         self._artics.artic_changed.connect(self.artic_changed)
@@ -116,7 +139,7 @@ class Controller(QWidget):
         tabs = QTabWidget()
         tabs.addTab(self._dynamics, "Dynamics")
         tabs.addTab(self._artics, "Articulations/Pan")
-        tabs.addTab(QWidget(), "Echo")
+        tabs.addTab(self._echo, "Echo")
 
         layout = QHBoxLayout()
         layout.addWidget(self._control_panel)

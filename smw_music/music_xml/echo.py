@@ -37,7 +37,7 @@ def _truthy(arg: str) -> bool:
 ###############################################################################
 
 
-@dataclass(frozen=True)
+@dataclass
 class EchoConfig:
     """
     Configuration settings for setting up echo/reverb
