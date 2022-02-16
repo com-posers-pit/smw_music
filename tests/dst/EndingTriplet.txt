@@ -12,9 +12,6 @@
 ; PORTER: GLOBAL VOLUME HERE
 w180
 
-; PORTER: TEMPO HERE
-"SET_TEMPO=t48"
-
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
@@ -74,7 +71,7 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 SET_TEMPO GLOBAL_LEGATO /
+#0 GLOBAL_LEGATO /
 
 l2
 @Piano { > c d e }

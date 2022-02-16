@@ -12,9 +12,6 @@
 ; PORTER: GLOBAL VOLUME HERE
 w180
 
-; PORTER: TEMPO HERE
-"SET_TEMPO=t36"
-
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
 ; Instrument voice definitions
@@ -93,10 +90,10 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 SET_TEMPO GLOBAL_LEGATO /
+#0 GLOBAL_LEGATO /
 
 l32
-@Piano (100)[ > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g]2 ; Measures 1-2
+@Piano t36 (100)[ > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g]2 ; Measures 1-2
 (101)[ > c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+]2 ; Measures 3-4
 (102)[ > f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+]2 ; Measure 5
 (100)2 (101)2 (102)2 ; Measures 6-12
