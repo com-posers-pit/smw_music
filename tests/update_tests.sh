@@ -27,6 +27,7 @@ smw_music_xml_to_amk "src/Repeats.mxl" "dst/Repeats.txt" --loop_analysis --disab
 smw_music_xml_to_amk "src/Slurs.mxl" "dst/Slurs.txt" --disable_dt
 smw_music_xml_to_amk "src/SMB_Castle_Theme.mxl" "dst/SMB_Castle_Theme.txt" --disable_dt
 smw_music_xml_to_amk "src/SwapRepeatAnnotation.mxl" "dst/SwapRepeatAnnotation.txt" --disable_dt
+smw_music_xml_to_amk "src/Tempos.mxl" "dst/Tempos.txt" --disable_dt
 smw_music_xml_to_amk "src/TiedArticulations.mxl" "dst/TiedArticulations.txt" --disable_dt
 smw_music_xml_to_amk "src/Ties.mxl" "dst/Ties.txt" --disable_dt
 smw_music_xml_to_amk "src/Triplets.mxl" "dst/Triplets.txt" --disable_dt
