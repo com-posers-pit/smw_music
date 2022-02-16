@@ -34,6 +34,7 @@ from .shared import CRLF, MusicXmlException
 from .tokens import (
     Annotation,
     CrescDelim,
+    Crescendo,
     Dynamic,
     Error,
     Instrument,
@@ -298,15 +299,26 @@ class Song:
     ###########################################################################
 
     def _collect_instruments(self):
-        inst_set: set[str] = set()
+        instruments: dict[str, set[str]] = {}
+        inst: str = ""
         for channel in self.channels:
-            inst_set |= set(
-                x.name for x in channel.tokens if isinstance(x, Instrument)
-            )
-        inst = sorted(inst_set)
+            for token in channel.tokens:
+                if isinstance(token, Instrument):
+                    inst = token.name
+                    if inst not in instruments:
+                        instruments[inst] = set()
+                if isinstance(token, Dynamic):
+                    instruments[inst].add(token.level)
+                if isinstance(token, Crescendo):
+                    instruments[inst].add(token.level)
+
+        inst = sorted(instruments)
 
         self.instruments = [
-            InstrumentConfig(x, inst_from_name(x)) for x in inst
+            InstrumentConfig(
+                x, inst_from_name(x), dynamics_present=instruments[x]
+            )
+            for x in inst
         ]
 
     ###########################################################################
