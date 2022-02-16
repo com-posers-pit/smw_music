@@ -232,9 +232,10 @@ class PanControl(QWidget):
         self._enable = QCheckBox("Enabled")
 
         self._slider.setRange(0, 20)
-        self._slider.setValue(10)
-
         self._attach_signals()
+
+        self.set_pan(False, 10)
+
         self._do_layout()
 
     ###########################################################################
@@ -253,6 +254,8 @@ class PanControl(QWidget):
             text = f"{10*(pan - 10)}% L"
         self._display.setText(text)
 
+        self._slider.setEnabled(enabled)
+        self._display.setEnabled(enabled)
         self.pan_changed.emit(enabled, pan)
 
     ###########################################################################

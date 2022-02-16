@@ -316,6 +316,7 @@ class EchoPanel(QWidget):
     _chan_enables: list[QCheckBox]
     _delay: QSlider
     _delay_display: QLabel
+    _delay_panel: QWidget
     _lvol: PctSlider
     _rvol: PctSlider
     _fbvol: PctSlider
@@ -333,6 +334,7 @@ class EchoPanel(QWidget):
         self._lvol = PctSlider("Left Volume")
         self._rvol = PctSlider("Right Volume")
         self._fbvol = PctSlider("Feedback")
+        self._delay_panel = QWidget()
         self._delay = QSlider()
         self._delay_display = QLabel()
         self._filter = (QRadioButton("0"), QRadioButton("1"))
@@ -432,14 +434,13 @@ class EchoPanel(QWidget):
         enable_widget.setLayout(layout)
 
         # Delay group
-        delay_widget = QWidget()
         layout = QVBoxLayout()
 
         layout.addWidget(QLabel("Delay"))
         layout.addWidget(self._delay)
         layout.addWidget(self._delay_display)
 
-        delay_widget.setLayout(layout)
+        self._delay_panel.setLayout(layout)
 
         # Panel
         layout = QHBoxLayout()
@@ -448,7 +449,7 @@ class EchoPanel(QWidget):
         layout.addWidget(self._lvol)
         layout.addWidget(self._rvol)
         layout.addWidget(self._fbvol)
-        layout.addWidget(delay_widget)
+        layout.addWidget(self._delay_panel)
 
         self.setLayout(layout)
 
@@ -469,8 +470,7 @@ class EchoPanel(QWidget):
                 self._lvol,
                 self._rvol,
                 self._fbvol,
-                self._delay,
-                self._delay_display,
+                self._delay_panel,
             ]
             + list(self._filter)
         )
