@@ -35,6 +35,7 @@ from .tokens import (
     Repeat,
     Rest,
     Slur,
+    Tempo,
     Token,
     Triplet,
 )
@@ -233,6 +234,14 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         self.slur = (
             SlurState.SLUR_ACTIVE if token.start else SlurState.SLUR_END
         )
+
+    ###########################################################################
+
+    @_emit.register
+    def _(self, token: Tempo) -> None:
+        # Magic BPM -> MML/SPC tempo conversion
+        tempo = int(token.bpm * 255 / 625)
+        self._append(f"t{tempo}")
 
     ###########################################################################
 

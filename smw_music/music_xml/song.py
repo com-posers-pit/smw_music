@@ -43,6 +43,7 @@ from .tokens import (
     Repeat,
     Rest,
     Slur,
+    Tempo,
     Token,
     Triplet,
 )
@@ -188,8 +189,7 @@ class Song:
     ----------
     metadata: dict
         A dictionary containing the song's title (key "title"), composer (key
-        "composer"), porter (key "porter") and game name (key "game") and tempo
-        (key "bpm").
+        "composer"), porter (key "porter") and game name (key "game")
     channels: list
         A list of `Channel` objects, the first 8 of which are used in this
         song.
@@ -204,8 +204,6 @@ class Song:
         The song's porter, or '???' if one was not provided
     game : str
         The song's source game, or '???' if one was not provided
-    bpm : int
-        The song's tempo in beats per minute
     channels : list
         A list of up to 8 channels of music in this song.
     """
@@ -219,7 +217,6 @@ class Song:
         self.composer = metadata.get("composer", "???")
         self.porter = metadata.get("porter", "???")
         self.game = metadata.get("game", "???")
-        self.bpm = int(metadata.get("bpm", 120))
         self.channels = channels[:8]
 
     ###########################################################################
@@ -248,8 +245,6 @@ class Song:
                 metadata["title"] = elem.title or "TITLE HERE"
                 metadata["porter"] = elem.lyricist or "PORTER NAME HERE"
                 metadata["game"] = elem.copyright or "GAME NAME HERE"
-            if isinstance(elem, music21.tempo.MetronomeMark):
-                metadata["bpm"] = elem.getQuarterBPM()
 
         sections = cls._find_rehearsal_marks(stream)
 
@@ -426,6 +421,9 @@ class Song:
                     annotation = Annotation.from_music_xml(subelem)
                     if annotation is not None:
                         channel_elem.append(annotation)
+                if isinstance(subelem, music21.tempo.MetronomeMark):
+                    channel_elem.append(Tempo.from_music_xml(subelem))
+
                 if subelem.id in lines[1]:
                     channel_elem.append(
                         LoopDelim(False, loop_nos[lines[1].index(subelem.id)])
@@ -442,9 +440,13 @@ class Song:
         loop_analysis: bool,
         superloop_analysis: bool,
     ):
-        for chan in self.channels:
+        for n, chan in enumerate(self.channels):
             chan.tokens = reduce(
-                chan.tokens, loop_analysis, superloop_analysis, chan.percussion
+                chan.tokens,
+                loop_analysis,
+                superloop_analysis,
+                chan.percussion,
+                n != 0,
             )
 
     ###########################################################################
@@ -497,8 +499,6 @@ class Song:
             True iff repeated percussion notes should not repeat their
             instrument
         """
-        # Magic BPM -> MML/SPC tempo conversion
-        mml_tempo = int(self.bpm * 255 / 625)
 
         volmap = {
             "PPPP": 26,
@@ -534,7 +534,6 @@ class Song:
         rv = tmpl.render(
             version=__version__,
             global_legato=global_legato,
-            tempo=mml_tempo,
             song=self,
             channels=channels,
             volmap=volmap,

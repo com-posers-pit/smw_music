@@ -717,6 +717,22 @@ class Slur(Token):
 
 
 @dataclass
+class Tempo(Token):
+    bpm: int
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(cls, elem: music21.tempo.MetronomeMark) -> "Tempo":
+        return cls(elem.getQuarterBPM())
+
+
+###############################################################################
+
+
+@dataclass
 class Triplet(Token):
     """
     A triplet start/stop.

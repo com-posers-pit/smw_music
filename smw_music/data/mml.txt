@@ -35,9 +35,6 @@
 ; PORTER: GLOBAL VOLUME HERE
 w180
 
-; PORTER: TEMPO HERE
-"SET_TEMPO=${f"t{tempo}"}"
-
 %if instruments or percussion:
 ; PORTER: INSTRUMENT DEFINITIONS HERE
 
@@ -142,7 +139,6 @@ ${f'"v{key: <4} = $E7$_{key}"'}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 #${n}\
-${" SET_TEMPO" if n == 0 else ''}\
 ${" GLOBAL_LEGATO" if global_legato and (n == 0) else ""}\
 ${" /" if "/" not in channel else ""}
 

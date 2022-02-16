@@ -25,6 +25,7 @@ from .tokens import (
     RehearsalMark,
     Repeat,
     Slur,
+    Tempo,
     Token,
     Triplet,
 )
@@ -436,6 +437,13 @@ def _repeat_analysis(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
+def _strip_tempo(tokens: list[Token]) -> list[Token]:
+    return [tok for tok in tokens if not isinstance(tok, Tempo)]
+
+
+###############################################################################
+
+
 def _superloopify(tokens: list[Token]) -> list[Token]:
 
     elements: list[Token] = []
@@ -515,12 +523,15 @@ def reduce(
     loop_analysis: bool,
     superloop_analysis: bool,
     percussion: bool,
+    remove_tempo: bool,
 ) -> list[Token]:
     # A blah hack to kill annotations in percussion channels... this will go
     # away.
     if percussion:
         tokens = [x for x in tokens if not isinstance(x, Instrument)]
     tokens = _filter_annotations(tokens)
+    if remove_tempo:
+        tokens = _strip_tempo(tokens)
     tokens = _remove_unused_instruments(tokens)
     tokens = _swap_repeat_annotations(tokens)
     tokens = _reorder_measures(tokens)
