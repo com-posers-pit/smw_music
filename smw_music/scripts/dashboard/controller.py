@@ -92,7 +92,7 @@ class Controller(QWidget):
 
     @info(True)
     def change_inst_config(self, config: InstrumentConfig) -> None:
-        self._dynamics.update(config.dynamics)
+        self._dynamics.update(config.dynamics, config.dynamics_present)
         self._artics.update(config.quant)
         self._artics.update_pan(config.pan)
 

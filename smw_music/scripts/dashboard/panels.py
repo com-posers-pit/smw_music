@@ -280,9 +280,10 @@ class DynamicsPanel(QWidget):
     ###########################################################################
 
     @info()
-    def update(self, config: dict[str, int]) -> None:
+    def update(self, config: dict[str, int], present: set[str]) -> None:
         for dyn, vol in config.items():
             self._sliders[dyn].set_volume(vol)
+            self._sliders[dyn].setEnabled(dyn.lower() in present)
 
     ###########################################################################
     # Private method definitions
