@@ -60,7 +60,9 @@ class Controller(QWidget):
         bool, int, arguments=["enable", "pan"]
     )
     song_changed: pyqtSignal = pyqtSignal(str, arguments=["fname"])
-    volume_changed: pyqtSignal = pyqtSignal(str, int, arguments=["dyn", "val"])
+    volume_changed: pyqtSignal = pyqtSignal(
+        str, int, bool, arguments=["dyn", "val", "interp"]
+    )
 
     _control_panel: ControlPanel
     _instruments: QListWidget
@@ -130,7 +132,7 @@ class Controller(QWidget):
         self._instruments.currentTextChanged.connect(self.instrument_changed)
 
         self._volume.volume_changed.connect(
-            lambda x: self.volume_changed.emit("global", x)
+            lambda x: self.volume_changed.emit("global", x, False)
         )
 
     ###########################################################################

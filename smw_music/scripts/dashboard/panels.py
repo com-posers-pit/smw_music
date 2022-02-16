@@ -238,7 +238,7 @@ class ControlPanel(QWidget):
 
 class DynamicsPanel(QWidget):
     volume_changed: pyqtSignal = pyqtSignal(
-        str, int, arguments=["dynamics", "vol"]
+        str, int, bool, arguments=["dynamics", "vol", "interp"]
     )
     _sliders: dict[str, VolSlider]
     _interpolate: QCheckBox
@@ -283,7 +283,7 @@ class DynamicsPanel(QWidget):
     def update(self, config: dict[str, int], present: set[str]) -> None:
         for dyn, vol in config.items():
             self._sliders[dyn].set_volume(vol)
-            self._sliders[dyn].setEnabled(dyn.lower() in present)
+            self._sliders[dyn].setEnabled(dyn in present)
 
     ###########################################################################
     # Private method definitions
@@ -293,7 +293,9 @@ class DynamicsPanel(QWidget):
     def _attach_signals(self) -> None:
         for dyn, slider in self._sliders.items():
             slider.volume_changed.connect(
-                lambda x, dyn=dyn: self.volume_changed.emit(dyn, x)
+                lambda x, dyn=dyn: self.volume_changed.emit(
+                    dyn, x, self._interpolate.isChecked()
+                )
             )
 
     ###########################################################################

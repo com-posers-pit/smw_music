@@ -308,9 +308,9 @@ class Song:
                     if inst not in instruments:
                         instruments[inst] = set()
                 if isinstance(token, Dynamic):
-                    instruments[inst].add(token.level)
+                    instruments[inst].add(token.level.upper())
                 if isinstance(token, Crescendo):
-                    instruments[inst].add(token.level)
+                    instruments[inst].add(token.level.upper())
 
         inst = sorted(instruments)
 

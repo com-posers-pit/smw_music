@@ -11,6 +11,7 @@
 # Standard library imports
 ###############################################################################
 
+from enum import auto, IntEnum
 from typing import cast, Optional, Union
 
 ###############################################################################
@@ -27,6 +28,64 @@ from ...log import debug, info
 from ...music_xml import InstrumentConfig, MusicXmlException
 from ...music_xml.echo import EchoConfig
 from ...music_xml.song import Song
+
+###############################################################################
+# Private Function Definitions
+###############################################################################
+
+
+def _dyn_to_str(dyn: "_DynEnum") -> str:
+    lut = {
+        _DynEnum.PPPP: "PPPP",
+        _DynEnum.PPP: "PPP",
+        _DynEnum.PP: "PP",
+        _DynEnum.P: "P",
+        _DynEnum.MP: "MP",
+        _DynEnum.MF: "MF",
+        _DynEnum.F: "F",
+        _DynEnum.FF: "FF",
+        _DynEnum.FFF: "FFF",
+        _DynEnum.FFFF: "ffff",
+    }
+    return lut[dyn]
+
+
+###############################################################################
+
+
+def _str_to_dyn(dyn: str) -> "_DynEnum":
+    lut = {
+        "PPPP": _DynEnum.PPPP,
+        "PPP": _DynEnum.PPP,
+        "PP": _DynEnum.PP,
+        "P": _DynEnum.P,
+        "MP": _DynEnum.MP,
+        "MF": _DynEnum.MF,
+        "F": _DynEnum.F,
+        "FF": _DynEnum.FF,
+        "FFF": _DynEnum.FFF,
+        "FFFF": _DynEnum.FFFF,
+    }
+    return lut[dyn]
+
+
+###############################################################################
+# Private Class Definitions
+###############################################################################
+
+
+class _DynEnum(IntEnum):
+    PPPP = auto()
+    PPP = auto()
+    PP = auto()
+    P = auto()
+    MP = auto()
+    MF = auto()
+    F = auto()
+    FF = auto()
+    FFF = auto()
+    FFFF = auto()
+
 
 ###############################################################################
 # API Class Definitions
@@ -51,6 +110,7 @@ class Model(QObject):
     custom_samples: bool
     custom_percussion: bool
     active_instrument: InstrumentConfig
+    _disable_interp: bool
 
     ###########################################################################
 
@@ -67,6 +127,7 @@ class Model(QObject):
         self.custom_percussion = False
         self.instruments = None
         self.active_instrument = InstrumentConfig("")
+        self._disable_interp = False
 
     ###########################################################################
     # API method definitions
@@ -106,7 +167,9 @@ class Model(QObject):
             for inst in self.song.instruments:
                 if inst.name == name:
                     self.active_instrument = inst
+                    self._disable_interp = True
                     self.inst_config_changed.emit(inst)
+                    self._disable_interp = False
                     break
 
     ###########################################################################
@@ -156,12 +219,14 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def update_dynamics(self, dyn: str, val: int) -> None:
+    def update_dynamics(self, dyn: str, val: int, interp: bool) -> None:
         if self.song is not None:
             if dyn == "global":
                 self.song.volume = val
             else:
                 self.active_instrument.dynamics[dyn] = val
+                if interp and not self._disable_interp:
+                    self._interpolate(dyn, val)
 
     ###########################################################################
     # Private method definitions
@@ -170,3 +235,42 @@ class Model(QObject):
     @debug()
     def _signal(self) -> None:
         self.song_changed.emit(self.song)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @debug()
+    def _interpolate(self, dyn_str: str, level: int) -> None:
+        self._disable_interp = True
+
+        moved_dyn = _str_to_dyn(dyn_str)
+        dyns = [
+            _str_to_dyn(x) for x in self.active_instrument.dynamics_present
+        ]
+
+        min_dyn = min(dyns)
+        max_dyn = max(dyns)
+
+        min_val = self.active_instrument.dynamics[_dyn_to_str(min_dyn).upper()]
+        max_val = self.active_instrument.dynamics[_dyn_to_str(max_dyn).upper()]
+
+        for dyn in dyns:
+            if dyn in [min_dyn, max_dyn, moved_dyn]:
+                continue
+            if dyn < moved_dyn:
+                numer = 1 + sum(dyn < x < moved_dyn for x in dyns)
+                denom = 1 + sum(min_dyn < x < moved_dyn for x in dyns)
+                val = round(
+                    min_val + (level - min_val) * (denom - numer) / denom
+                )
+            elif dyn > moved_dyn:
+                numer = 1 + sum(moved_dyn < x < dyn for x in dyns)
+                denom = 1 + sum(moved_dyn < x < max_dyn for x in dyns)
+                val = round(level + (max_val - level) * numer / denom)
+
+            self.active_instrument.dynamics[_dyn_to_str(dyn)] = val
+
+        self.inst_config_changed.emit(self.active_instrument)
+
+        self._disable_interp = False
