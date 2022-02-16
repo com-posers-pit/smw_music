@@ -267,7 +267,10 @@ class DynamicsPanel(QWidget):
             slider = VolSlider(dyn)
             self._sliders[dyn] = slider
 
-        # self._interpolate = QCheckBox("Interpolate")
+        self._interpolate = QCheckBox(
+            "Interpolate",
+            toolTip="Adjust all dynamics settings based on the extreme values",
+        )
 
         self._attach_signals()
         self._do_layout()
@@ -301,7 +304,7 @@ class DynamicsPanel(QWidget):
         for slider in self._sliders.values():
             layout.addWidget(slider)
 
-        # layout.addWidget(self._interpolate)
+        layout.addWidget(self._interpolate)
 
         self.setLayout(layout)
 

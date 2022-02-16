@@ -431,7 +431,7 @@ class VolSlider(QWidget):
         self._fmt = "x{:02x}" if hex_disp else "{}"
         self._slider = QSlider(Qt.Orientation.Vertical)
         self._control = QLineEdit()
-        self._display = QLabel()
+        self._display = QLabel(toolTip=f"{label} hex volume value")
 
         self._slider.setRange(0, 255)
         self._control.setValidator(QDoubleValidator(0, 100, 1))
