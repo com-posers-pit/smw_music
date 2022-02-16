@@ -12,7 +12,7 @@
 ###############################################################################
 
 from enum import auto, IntEnum
-from typing import cast, Optional, Union
+from typing import Optional
 
 ###############################################################################
 # Library imports

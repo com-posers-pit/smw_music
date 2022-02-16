@@ -6,12 +6,6 @@
 """Dashboard Controller."""
 
 ###############################################################################
-# Standard library imports
-###############################################################################
-
-from typing import Optional
-
-###############################################################################
 # Library imports
 ###############################################################################
 
@@ -31,7 +25,6 @@ from PyQt6.QtWidgets import (  # type: ignore
 ###############################################################################
 
 from ...log import info, debug
-from ...music_xml.echo import EchoConfig
 from ...music_xml.instrument import InstrumentConfig
 from ...music_xml.song import Song
 from .panels import ArticPanel, ControlPanel, DynamicsPanel, EchoPanel

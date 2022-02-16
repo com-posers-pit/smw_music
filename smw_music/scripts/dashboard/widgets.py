@@ -41,6 +41,7 @@ from ...log import debug, info
 # Private function definitions
 ###############################################################################
 
+
 # h/t: https://stackoverflow.com/questions/47285303
 def _fix_width(edit: QLineEdit) -> None:
     font_metrics = edit.fontMetrics()
