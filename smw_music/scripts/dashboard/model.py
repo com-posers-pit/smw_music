@@ -255,8 +255,15 @@ class Model(QObject):
         min_val = self.active_instrument.dynamics[_dyn_to_str(min_dyn).upper()]
         max_val = self.active_instrument.dynamics[_dyn_to_str(max_dyn).upper()]
 
+        if moved_dyn != min_dyn:
+            level = max(min_val, level)
+        if moved_dyn != max_dyn:
+            level = min(max_val, level)
+
         for dyn in dyns:
-            if dyn in [min_dyn, max_dyn, moved_dyn]:
+            if dyn == moved_dyn:
+                val = level
+            elif dyn in [min_dyn, max_dyn]:
                 continue
             if dyn < moved_dyn:
                 numer = 1 + sum(dyn < x < moved_dyn for x in dyns)
