@@ -24,9 +24,9 @@ from PyQt6.QtWidgets import (  # type: ignore
 # Package imports
 ###############################################################################
 
-from ...log import info, debug
-from ...music_xml.instrument import InstrumentConfig
-from ...music_xml.song import Song
+from ..log import info, debug
+from ..music_xml.instrument import InstrumentConfig
+from ..music_xml.song import Song
 from .panels import ArticPanel, ControlPanel, DynamicsPanel, EchoPanel
 from .widgets import VolSlider
 

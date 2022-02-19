@@ -24,10 +24,10 @@ from PyQt6.QtCore import pyqtSignal, QObject  # type: ignore
 # Package imports
 ###############################################################################
 
-from ...log import debug, info
-from ...music_xml import InstrumentConfig, MusicXmlException
-from ...music_xml.echo import EchoConfig
-from ...music_xml.song import Song
+from ..log import debug, info
+from ..music_xml import InstrumentConfig, MusicXmlException
+from ..music_xml.echo import EchoConfig
+from ..music_xml.song import Song
 
 ###############################################################################
 # Private Function Definitions

@@ -33,8 +33,8 @@ from PyQt6.QtWidgets import (  # type: ignore
 # Package imports
 ###############################################################################
 
-from ...log import debug, info
-from ...music_xml.echo import EchoConfig
+from ..log import debug, info
+from ..music_xml.echo import EchoConfig
 from .widgets import ArticSlider, FilePicker, PanControl, PctSlider, VolSlider
 
 ###############################################################################

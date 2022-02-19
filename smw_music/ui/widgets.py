@@ -35,7 +35,7 @@ from PyQt6.QtWidgets import (  # type: ignore
 # Package imports
 ###############################################################################
 
-from ...log import debug, info
+from ..log import debug, info
 
 ###############################################################################
 # Private function definitions
