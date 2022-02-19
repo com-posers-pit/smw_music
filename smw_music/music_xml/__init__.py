@@ -6,5 +6,6 @@
 """Utilities for handling Music XML conversions."""
 
 from .echo import EchoConfig  # noqa: F401
+from .instrument import InstrumentConfig  # noqa: F401
 from .shared import MusicXmlException  # noqa: F401
 from .song import Song  # noqa: F401

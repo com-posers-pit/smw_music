@@ -28,11 +28,13 @@ from mako.template import Template  # type: ignore
 
 from .channel import Channel
 from .echo import EchoConfig
-from .reduction import reduce
+from .instrument import DEFAULT_DYN, inst_from_name, InstrumentConfig
+from .reduction import reduce, remove_unused_instruments
 from .shared import CRLF, MusicXmlException
 from .tokens import (
     Annotation,
     CrescDelim,
+    Crescendo,
     Dynamic,
     Error,
     Instrument,
@@ -189,7 +191,8 @@ class Song:
     ----------
     metadata: dict
         A dictionary containing the song's title (key "title"), composer (key
-        "composer"), porter (key "porter") and game name (key "game")
+        "composer"), porter (key "porter") game name (key "game"), and global
+        volume (key "volume").
     channels: list
         A list of `Channel` objects, the first 8 of which are used in this
         song.
@@ -206,6 +209,10 @@ class Song:
         The song's source game, or '???' if one was not provided
     channels : list
         A list of up to 8 channels of music in this song.
+    instruments: list
+        A list of InstrumentConfig objects for each detected instrument
+    volume: int
+        Global volume
     """
 
     ###########################################################################
@@ -217,7 +224,11 @@ class Song:
         self.composer = metadata.get("composer", "???")
         self.porter = metadata.get("porter", "???")
         self.game = metadata.get("game", "???")
+        self.volume = int(metadata.get("volume", 180))
         self.channels = channels[:8]
+        self.instruments: list[InstrumentConfig] = []
+
+        self._collect_instruments()
 
     ###########################################################################
 
@@ -230,15 +241,25 @@ class Song:
         ----------
         fname : str
             The (compressed or uncompressed) MusicXML file
+
         Return
         ------
         Song
             A new Song object representing the song described in `fname`
+
+        Raises
+        ------
+        MusicXmlException:
+            Whenever a conversion is not possible
         """
         metadata = {}
         parts: list[Channel] = []
 
-        stream = music21.converter.parseFile(fname)
+        try:
+            stream = music21.converter.parseFile(fname)
+        except music21.converter.ConverterFileException as e:
+            raise MusicXmlException(str(e)) from e
+
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
                 metadata["composer"] = elem.composer or "COMPOSER HERE"
@@ -257,6 +278,7 @@ class Song:
                         break
 
                 part = cls._parse_part(elem, sections, len(parts))
+                part = remove_unused_instruments(percussion, part)
                 parts.append(Channel(part, percussion))
 
         return cls(metadata, parts)
@@ -270,6 +292,31 @@ class Song:
 
     ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _collect_instruments(self):
+        instruments: dict[str, set[str]] = {}
+        inst: str = ""
+        for channel in self.channels:
+            for token in channel.tokens:
+                if isinstance(token, Instrument):
+                    inst = token.name
+                    if inst not in instruments:
+                        instruments[inst] = set()
+                if isinstance(token, Dynamic):
+                    instruments[inst].add(token.level.upper())
+                if isinstance(token, Crescendo):
+                    instruments[inst].add(token.level.upper())
+
+        inst = sorted(instruments)
+
+        self.instruments = [
+            InstrumentConfig(
+                x, inst_from_name(x), dynamics_present=instruments[x]
+            )
+            for x in inst
+        ]
+
     ###########################################################################
 
     @classmethod
@@ -289,33 +336,6 @@ class Song:
                             ] = RehearsalMark.from_music_xml(subelem)
                 break
         return marks
-
-    ###########################################################################
-
-    def _instruments(self) -> dict[str, int]:
-        # Default instrument mapping, from Wakana's tutorial
-        inst_map = {
-            "flute": 0,
-            "marimba": 3,
-            "cello": 4,
-            "trumpet": 6,
-            "bass": 8,
-            "bassguitar": 8,
-            "electricbass": 8,
-            "piano": 13,
-            "guitar": 17,
-            "electricguitar": 17,
-        }
-
-        inst_set: set[str] = set()
-        for channel in self.channels:
-            inst_set |= set(
-                x.name for x in channel.tokens if isinstance(x, Instrument)
-            )
-        instruments = sorted(inst_set)
-        samples = map(lambda x: inst_map.get(x.lower(), 0), instruments)
-
-        return dict(zip(instruments, samples))
 
     ###########################################################################
 
@@ -500,19 +520,6 @@ class Song:
             instrument
         """
 
-        volmap = {
-            "PPPP": 26,
-            "PPP": 38,
-            "PP": 64,
-            "P": 90,
-            "MP": 115,
-            "MF": 141,
-            "F": 179,
-            "FF": 217,
-            "FFF": 230,
-            "FFFF": 245,
-        }
-
         self._reduce(loop_analysis, superloop_analysis)
 
         self._validate()
@@ -536,12 +543,12 @@ class Song:
             global_legato=global_legato,
             song=self,
             channels=channels,
-            volmap=volmap,
             datetime=build_dt,
             percussion=percussion,
             echo_config=echo_config,
-            instruments=self._instruments(),
+            instruments=self.instruments,
             custom_samples=custom_samples,
+            dynamics=list(DEFAULT_DYN.keys()),
         )
 
         rv = rv.replace(" ^", "^")
