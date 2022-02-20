@@ -45,7 +45,7 @@ def _dyn_to_str(dyn: "_DynEnum") -> str:
         _DynEnum.F: "F",
         _DynEnum.FF: "FF",
         _DynEnum.FFF: "FFF",
-        _DynEnum.FFFF: "ffff",
+        _DynEnum.FFFF: "FFFF",
     }
     return lut[dyn]
 
