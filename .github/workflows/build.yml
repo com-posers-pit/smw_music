@@ -8,7 +8,7 @@ name: Build
 on:
   workflow_run:
     workflows: ["Test"]
-    branches: ["develop"]
+    branches: ["main"]
     types:
       - completed
 
