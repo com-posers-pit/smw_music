@@ -31,8 +31,8 @@ def _bump_version(version):
     key = "assert __version__ == "
     _overwrite("tests/test_smw_music.py", key, f'{key}"{version}"')
 
-    key = "version: "
-    _overwrite("misc/mml.qml", key, f'{key}"{version}"')
+    key = "  version: "
+    _overwrite("misc/mml.qml", key, f'{key}"{version}"{chr(13)}')
 
     key = "; MusicXML->AMK v"
     repl = f"{key}{version}\r"
@@ -44,6 +44,7 @@ def _bump_version(version):
 
 
 def _overwrite(fname: str, key: str, repl: str):
+    repl = repl.lstrip("^").rstrip("$")
     with open(fname, "r+", newline="", encoding="ascii") as fobj:
         contents = fobj.readlines()
         contents = [re.sub(f"{key}.*", repl, x) for x in contents]
