@@ -19,7 +19,7 @@ import logging
 # Project imports
 ###############################################################################
 
-from smw_music.ui.dashboard import start
+from smw_music.ui.dashboard import Dashboard
 
 
 ###############################################################################
@@ -42,7 +42,7 @@ def main() -> None:
     logging.basicConfig(level=level)
 
     logging.info("Starting application")
-    start()
+    Dashboard([]).run()
 
 
 ###############################################################################
