@@ -1,6 +1,6 @@
 #amk 2
 
-; MusicXML->AMK v0.1.2
+; MusicXML->AMK v0.2.0
 
 #spc {
     #author  "COMPOSER HERE"
