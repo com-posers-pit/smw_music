@@ -15,8 +15,10 @@ Unreleased
 
 --------------------------------------------------------------------------------
 
-`0.2.0`_ - 2021-02-21
----------------------
+Release 0.2.0 - 2022-02-21
+--------------------------
+
+`Release 0.2.0`_
 
 `Differences from 0.1.2`_
 
@@ -145,8 +147,10 @@ None.
 
 --------------------------------------------------------------------------------
 
-`0.1.2`_ - 2021-12-28
----------------------
+Release 0.1.2 - 2021-12-28
+--------------------------
+
+`Release 0.1.2`_
 
 `Differences from 0.1.1`_
 
@@ -204,8 +208,10 @@ None.
 
 --------------------------------------------------------------------------------
 
-`0.1.1`_ - 2021-12-23
----------------------
+Release 0.1.1 - 2021-12-23
+--------------------------
+
+`Release 0.1.1`_
 
 `Differences from 0.1.0`_
 
@@ -242,8 +248,10 @@ None.
 --------------------------------------------------------------------------------
 
 
-`0.1.0`_ - 2021-12-23
----------------------
+Release 0.1.0 - 2021-12-23
+--------------------------
+
+`Release 0.1.0`_
 
 Purpose
 +++++++
@@ -273,9 +281,6 @@ Affected Issues
 - `#1 Add support for AMK annotations`_
 
 
-.. #####################################################################
-
-.. # Issues
 .. _#78 Interpolation crash w/ ffff slider: https://github.com/com-posers-pit/smw_music/issues/78
 .. _#76 Support multiple tempos: https://github.com/com-posers-pit/smw_music/issues/76
 .. _#73 "complex" error: https://github.com/com-posers-pit/smw_music/issues/73
@@ -333,15 +338,11 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
-.. #####################################################################
+.. _Release 0.2.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.0
+.. _Release 0.1.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.2
+.. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
+.. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. # Releases
-.. _0.2.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.0
-.. _0.1.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.2
-.. _0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
-.. _0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
-
-.. # Differences
 .. _Differences from 0.2.0: https://github.com/com-posers-pit/smw_music/compare/v0.2.0...HEAD
 .. _Differences from 0.1.2: https://github.com/com-posers-pit/smw_music/compare/v0.1.2...v0.2.0
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
