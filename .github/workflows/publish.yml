@@ -1,0 +1,94 @@
+# SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
+# <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+#
+# SPDX-License-Identifier: CC0-1.0
+
+name: Publish
+
+on:
+  push:
+    tags: ['v*.*.*']
+
+jobs:
+  pypi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Build and publish to pypi
+        uses: JRubics/poetry-publish@v1.10
+        with:
+          pypi_token: ${{ secrets.PYPI_TOKEN }}
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.1'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-windows-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Install library
+        run: poetry install --no-interaction
+      - name: Run pyinstaller
+        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt;smw_music/data" smw_music/scripts/dashboard.py
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/dashboard.exe
+          asset_name: smw_music_xml_dashboard-windows-$tag.exe
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  mac:
+    runs-on: macos-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.10.1'
+      - name: Install Poetry
+        uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+          installer-parallel: true
+      - name: Load cached venv
+        id: cached-poetry-dependencies
+        uses: actions/cache@v2
+        with:
+          path: .venv
+          key: venv-macos-${{ hashFiles('**/poetry.lock') }}
+      - name: Install dependencies
+        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
+        run: poetry install --no-interaction --no-root
+      - name: Install library
+        run: poetry install --no-interaction
+      - name: Run pyinstaller
+        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt:smw_music/data" smw_music/scripts/dashboard.py
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/dashboard
+          asset_name: smw_music_xml_dashboard-osx-$tag
+          tag: ${{ github.ref }}
+          overwrite: true
