@@ -266,4 +266,4 @@ def test_multiple_invalid(text):
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.2.0"
+    assert __version__ == "0.2.1"

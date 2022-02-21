@@ -39,7 +39,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-windows-${{ hashFiles('**/poetry.lock') }}
+          key: venv-windows-py3.10.1-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
@@ -76,7 +76,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: .venv
-          key: venv-macos-${{ hashFiles('**/poetry.lock') }}
+          key: venv-macosx-py3.10.1-${{ hashFiles('**/poetry.lock') }}
       - name: Install dependencies
         if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
         run: poetry install --no-interaction --no-root
