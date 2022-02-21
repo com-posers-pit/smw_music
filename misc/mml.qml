@@ -12,7 +12,7 @@ import QtQuick.Controls.Styles 1.4
 import QtQuick.Layouts 1.0
 
 MuseScore {
-  version: "0.2.0"
+  version: "0.2.1"
   description: "Convert score to MML via webservice"
   menuPath: "Plugins.MML"
   pluginType: "dock"
