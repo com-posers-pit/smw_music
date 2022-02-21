@@ -1,4 +1,5 @@
-# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
+# <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: CC0-1.0
 
@@ -10,7 +11,7 @@ line-length = 79
 
 [tool.poetry]
 name = "smw_music"
-version = "0.1.2"
+version = "0.2.0"
 description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"
@@ -28,27 +29,38 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.9,<3.11"
 music21 = "^7.1.0"
+Mako = "^1.1.6"
+Flask = {version = "^2.0.2", optional = true}
+PyQt6 = "^6.2.3"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.3.2"
 sphinx-rtd-theme = "^1.0.0"
-poetry = "^1.1.12"
 tox = "^3.24.4"
 pre-commit = "^2.16.0"
+pyinstaller = "^4.9"
+
+[tool.poetry.extras]
+webserver = ["flask"]
 
 [tool.poetry.scripts]
-smw_music_xml_to_amk = "smw_music.scripts.convert:main"
+smw_music_xml_to_mml = "smw_music.scripts.convert:main"
+smw_music_xml_dashboard = "smw_music.scripts.dashboard:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
 
 [tool.pydocstyle]
 convention = "numpy"
+add-ignore = "D105"
 
 [tool.pylint.FORMAT]
-good-names = "n,rv"
+good-names = "e,n,rv"
+
+[tool.pylint.SIMILARITIES]
+ignore-imports = "yes"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

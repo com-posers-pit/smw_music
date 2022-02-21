@@ -9,7 +9,6 @@
 # Standard library imports
 ###############################################################################
 
-import os
 import tempfile
 import pathlib
 
@@ -23,43 +22,9 @@ import pytest
 # Project imports
 ###############################################################################
 
-from smw_music import music_xml, __version__
+from smw_music import __version__
+from smw_music.music_xml import MusicXmlException
 from smw_music.scripts import convert
-
-
-###############################################################################
-# Private function definitions
-###############################################################################
-
-
-def _compare(src, dst, constants):
-    fname = constants["amk_dir"] / dst
-
-    with open(fname, "r") as fobj:
-        target = fobj.readlines()
-
-    fname = constants["mxl_dir"] / src
-
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        convert.main([str(fname), str(fobj.name)])
-        written = fobj.readlines()
-
-    assert target == written
-
-
-###############################################################################
-# Fixture definitions
-###############################################################################
-
-
-@pytest.fixture
-def constants():
-    testdir = pathlib.Path("tests")
-    return {
-        "test_dir": testdir,
-        "mxl_dir": testdir / "src",
-        "amk_dir": testdir / "dst",
-    }
 
 
 ###############################################################################
@@ -67,50 +32,233 @@ def constants():
 ###############################################################################
 
 
-def test_dotted(constants):
-    _compare("Dots.mxl", "Dots.txt", constants)
+@pytest.mark.parametrize(
+    "src, dst, args",
+    [
+        ("Articulations.mxl", "Articulations.txt", []),
+        ("Crescendos.mxl", "Crescendos.txt", []),
+        (
+            "Crescendo_Triplet_Loops.mxl",
+            "Crescendo_Triplet_Loops.txt",
+            ["--loop_analysis"],
+        ),
+        ("Dots.mxl", "Dots.txt", []),
+        ("Dynamics.mxl", "Dynamics.txt", []),
+        ("Empty_Section.mxl", "Empty_Section.txt", ["--loop_analysis"]),
+        ("EndingTriplet.mxl", "EndingTriplet.txt", []),
+        ("ExtraInstruments.mxl", "ExtraInstruments.txt", []),
+        ("Grace_Notes.mxl", "Grace_Notes.txt", []),
+        ("Headers.mxl", "Headers.txt", []),
+        ("Instruments.mxl", "Instruments_parse_to.txt", []),
+        ("Loop_Point.mxl", "Loop_Point.txt", []),
+        (
+            "Loops.mxl",
+            "Loops.txt",
+            [
+                "--loop_analysis",
+            ],
+        ),
+        ("Metadata.mxl", "Metadata.txt", []),
+        ("No_Metadata.mxl", "No_Metadata.txt", []),
+        (
+            "Percussion.mxl",
+            "Percussion.txt",
+            [],
+        ),
+        (
+            "Percussion.mxl",
+            "Percussion_opt.txt",
+            ["--optimize_percussion"],
+        ),
+        (
+            "Pickup_Measure.mxl",
+            "Pickup_Measure.txt",
+            [
+                "--measure_numbers",
+            ],
+        ),
+        (
+            "Repeats.mxl",
+            "Repeats.txt",
+            [
+                "--loop_analysis",
+            ],
+        ),
+        ("Slurs.mxl", "Slurs.txt", []),
+        ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", []),
+        ("SwapRepeatAnnotation.mxl", "SwapRepeatAnnotation.txt", []),
+        ("Tempos.mxl", "Tempos.txt", []),
+        ("TiedArticulations.mxl", "TiedArticulations.txt", []),
+        ("Ties.mxl", "Ties.txt", []),
+        ("Triplets.mxl", "Triplets.txt", []),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme.txt",
+            [],
+        ),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_full.txt",
+            [
+                "--measure_numbers",
+                "--loop_analysis",
+                "--optimize_percussion",
+            ],
+        ),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_measures.txt",
+            [
+                "--measure_numbers",
+            ],
+        ),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_Echo.txt",
+            [
+                "--echo",
+                "2,3,4,0.109,Y,0.189,N,11,0.323,N,1",
+            ],
+        ),
+        (
+            "SMB_Castle_Theme.musicxml",
+            "SMB_Castle_Theme_custom_samples.txt",
+            ["--custom_samples"],
+        ),
+    ],
+    ids=[
+        "Articulations",
+        "Crescendos",
+        "Crescendo+Triplet+Loop",
+        "Dots",
+        "Dynamics",
+        "Empty Section",
+        "Ending Triplet",
+        "Extra Instruments",
+        "Grace Notes",
+        "Headers",
+        "Instruments (w/ To parsing)",
+        "Loop Point",
+        "Loops",
+        "Metadata",
+        "No Metadata",
+        "Percussion",
+        "Percussion (optimized)",
+        "Pickup Measure",
+        "Repeats",
+        "Slurs",
+        "SMB Castle Theme (compressed)",
+        "Swap Repeat & Annotation",
+        "Tempos",
+        "TiedArticulations",
+        "Ties",
+        "Triplets",
+        "SMB Castle Theme (uncompressed)",
+        "SMB Castle Theme (kitchen sink)",
+        "SMB Castle Theme (measure #s)",
+        "SMB Castle Theme (echo enabled)",
+        "SMB Castle Theme (custom samples)",
+    ],
+)
+def test_conversion(src, dst, args):
+    test_dir = pathlib.Path("tests")
+    fname = test_dir / "dst" / dst
+
+    with open(fname, "r") as fobj:
+        target = fobj.readlines()
+
+    fname = test_dir / "src" / src
+
+    # We always want the datetime stamp disabled for these tests
+    args += ["--disable_dt"]
+    with tempfile.NamedTemporaryFile("r") as fobj:
+        convert.main([str(fname), str(fobj.name)] + args)
+        written = fobj.readlines()
+
+    assert target == written
 
 
 ###############################################################################
 
 
-def test_dynamics(constants):
-    _compare("Dynamics.mxl", "Dynamics.txt", constants)
+@pytest.mark.parametrize(
+    "src, text",
+    [
+        (
+            "Bad_Percussion.mxl",
+            r"Unsupported percussion note #3 in measure 1 in staff 1",
+        ),
+        ("Chords.mxl", r"Chord found, #1 in measure 2 in staff 1"),
+        ("Chords.mxl", r"Chord found, #2 in measure 2 in staff 1"),
+        ("Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
+        (
+            "ComplexNoteLength.mxl",
+            r"Unsupported note #1 in Measure 2 in staff 1",
+        ),
+        (
+            "ComplexNoteLength.mxl",
+            r"Unsupported note #1 in Measure 7 in staff 1",
+        ),
+        ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
+        ("TooHigh.mxl", r"Unsupported note c7 #3 in measure 1 in staff 1"),
+        ("TooLow.mxl", r"Unsupported note a0 #2 in measure 1 in staff 1"),
+        ("Voices.mxl", r"Multiple voices in measure 2 in staff 1"),
+    ],
+    ids=[
+        "Bad percussion",
+        "Chord 1",
+        "Chord 2",
+        "Chord 3",
+        "Bad 5/4 whole rest",
+        "Bad 5/8 whole rest",
+        "Percussion Chord",
+        "Note too high",
+        "Note too low",
+        "Multiple Voices",
+    ],
+)
+def test_invalid(src, text):
+    test_dir = pathlib.Path("tests")
+    fname = test_dir / "src" / "bad" / src
+
+    with tempfile.NamedTemporaryFile("r") as fobj:
+        with pytest.raises(MusicXmlException, match=text):
+            convert.main([str(fname), str(fobj.name)])
 
 
 ###############################################################################
 
 
-def test_grace_notes(constants):
-    _compare("Grace_Notes.mxl", "Grace_Notes.txt", constants)
+@pytest.mark.parametrize(
+    "text",
+    [
+        (r"Chord found, #1 in measure 2 in staff 1"),
+        (r"Chord found, #2 in measure 2 in staff 1"),
+        (r"Chord found, #3 in measure 2 in staff 1"),
+        (r"Multiple voices in measure 6 in staff 1"),
+        (r"Unsupported note c7 #3 in measure 3 in staff 1"),
+        (r"Unsupported note a0 #2 in measure 4 in staff 1"),
+        (r"Chord found, #3 in measure 3 in staff 2"),
+        (r"Unsupported percussion note #3 in measure 1 in staff 2"),
+    ],
+    ids=[
+        "Chord 1",
+        "Chord 2",
+        "Chord 3",
+        "Multiple Voices",
+        "Note too high",
+        "Note too low",
+        "Percussion Chord",
+        "Bad percussion",
+    ],
+)
+def test_multiple_invalid(text):
+    test_dir = pathlib.Path("tests")
+    fname = test_dir / "src" / "bad" / "Errors.mxl"
 
-
-###############################################################################
-
-
-def test_smb_castle(constants):
-    _compare("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", constants)
-
-
-###############################################################################
-
-
-def test_ties(constants):
-    _compare("Ties.mxl", "Ties.txt", constants)
-
-
-###############################################################################
-
-
-def test_triplets(constants):
-    _compare("Triplets.mxl", "Triplets.txt", constants)
-
-
-###############################################################################
-
-
-def test_uncompressed_smb_castle(constants):
-    _compare("SMB_Castle_Theme.musicxml", "SMB_Castle_Theme.txt", constants)
+    with tempfile.NamedTemporaryFile("r") as fobj:
+        with pytest.raises(MusicXmlException, match=text):
+            convert.main([str(fname), str(fobj.name)])
 
 
 ###############################################################################
@@ -118,4 +266,4 @@ def test_uncompressed_smb_castle(constants):
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.1.2"
+    assert __version__ == "0.2.0"

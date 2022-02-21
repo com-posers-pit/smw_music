@@ -1,0 +1,159 @@
+## SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
+## <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+##
+## SPDX-License-Identifier: AGPL-3.0-only
+#amk 2
+
+; MusicXML->AMK v${version}
+%if datetime:
+; Built: ${datetime}
+%endif
+
+#spc {
+    #author  "${song.composer}"
+    #title   "${song.title}"
+    #game    "${song.game}"
+    #comment "Ported by: ${song.porter}"
+}
+%if custom_samples:
+
+; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
+#path "folder name"
+
+#samples {
+    #optimized ;Don't touch/delete this line, just replace the sample brr files below
+    "Sample1.brr"
+    "Sample2.brr"
+}
+
+#instruments {
+    "Sample1.brr"        $00$00 $00 $00$00 ;@30
+    "Sample2.brr"        $00$00 $00 $00$00 ;@31
+}
+%endif
+
+; PORTER: GLOBAL VOLUME HERE
+w${song.volume}
+
+%if instruments or percussion:
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+%endif
+%if instruments:
+<%
+    voice = lambda x: x.name + "_voice"
+    dyn = lambda x: x.name + "_dyn"
+    artic = lambda x: x.name + "_artic"
+    pan = lambda x: x.name + "_pan"
+
+    voice_sz = max((len(voice(inst))) for inst in instruments)
+    dyn_sz = max((len(dyn(inst))) for inst in instruments)
+    artic_sz = max((len(artic(inst))) for inst in instruments)
+    pan_sz = max((len(pan(inst))) for inst in instruments)
+
+    def dyn_str(inst):
+        rv = []
+        for vol, val in inst.dynamics.items():
+            rv.append(f'\\"_{vol}={val:02X}\\"')
+        return ' '.join(rv)
+
+    def artic_str(inst):
+        rv = []
+        for artic, val in inst.quant.items():
+            rv.append(f'\\"q{artic}=q{val:02X}\\"')
+        return ' '.join(rv)
+
+    def pan_str(inst):
+        return '' if inst.pan is None else f'y{inst.pan}'
+%>\
+; Instrument voice definitions
+; Only change the instrument octave numbers on the right of the equals signs
+%for inst in instruments:
+"${f'{voice(inst):{voice_sz}}'} = ${f'{inst.instrument:3} o{inst.octave}'}"
+%endfor
+
+; Instrument dynamics definitions
+; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
+; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
+%for inst in instruments:
+"${f'{dyn(inst):{dyn_sz}}'} = ${dyn_str(inst)}"
+%endfor
+
+; Instrument articulation definitions
+; Just like dynamics, only touch numbers after the 'q' after each equals sign.
+%for inst in instruments:
+"${f'{artic(inst):{artic_sz}}'} = ${artic_str(inst)}"
+%endfor
+
+; Instrument pan definitions
+; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
+; pick your own using a y command.  These are blank by default because not
+; everyone uses them and it ; saves space to leave them out.
+%for inst in instruments:
+"${f'{pan(inst):{pan_sz}} = {pan_str(inst)}'}"
+%endfor
+
+%endif
+%if percussion:
+; Percussion definitions
+"CR3_ = @22 CR3_n" "CR3_n = o6 c"
+"CR2_ = @22 CR2_n" "CR2_n = o5 b"
+"CR   = @22 CRn"   "CRn   = o5 a"
+"CH   = @22 CHn"   "CHn   = o5 g"
+"OH   = @22 OHn"   "OHn   = o5 f"
+"RD   = @22 RDn"   "RDn   = o5 e"
+"RD2_ = @22 RD2_n" "RD2_n = o5 d"
+"HT   = @24 HTn"   "HTn   = o5 e"
+"MT   = @23 MTn"   "MTn   = o5 d"
+"SN   = @10 SNn"   "SNn   = o5 c"
+"LT   = @21 LTn"   "LTn   = o4 a"
+"KD   = @21 KDn"   "KDn   = o4 f"
+
+%endif
+%if echo_config:
+; Echo settings
+
+${f'$EF${echo_config.channel_reg:02X}${echo_config.left_vol_reg:02X}${echo_config.right_vol_reg:02X}'}
+${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:02X}'}
+
+%endif
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+%for inst in instruments:
+"${inst.name} = ${voice(inst)} ${dyn(inst)} ${artic(inst)} ${pan(inst)}"
+%endfor
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
+%for dyn in dynamics:
+${f'"v{dyn: <4} = $E7$_{dyn}"'}
+%endfor
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON     = $F4$01"
+"LEGATO_OFF    = $F4$01"
+"GLOBAL_LEGATO = $F4$02"
+"CRESC         = $E8"
+"DIM           = $E8"
+"PAN_LEFT      = y20"
+"PAN_MID_LEFT  = y15"
+"PAN_CENTER    = y10"
+"PAN_MID_RIGHT = y05"
+"PAN_RIGHT     = y00"
+%for n, channel in enumerate(channels):
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff ${n + 1}
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#${n}\
+${" GLOBAL_LEGATO" if global_legato and (n == 0) else ""}\
+${" /" if "/" not in channel else ""}
+
+${channel}
+%endfor

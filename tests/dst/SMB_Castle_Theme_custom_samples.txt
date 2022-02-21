@@ -1,0 +1,181 @@
+#amk 2
+
+; MusicXML->AMK v0.2.0
+
+#spc {
+    #author  "Koji Kondo"
+    #title   "SMB Castle Theme"
+    #game    "GAME NAME HERE"
+    #comment "Ported by: PORTER NAME HERE"
+}
+
+; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
+#path "folder name"
+
+#samples {
+    #optimized ;Don't touch/delete this line, just replace the sample brr files below
+    "Sample1.brr"
+    "Sample2.brr"
+}
+
+#instruments {
+    "Sample1.brr"        $00$00 $00 $00$00 ;@30
+    "Sample2.brr"        $00$00 $00 $00$00 ;@31
+}
+
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+; Instrument voice definitions
+; Only change the instrument octave numbers on the right of the equals signs
+"BassGuitar_voice =   8 o3"
+"Piano_voice      =  13 o3"
+
+; Instrument dynamics definitions
+; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
+; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
+"BassGuitar_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Piano_dyn      = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+
+; Instrument articulation definitions
+; Just like dynamics, only touch numbers after the 'q' after each equals sign.
+"BassGuitar_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Piano_artic      = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+
+; Instrument pan definitions
+; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
+; pick your own using a y command.  These are blank by default because not
+; everyone uses them and it ; saves space to leave them out.
+"BassGuitar_pan = "
+"Piano_pan      = "
+
+; Percussion definitions
+"CR3_ = @22 CR3_n" "CR3_n = o6 c"
+"CR2_ = @22 CR2_n" "CR2_n = o5 b"
+"CR   = @22 CRn"   "CRn   = o5 a"
+"CH   = @22 CHn"   "CHn   = o5 g"
+"OH   = @22 OHn"   "OHn   = o5 f"
+"RD   = @22 RDn"   "RDn   = o5 e"
+"RD2_ = @22 RD2_n" "RD2_n = o5 d"
+"HT   = @24 HTn"   "HTn   = o5 e"
+"MT   = @23 MTn"   "MTn   = o5 d"
+"SN   = @10 SNn"   "SNn   = o5 c"
+"LT   = @21 LTn"   "LTn   = o4 a"
+"KD   = @21 KDn"   "KDn   = o4 f"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+"BassGuitar = BassGuitar_voice BassGuitar_dyn BassGuitar_artic BassGuitar_pan"
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON     = $F4$01"
+"LEGATO_OFF    = $F4$01"
+"GLOBAL_LEGATO = $F4$02"
+"CRESC         = $E8"
+"DIM           = $E8"
+"PAN_LEFT      = y20"
+"PAN_MID_LEFT  = y15"
+"PAN_CENTER    = y10"
+"PAN_MID_RIGHT = y05"
+"PAN_RIGHT     = y00"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 GLOBAL_LEGATO /
+
+l32
+@Piano t36 > d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> d < g > c+ < g > c < g > c+ < g > d < g > d+ < g > d < g > c+ < g
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> c+ < f+ > c < f+ > c+ < f+ > d < f+ > c+ < f+ > d < f+ > c+ < f+ > c < f+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+> f < a+ > f+ < a+ > f < a+ > e < a+ > f < a+ > e < a+ > d+ < a+ > e < a+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 /
+
+l32
+@Piano a+ r a r g+ r a r a+ r b r a+ r a r
+a+ r a r g+ r a r a+ r b r a+ r a r
+a r g+ r a r a+ r a r a+ r a r g+ r
+a r g+ r a r a+ r a r a+ r a r g+ r
+> c+ r d r c+ r c r c+ r c r < b r > c r
+c+ r d r c+ r c r c+ r c r < b r > c r
+< a+ r a r g+ r a r a+ r b r a+ r a r
+a+ r a r g+ r a r a+ r b r a+ r a r
+a r g+ r a r a+ r a r a+ r a r g+ r
+a r g+ r a r a+ r a r a+ r a r g+ r
+> c+ r d r c+ r c r c+ r c r < b r > c r
+c+ r d r c+ r c r c+ r c r < b r > c r
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 3
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#2 /
+
+l4
+@BassGuitar < d+2
+d f+
+f2
+e a+
+a e
+d+ e
+d+2
+d f+
+f2
+e a+
+a e
+d+ e
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 4
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#3 /
+
+l8
+r2
+r2
+r2
+r2
+r2
+r2
+KD SN MT SN
+KD SN MT16 MT16 SN16 MT16
+KD SN MT SN
+KD SN MT16 MT16 SN16 MT16
+KD SN MT SN
+KD SN MT16 MT16 SN16 MT16
