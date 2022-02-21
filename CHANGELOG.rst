@@ -15,6 +15,47 @@ Unreleased
 
 --------------------------------------------------------------------------------
 
+Release 0.2.1 - 2022-02-21
+--------------------------
+
+`Release 0.2.1`_
+
+`Differences from 0.2.0`_
+
+Purpose
++++++++
+
+Fix problem in GH publish action---no changes to the codebase.
+
+See `Release 0.2.0`_ for applicable changelog.
+
+Affected Issues
++++++++++++++++
+
+None.
+
+Changed
++++++++
+
+None.
+
+Added
++++++
+
+None.
+
+Removed
++++++++
+
+None.
+
+Idiosyncrasies
+++++++++++++++
+
+None.
+
+--------------------------------------------------------------------------------
+
 Release 0.2.0 - 2022-02-21
 --------------------------
 
@@ -338,12 +379,14 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.2.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.1
 .. _Release 0.2.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.0
 .. _Release 0.1.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.2
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.2.0: https://github.com/com-posers-pit/smw_music/compare/v0.2.0...HEAD
+.. _Differences from 0.2.1: https://github.com/com-posers-pit/smw_music/compare/v0.2.1...HEAD
+.. _Differences from 0.2.0: https://github.com/com-posers-pit/smw_music/compare/v0.2.0...v0.2.1
 .. _Differences from 0.1.2: https://github.com/com-posers-pit/smw_music/compare/v0.1.2...v0.2.0
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
