@@ -15,6 +15,46 @@ Unreleased
 
 --------------------------------------------------------------------------------
 
+Release 0.2.2 - 2022-02-22
+--------------------------
+
+`Release 0.2.2`_
+
+`Differences from 0.2.1`_
+
+Purpose
++++++++
+
+Fix extra newline problem in output on windows
+
+Affected Issues
++++++++++++++++
+
+- `#80 Extra newlines in windows-generated output`_
+
+Changed
++++++++
+
+- Removed extra newlines in .exe-generated MML outputs
+  - This was a side effect of print in text mode on windows
+
+Added
++++++
+
+None.
+
+Removed
++++++++
+
+None.
+
+Idiosyncrasies
+++++++++++++++
+
+None.
+
+--------------------------------------------------------------------------------
+
 Release 0.2.1 - 2022-02-21
 --------------------------
 
@@ -322,6 +362,7 @@ Affected Issues
 - `#1 Add support for AMK annotations`_
 
 
+.. _#80 Extra newlines in windows-generated output: https://github.com/com-posers-pit/smw_music/issues/80
 .. _#78 Interpolation crash w/ ffff slider: https://github.com/com-posers-pit/smw_music/issues/78
 .. _#76 Support multiple tempos: https://github.com/com-posers-pit/smw_music/issues/76
 .. _#73 "complex" error: https://github.com/com-posers-pit/smw_music/issues/73
@@ -379,13 +420,15 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.2.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.2
 .. _Release 0.2.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.1
 .. _Release 0.2.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.0
 .. _Release 0.1.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.2
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.2.1: https://github.com/com-posers-pit/smw_music/compare/v0.2.1...HEAD
+.. _Differences from 0.2.2: https://github.com/com-posers-pit/smw_music/compare/v0.2.2...HEAD
+.. _Differences from 0.2.1: https://github.com/com-posers-pit/smw_music/compare/v0.2.1...v0.2.2
 .. _Differences from 0.2.0: https://github.com/com-posers-pit/smw_music/compare/v0.2.0...v0.2.1
 .. _Differences from 0.1.2: https://github.com/com-posers-pit/smw_music/compare/v0.1.2...v0.2.0
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
