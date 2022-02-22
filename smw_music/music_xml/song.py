@@ -598,8 +598,8 @@ class Song:
             True iff repeated percussion notes should not repeat their
             instrument
         """
-        with open(fname, "w", encoding="ascii") as fobj:
-            print(
+        with open(fname, "wb") as fobj:
+            fobj.write(
                 self.generate_mml(
                     global_legato,
                     loop_analysis,
@@ -609,7 +609,5 @@ class Song:
                     echo_config,
                     custom_samples,
                     optimize_percussion,
-                ),
-                end="",
-                file=fobj,
+                ).encode("ascii"),
             )
