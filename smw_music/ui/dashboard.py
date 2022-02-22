@@ -30,19 +30,17 @@ from .model import Model
 ###############################################################################
 
 
-class Dashboard(QApplication):
-    def __init__(self, args: list) -> None:
-        super().__init__(args)
+class Dashboard(QMainWindow):
+    def __init__(self) -> None:
+        super().__init__()
 
-        self.setApplicationName("MusicXML -> MML")
         self._model = Model()
-        self._window = QMainWindow()
         self._controller = Controller()
 
         self._setup_menus()
         self._attach_signals()
 
-        self._window.setCentralWidget(self._controller)
+        self.setCentralWidget(self._controller)
 
     ###########################################################################
     # Private method definitions
@@ -54,7 +52,7 @@ class Dashboard(QApplication):
         text += "\nCopyright Ⓒ 2022 The SMW Music Python Project Authors"
         text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
 
-        QMessageBox.about(self._window, title, text)
+        QMessageBox.about(self, title, text)
 
     ###########################################################################
 
@@ -76,20 +74,12 @@ class Dashboard(QApplication):
     ###########################################################################
 
     def _setup_menus(self) -> None:
-        file_menu = self._window.menuBar().addMenu("&File")
+        file_menu = self.menuBar().addMenu("&File")
         file_menu.addAction("&Load project")
         file_menu.addAction("&Save project")
         file_menu.addSeparator()
-        file_menu.addAction("&Quit", self.quit)
+        file_menu.addAction("&Quit", QApplication.quit)
 
-        help_menu = self._window.menuBar().addMenu("&Help")
+        help_menu = self.menuBar().addMenu("&Help")
         help_menu.addAction("About", self._about)
-        help_menu.addAction("About Qt", self.aboutQt)
-
-    ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def run(self) -> None:
-        self._window.show()
-        self.exec()
+        help_menu.addAction("About Qt", QApplication.aboutQt)
