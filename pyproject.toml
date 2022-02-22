@@ -59,6 +59,9 @@ add-ignore = "D105"
 [tool.pylint.FORMAT]
 good-names = "e,n,rv"
 
+[tool.pylint.MASTER]
+extension-pkg-allow-list = "PyQt6"
+
 [tool.pylint.SIMILARITIES]
 ignore-imports = "yes"
 
