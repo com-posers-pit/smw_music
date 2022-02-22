@@ -15,11 +15,12 @@ from typing import Any
 # Library imports
 ###############################################################################
 
-from PyQt6.QtCore import pyqtSignal, Qt  # type: ignore
-from PyQt6.QtGui import QDoubleValidator  # type: ignore
-from PyQt6.QtWidgets import (  # type: ignore
-    QDial,
+from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtGui import QDoubleValidator
+from PyQt6.QtWidgets import (
+    QBoxLayout,
     QCheckBox,
+    QDial,
     QFileDialog,
     QGridLayout,
     QHBoxLayout,
@@ -55,7 +56,7 @@ def _fix_width(edit: QLineEdit) -> None:
 
 
 class ArticSlider(QWidget):
-    artic_changed: pyqtSignal = pyqtSignal(int, arguments=["quant"])
+    artic_changed = pyqtSignal(int)  # arguments=["quant"]
     _length_slider: QSlider
     _vol_slider: QSlider
     _length_display: QLabel
@@ -175,7 +176,7 @@ class FilePicker(QWidget):
 
     @debug()
     def _attach_signals(self) -> None:
-        self._button.clicked.connect(self._open_dialog)
+        self._button.clicked.connect(lambda _: self._open_dialog())
         self._edit.editingFinished.connect(self._update_fname)
 
     ###########################################################################
@@ -192,7 +193,7 @@ class FilePicker(QWidget):
     ###########################################################################
 
     @debug()
-    def _open_dialog(self, _: bool) -> None:
+    def _open_dialog(self) -> None:
         if self._save:
             dlg = QFileDialog.getSaveFileName
         else:
@@ -215,9 +216,7 @@ class FilePicker(QWidget):
 
 
 class PanControl(QWidget):
-    pan_changed: pyqtSignal = pyqtSignal(
-        bool, int, arguments=["enable", "pan"]
-    )
+    pan_changed = pyqtSignal(bool, int)  # arguments=["enable", "pan"]
     _slider: QDial
     _display: QLabel
     _enable: QCheckBox
@@ -308,9 +307,7 @@ class PanControl(QWidget):
 
 
 class PctSlider(QWidget):
-    pct_changed: pyqtSignal = pyqtSignal(
-        float, bool, arguments=["percent", "invert"]
-    )
+    pct_changed = pyqtSignal(float, bool)  # arguments=["percent", "invert"]
     _control: QLineEdit
     _display: QLabel
     _invert: QCheckBox
@@ -376,7 +373,7 @@ class PctSlider(QWidget):
     def _do_layout(self, label: str) -> None:
         control_panel = QWidget()
 
-        layout = QHBoxLayout()
+        layout: QBoxLayout = QHBoxLayout()
         layout.addWidget(self._control)
         layout.addWidget(QLabel("%"))
 
@@ -435,7 +432,8 @@ class VolSlider(QWidget):
         self._fmt = "x{:02x}" if hex_disp else "{}"
         self._slider = QSlider(Qt.Orientation.Vertical)
         self._control = QLineEdit()
-        self._display = QLabel(toolTip=f"{label} hex volume value")
+        self._display = QLabel()
+        self._display.setToolTip(f"{label} hex volume value")
 
         self._slider.setRange(0, 255)
         self._control.setValidator(QDoubleValidator(0, 100, 1))
@@ -473,7 +471,7 @@ class VolSlider(QWidget):
     def _do_layout(self, label: str) -> None:
         control_panel = QWidget()
 
-        layout = QHBoxLayout()
+        layout: QBoxLayout = QHBoxLayout()
         layout.addWidget(self._control)
         layout.addWidget(QLabel("%"))
 

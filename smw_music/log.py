@@ -47,6 +47,17 @@ def _wrapper(log_type, log_args: bool, log_rv: bool):
 
 
 def debug(args: bool = False, rv: bool = False):
+    """
+    Decorator for logging a method invocation at DEBUG level
+
+    Arguments
+    ---------
+    args: bool
+        Log the method arguments iff True
+
+    rv: bool
+        Log the method return value iff True
+    """
     return _wrapper(logging.debug, args, rv)
 
 
@@ -54,4 +65,15 @@ def debug(args: bool = False, rv: bool = False):
 
 
 def info(args: bool = False, rv: bool = False):
+    """
+    Decorator for logging a method invocation at INFO level
+
+    Arguments
+    ---------
+    args: bool
+        Log the method arguments iff True
+
+    rv: bool
+        Log the method return value iff True
+    """
     return _wrapper(logging.info, args, rv)
