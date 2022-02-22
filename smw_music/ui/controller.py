@@ -11,6 +11,7 @@
 
 from PyQt6.QtCore import pyqtSignal  # type: ignore
 from PyQt6.QtWidgets import (  # type: ignore
+    QBoxLayout,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -36,26 +37,18 @@ from .widgets import VolSlider
 
 
 class Controller(QWidget):
-    artic_changed: pyqtSignal = pyqtSignal(
-        str, int, arguments=["artic", "quant"]
-    )
-    config_changed: pyqtSignal = pyqtSignal(bool, bool, bool, bool, bool, bool)
-    instrument_changed: pyqtSignal = pyqtSignal(str, arguments=["inst_name"])
-    mml_requested: pyqtSignal = pyqtSignal(
+    artic_changed = pyqtSignal(str, int)  # arguments=["artic", "quant"]
+    config_changed = pyqtSignal(bool, bool, bool, bool, bool, bool)
+    instrument_changed = pyqtSignal(str)  # arguments=["inst_name"])
+    mml_requested = pyqtSignal(
         str,
         object,  # object type lets us pass None or an EchoConfig
-        arguments=[
-            "fname",
-            "config",
-        ],
-    )
-    pan_changed: pyqtSignal = pyqtSignal(
-        bool, int, arguments=["enable", "pan"]
-    )
-    song_changed: pyqtSignal = pyqtSignal(str, arguments=["fname"])
-    volume_changed: pyqtSignal = pyqtSignal(
-        str, int, bool, arguments=["dyn", "val", "interp"]
-    )
+    )  # arguments=[ "fname", "config", ],
+    pan_changed = pyqtSignal(bool, int)  # arguments=["enable", "pan"]
+    song_changed = pyqtSignal(str)  # arguments=["fname"]
+    volume_changed = pyqtSignal(
+        str, int, bool
+    )  # arguments=["dyn", "val", "interp"]
 
     _control_panel: ControlPanel
     _instruments: QListWidget
@@ -134,7 +127,7 @@ class Controller(QWidget):
     def _do_layout(self) -> None:
         inst_panel = QWidget()
 
-        layout = QVBoxLayout()
+        layout: QBoxLayout = QVBoxLayout()
         layout.addWidget(QLabel("Instruments"))
         layout.addWidget(self._instruments)
         inst_panel.setLayout(layout)

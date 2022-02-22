@@ -93,13 +93,11 @@ class _DynEnum(IntEnum):
 
 
 class Model(QObject):
-    inst_config_changed: pyqtSignal = pyqtSignal(
-        InstrumentConfig, arguments=["config"]
-    )
-    response_generated: pyqtSignal = pyqtSignal(
-        bool, str, str, arguments=["error", "title", "response"]
-    )
-    song_changed: pyqtSignal = pyqtSignal(Song)
+    inst_config_changed = pyqtSignal(InstrumentConfig)  # arguments=["config"]
+    response_generated = pyqtSignal(
+        bool, str, str
+    )  # arguments=["error", "title", "response"]
+    song_changed = pyqtSignal(Song)  # arguments=["song"]
 
     song: Optional[Song]
     mml_fname: str

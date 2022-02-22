@@ -17,6 +17,7 @@ from typing import cast, Optional, Union
 
 from PyQt6.QtCore import pyqtSignal  # type: ignore
 from PyQt6.QtWidgets import (  # type: ignore
+    QBoxLayout,
     QCheckBox,
     QGridLayout,
     QHBoxLayout,
@@ -43,12 +44,8 @@ from .widgets import ArticSlider, FilePicker, PanControl, PctSlider, VolSlider
 
 
 class ArticPanel(QWidget):
-    artic_changed: pyqtSignal = pyqtSignal(
-        str, int, arguments=["artic", "quant"]
-    )
-    pan_changed: pyqtSignal = pyqtSignal(
-        bool, int, arguments=["enable", "pan"]
-    )
+    artic_changed = pyqtSignal(str, int)  # arguments=["artic", "quant"]
+    pan_changed = pyqtSignal(bool, int)  # arguments=["enable", "pan"]
     _sliders: dict[str, ArticSlider]
     _pan: PanControl
 
@@ -118,19 +115,11 @@ class ArticPanel(QWidget):
 
 
 class ControlPanel(QWidget):
-    config_changed = pyqtSignal(
-        [bool, bool, bool, bool, bool, bool],
-        arguments=[
-            "global_legato",
-            "loop_analysis",
-            "superloop_analysis",
-            "measure_numbers",
-            "custom_samples",
-            "custom_percussion",
-        ],
-    )
-    mml_requested = pyqtSignal(str, arguments=["fname"])
-    song_changed = pyqtSignal(str, arguments=["fname"])
+    config_changed = pyqtSignal([bool, bool, bool, bool, bool, bool])
+    # arguments=[ "global_legato", "loop_analysis", "superloop_analysis",
+    # "measure_numbers", "custom_samples", "custom_percussion", ]
+    mml_requested = pyqtSignal(str)  # arguments=["fname"]
+    song_changed = pyqtSignal(str)  # arguments=["fname"]
 
     _musicxml_picker: FilePicker
     _mml_picker: FilePicker
@@ -237,9 +226,9 @@ class ControlPanel(QWidget):
 
 
 class DynamicsPanel(QWidget):
-    volume_changed: pyqtSignal = pyqtSignal(
-        str, int, bool, arguments=["dynamics", "vol", "interp"]
-    )
+    volume_changed = pyqtSignal(
+        str, int, bool
+    )  # arguments=["dynamics", "vol", "interp"]
     _sliders: dict[str, VolSlider]
     _interpolate: QCheckBox
 
@@ -267,9 +256,9 @@ class DynamicsPanel(QWidget):
             slider = VolSlider(dyn)
             self._sliders[dyn] = slider
 
-        self._interpolate = QCheckBox(
-            "Interpolate",
-            toolTip="Adjust all dynamics settings based on the extreme values",
+        self._interpolate = QCheckBox("Interpolate")
+        self._interpolate.setToolTip(
+            "Adjust all dynamics settings based on the extreme values",
         )
 
         self._attach_signals()
@@ -421,23 +410,23 @@ class EchoPanel(QWidget):
     def _do_layout(self) -> None:
         # Enable check boxes
         enable_widget = QWidget()
-        layout = QGridLayout()
+        grid_layout = QGridLayout()
 
-        layout.addWidget(self._enable, 0, 0, 1, 2)
-        layout.addWidget(QLabel("Channel Enables"), 1, 0, 1, 2)
+        grid_layout.addWidget(self._enable, 0, 0, 1, 2)
+        grid_layout.addWidget(QLabel("Channel Enables"), 1, 0, 1, 2)
 
         for n, enable in enumerate(self._chan_enables):
-            layout.addWidget(enable, 2 + n // 2, n % 2)
+            grid_layout.addWidget(enable, 2 + n // 2, n % 2)
 
         row = 3 + len(self._chan_enables) // 2
-        layout.addWidget(QLabel("Filter"), row, 0, 1, 2)
-        layout.addWidget(self._filter[0], row + 1, 0)
-        layout.addWidget(self._filter[1], row + 1, 1)
+        grid_layout.addWidget(QLabel("Filter"), row, 0, 1, 2)
+        grid_layout.addWidget(self._filter[0], row + 1, 0)
+        grid_layout.addWidget(self._filter[1], row + 1, 1)
 
-        enable_widget.setLayout(layout)
+        enable_widget.setLayout(grid_layout)
 
         # Delay group
-        layout = QVBoxLayout()
+        layout: QBoxLayout = QVBoxLayout()
 
         layout.addWidget(QLabel("Delay"))
         layout.addWidget(self._delay)
@@ -467,16 +456,11 @@ class EchoPanel(QWidget):
     @debug()
     def _update_enables(self, enable: Union[bool, int]) -> None:
         enable = bool(enable)
-        widgets = (
-            self._chan_enables
-            + [
-                self._lvol,
-                self._rvol,
-                self._fbvol,
-                self._delay_panel,
-            ]
-            + list(self._filter)
+        widgets: list[QWidget] = list(self._chan_enables)
+        widgets.extend(
+            [self._lvol, self._rvol, self._fbvol, self._delay_panel]
         )
+        widgets.extend(self._filter)
 
         for widget in widgets:
             widget.setEnabled(enable)
