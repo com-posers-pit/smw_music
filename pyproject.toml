@@ -18,7 +18,7 @@ license = "AGPL-3.0-only"
 readme = "README.rst"
 repository = "http://github.com/com-posers-pit/smw_music"
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",

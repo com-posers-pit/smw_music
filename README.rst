@@ -12,7 +12,7 @@ The tooling has only been tested with exported MusicXML files from MuseScore
 3.6.2, but it should work with outputs from other music notation software.
 Output files are tested against `AddMusicK`_ 1.0.8.
 
-The software (and especially the libraries) are pre-alpha.  APIs may change at
+The software (and especially the libraries) are alpha.  APIs may change at
 any time for any/no reason.
 
 Webserver
