@@ -16,9 +16,15 @@ jobs:
       matrix:
         python-version: ['3.9', '3.10']
 
+    env:
+      DISPLAY: ':99.0'
+
     steps:
       - name: Install system dependencies
-        run: yes | sudo apt install xvfb libxkbcommon-x11-0
+        run: |
+          sudo apt update
+          sudo apt install -y libegl1 libxkbcommon-x11-0 libxcb-icccm4 libxcb-image0 libxcb-keysyms1 libxcb-randr0 libxcb-render-util0 libxcb-xinerama0 libxcb-xfixes0
+          /sbin/start-stop-daemon --start --quiet --pidfile /tmp/custom_xvfb_99.pid --make-pidfile --background --exec /usr/bin/Xvfb -- :99 -screen 0 1920x120
       - name: Check out repository
         uses: actions/checkout@v2
       - name: Set up Python ${{ matrix.python-version }}
