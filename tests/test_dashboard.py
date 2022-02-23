@@ -10,7 +10,7 @@
 ###############################################################################
 
 import pathlib
-import tempfile
+import sys
 
 ###############################################################################
 # Library imports
@@ -32,6 +32,7 @@ from smw_music.ui.dashboard import Dashboard
 ###############################################################################
 
 
+@pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
 def test_gui(qtbot, monkeypatch):
     src = "Articulations.mxl"
     dst = "Articulations.txt"

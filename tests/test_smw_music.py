@@ -160,19 +160,21 @@ from smw_music.scripts import convert
         "SMB Castle Theme (custom samples)",
     ],
 )
-def test_conversion(src, dst, args):
+def test_conversion(src, dst, args, tmp_path):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "dst" / dst
 
     with open(fname, "r") as fobj:
         target = fobj.readlines()
 
-    fname = test_dir / "src" / src
+    src_fname = test_dir / "src" / src
+    dst_fname = tmp_path / dst
 
     # We always want the datetime stamp disabled for these tests
     args += ["--disable_dt"]
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        convert.main([str(fname), str(fobj.name)] + args)
+    convert.main([str(src_fname), str(dst_fname)] + args)
+
+    with open(dst_fname, "r") as fobj:
         written = fobj.readlines()
 
     assert target == written
@@ -217,13 +219,13 @@ def test_conversion(src, dst, args):
         "Multiple Voices",
     ],
 )
-def test_invalid(src, text):
+def test_invalid(src, text, tmp_path):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "src" / "bad" / src
+    dst = tmp_path / src
 
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        with pytest.raises(MusicXmlException, match=text):
-            convert.main([str(fname), str(fobj.name)])
+    with pytest.raises(MusicXmlException, match=text):
+        convert.main([str(fname), str(dst)])
 
 
 ###############################################################################
@@ -252,13 +254,13 @@ def test_invalid(src, text):
         "Bad percussion",
     ],
 )
-def test_multiple_invalid(text):
+def test_multiple_invalid(text, tmp_path):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "src" / "bad" / "Errors.mxl"
+    dst = tmp_path / "Errors.mml"
 
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        with pytest.raises(MusicXmlException, match=text):
-            convert.main([str(fname), str(fobj.name)])
+    with pytest.raises(MusicXmlException, match=text):
+        convert.main([str(fname), str(dst)])
 
 
 ###############################################################################
