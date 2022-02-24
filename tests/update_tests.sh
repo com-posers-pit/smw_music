@@ -38,3 +38,10 @@ smw_music_xml_to_amk "src/SMB_Castle_Theme.musicxml" "dst/SMB_Castle_Theme_Echo.
 smw_music_xml_to_amk "src/SMB_Castle_Theme.musicxml" "dst/SMB_Castle_Theme_custom_samples.txt" --custom_samples --disable_dt
 smw_music_xml_to_amk "src/Metadata.mxl" "dst/Metadata.txt" --disable_dt
 smw_music_xml_to_amk "src/No_Metadata.mxl" "dst/No_Metadata.txt" --disable_dt
+
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/global_legato.mml" --disable_dt
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/vanilla.mml" --disable_global_legato --disable_dt
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/loop.mml" --disable_dt --disable_global_legato --loop_analysis
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/measure_numbers.mml" --disable_dt --disable_global_legato --measure_numbers
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/custom_samples.mml" --disable_dt --disable_global_legato --custom_samples
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/custom_percusion.mml" --disable_dt --disable_global_legato --optimize_percussion

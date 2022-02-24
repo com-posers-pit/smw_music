@@ -1,0 +1,121 @@
+#amk 2
+
+; MusicXML->AMK v0.2.2
+
+#spc {
+    #author  "COMPOSER HERE"
+    #title   "GUI Test"
+    #game    "GAME NAME HERE"
+    #comment "Ported by: PORTER NAME HERE"
+}
+
+; PORTER: GLOBAL VOLUME HERE
+w180
+
+; PORTER: INSTRUMENT DEFINITIONS HERE
+
+; Instrument voice definitions
+; Only change the instrument octave numbers on the right of the equals signs
+"Harpsichord_voice =   0 o3"
+"Piano_voice       =  13 o3"
+
+; Instrument dynamics definitions
+; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
+; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
+"Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Piano_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+
+; Instrument articulation definitions
+; Just like dynamics, only touch numbers after the 'q' after each equals sign.
+"Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Piano_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+
+; Instrument pan definitions
+; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
+; pick your own using a y command.  These are blank by default because not
+; everyone uses them and it ; saves space to leave them out.
+"Harpsichord_pan = "
+"Piano_pan       = "
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Macro magic.  Look, but don't touch.
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+; Instrument definitions.  Smoosh together the instrument voice definition
+; with its dynamics, articulation, and pan definitions
+"Harpsichord = Harpsichord_voice Harpsichord_dyn Harpsichord_artic Harpsichord_pan"
+"Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
+
+; This is a way to use a hex value in a volume command.  We want to use hex
+; values because that's how volume fades work.  Update the corresponding
+; dynamics marks in each instrument.
+"vPPPP = $E7$_PPPP"
+"vPPP  = $E7$_PPP"
+"vPP   = $E7$_PP"
+"vP    = $E7$_P"
+"vMP   = $E7$_MP"
+"vMF   = $E7$_MF"
+"vF    = $E7$_F"
+"vFF   = $E7$_FF"
+"vFFF  = $E7$_FFF"
+"vFFFF = $E7$_FFFF"
+
+; Magic hex values are no fun, we'll give them nicer names
+"LEGATO_ON     = $F4$01"
+"LEGATO_OFF    = $F4$01"
+"GLOBAL_LEGATO = $F4$02"
+"CRESC         = $E8"
+"DIM           = $E8"
+"PAN_LEFT      = y20"
+"PAN_MID_LEFT  = y15"
+"PAN_CENTER    = y10"
+"PAN_MID_RIGHT = y05"
+"PAN_RIGHT     = y00"
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 1
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#0 /
+
+l4
+@Piano vPPPP [[ > c]]4
+vPPP [[ d]]4
+vPP [[ e]]4
+vP [[ f]]4
+vMP [[ g]]4
+vMF [[ a]]4
+vF [[ b]]4
+vFF [[ > c]]4
+vFFF [[ << c]]4
+vFFFF [[ d]]4
+[[ e]]4
+[[ f]]4
+[[ g]]4
+[[ a]]4
+[[ b]]4
+[[ > c]]4
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 /
+
+l4
+@Harpsichord vMP [[ f]]4
+[[ g]]4
+[[ a]]4
+[[ b-]]4
+vMF [[ > c]]4
+[[ d]]4
+[[ e]]4
+[[ f]]4
+vFF [[ << f]]4
+[[ g]]4
+[[ a]]4
+[[ b-]]4
+[[ > c]]4
+[[ d]]4
+[[ e]]4
+[[ f]]4
