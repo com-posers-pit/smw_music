@@ -103,33 +103,14 @@ def _set_mp_slider(qtbot, dut: Dashboard, ticks: int) -> None:
 
 
 ###############################################################################
-# Test definitions
+# Fixture definitions
 ###############################################################################
 
 
-@pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
-@pytest.mark.parametrize(
-    "tgt, func",
-    [
-        ("vanilla.mml", None),
-        ("global_legato.mml", _enable_legato),
-        ("loop.mml", _enable_loop_analysis),
-        ("measure_numbers.mml", _enable_measure_numbers),
-        ("custom_samples.mml", _custom_samples),
-        ("custom_percussion.mml", _custom_percussion),
-        ("vanilla.mml", lambda x, y: _set_mp_slider(x, y, 4)),
-    ],
-    ids=[
-        "Vanilla Conversion",
-        "Enable Legato",
-        "Loop Analysis",
-        "Measure Numbers",
-        "Custom Samples",
-        "Custom Percussion",
-        "Set MP volume",
-    ],
-)
-def test_controls(tgt, func, qtbot, monkeypatch, tmp_path):
+@pytest.fixture
+def setup(request, tmp_path, qtbot, monkeypatch):
+    tgt = request.param
+
     fname = "GUI_Test.mxl"
     test_dir = pathlib.Path("tests")
 
@@ -149,6 +130,41 @@ def test_controls(tgt, func, qtbot, monkeypatch, tmp_path):
     qtbot.addWidget(dashboard)
 
     _set_files(qtbot, dashboard, src_fname, dst_fname)
+
+    return (dashboard, target, dst_fname)
+
+
+###############################################################################
+# Test definitions
+###############################################################################
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
+@pytest.mark.parametrize(
+    "setup, func",
+    [
+        ("vanilla.mml", None),
+        ("global_legato.mml", _enable_legato),
+        ("loop.mml", _enable_loop_analysis),
+        ("measure_numbers.mml", _enable_measure_numbers),
+        ("custom_samples.mml", _custom_samples),
+        ("custom_percussion.mml", _custom_percussion),
+        ("vanilla.mml", lambda x, y: _set_mp_slider(x, y, 4)),
+    ],
+    ids=[
+        "Vanilla Conversion",
+        "Enable Legato",
+        "Loop Analysis",
+        "Measure Numbers",
+        "Custom Samples",
+        "Custom Percussion",
+        "Set MP volume",
+    ],
+    indirect=["setup"],
+)
+def test_controls(setup, func, qtbot):
+    dashboard, target, dst_fname = setup
+
     if func is not None:
         func(qtbot, dashboard)
     _generate(qtbot, dashboard)
