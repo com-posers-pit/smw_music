@@ -95,17 +95,24 @@ def _panel(dut: Dashboard) -> ControlPanel:
 ###############################################################################
 
 
-def _set_files(
-    qtbot, dut: Dashboard, src: pathlib.Path, dst: pathlib.Path
-) -> None:
-    qtbot.keyClicks(_panel(dut)._musicxml_picker._edit, f"{src}\r")
-    qtbot.keyClicks(_panel(dut)._mml_picker._edit, f"{dst}\r")
+def _set_dyn_control(
+    qtbot, dut: Dashboard, dyn: str, pct: float
+) -> tuple[str, int]:
+    widget = dut._controller._dynamics._sliders[dyn]
+    for _ in range(5):
+        qtbot.keyClick(widget._control, Qt.Key.Key_Backspace)
+        qtbot.keyClick(widget._control, Qt.Key.Key_Delete)
+    qtbot.keyClicks(widget._control, f"{pct:0.1f}\r")
+
+    return widget._display.text(), widget._slider.value()
 
 
 ###############################################################################
 
 
-def _set_dyn_slider(qtbot, dut: Dashboard, dyn: str, ticks: int) -> str:
+def _set_dyn_slider(
+    qtbot, dut: Dashboard, dyn: str, ticks: int
+) -> tuple[str, str]:
     widget = dut._controller._dynamics._sliders[dyn]
     slider = widget._slider
     key = Qt.Key.Key_Up if ticks > 0 else Qt.Key.Key_Down
@@ -117,14 +124,28 @@ def _set_dyn_slider(qtbot, dut: Dashboard, dyn: str, ticks: int) -> str:
 
 
 ###############################################################################
-# Fixture definitions
+
+
+def _set_instr(dashboard: Dashboard, instr: str) -> None:
+    instrs = dashboard._controller._instruments
+    idxs = instrs.findItems(instr, Qt.MatchFlag.MatchExactly)
+    instrs.setCurrentItem(idxs[0])
+
+
 ###############################################################################
 
 
-@pytest.fixture
-def setup(request, tmp_path, qtbot, monkeypatch):
-    tgt = request.param
+def _set_files(
+    qtbot, dut: Dashboard, src: pathlib.Path, dst: pathlib.Path
+) -> None:
+    qtbot.keyClicks(_panel(dut)._musicxml_picker._edit, f"{src}\r")
+    qtbot.keyClicks(_panel(dut)._mml_picker._edit, f"{dst}\r")
 
+
+###############################################################################
+
+
+def _setup(tgt, tmp_path, qtbot):
     fname = "GUI_Test.mxl"
     test_dir = pathlib.Path("tests")
 
@@ -134,10 +155,6 @@ def setup(request, tmp_path, qtbot, monkeypatch):
 
     with tgt_fname.open(encoding="ascii") as fobj:
         target = fobj.readlines()
-
-    monkeypatch.setattr(
-        QMessageBox, "information", lambda *_: QMessageBox.StandardButton.Yes
-    )
 
     dashboard = Dashboard()
     dashboard.show()
@@ -149,13 +166,25 @@ def setup(request, tmp_path, qtbot, monkeypatch):
 
 
 ###############################################################################
+# Fixture definitions
+###############################################################################
+
+
+@pytest.fixture
+def auto_ok(monkeypatch):
+    monkeypatch.setattr(
+        QMessageBox, "information", lambda *_: QMessageBox.StandardButton.Yes
+    )
+
+
+###############################################################################
 # Test definitions
 ###############################################################################
 
 
 @pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
 @pytest.mark.parametrize(
-    "setup, func",
+    "tgt, func",
     [
         ("vanilla.mml", None),
         ("global_legato.mml", _enable_legato),
@@ -172,10 +201,9 @@ def setup(request, tmp_path, qtbot, monkeypatch):
         "Custom Samples",
         "Custom Percussion",
     ],
-    indirect=["setup"],
 )
-def test_controls(setup, func, qtbot):
-    dashboard, target, dst_fname = setup
+def test_controls(tgt, func, qtbot, tmp_path, auto_ok):
+    dashboard, target, dst_fname = _setup(tgt, tmp_path, qtbot)
 
     if func is not None:
         func(qtbot, dashboard)
@@ -194,36 +222,82 @@ def test_controls(setup, func, qtbot):
 
 @pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
 @pytest.mark.parametrize(
-    "setup, instr, dyn, ticks, expected",
+    "instr, dyn, pct, expected",
     [
-        ("vanilla.mml", "Harpsichord", "MP", 0, 0x73),
-        ("vanilla.mml", "Harpsichord", "MP", 1, 0x74),
-        ("vanilla.mml", "Harpsichord", "MP", -1, 0x72),
-        ("vanilla.mml", "Harpsichord", "MP", 10, 0x7D),
-        ("vanilla.mml", "Harpsichord", "MP", -10, 0x69),
-        ("vanilla.mml", "Harpsichord", "MP", 120, 235),
-        ("vanilla.mml", "Harpsichord", "MP", -120, 0),
-        ("vanilla.mml", "Harpsichord", "MP", 150, 255),
-        ("vanilla.mml", "Harpsichord", "MF", 0, 141),
-        ("vanilla.mml", "Harpsichord", "MF", 20, 161),
-        ("vanilla.mml", "Harpsichord", "MF", -40, 101),
-        ("vanilla.mml", "Harpsichord", "F", 0, 179),
-        ("vanilla.mml", "Harpsichord", "F", 10, 179),
-        ("vanilla.mml", "Harpsichord", "F", -10, 179),
-        ("vanilla.mml", "Piano", "MP", 0, 0x73),
-        ("vanilla.mml", "Piano", "MP", 1, 0x74),
-        ("vanilla.mml", "Piano", "MP", -1, 0x72),
-        ("vanilla.mml", "Piano", "MP", 10, 0x7D),
-        ("vanilla.mml", "Piano", "MP", -10, 0x69),
-        ("vanilla.mml", "Piano", "MP", 120, 235),
-        ("vanilla.mml", "Piano", "MP", -120, 0),
-        ("vanilla.mml", "Piano", "MP", 150, 255),
-        ("vanilla.mml", "Piano", "MF", 0, 141),
-        ("vanilla.mml", "Piano", "MF", 20, 161),
-        ("vanilla.mml", "Piano", "MF", -40, 101),
-        ("vanilla.mml", "Piano", "F", 0, 179),
-        ("vanilla.mml", "Piano", "F", 10, 189),
-        ("vanilla.mml", "Piano", "F", -10, 169),
+        ("Harpsichord", "P", 0, 90),
+        ("Harpsichord", "P", 50, 90),
+        ("Harpsichord", "P", 100, 90),
+        ("Piano", "P", 0, 0),
+        ("Piano", "P", 50, 127),
+        ("Piano", "P", 100, 255),
+    ],
+    ids=[
+        "Harp. P 0% (disabled)",
+        "Harp. P 50% (disabled)",
+        "Harp. P 100% (disabled)",
+        "Piano P 0%",
+        "Piano P 50%",
+        "Piano P 100%",
+    ],
+)
+def test_dynamics_controls(
+    instr, dyn, pct, expected, qtbot, tmp_path, auto_ok
+):
+    dashboard, target, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
+
+    _set_instr(dashboard, instr)
+
+    disp, slider = _set_dyn_control(qtbot, dashboard, dyn, pct)
+
+    _generate(qtbot, dashboard)
+
+    # Pick off only the dynamics settings from the target and generated output
+    target = [x for x in target if x.startswith(f'"{instr}_dyn')][0]
+    with dst_fname.open(encoding="ascii") as fobj:
+        act = [x for x in fobj.readlines() if x.startswith(f'"{instr}_dyn')][0]
+
+    # Confirm the displayed hex value, percent edit value, and MML output are
+    # correct
+    assert int("0" + disp, 16) == expected
+    assert slider == expected
+    assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == act
+
+
+###############################################################################
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
+@pytest.mark.parametrize(
+    "instr, dyn, ticks, expected",
+    [
+        ("Harpsichord", "MP", 0, 0x73),
+        ("Harpsichord", "MP", 1, 0x74),
+        ("Harpsichord", "MP", -1, 0x72),
+        ("Harpsichord", "MP", 10, 0x7D),
+        ("Harpsichord", "MP", -10, 0x69),
+        ("Harpsichord", "MP", 120, 235),
+        ("Harpsichord", "MP", -120, 0),
+        ("Harpsichord", "MP", 150, 255),
+        ("Harpsichord", "MF", 0, 141),
+        ("Harpsichord", "MF", 20, 161),
+        ("Harpsichord", "MF", -40, 101),
+        ("Harpsichord", "F", 0, 179),
+        ("Harpsichord", "F", 10, 179),
+        ("Harpsichord", "F", -10, 179),
+        ("Piano", "MP", 0, 0x73),
+        ("Piano", "MP", 1, 0x74),
+        ("Piano", "MP", -1, 0x72),
+        ("Piano", "MP", 10, 0x7D),
+        ("Piano", "MP", -10, 0x69),
+        ("Piano", "MP", 120, 235),
+        ("Piano", "MP", -120, 0),
+        ("Piano", "MP", 150, 255),
+        ("Piano", "MF", 0, 141),
+        ("Piano", "MF", 20, 161),
+        ("Piano", "MF", -40, 101),
+        ("Piano", "F", 0, 179),
+        ("Piano", "F", 10, 189),
+        ("Piano", "F", -10, 169),
     ],
     ids=[
         "Harp. MP No change",
@@ -255,14 +329,13 @@ def test_controls(setup, func, qtbot):
         "Piano. F +10",
         "Piano. F -10",
     ],
-    indirect=["setup"],
 )
-def test_dynamics_slider(setup, instr, dyn, ticks, expected, qtbot):
-    dashboard, target, dst_fname = setup
+def test_dynamics_slider(
+    instr, dyn, ticks, expected, qtbot, tmp_path, auto_ok
+):
+    dashboard, target, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
 
-    instrs = dashboard._controller._instruments
-    idxs = instrs.findItems(instr, Qt.MatchFlag.MatchExactly)
-    instrs.setCurrentItem(idxs[0])
+    _set_instr(dashboard, instr)
 
     disp, control = _set_dyn_slider(qtbot, dashboard, dyn, ticks)
 
