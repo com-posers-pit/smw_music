@@ -126,10 +126,14 @@ def _set_dyn_slider(
 ###############################################################################
 
 
-def _set_instr(dashboard: Dashboard, instr: str) -> None:
+def _set_instr(qtbot, dashboard: Dashboard, instr: str) -> None:
     instrs = dashboard._controller._instruments
-    idxs = instrs.findItems(instr, Qt.MatchFlag.MatchExactly)
-    instrs.setCurrentItem(idxs[0])
+    row = instrs.currentRow()
+    idx = instrs.row(instrs.findItems(instr, Qt.MatchFlag.MatchExactly)[0])
+    delta = idx - row
+    key = Qt.Key.Key_Down if delta > 0 else Qt.Key.Key_Up
+    for _ in range(abs(delta)):
+        qtbot.keyClick(instrs, key)
 
 
 ###############################################################################
@@ -245,7 +249,7 @@ def test_dynamics_controls(
 ):
     dashboard, target, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
 
-    _set_instr(dashboard, instr)
+    _set_instr(qtbot, dashboard, instr)
 
     disp, slider = _set_dyn_control(qtbot, dashboard, dyn, pct)
 
@@ -335,7 +339,7 @@ def test_dynamics_slider(
 ):
     dashboard, target, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
 
-    _set_instr(dashboard, instr)
+    _set_instr(qtbot, dashboard, instr)
 
     disp, control = _set_dyn_slider(qtbot, dashboard, dyn, ticks)
 
