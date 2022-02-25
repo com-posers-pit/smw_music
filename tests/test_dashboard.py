@@ -5,6 +5,18 @@
 
 """SMW Music Module Tests."""
 
+# Functions in this module aren't part of the API, so docstrings aren't needed
+# pylint: disable=missing-function-docstring
+
+# Testing requires access to protected members to simulate UI interactions.
+# pylint: disable=protected-access
+
+# Fixtures are referenced as arguments
+# pylint: disable=redefined-outer-name
+
+# Most of the "too many arguments" errors are because of fixtures
+# pylint: disable=too-many-arguments
+
 ###############################################################################
 # Standard library imports
 ###############################################################################
@@ -19,9 +31,8 @@ import sys
 
 import pytest
 
-from PyQt6 import QtCore
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import QMessageBox
+from PyQt6.QtCore import Qt  # pylint: disable=import-error
+from PyQt6.QtWidgets import QMessageBox  # pylint: disable=import-error
 
 ###############################################################################
 # Project imports
@@ -185,16 +196,6 @@ def test_controls(setup, func, qtbot):
 @pytest.mark.parametrize(
     "setup, instr, dyn, ticks, expected",
     [
-        ("vanilla.mml", "Harpsichord", "PPPP", 0, 0x1A),
-        ("vanilla.mml", "Harpsichord", "PPP", 0, 0x26),
-        ("vanilla.mml", "Harpsichord", "PP", 0, 0x40),
-        ("vanilla.mml", "Harpsichord", "P", 0, 0x5A),
-        ("vanilla.mml", "Harpsichord", "MP", 0, 0x73),
-        ("vanilla.mml", "Harpsichord", "MF", 0, 0x8D),
-        ("vanilla.mml", "Harpsichord", "F", 0, 0xB3),
-        ("vanilla.mml", "Harpsichord", "FF", 0, 0xD9),
-        ("vanilla.mml", "Harpsichord", "FFF", 0, 0xE6),
-        ("vanilla.mml", "Harpsichord", "FFFF", 0, 0xF5),
         ("vanilla.mml", "Harpsichord", "MP", 0, 0x73),
         ("vanilla.mml", "Harpsichord", "MP", 1, 0x74),
         ("vanilla.mml", "Harpsichord", "MP", -1, 0x72),
@@ -225,24 +226,14 @@ def test_controls(setup, func, qtbot):
         ("vanilla.mml", "Piano", "F", -10, 169),
     ],
     ids=[
-        "Harp. Base PPPP",
-        "Harp. Base PPP",
-        "Harp. Base PP",
-        "Harp. Base P",
-        "Harp. Base MP",
-        "Harp. Base MF",
-        "Harp. Base F",
-        "Harp. Base FF",
-        "Harp. Base FFF",
-        "Harp. Base FFFF",
         "Harp. MP No change",
         "Harp. MP +1",
         "Harp. MP -1",
         "Harp. MP +10",
         "Harp. MP -10",
         "Harp. MP +120",
-        "Harp. MP -120 (saturate at 0)",
-        "Harp. MP +150 (saturate at k55)",
+        "Harp. MP -120 (sat. at 0)",
+        "Harp. MP +150 (sat. at 255)",
         "Harp. MF No change",
         "Harp. MF +20",
         "Harp. MF -40",
@@ -255,8 +246,8 @@ def test_controls(setup, func, qtbot):
         "Piano. MP +10",
         "Piano. MP -10",
         "Piano. MP +120",
-        "Piano. MP -120 (saturate at 0)",
-        "Piano. MP +150 (saturate at k55)",
+        "Piano. MP -120 (sat. at 0)",
+        "Piano. MP +150 (sat. at 255)",
         "Piano. MF No change",
         "Piano. MF +20",
         "Piano. MF -40",
