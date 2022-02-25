@@ -91,6 +91,18 @@ def _set_files(
 
 
 ###############################################################################
+
+
+def _set_mp_slider(qtbot, dut: Dashboard, ticks: int) -> None:
+    widget = dut._controller._dynamics._sliders["MP"]._slider
+    qtbot.mouseClick(widget, Qt.MouseButton.LeftButton)
+    key = Qt.Key.Key_Up if ticks > 0 else Qt.Key.Key_Down
+    for _ in range(abs(ticks)):
+        qtbot.keyPress(widget, key)
+        qtbot.keyRelease(widget, key)
+
+
+###############################################################################
 # Test definitions
 ###############################################################################
 
@@ -105,6 +117,7 @@ def _set_files(
         ("measure_numbers.mml", _enable_measure_numbers),
         ("custom_samples.mml", _custom_samples),
         ("custom_percussion.mml", _custom_percussion),
+        ("vanilla.mml", lambda x, y: _set_mp_slider(x, y, 4)),
     ],
     ids=[
         "Vanilla Conversion",
@@ -113,9 +126,10 @@ def _set_files(
         "Measure Numbers",
         "Custom Samples",
         "Custom Percussion",
+        "Set MP volume",
     ],
 )
-def test_gui(tgt, func, qtbot, monkeypatch, tmp_path):
+def test_controls(tgt, func, qtbot, monkeypatch, tmp_path):
     fname = "GUI_Test.mxl"
     test_dir = pathlib.Path("tests")
 
