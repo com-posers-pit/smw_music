@@ -196,10 +196,7 @@ class ControlPanel(QWidget):
     @debug()
     def _generate_mml(self, _: bool) -> None:
         fname = self._mml_picker.fname
-        if not fname:
-            QMessageBox.critical(self, "", "Please pick an MML output file")
-        else:
-            self.mml_requested.emit(fname)
+        self.mml_requested.emit(fname)
 
     ###########################################################################
 

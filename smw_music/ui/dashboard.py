@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (  # type: ignore
     QApplication,
     QMainWindow,
     QMessageBox,
+    QTextEdit,
 )
 
 ###############################################################################
@@ -36,11 +37,22 @@ class Dashboard(QMainWindow):
 
         self._model = Model()
         self._controller = Controller()
+        self._edit_window = QMainWindow(parent=self)
+        self._edit = QTextEdit()
 
         self._setup_menus()
+        self._setup_output()
         self._attach_signals()
 
         self.setCentralWidget(self._controller)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def show(self) -> None:
+        super().show()
+        self._edit_window.show()
 
     ###########################################################################
     # Private method definitions
@@ -68,6 +80,7 @@ class Dashboard(QMainWindow):
         controller.song_changed.connect(model.set_song)
         controller.volume_changed.connect(model.update_dynamics)
         model.inst_config_changed.connect(controller.change_inst_config)
+        model.mml_generated.connect(self._edit.setText)
         model.response_generated.connect(controller.log_response)
         model.song_changed.connect(controller.update_song)
 
@@ -83,3 +96,10 @@ class Dashboard(QMainWindow):
         help_menu = self.menuBar().addMenu("&Help")
         help_menu.addAction("About", self._about)
         help_menu.addAction("About Qt", QApplication.aboutQt)
+
+    ###########################################################################
+
+    def _setup_output(self) -> None:
+        self._edit.setReadOnly(True)
+        self._edit.setFontFamily("Courier")
+        self._edit_window.setCentralWidget(self._edit)

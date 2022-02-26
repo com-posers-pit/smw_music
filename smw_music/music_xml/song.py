@@ -572,7 +572,7 @@ class Song:
         echo_config: Optional[EchoConfig] = None,
         custom_samples: bool = False,
         optimize_percussion: bool = True,
-    ):
+    ) -> str:
         """
         Output the MML representation of this Song to a file.
 
@@ -598,16 +598,19 @@ class Song:
             True iff repeated percussion notes should not repeat their
             instrument
         """
-        with open(fname, "wb") as fobj:
-            fobj.write(
-                self.generate_mml(
-                    global_legato,
-                    loop_analysis,
-                    superloop_analysis,
-                    measure_numbers,
-                    include_dt,
-                    echo_config,
-                    custom_samples,
-                    optimize_percussion,
-                ).encode("ascii"),
-            )
+        mml = self.generate_mml(
+            global_legato,
+            loop_analysis,
+            superloop_analysis,
+            measure_numbers,
+            include_dt,
+            echo_config,
+            custom_samples,
+            optimize_percussion,
+        )
+
+        if fname:
+            with open(fname, "wb") as fobj:
+                fobj.write(mml.encode("ascii"))
+
+        return mml
