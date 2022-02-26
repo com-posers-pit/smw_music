@@ -32,7 +32,11 @@ import sys
 import pytest
 
 from PyQt6.QtCore import Qt  # pylint: disable=import-error
-from PyQt6.QtWidgets import QMessageBox  # pylint: disable=import-error
+from PyQt6.QtWidgets import (  # pylint: disable=import-error
+    QLineEdit,
+    QMessageBox,
+    QSlider,
+)
 
 ###############################################################################
 # Project imports
@@ -88,6 +92,28 @@ def _generate(qtbot, dut: Dashboard) -> None:
 ###############################################################################
 
 
+def _move_dyn_slider(
+    qtbot, dut: Dashboard, dyn: str, ticks: int
+) -> tuple[str, str]:
+    widget = dut._controller._dynamics._sliders[dyn]
+    _move_slider(qtbot, widget._slider, ticks)
+
+    return widget._display.text(), widget._control.text()
+
+
+###############################################################################
+
+
+def _move_slider(qtbot, slider: QSlider, ticks: int) -> None:
+    key = Qt.Key.Key_Up if ticks > 0 else Qt.Key.Key_Down
+    for _ in range(abs(ticks)):
+        qtbot.keyPress(slider, key)
+        qtbot.keyRelease(slider, key)
+
+
+###############################################################################
+
+
 def _panel(dut: Dashboard) -> ControlPanel:
     return dut._controller._control_panel
 
@@ -99,10 +125,7 @@ def _set_dyn_control(
     qtbot, dut: Dashboard, dyn: str, pct: float
 ) -> tuple[str, int]:
     widget = dut._controller._dynamics._sliders[dyn]
-    for _ in range(5):
-        qtbot.keyClick(widget._control, Qt.Key.Key_Backspace)
-        qtbot.keyClick(widget._control, Qt.Key.Key_Delete)
-    qtbot.keyClicks(widget._control, f"{pct:0.1f}\r")
+    _set_edit(qtbot, widget._control, f"{pct:0.1f}\r")
 
     return widget._display.text(), widget._slider.value()
 
@@ -110,17 +133,10 @@ def _set_dyn_control(
 ###############################################################################
 
 
-def _set_dyn_slider(
-    qtbot, dut: Dashboard, dyn: str, ticks: int
-) -> tuple[str, str]:
-    widget = dut._controller._dynamics._sliders[dyn]
-    slider = widget._slider
-    key = Qt.Key.Key_Up if ticks > 0 else Qt.Key.Key_Down
-    for _ in range(abs(ticks)):
-        qtbot.keyPress(slider, key)
-        qtbot.keyRelease(slider, key)
-
-    return widget._display.text(), widget._control.text()
+def _set_edit(qtbot, edit: QLineEdit, txt: str) -> None:
+    qtbot.keyClicks(edit, "a", modifier=Qt.KeyboardModifier.ControlModifier)
+    qtbot.keyClick(edit, Qt.Key.Key_Backspace)
+    qtbot.keyClicks(edit, f"{txt}\r")
 
 
 ###############################################################################
@@ -142,8 +158,8 @@ def _set_instr(qtbot, dashboard: Dashboard, instr: str) -> None:
 def _set_files(
     qtbot, dut: Dashboard, src: pathlib.Path, dst: pathlib.Path
 ) -> None:
-    qtbot.keyClicks(_panel(dut)._musicxml_picker._edit, f"{src}\r")
-    qtbot.keyClicks(_panel(dut)._mml_picker._edit, f"{dst}\r")
+    _set_edit(qtbot, _panel(dut)._musicxml_picker._edit, str(src))
+    _set_edit(qtbot, _panel(dut)._mml_picker._edit, str(dst))
 
 
 ###############################################################################
@@ -341,7 +357,7 @@ def test_dynamics_slider(
 
     _set_instr(qtbot, dashboard, instr)
 
-    disp, control = _set_dyn_slider(qtbot, dashboard, dyn, ticks)
+    disp, control = _move_dyn_slider(qtbot, dashboard, dyn, ticks)
 
     _generate(qtbot, dashboard)
 
@@ -353,5 +369,86 @@ def test_dynamics_slider(
     # Confirm the displayed hex value, percent edit value, and MML output are
     # correct
     assert int("0" + disp, 16) == expected
-    assert float(control) == pytest.approx(100 * expected / 255, rel=1e-3)
+    assert float(control) == pytest.approx(100 * expected / 255, abs=0.05)
     assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == act
+
+
+###############################################################################
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
+@pytest.mark.parametrize(
+    "pct, expected",
+    [
+        (0, 0),
+        (33, 84),
+        (50, 127),
+        (100, 255),
+    ],
+    ids=["0%", "33%", "50%", "100%"],
+)
+def test_volume_control(pct, expected, qtbot, tmp_path, auto_ok):
+    dashboard, _, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
+    widget = dashboard._controller._volume
+
+    _set_edit(qtbot, widget._control, str(pct))
+    _generate(qtbot, dashboard)
+
+    disp = widget._display.text()
+    slider = widget._slider.value()
+
+    with dst_fname.open(encoding="ascii") as fobj:
+        act = [x for x in fobj.readlines() if x.startswith("w")][0]
+
+    # Confirm the displayed hex value, percent edit value, and MML output are
+    # correct
+    assert int(disp) == expected
+    assert slider == expected
+    assert act.strip() == f"w{expected}"
+
+
+###############################################################################
+
+
+@pytest.mark.skipif(sys.platform == "win32", reason="No qtbot on Windows")
+@pytest.mark.parametrize(
+    "ticks, expected",
+    [
+        (0, 180),
+        (1, 181),
+        (-1, 179),
+        (10, 190),
+        (-10, 170),
+        (120, 255),
+        (-120, 60),
+        (-200, 0),
+    ],
+    ids=[
+        "No change",
+        "+1",
+        "-1",
+        "+10",
+        "-10",
+        "+120 (sat. at 255)",
+        "-120",
+        "-200 (sat. at 0)",
+    ],
+)
+def test_volume_slider(ticks, expected, qtbot, tmp_path, auto_ok):
+    dashboard, _, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
+    widget = dashboard._controller._volume
+
+    _move_slider(qtbot, widget._slider, ticks)
+    disp = widget._display.text()
+    control = widget._control.text()
+
+    _generate(qtbot, dashboard)
+
+    with dst_fname.open(encoding="ascii") as fobj:
+        act = [x for x in fobj.readlines() if x.startswith("w")][0]
+
+    # Confirm the displayed hex value, percent edit value, and MML output are
+    # correct
+    assert int(disp) == expected
+    assert float(control) == pytest.approx(100 * expected / 255, abs=0.05)
+    assert act.strip() == f"w{expected}"
