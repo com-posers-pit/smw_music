@@ -41,7 +41,7 @@ w${song.volume}
 %endif
 %if instruments:
 <%
-    do_transpose = any(x.transpose for x in instruments)
+    do_transpose = False # any(x.transpose for x in instruments) TODO: removed due to music21 bug
 
     voice = lambda x: x.name + "_voice"
     dyn = lambda x: x.name + "_dyn"
