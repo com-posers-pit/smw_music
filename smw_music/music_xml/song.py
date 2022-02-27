@@ -9,6 +9,7 @@
 # Standard Library imports
 ###############################################################################
 
+import copy
 import pkgutil
 
 from datetime import datetime
@@ -247,6 +248,8 @@ class Song:
         self.volume = int(metadata.get("volume", 180))
         self.channels = channels[:8]
         self.instruments: list[InstrumentConfig] = []
+
+        self._reduced_channels = []
 
         self._collect_instruments()
 
@@ -499,7 +502,9 @@ class Song:
         loop_analysis: bool,
         superloop_analysis: bool,
     ):
-        for n, chan in enumerate(self.channels):
+        self._reduced_channels = copy.deepcopy(self.channels)
+
+        for n, chan in enumerate(self._reduced_channels):
             chan.tokens = reduce(
                 chan.tokens,
                 loop_analysis,
@@ -512,7 +517,7 @@ class Song:
 
     def _validate(self):
         errors = []
-        for n, channel in enumerate(self.channels):
+        for n, channel in enumerate(self._reduced_channels):
             msgs = channel.check()
             for msg in msgs:
                 errors.append(f"{msg} in staff {n + 1}")
@@ -564,14 +569,14 @@ class Song:
         self._validate()
         channels = [
             x.generate_mml({}, measure_numbers, optimize_percussion)
-            for x in self.channels
+            for x in self._reduced_channels
         ]
 
         build_dt = ""
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        percussion = any(x.percussion for x in self.channels)
+        percussion = any(x.percussion for x in self._reduced_channels)
 
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")
