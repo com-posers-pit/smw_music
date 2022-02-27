@@ -749,3 +749,11 @@ class Triplet(Token):
     """
 
     start: bool
+
+
+###############################################################################
+
+
+@dataclass
+class Vibrato(Token):
+    start: bool

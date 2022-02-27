@@ -48,6 +48,7 @@ from .tokens import (
     Tempo,
     Token,
     Triplet,
+    Vibrato,
 )
 from .. import __version__
 
@@ -92,6 +93,18 @@ def _get_slurs(part: music21.stream.Part) -> list[list[int]]:
     slurs[1] = [x.getLast().id for x in slur_list]
 
     return slurs
+
+
+###############################################################################
+
+
+def _get_trems(part: music21.stream.Part) -> list[list[int]]:
+    trems: list[list[int]] = [[], []]
+    trem_list = list(filter(_is_trill, part))
+    trems[0] = [x.getFirst().id for x in trem_list]
+    trems[1] = [x.getLast().id for x in trem_list]
+
+    return trems
 
 
 ###############################################################################
@@ -176,6 +189,13 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
         True iff `elem` is of type `music21.spanner.Slur`
     """
     return isinstance(elem, music21.spanner.Slur)
+
+
+###############################################################################
+
+
+def _is_trill(elem: music21.stream.Stream) -> bool:
+    return isinstance(elem, music21.expressions.TrillExtension)
 
 
 ###############################################################################
@@ -349,6 +369,7 @@ class Song:
         channel_elem: list[Token] = []
 
         slurs = _get_slurs(part)
+        trems = _get_trems(part)
         lines = _get_lines(part)
         loop_nos = list((part_no + 1) * 100 + n for n in range(len(lines[0])))
         cresc, cresc_type = _get_cresc(part)
@@ -418,9 +439,15 @@ class Song:
                             )
                         )
 
+                    if subelem.id in trems[0]:
+                        channel_elem.append(Vibrato(True))
+
                     note.measure_num = measure.number
                     note.note_num = note_no
                     channel_elem.append(note)
+
+                    if subelem.id in trems[1]:
+                        channel_elem.append(Vibrato(False))
 
                     # Also gross, fix this
                     if subelem.id in cresc[1]:
