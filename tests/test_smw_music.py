@@ -90,6 +90,7 @@ from smw_music.scripts import convert
         ("Tempos.mxl", "Tempos.txt", []),
         ("TiedArticulations.mxl", "TiedArticulations.txt", []),
         ("Ties.mxl", "Ties.txt", []),
+        ("Transposing_Instrument.mxl", "Transposing_Instrument.txt", []),
         ("Triplets.mxl", "Triplets.txt", []),
         ("Vibrato.mxl", "Vibrato.txt", []),
         (
@@ -153,6 +154,7 @@ from smw_music.scripts import convert
         "Tempos",
         "TiedArticulations",
         "Ties",
+        "Transposing Instrument",
         "Triplets",
         "Vibrato",
         "SMB Castle Theme (uncompressed)",
