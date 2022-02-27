@@ -377,9 +377,10 @@ class Song:
         triplets = False
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
-                channel_elem.append(
-                    Instrument(subpart.instrumentName.replace(" ", ""))
-                )
+                inst = subpart.instrumentName
+                inst = inst.replace("\u266d", "b")  # Replace flats
+                inst = inst.replace(" ", "")  # Replace spaces
+                channel_elem.append(Instrument(inst))
             if not isinstance(subpart, music21.stream.Measure):
                 continue
 
@@ -638,6 +639,6 @@ class Song:
 
         if fname:
             with open(fname, "wb") as fobj:
-                fobj.write(mml.encode("ascii"))
+                fobj.write(mml.encode("ascii", "ignore"))
 
         return mml
