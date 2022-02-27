@@ -249,7 +249,7 @@ class Song:
         self.channels = channels[:8]
         self.instruments: list[InstrumentConfig] = []
 
-        self._reduced_channels = []
+        self._reduced_channels: list["Channel"] = []
 
         self._collect_instruments()
 
