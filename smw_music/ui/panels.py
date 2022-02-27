@@ -22,7 +22,6 @@ from PyQt6.QtWidgets import (  # type: ignore
     QGridLayout,
     QHBoxLayout,
     QLabel,
-    QMessageBox,
     QPushButton,
     QRadioButton,
     QSlider,

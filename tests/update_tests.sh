@@ -44,4 +44,4 @@ smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/vanilla.mml" --disable_global_le
 smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/loop.mml" --disable_dt --disable_global_legato --loop_analysis
 smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/measure_numbers.mml" --disable_dt --disable_global_legato --measure_numbers
 smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/custom_samples.mml" --disable_dt --disable_global_legato --custom_samples
-smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/custom_percusion.mml" --disable_dt --disable_global_legato --optimize_percussion
+smw_music_xml_to_amk "src/GUI_Test.mxl" "dst/ui/custom_percussion.mml" --disable_dt --disable_global_legato --optimize_percussion
