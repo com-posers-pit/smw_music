@@ -165,8 +165,7 @@ def _set_files(
 ###############################################################################
 
 
-def _setup(tgt, tmp_path, qtbot):
-    fname = "GUI_Test.mxl"
+def _setup(tgt, tmp_path, qtbot, fname="GUI_Test.mxl"):
     test_dir = pathlib.Path("tests")
 
     src_fname = test_dir / "src" / fname
@@ -371,6 +370,27 @@ def test_dynamics_slider(
     assert int("0" + disp, 16) == expected
     assert float(control) == pytest.approx(100 * expected / 255, abs=0.05)
     assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == act
+
+
+###############################################################################
+
+
+def test_multiple_exports(qtbot, tmp_path, auto_ok):
+    dashboard, target, dst_fname = _setup(
+        "../Repeats.txt", tmp_path, qtbot, "Repeats.mxl"
+    )
+    _enable_loop_analysis(qtbot, dashboard)
+    _enable_legato(qtbot, dashboard)
+
+    for _ in range(4):
+        _generate(qtbot, dashboard)
+
+        with dst_fname.open(encoding="ascii") as fobj:
+            actual = [
+                x for x in fobj.readlines() if not x.startswith("; Built:")
+            ]
+
+        assert actual == target
 
 
 ###############################################################################
