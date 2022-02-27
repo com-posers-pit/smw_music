@@ -92,6 +92,17 @@ def _generate(qtbot, dut: Dashboard) -> None:
 ###############################################################################
 
 
+def _load_mml(fname: pathlib.Path) -> list[str]:
+    # Read the result and strip out the build date/time before comparing
+    with fname.open(encoding="ascii") as fobj:
+        contents = fobj.readlines()
+
+    return [x for x in contents if not x.startswith("; Built:")]
+
+
+###############################################################################
+
+
 def _move_dyn_slider(
     qtbot, dut: Dashboard, dyn: str, ticks: int
 ) -> tuple[str, str]:
@@ -229,9 +240,7 @@ def test_controls(tgt, func, qtbot, tmp_path, auto_ok):
 
     _generate(qtbot, dashboard)
 
-    # Read the result and strip out the build date/time before comparing
-    with dst_fname.open(encoding="ascii") as fobj:
-        actual = [x for x in fobj.readlines() if not x.startswith("; Built:")]
+    actual = _load_mml(dst_fname)
 
     assert target == actual
 
@@ -270,16 +279,17 @@ def test_dynamics_controls(
 
     _generate(qtbot, dashboard)
 
+    actual = _load_mml(dst_fname)
+
     # Pick off only the dynamics settings from the target and generated output
     target = [x for x in target if x.startswith(f'"{instr}_dyn')][0]
-    with dst_fname.open(encoding="ascii") as fobj:
-        act = [x for x in fobj.readlines() if x.startswith(f'"{instr}_dyn')][0]
+    actual = [x for x in actual if x.startswith(f'"{instr}_dyn')][0]
 
     # Confirm the displayed hex value, percent edit value, and MML output are
     # correct
     assert int("0" + disp, 16) == expected
     assert slider == expected
-    assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == act
+    assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == actual
 
 
 ###############################################################################
@@ -360,16 +370,17 @@ def test_dynamics_slider(
 
     _generate(qtbot, dashboard)
 
+    actual = _load_mml(dst_fname)
+
     # Pick off only the dynamics settings from the target and generated output
     target = [x for x in target if x.startswith(f'"{instr}_dyn')][0]
-    with dst_fname.open(encoding="ascii") as fobj:
-        act = [x for x in fobj.readlines() if x.startswith(f'"{instr}_dyn')][0]
+    actual = [x for x in actual if x.startswith(f'"{instr}_dyn')][0]
 
     # Confirm the displayed hex value, percent edit value, and MML output are
     # correct
     assert int("0" + disp, 16) == expected
     assert float(control) == pytest.approx(100 * expected / 255, abs=0.05)
-    assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == act
+    assert re.sub(f"_{dyn}=..", f"_{dyn}={expected:02X}", target) == actual
 
 
 ###############################################################################
@@ -385,10 +396,7 @@ def test_multiple_exports(qtbot, tmp_path, auto_ok):
     for _ in range(4):
         _generate(qtbot, dashboard)
 
-        with dst_fname.open(encoding="ascii") as fobj:
-            actual = [
-                x for x in fobj.readlines() if not x.startswith("; Built:")
-            ]
+        actual = _load_mml(dst_fname)
 
         assert actual == target
 
@@ -417,14 +425,13 @@ def test_volume_control(pct, expected, qtbot, tmp_path, auto_ok):
     disp = widget._display.text()
     slider = widget._slider.value()
 
-    with dst_fname.open(encoding="ascii") as fobj:
-        act = [x for x in fobj.readlines() if x.startswith("w")][0]
+    actual = [x for x in _load_mml(dst_fname) if x.startswith("w")][0]
 
     # Confirm the displayed hex value, percent edit value, and MML output are
     # correct
     assert int(disp) == expected
     assert slider == expected
-    assert act.strip() == f"w{expected}"
+    assert actual.strip() == f"w{expected}"
 
 
 ###############################################################################
@@ -464,11 +471,10 @@ def test_volume_slider(ticks, expected, qtbot, tmp_path, auto_ok):
 
     _generate(qtbot, dashboard)
 
-    with dst_fname.open(encoding="ascii") as fobj:
-        act = [x for x in fobj.readlines() if x.startswith("w")][0]
+    actual = [x for x in _load_mml(dst_fname) if x.startswith("w")][0]
 
     # Confirm the displayed hex value, percent edit value, and MML output are
     # correct
     assert int(disp) == expected
     assert float(control) == pytest.approx(100 * expected / 255, abs=0.05)
-    assert act.strip() == f"w{expected}"
+    assert actual.strip() == f"w{expected}"
