@@ -38,6 +38,7 @@ smw_music_xml_to_mml "src/SMB_Castle_Theme.musicxml" "dst/SMB_Castle_Theme_Echo.
 smw_music_xml_to_mml "src/SMB_Castle_Theme.musicxml" "dst/SMB_Castle_Theme_custom_samples.txt" --custom_samples --disable_dt
 smw_music_xml_to_mml "src/Metadata.mxl" "dst/Metadata.txt" --disable_dt
 smw_music_xml_to_mml "src/No_Metadata.mxl" "dst/No_Metadata.txt" --disable_dt
+smw_music_xml_to_mml "src/Vibrato.mxl" "dst/Vibrato.txt" --disable_dt
 
 smw_music_xml_to_mml "src/GUI_Test.mxl" "dst/ui/global_legato.mml" --disable_dt
 smw_music_xml_to_mml "src/GUI_Test.mxl" "dst/ui/vanilla.mml" --disable_global_legato --disable_dt
