@@ -316,6 +316,7 @@ class Song:
 
     def _collect_instruments(self):
         instruments: dict[str, set[str]] = {}
+        transposes: dict[str, int] = {}
         inst: str = ""
         for channel in self.channels:
             for token in channel.tokens:
@@ -323,6 +324,7 @@ class Song:
                     inst = token.name
                     if inst not in instruments:
                         instruments[inst] = set()
+                        transposes[inst] = token.transpose
                 if isinstance(token, Dynamic):
                     instruments[inst].add(token.level.upper())
                 if isinstance(token, Crescendo):
@@ -332,7 +334,10 @@ class Song:
 
         self.instruments = [
             InstrumentConfig(
-                x, inst_from_name(x), dynamics_present=instruments[x]
+                x,
+                inst_from_name(x),
+                dynamics_present=instruments[x],
+                transpose=transposes[x],
             )
             for x in inst
         ]
@@ -377,10 +382,16 @@ class Song:
         triplets = False
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
-                inst = subpart.instrumentName
-                inst = inst.replace("\u266d", "b")  # Replace flats
-                inst = inst.replace(" ", "")  # Replace spaces
-                channel_elem.append(Instrument(inst))
+                name = subpart.instrumentName
+                name = name.replace("\u266d", "b")  # Replace flats
+                name = name.replace(" ", "")  # Replace spaces
+
+                # Pick off the instrument transposition
+                transpose = subpart.transposition
+                semitones = transpose.semitones if transpose is not None else 0
+                semitones %= 12
+
+                channel_elem.append(Instrument(name, semitones))
             if not isinstance(subpart, music21.stream.Measure):
                 continue
 

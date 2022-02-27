@@ -325,6 +325,7 @@ class Error(Token):
 @dataclass(order=True)
 class Instrument(Token):
     name: str
+    transpose: int = 0
 
 
 ###############################################################################
