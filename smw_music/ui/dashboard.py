@@ -51,8 +51,8 @@ class Dashboard(QMainWindow):
     ###########################################################################
 
     def show(self) -> None:
-        super().show()
         self._edit_window.show()
+        super().show()
 
     ###########################################################################
     # Private method definitions
