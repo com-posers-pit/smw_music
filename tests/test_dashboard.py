@@ -21,6 +21,7 @@
 # Standard library imports
 ###############################################################################
 
+import os
 import pathlib
 import re
 import sys
@@ -393,12 +394,15 @@ def test_multiple_exports(qtbot, tmp_path, auto_ok):
     _enable_loop_analysis(qtbot, dashboard)
     _enable_legato(qtbot, dashboard)
 
-    for _ in range(4):
+    for n in range(4):
         _generate(qtbot, dashboard)
 
         actual = _load_mml(dst_fname)
 
         assert actual == target
+
+        has_backup = os.path.exists(f"{dst_fname}.bak")
+        assert (has_backup) == (n > 0)
 
 
 ###############################################################################
