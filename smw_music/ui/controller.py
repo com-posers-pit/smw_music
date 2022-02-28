@@ -45,6 +45,7 @@ class Controller(QWidget):
         object,  # object type lets us pass None or an EchoConfig
     )  # arguments=[ "fname", "config", ],
     pan_changed = pyqtSignal(bool, int)  # arguments=["enable", "pan"]
+    quicklook_opened = pyqtSignal()
     song_changed = pyqtSignal(str)  # arguments=["fname"]
     volume_changed = pyqtSignal(
         str, int, bool
@@ -106,11 +107,12 @@ class Controller(QWidget):
 
     @debug()
     def _attach_signals(self) -> None:
-        self._control_panel.song_changed.connect(self.song_changed)
+        self._control_panel.config_changed.connect(self.config_changed)
         self._control_panel.mml_requested.connect(
             lambda x: self.mml_requested.emit(x, self._echo.config)
         )
-        self._control_panel.config_changed.connect(self.config_changed)
+        self._control_panel.quicklook_opened.connect(self.quicklook_opened)
+        self._control_panel.song_changed.connect(self.song_changed)
 
         self._artics.artic_changed.connect(self.artic_changed)
         self._artics.pan_changed.connect(self.pan_changed)

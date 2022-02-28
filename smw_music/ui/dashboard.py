@@ -8,6 +8,12 @@
 """Dashboard application."""
 
 ###############################################################################
+# Standard Library imports
+###############################################################################
+
+from typing import Optional
+
+###############################################################################
 # Library imports
 ###############################################################################
 
@@ -23,6 +29,7 @@ from PyQt6.QtWidgets import (  # type: ignore
 ###############################################################################
 
 from .. import __version__
+from ..music_xml.echo import EchoConfig
 from .controller import Controller
 from .model import Model
 
@@ -47,14 +54,6 @@ class Dashboard(QMainWindow):
         self.setCentralWidget(self._controller)
 
     ###########################################################################
-    # API method definitions
-    ###########################################################################
-
-    def show(self) -> None:
-        self._edit_window.show()
-        super().show()
-
-    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -75,14 +74,27 @@ class Dashboard(QMainWindow):
         controller.artic_changed.connect(model.update_artic)
         controller.config_changed.connect(model.set_config)
         controller.instrument_changed.connect(model.set_instrument)
-        controller.mml_requested.connect(model.generate_mml)
+        controller.mml_requested.connect(self._generate_mml)
         controller.pan_changed.connect(model.set_pan)
+        controller.quicklook_opened.connect(self._edit_window.show)
         controller.song_changed.connect(model.set_song)
         controller.volume_changed.connect(model.update_dynamics)
         model.inst_config_changed.connect(controller.change_inst_config)
         model.mml_generated.connect(self._edit.setText)
         model.response_generated.connect(controller.log_response)
         model.song_changed.connect(controller.update_song)
+
+    ###########################################################################
+
+    def _generate_mml(self, fname: str, echo: Optional[EchoConfig]) -> None:
+        if self._edit_window.isVisible() or fname:
+            self._model.generate_mml(fname, echo)
+        else:
+            self._controller.log_response(
+                True,
+                "Generation Error",
+                "Select an MML file or open the Quicklook",
+            )
 
     ###########################################################################
 
