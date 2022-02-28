@@ -11,6 +11,9 @@
 # Standard library imports
 ###############################################################################
 
+import os
+import shutil
+
 from enum import auto, IntEnum
 from typing import Optional
 
@@ -140,6 +143,8 @@ class Model(QObject):
             msg = "Song not loaded"
         else:
             try:
+                if os.path.exists(fname):
+                    shutil.copy2(fname, f"{fname}.bak")
                 mml = self.song.to_mml_file(
                     fname,
                     self.global_legato,
