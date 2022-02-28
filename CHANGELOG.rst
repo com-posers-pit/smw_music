@@ -11,7 +11,69 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
-`Differences from 0.2.0`_
+`Differences from 0.2.3`_
+
+--------------------------------------------------------------------------------
+
+Release 0.2.3 - 2022-02-27
+--------------------------
+
+`Release 0.2.3`_
+
+`Differences from 0.2.2`_
+
+Purpose
++++++++
+
+
+Affected Issues
++++++++++++++++
+
+- `#87 Generate a backup mml`_
+
+- `#86 Add vibrato support`_
+
+- `#85 Non-concert pitch instruments`_
+
+- `#84 Dashboard loop analysis bug`_
+
+- `#82 Display generated text`_
+
+Changed
++++++++
+
+- Fix bug where multiple exports in the dashboard broke things spectacularly
+
+- Moved python package to alpha
+
+- Strip unicode from instrument names, except flat which goes to 'b'
+
+Added
++++++
+
+- Quicklook window
+
+- MML file backup generation
+
+- Initial vibrato support
+
+- Logic to support transposing instruments
+  - Temporarily removed due to a bug in music21
+
+- Testing updates
+  - GUI tests
+
+  - Github action to run tests on windows runners
+
+Removed
++++++++
+
+None.
+
+Idiosyncrasies
+++++++++++++++
+
+None.
 
 --------------------------------------------------------------------------------
 
@@ -362,6 +424,11 @@ Affected Issues
 - `#1 Add support for AMK annotations`_
 
 
+.. _#87 Generate a backup mml: https://github.com/com-posers-pit/smw_music/issues/87
+.. _#86 Add vibrato support: https://github.com/com-posers-pit/smw_music/issues/86
+.. _#85 Non-concert pitch instruments: https://github.com/com-posers-pit/smw_music/issues/85
+.. _#84 Dashboard loop analysis bug: https://github.com/com-posers-pit/smw_music/issues/84
+.. _#82 Display generated text: https://github.com/com-posers-pit/smw_music/issues/82
 .. _#80 Extra newlines in windows-generated output: https://github.com/com-posers-pit/smw_music/issues/80
 .. _#78 Interpolation crash w/ ffff slider: https://github.com/com-posers-pit/smw_music/issues/78
 .. _#76 Support multiple tempos: https://github.com/com-posers-pit/smw_music/issues/76
@@ -420,6 +487,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.2.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.3
 .. _Release 0.2.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.2
 .. _Release 0.2.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.1
 .. _Release 0.2.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.0
@@ -427,7 +495,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.2.2: https://github.com/com-posers-pit/smw_music/compare/v0.2.2...HEAD
+.. _Differences from 0.2.3: https://github.com/com-posers-pit/smw_music/compare/v0.2.3...HEAD
+.. _Differences from 0.2.2: https://github.com/com-posers-pit/smw_music/compare/v0.2.2...v0.2.3
 .. _Differences from 0.2.1: https://github.com/com-posers-pit/smw_music/compare/v0.2.1...v0.2.2
 .. _Differences from 0.2.0: https://github.com/com-posers-pit/smw_music/compare/v0.2.0...v0.2.1
 .. _Differences from 0.1.2: https://github.com/com-posers-pit/smw_music/compare/v0.1.2...v0.2.0
