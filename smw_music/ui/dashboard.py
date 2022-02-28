@@ -47,6 +47,8 @@ class Dashboard(QMainWindow):
         self._edit_window = QMainWindow(parent=self)
         self._edit = QTextEdit()
 
+        self._edit_window.setMinimumSize(800, 600)
+
         self._setup_menus()
         self._setup_output()
         self._attach_signals()
