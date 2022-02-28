@@ -14,6 +14,11 @@
 import argparse
 import logging
 
+###############################################################################
+# Library imports
+###############################################################################
+
+from PyQt6.QtWidgets import QApplication  # type: ignore
 
 ###############################################################################
 # Project imports
@@ -42,7 +47,12 @@ def main() -> None:
     logging.basicConfig(level=level)
 
     logging.info("Starting application")
-    Dashboard([]).run()
+
+    app = QApplication([])
+    app.setApplicationName("MusicXML -> MML")
+    dashboard = Dashboard()
+    dashboard.show()
+    app.exec()
 
 
 ###############################################################################

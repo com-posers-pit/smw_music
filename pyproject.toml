@@ -11,14 +11,14 @@ line-length = 79
 
 [tool.poetry]
 name = "smw_music"
-version = "0.2.2"
+version = "0.2.3"
 description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"
 readme = "README.rst"
 repository = "http://github.com/com-posers-pit/smw_music"
 classifiers = [
-    "Development Status :: 2 - Pre-Alpha",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
@@ -41,6 +41,7 @@ sphinx-rtd-theme = "^1.0.0"
 tox = "^3.24.4"
 pre-commit = "^2.16.0"
 pyinstaller = "^4.9"
+pyqt6-stubs = {git = "https://github.com/TilmanK/PyQt6-stubs", rev = "ab869638f92b7c5264d7d169093233f15716f1cc"}
 
 [tool.poetry.extras]
 webserver = ["flask"]

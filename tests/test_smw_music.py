@@ -90,7 +90,10 @@ from smw_music.scripts import convert
         ("Tempos.mxl", "Tempos.txt", []),
         ("TiedArticulations.mxl", "TiedArticulations.txt", []),
         ("Ties.mxl", "Ties.txt", []),
+        # ("Transposing_Instrument.mxl", "Transposing_Instrument.txt", []), #
+        # Disabled due to breakage in music21
         ("Triplets.mxl", "Triplets.txt", []),
+        ("Vibrato.mxl", "Vibrato.txt", []),
         (
             "SMB_Castle_Theme.musicxml",
             "SMB_Castle_Theme.txt",
@@ -152,7 +155,9 @@ from smw_music.scripts import convert
         "Tempos",
         "TiedArticulations",
         "Ties",
+        # "Transposing Instrument",
         "Triplets",
+        "Vibrato",
         "SMB Castle Theme (uncompressed)",
         "SMB Castle Theme (kitchen sink)",
         "SMB Castle Theme (measure #s)",
@@ -160,19 +165,21 @@ from smw_music.scripts import convert
         "SMB Castle Theme (custom samples)",
     ],
 )
-def test_conversion(src, dst, args):
+def test_conversion(src, dst, args, tmp_path):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "dst" / dst
 
     with open(fname, "r") as fobj:
         target = fobj.readlines()
 
-    fname = test_dir / "src" / src
+    src_fname = test_dir / "src" / src
+    dst_fname = tmp_path / dst
 
     # We always want the datetime stamp disabled for these tests
     args += ["--disable_dt"]
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        convert.main([str(fname), str(fobj.name)] + args)
+    convert.main([str(src_fname), str(dst_fname)] + args)
+
+    with open(dst_fname, "r") as fobj:
         written = fobj.readlines()
 
     assert target == written
@@ -217,13 +224,13 @@ def test_conversion(src, dst, args):
         "Multiple Voices",
     ],
 )
-def test_invalid(src, text):
+def test_invalid(src, text, tmp_path):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "src" / "bad" / src
+    dst = tmp_path / src
 
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        with pytest.raises(MusicXmlException, match=text):
-            convert.main([str(fname), str(fobj.name)])
+    with pytest.raises(MusicXmlException, match=text):
+        convert.main([str(fname), str(dst)])
 
 
 ###############################################################################
@@ -252,13 +259,13 @@ def test_invalid(src, text):
         "Bad percussion",
     ],
 )
-def test_multiple_invalid(text):
+def test_multiple_invalid(text, tmp_path):
     test_dir = pathlib.Path("tests")
     fname = test_dir / "src" / "bad" / "Errors.mxl"
+    dst = tmp_path / "Errors.mml"
 
-    with tempfile.NamedTemporaryFile("r") as fobj:
-        with pytest.raises(MusicXmlException, match=text):
-            convert.main([str(fname), str(fobj.name)])
+    with pytest.raises(MusicXmlException, match=text):
+        convert.main([str(fname), str(dst)])
 
 
 ###############################################################################
@@ -266,4 +273,4 @@ def test_multiple_invalid(text):
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.2.2"
+    assert __version__ == "0.2.3"

@@ -16,6 +16,8 @@ import glob
 import re
 import sys
 
+from itertools import chain
+
 ###############################################################################
 # Private function definitions
 ###############################################################################
@@ -36,7 +38,9 @@ def _bump_version(version):
 
     key = "; MusicXML->AMK v"
     repl = f"{key}{version}\r"
-    for fname in glob.iglob("tests/dst/*.txt"):
+    for fname in chain(
+        glob.iglob("tests/dst/*.txt"), glob.iglob("tests/dst/ui/*.mml")
+    ):
         _overwrite(fname, key, repl)
 
 

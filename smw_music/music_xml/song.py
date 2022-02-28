@@ -9,6 +9,7 @@
 # Standard Library imports
 ###############################################################################
 
+import copy
 import pkgutil
 
 from datetime import datetime
@@ -48,6 +49,7 @@ from .tokens import (
     Tempo,
     Token,
     Triplet,
+    Vibrato,
 )
 from .. import __version__
 
@@ -92,6 +94,18 @@ def _get_slurs(part: music21.stream.Part) -> list[list[int]]:
     slurs[1] = [x.getLast().id for x in slur_list]
 
     return slurs
+
+
+###############################################################################
+
+
+def _get_trems(part: music21.stream.Part) -> list[list[int]]:
+    trems: list[list[int]] = [[], []]
+    trem_list = list(filter(_is_trill, part))
+    trems[0] = [x.getFirst().id for x in trem_list]
+    trems[1] = [x.getLast().id for x in trem_list]
+
+    return trems
 
 
 ###############################################################################
@@ -179,6 +193,13 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
 
 
 ###############################################################################
+
+
+def _is_trill(elem: music21.stream.Stream) -> bool:
+    return isinstance(elem, music21.expressions.TrillExtension)
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -227,6 +248,8 @@ class Song:
         self.volume = int(metadata.get("volume", 180))
         self.channels = channels[:8]
         self.instruments: list[InstrumentConfig] = []
+
+        self._reduced_channels: list["Channel"] = []
 
         self._collect_instruments()
 
@@ -296,6 +319,7 @@ class Song:
 
     def _collect_instruments(self):
         instruments: dict[str, set[str]] = {}
+        transposes: dict[str, int] = {}
         inst: str = ""
         for channel in self.channels:
             for token in channel.tokens:
@@ -303,6 +327,7 @@ class Song:
                     inst = token.name
                     if inst not in instruments:
                         instruments[inst] = set()
+                        transposes[inst] = token.transpose
                 if isinstance(token, Dynamic):
                     instruments[inst].add(token.level.upper())
                 if isinstance(token, Crescendo):
@@ -312,7 +337,10 @@ class Song:
 
         self.instruments = [
             InstrumentConfig(
-                x, inst_from_name(x), dynamics_present=instruments[x]
+                x,
+                inst_from_name(x),
+                dynamics_present=instruments[x],
+                transpose=transposes[x],
             )
             for x in inst
         ]
@@ -349,6 +377,7 @@ class Song:
         channel_elem: list[Token] = []
 
         slurs = _get_slurs(part)
+        trems = _get_trems(part)
         lines = _get_lines(part)
         loop_nos = list((part_no + 1) * 100 + n for n in range(len(lines[0])))
         cresc, cresc_type = _get_cresc(part)
@@ -356,9 +385,16 @@ class Song:
         triplets = False
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
-                channel_elem.append(
-                    Instrument(subpart.instrumentName.replace(" ", ""))
-                )
+                name = subpart.instrumentName
+                name = name.replace("\u266d", "b")  # Replace flats
+                name = name.replace(" ", "")  # Replace spaces
+
+                # Pick off the instrument transposition
+                transpose = subpart.transposition
+                semitones = transpose.semitones if transpose is not None else 0
+                semitones %= 12
+
+                channel_elem.append(Instrument(name, semitones))
             if not isinstance(subpart, music21.stream.Measure):
                 continue
 
@@ -418,9 +454,15 @@ class Song:
                             )
                         )
 
+                    if subelem.id in trems[0]:
+                        channel_elem.append(Vibrato(True))
+
                     note.measure_num = measure.number
                     note.note_num = note_no
                     channel_elem.append(note)
+
+                    if subelem.id in trems[1]:
+                        channel_elem.append(Vibrato(False))
 
                     # Also gross, fix this
                     if subelem.id in cresc[1]:
@@ -460,7 +502,9 @@ class Song:
         loop_analysis: bool,
         superloop_analysis: bool,
     ):
-        for n, chan in enumerate(self.channels):
+        self._reduced_channels = copy.deepcopy(self.channels)
+
+        for n, chan in enumerate(self._reduced_channels):
             chan.tokens = reduce(
                 chan.tokens,
                 loop_analysis,
@@ -473,7 +517,7 @@ class Song:
 
     def _validate(self):
         errors = []
-        for n, channel in enumerate(self.channels):
+        for n, channel in enumerate(self._reduced_channels):
             msgs = channel.check()
             for msg in msgs:
                 errors.append(f"{msg} in staff {n + 1}")
@@ -525,14 +569,14 @@ class Song:
         self._validate()
         channels = [
             x.generate_mml({}, measure_numbers, optimize_percussion)
-            for x in self.channels
+            for x in self._reduced_channels
         ]
 
         build_dt = ""
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        percussion = any(x.percussion for x in self.channels)
+        percussion = any(x.percussion for x in self._reduced_channels)
 
         tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
             pkgutil.get_data("smw_music", "data/mml.txt")
@@ -572,7 +616,7 @@ class Song:
         echo_config: Optional[EchoConfig] = None,
         custom_samples: bool = False,
         optimize_percussion: bool = True,
-    ):
+    ) -> str:
         """
         Output the MML representation of this Song to a file.
 
@@ -598,16 +642,19 @@ class Song:
             True iff repeated percussion notes should not repeat their
             instrument
         """
-        with open(fname, "wb") as fobj:
-            fobj.write(
-                self.generate_mml(
-                    global_legato,
-                    loop_analysis,
-                    superloop_analysis,
-                    measure_numbers,
-                    include_dt,
-                    echo_config,
-                    custom_samples,
-                    optimize_percussion,
-                ).encode("ascii"),
-            )
+        mml = self.generate_mml(
+            global_legato,
+            loop_analysis,
+            superloop_analysis,
+            measure_numbers,
+            include_dt,
+            echo_config,
+            custom_samples,
+            optimize_percussion,
+        )
+
+        if fname:
+            with open(fname, "wb") as fobj:
+                fobj.write(mml.encode("ascii", "ignore"))
+
+        return mml

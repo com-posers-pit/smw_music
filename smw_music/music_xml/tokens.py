@@ -325,6 +325,7 @@ class Error(Token):
 @dataclass(order=True)
 class Instrument(Token):
     name: str
+    transpose: int = 0
 
 
 ###############################################################################
@@ -748,4 +749,12 @@ class Triplet(Token):
         True iff this is the start of a triplet
     """
 
+    start: bool
+
+
+###############################################################################
+
+
+@dataclass
+class Vibrato(Token):
     start: bool

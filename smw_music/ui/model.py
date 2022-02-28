@@ -11,6 +11,9 @@
 # Standard library imports
 ###############################################################################
 
+import os
+import shutil
+
 from enum import auto, IntEnum
 from typing import Optional
 
@@ -94,6 +97,7 @@ class _DynEnum(IntEnum):
 
 class Model(QObject):
     inst_config_changed = pyqtSignal(InstrumentConfig)  # arguments=["config"]
+    mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
         bool, str, str
     )  # arguments=["error", "title", "response"]
@@ -139,7 +143,9 @@ class Model(QObject):
             msg = "Song not loaded"
         else:
             try:
-                self.song.to_mml_file(
+                if os.path.exists(fname):
+                    shutil.copy2(fname, f"{fname}.bak")
+                mml = self.song.to_mml_file(
                     fname,
                     self.global_legato,
                     self.loop_analysis,
@@ -150,6 +156,7 @@ class Model(QObject):
                     self.custom_samples,
                     self.custom_percussion,
                 )
+                self.mml_generated.emit(mml)
             except MusicXmlException as e:
                 msg = str(e)
             else:

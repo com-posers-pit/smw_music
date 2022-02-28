@@ -4,9 +4,23 @@
 
 #spc {
     #author  "COMPOSER HERE"
-    #title   "Articulations"
+    #title   "GUI Test"
     #game    "GAME NAME HERE"
     #comment "Ported by: PORTER NAME HERE"
+}
+
+; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
+#path "folder name"
+
+#samples {
+    #optimized ;Don't touch/delete this line, just replace the sample brr files below
+    "Sample1.brr"
+    "Sample2.brr"
+}
+
+#instruments {
+    "Sample1.brr"        $00$00 $00 $00$00 ;@30
+    "Sample2.brr"        $00$00 $00 $00$00 ;@31
 }
 
 ; PORTER: GLOBAL VOLUME HERE
@@ -16,22 +30,26 @@ w180
 
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
-"Piano_voice =  13 o3"
+"Harpsichord_voice =   0 o3"
+"Piano_voice       =  13 o3"
 
 ; Instrument dynamics definitions
 ; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
 ; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
-"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Harpsichord_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Piano_dyn       = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 
 ; Instrument articulation definitions
 ; Just like dynamics, only touch numbers after the 'q' after each equals sign.
-"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Harpsichord_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Piano_artic       = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 
 ; Instrument pan definitions
 ; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
 ; pick your own using a y command.  These are blank by default because not
 ; everyone uses them and it ; saves space to leave them out.
-"Piano_pan = "
+"Harpsichord_pan = "
+"Piano_pan       = "
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Macro magic.  Look, but don't touch.
@@ -39,6 +57,7 @@ w180
 
 ; Instrument definitions.  Smoosh together the instrument voice definition
 ; with its dynamics, articulation, and pan definitions
+"Harpsichord = Harpsichord_voice Harpsichord_dyn Harpsichord_artic Harpsichord_pan"
 "Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 
 ; This is a way to use a hex value in a volume command.  We want to use hex
@@ -72,90 +91,46 @@ w180
 ; Staff 1
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#0 GLOBAL_LEGATO /
-
-@Piano
-;====================
-; Accents
-;====================
-
-l2
-> qACC c1
-c. r4
-c r
-c4. r8 r
-c4 r4 r
-c8. r16 r4 r
-c8 r8 r4 r
-c16. r32 r8 r4 r
-c16 r16 r8 r4 r
-c32. r64 r16 r8 r4 r
-c32 r32 r16 r8 r4 r
-
-;====================
-; Staccatos
-;====================
-
-l2
-qSTAC c1
-c. r4
-c r
-c4. r8 r
-c4 r4 r
-c8. r16 r4 r
-c8 r8 r4 r
-c16. r32 r8 r4 r
-c16 r16 r8 r4 r
-c32. r64 r16 r8 r4 r
-c32 r32 r16 r8 r4 r
-
-;====================
-; Accented Staccatos
-;====================
-
-l2
-qACCSTAC c1
-c. r4
-c r
-c4. r8 r
-c4 r4 r
-c8. r16 r4 r
-c8 r8 r4 r
-c16. r32 r8 r4 r
-c16 r16 r8 r4 r
-c32. r64 r16 r8 r4 r
-c32 r32 r16 r8 r4 r
-
-;====================
-; Changes
-;====================
+#0 /
 
 l4
-qACC c c r2
-c qSTAC c r2
-qACC c qACCSTAC c r2
-qACC c qDEF c r2
-qSTAC c qACC c r2
-qSTAC c c r2
-c qACCSTAC c r2
-qSTAC c qDEF c r2
-qACCSTAC c qACC c r2
-qACCSTAC c qSTAC c r2
-qACCSTAC c c r2
-c qDEF c r2
-c qACC c r2
-qDEF c qSTAC c r2
-qDEF c qACCSTAC c r2
-qDEF c c r2
-qACC c r c r
-c r qSTAC c r
-qACC c r qACCSTAC c r
-qACC c r qDEF c r
-qSTAC c r qACC c r
-qSTAC c r c r
-c r qACCSTAC c r
-qSTAC c r qDEF c r
-c r qACC c r
-qDEF c r qSTAC c r
-qDEF c r qACCSTAC c r
-qDEF c r c r
+@Piano vPPPP > c c c c
+vPPP d d d d
+vPP e e e e
+vP f f f f
+vMP g g g g
+vMF a a a a
+vF b b b b
+vFF > c c c c
+vFFF << c c c c
+vFFFF d d d d
+e e e e
+f f f f
+g g g g
+a a a a
+b b b b
+> c c c c
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Staff 2
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+#1 /
+
+l4
+@Harpsichord vMP f f f f
+g g g g
+a a a a
+b- b- b- b-
+vMF > c c c c
+d d d d
+e e e e
+f f f f
+vFF << f f f f
+g g g g
+a a a a
+b- b- b- b-
+> c c c c
+d d d d
+e e e e
+f f f f

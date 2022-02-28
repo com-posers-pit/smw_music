@@ -487,6 +487,21 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
+name = "PyQt6-stubs"
+version = "6.2.2.1"
+description = "PEP561 stub files for the PyQt6 framework"
+category = "dev"
+optional = false
+python-versions = ">= 3.6"
+develop = false
+
+[package.source]
+type = "git"
+url = "https://github.com/TilmanK/PyQt6-stubs"
+reference = "ab869638f92b7c5264d7d169093233f15716f1cc"
+resolved_reference = "ab869638f92b7c5264d7d169093233f15716f1cc"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -781,7 +796,7 @@ webserver = ["Flask"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9,<3.11"
-content-hash = "578a5602a4c0459facc89c255c281a8bd605cac7f4ec06770f25b372c93501de"
+content-hash = "97eca8a9db671b6f791b81e9f08f54edb9f3c5e31b3cd129613c47971a88ca00"
 
 [metadata.files]
 alabaster = [
@@ -1184,6 +1199,7 @@ pyqt6-sip = [
     {file = "PyQt6_sip-13.2.1-cp39-cp39-win_amd64.whl", hash = "sha256:4b119a8fd880ece15a5bdff583edccd89dbc79d49de2e11cbbd6bba72713d1f3"},
     {file = "PyQt6_sip-13.2.1.tar.gz", hash = "sha256:b7bce59900b2e0a04f70246de2ccf79ee7933036b6b9183cf039b62eeae2b858"},
 ]
+PyQt6-stubs = []
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},

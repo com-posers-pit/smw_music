@@ -22,7 +22,6 @@ from PyQt6.QtWidgets import (  # type: ignore
     QGridLayout,
     QHBoxLayout,
     QLabel,
-    QMessageBox,
     QPushButton,
     QRadioButton,
     QSlider,
@@ -119,6 +118,7 @@ class ControlPanel(QWidget):
     # arguments=[ "global_legato", "loop_analysis", "superloop_analysis",
     # "measure_numbers", "custom_samples", "custom_percussion", ]
     mml_requested = pyqtSignal(str)  # arguments=["fname"]
+    quicklook_opened = pyqtSignal()
     song_changed = pyqtSignal(str)  # arguments=["fname"]
 
     _musicxml_picker: FilePicker
@@ -130,6 +130,7 @@ class ControlPanel(QWidget):
     _measure_numbers: QCheckBox
     _custom_samples: QCheckBox
     _custom_percussion: QCheckBox
+    _open_quicklook: QPushButton
 
     ###########################################################################
 
@@ -145,6 +146,7 @@ class ControlPanel(QWidget):
         )
         self._mml_picker = FilePicker("MML", True, "Output MML File", "", self)
         self._generate = QPushButton("Generate MML")
+        self._open_quicklook = QPushButton("Open Quicklook")
         self._global_legato = QCheckBox("Global Legato")
         self._loop_analysis = QCheckBox("Loop Analysis")
         self._superloop_analysis = QCheckBox("Superloop Analysis")
@@ -170,6 +172,7 @@ class ControlPanel(QWidget):
 
         self._musicxml_picker.file_changed.connect(self._load_musicxml)
         self._generate.clicked.connect(self._generate_mml)
+        self._open_quicklook.clicked.connect(self.quicklook_opened)
 
     ###########################################################################
 
@@ -185,6 +188,7 @@ class ControlPanel(QWidget):
         layout.addWidget(self._custom_samples)
         layout.addWidget(self._custom_percussion)
         layout.addWidget(self._mml_picker)
+        layout.addWidget(self._open_quicklook)
         layout.addWidget(self._generate)
         # layout.addWidget(QPushButton("Convert"))
         # layout.addWidget(QPushButton("Playback"))
@@ -196,10 +200,7 @@ class ControlPanel(QWidget):
     @debug()
     def _generate_mml(self, _: bool) -> None:
         fname = self._mml_picker.fname
-        if not fname:
-            QMessageBox.critical(self, "", "Please pick an MML output file")
-        else:
-            self.mml_requested.emit(fname)
+        self.mml_requested.emit(fname)
 
     ###########################################################################
 
