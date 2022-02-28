@@ -98,7 +98,7 @@ def _load_mml(fname: pathlib.Path) -> list[str]:
     with fname.open(encoding="ascii") as fobj:
         contents = fobj.readlines()
 
-    return [x for x in contents if not x.startswith("; Built:")]
+    return _strip_dt(contents)
 
 
 ###############################################################################
@@ -194,6 +194,13 @@ def _setup(tgt, tmp_path, qtbot, fname="GUI_Test.mxl"):
     _set_files(qtbot, dashboard, src_fname, dst_fname)
 
     return (dashboard, target, dst_fname)
+
+
+###############################################################################
+
+
+def _strip_dt(txt: list[str]) -> list[str]:
+    return [x for x in txt if not x.startswith("; Built:")]
 
 
 ###############################################################################
@@ -403,6 +410,28 @@ def test_multiple_exports(qtbot, tmp_path, auto_ok):
 
         has_backup = os.path.exists(f"{dst_fname}.bak")
         assert (has_backup) == (n > 0)
+
+
+###############################################################################
+
+
+def test_quicklook(qtbot, tmp_path, auto_ok):
+    dashboard, target, dst_fname = _setup("vanilla.mml", tmp_path, qtbot)
+
+    _generate(qtbot, dashboard)
+
+    assert not dashboard._edit.isVisible()
+
+    qtbot.mouseClick(
+        _panel(dashboard)._open_quicklook, Qt.MouseButton.LeftButton
+    )
+
+    _generate(qtbot, dashboard)
+    actual = _load_mml(dst_fname)
+    edit = "\n".join(_strip_dt(dashboard._edit.toPlainText().split("\n")))
+
+    assert dashboard._edit.isVisible()
+    assert edit == "".join(actual)
 
 
 ###############################################################################
