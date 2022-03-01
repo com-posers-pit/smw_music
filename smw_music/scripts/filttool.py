@@ -18,9 +18,9 @@ import sys
 # Library imports
 ###############################################################################
 
-import scipy.signal
+import scipy.signal  # type: ignore
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
 
 from PyQt6 import QtCore
@@ -34,8 +34,10 @@ from PyQt6.QtWidgets import (
 )
 
 import matplotlib
-from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
-from matplotlib.figure import Figure
+from matplotlib.backends.backend_qt5agg import (  # type: ignore
+    FigureCanvasQTAgg,
+)
+from matplotlib.figure import Figure  # type: ignore
 
 ###############################################################################
 # Package imports
@@ -116,15 +118,14 @@ class MainWindow(QMainWindow):
         self.controls[idx].setText(f"0x{(0xff & val):02x}")
 
         coeffs = [slider.value() for slider in self.sliders]
-        self.update(np.array(coeffs, dtype=np.int8))
+        self.update_plot(np.array(coeffs, dtype=np.int8))
 
-    def update(self, coeffs) -> None:
+    def update_plot(self, coeffs: np.ndarray) -> None:
         w, mag, phase = scipy.signal.dbode(
             (coeffs / 128, 1, 1 / (8e3)), n=1000
         )
         phase = (phase + 180) % 360 - 180
         w /= 2 * np.pi
-        plt.figure()
 
         self.sc.mag.cla()
         self.sc.mag.semilogx(w, mag)
