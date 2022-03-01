@@ -27,6 +27,7 @@ from PyQt6 import QtCore
 from PyQt6.QtWidgets import (
     QApplication,
     QGridLayout,
+    QLabel,
     QLineEdit,
     QMainWindow,
     QSlider,
@@ -102,6 +103,8 @@ class MainWindow(QMainWindow):
             edit.editingFinished.connect(lambda n=n: self._control_updated(n))
             self.controls.append(edit)
 
+            layout.addWidget(QLabel(f"C{n}"), 3, n, 1, 1)
+
         widget.setLayout(layout)
 
         self.setCentralWidget(widget)
@@ -122,7 +125,7 @@ class MainWindow(QMainWindow):
 
     def update_plot(self, coeffs: np.ndarray) -> None:
         w, mag, phase = scipy.signal.dbode(
-            (coeffs / 128, 1, 1 / (8e3)), n=1000
+            (coeffs[::-1] / 128, 1, 1 / (8e3)), n=1000
         )
         phase = (phase + 180) % 360 - 180
         w /= 2 * np.pi
