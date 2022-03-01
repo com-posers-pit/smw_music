@@ -34,6 +34,7 @@ music21 = "^7.1.0"
 Mako = "^1.1.6"
 Flask = {version = "^2.0.2", optional = true}
 PyQt6 = "^6.2.3"
+scipy = "^1.8.0"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^4.3.2"
@@ -47,6 +48,7 @@ pyqt6-stubs = {git = "https://github.com/TilmanK/PyQt6-stubs", rev = "ab869638f9
 webserver = ["flask"]
 
 [tool.poetry.scripts]
+smw_music_filttool = "smw_music.scripts.filttool:main"
 smw_music_xml_to_mml = "smw_music.scripts.convert:main"
 smw_music_xml_dashboard = "smw_music.scripts.dashboard:main"
 
