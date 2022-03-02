@@ -44,6 +44,7 @@ from matplotlib.backends.backend_qt5agg import (  # type: ignore
     FigureCanvasQTAgg,
 )
 from matplotlib.figure import Figure  # type: ignore
+from matplotlib.ticker import ScalarFormatter  # type: ignore
 
 ###############################################################################
 # Package imports
@@ -94,8 +95,8 @@ class MainWindow(QMainWindow):
 
         grid = QGridLayout()
         grid.addWidget(self.sc, 0, 0, 1, 8)
-        grid.setRowStretch(0, 1)
-        grid.setRowStretch(1, 0.5)
+        grid.setRowStretch(0, 3)
+        grid.setRowStretch(1, 1)
 
         ncoeff = 8
         self.sliders = []
@@ -173,25 +174,34 @@ class MainWindow(QMainWindow):
         phase = (phase + 180) % 360 - 180
         w /= 2 * np.pi
 
-        self.sc.mag.cla()
-        self.sc.mag.semilogx(w, mag)
-        self.sc.mag.grid(True)
-        self.sc.mag.set_ylim(
-            max(-60, np.min(mag) - 10), 10 + max(0, np.max(mag))
+        axes = self.sc.mag
+        axes.cla()
+        axes.semilogx(w, mag)
+        axes.grid(True)
+        axes.set_ylim(max(-60, np.min(mag) - 10), 10 + max(0, np.max(mag)))
+        axes.set_xlabel("freq/Hz")
+        axes.set_ylabel("Mag/dB")
+        axes.set_title("Magnitude Response")
+        axes.xaxis.set_major_formatter(ScalarFormatter())
+        axes.set_xticks(
+            [1, 2, 4, 7, 10, 20, 40, 70, 100, 200, 400, 700, 1000, 2000, 4000]
         )
-        self.sc.mag.set_xlabel("freq/Hz")
-        self.sc.mag.set_ylabel("Mag/dB")
-        self.sc.mag.set_title("Magnitude Response")
 
-        self.sc.phase.cla()
-        self.sc.phase.semilogx(w, phase)
-        self.sc.phase.grid(True)
-        self.sc.phase.set_ylim(-210, 210)
-        self.sc.phase.set_xlabel("freq/Hz")
-        self.sc.phase.set_ylabel("Phase/\u00b0")
-        self.sc.phase.set_title("Phase Response")
+        axes = self.sc.phase
+        axes.cla()
+        axes.semilogx(w, phase)
+        axes.grid(True)
+        axes.set_ylim(-210, 210)
+        axes.set_xlabel("freq/Hz")
+        axes.set_ylabel("Phase/\u00b0")
+        axes.set_title("Phase Response")
+        axes.xaxis.set_major_formatter(ScalarFormatter())
+        axes.set_xticks(
+            [1, 2, 4, 7, 10, 20, 40, 70, 100, 200, 400, 700, 1000, 2000, 4000]
+        )
 
         self.sc.fig.canvas.draw_idle()
+        self.sc.fig.tight_layout()
 
 
 ###############################################################################
