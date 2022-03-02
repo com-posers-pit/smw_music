@@ -14,6 +14,8 @@
 import argparse
 import sys
 
+import warnings
+
 ###############################################################################
 # Library imports
 ###############################################################################
@@ -26,11 +28,14 @@ import numpy as np
 from PyQt6 import QtCore
 from PyQt6.QtWidgets import (
     QApplication,
+    QFrame,
     QGridLayout,
     QLabel,
     QLineEdit,
     QMainWindow,
+    QPushButton,
     QSlider,
+    QVBoxLayout,
     QWidget,
 )
 
@@ -63,7 +68,7 @@ def _decode_coeffs(arg: str) -> np.ndarray:
 
 
 class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None, width=5, height=500, dpi=100):
+    def __init__(self, parent=None, width=5, height=1000, dpi=200):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.mag = self.fig.add_subplot(2, 1, 1)
         self.phase = self.fig.add_subplot(2, 1, 2)
@@ -72,6 +77,9 @@ class MplCanvas(FigureCanvasQTAgg):
         self.phase.grid(True)
 
         super(MplCanvas, self).__init__(self.fig)
+
+
+###############################################################################
 
 
 class MainWindow(QMainWindow):
@@ -84,28 +92,60 @@ class MainWindow(QMainWindow):
 
         widget = QWidget()
 
-        layout = QGridLayout()
-        layout.addWidget(self.sc, 0, 0, 1, 8)
+        grid = QGridLayout()
+        grid.addWidget(self.sc, 0, 0, 1, 8)
+        grid.setRowStretch(0, 1)
+        grid.setRowStretch(1, 0.5)
 
+        ncoeff = 8
         self.sliders = []
         self.controls = []
-        for n in range(8):
+
+        for n in range(ncoeff):
+            frame = QFrame()
+            frame.setFrameShape(QFrame.Shape.Box)
+
+            layout = QVBoxLayout()
+
+            label = QLabel(f"C{n}")
+            layout.addWidget(label)
+            layout.setAlignment(label, QtCore.Qt.AlignmentFlag.AlignHCenter)
+
             slider = QSlider()
             slider.setRange(-128, 127)
-            layout.addWidget(slider, 1, n, 1, 1)
+            slider.setPageStep(16)
+            layout.addWidget(slider)
+            layout.setAlignment(slider, QtCore.Qt.AlignmentFlag.AlignHCenter)
             slider.valueChanged.connect(
                 lambda v, n=n: self._slider_updated(n, v)
             )
             self.sliders.append(slider)
 
             edit = QLineEdit("0")
-            layout.addWidget(edit, 2, n, 1, 1)
+            layout.addWidget(edit)
             edit.editingFinished.connect(lambda n=n: self._control_updated(n))
             self.controls.append(edit)
 
-            layout.addWidget(QLabel(f"C{n}"), 3, n, 1, 1)
+            btn = QPushButton("Max")
+            layout.addWidget(btn)
+            btn.clicked.connect(lambda _, slider=slider: slider.setValue(127))
 
-        widget.setLayout(layout)
+            btn = QPushButton("Zero")
+            layout.addWidget(btn)
+            btn.clicked.connect(lambda _, slider=slider: slider.setValue(0))
+
+            btn = QPushButton("Min")
+            layout.addWidget(btn)
+            btn.clicked.connect(lambda _, slider=slider: slider.setValue(-128))
+
+            frame.setLayout(layout)
+            grid.addWidget(frame, 1, n, 1, 1)
+
+        widget.setLayout(grid)
+
+        for n in range(ncoeff - 1):
+            for lst in [self.sliders, self.controls]:
+                QWidget.setTabOrder(lst[n], lst[n + 1])
 
         self.setCentralWidget(widget)
 
@@ -124,25 +164,32 @@ class MainWindow(QMainWindow):
         self.update_plot(np.array(coeffs, dtype=np.int8))
 
     def update_plot(self, coeffs: np.ndarray) -> None:
-        w, mag, phase = scipy.signal.dbode(
-            (coeffs[::-1] / 128, 1, 1 / (8e3)), n=1000
-        )
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            w, mag, phase = scipy.signal.dbode(
+                (coeffs[::-1] / 128, 1, 1 / (8e3)), n=1000
+            )
+
         phase = (phase + 180) % 360 - 180
         w /= 2 * np.pi
 
         self.sc.mag.cla()
         self.sc.mag.semilogx(w, mag)
-        self.sc.mag.set_ylim(-60, max(10, np.max(mag)))
+        self.sc.mag.grid(True)
+        self.sc.mag.set_ylim(
+            max(-60, np.min(mag) - 10), 10 + max(0, np.max(mag))
+        )
         self.sc.mag.set_xlabel("freq/Hz")
         self.sc.mag.set_ylabel("Mag/dB")
-        # self.sc.mag.set_title("Magnitude Response")
+        self.sc.mag.set_title("Magnitude Response")
 
         self.sc.phase.cla()
         self.sc.phase.semilogx(w, phase)
+        self.sc.phase.grid(True)
         self.sc.phase.set_ylim(-210, 210)
         self.sc.phase.set_xlabel("freq/Hz")
         self.sc.phase.set_ylabel("Phase/\u00b0")
-        # self.sc.phase.set_title("Phase Response")
+        self.sc.phase.set_title("Phase Response")
 
         self.sc.fig.canvas.draw_idle()
 
