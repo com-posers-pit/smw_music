@@ -50,29 +50,29 @@ Tool Configuration Files
 
 Locations for all tool configurations is covered in the following table.
 
-=========== ======================= ============================
-Tool        File                    Section
------------ ----------------------- ----------------------------
-poetry      ``[tool.poetry*]``      ``/pyproject.toml``
-poetry      ``[build-system]``      ``/pyproject.toml``
-pylint      ``[tool.pylint*]``      ``/pyproject.toml``
-flake8      ``[flake8]``            ``/tox.ini``
-pytest      ``[testenv]``           ``/tox.ini``
-pytest-cov  ``[testenv]``           ``/tox.ini``
-pytest-cov  All                     ``/.coveragerc``
-codecov     All                     ``/codecov.yml``
-doc8        ``[testenv:lint]``      ``/tox.ini``
-pydocstyle  ``[tool.pydocstyle]``   ``/pyproject.toml``
-mypy        ``[testenv:mypy]``      ``/tox.ini``
-Black       ``[tool.black]``        ``/pyproject.toml``
-Bandit      ``[tool.bandit]``       ``/pyproject.toml``
-tox         ``[tox]``               ``/tox.ini``
-sphinx      All                     ``/doc/source/conf.py``
-RTD         All                     ``/.readthedocs.yml``
-Precommit   All                     ``/.pre-commit-config.yaml``
-Reuse       All                     ``/.reuse/dep5``
-Pypi        tbd                     tbd
-=========== ======================= ============================
+=========== ============================  =======================
+Tool        File                          Section
+----------- ----------------------------  -----------------------
+poetry      ``/pyproject.toml``           ``[tool.poetry*]``
+poetry      ``/pyproject.toml``           ``[build-system]``
+pylint      ``/pyproject.toml``           ``[tool.pylint*]``
+flake8      ``/tox.ini``                  ``[flake8]``
+pytest      ``/tox.ini``                  ``[testenv]``
+pytest-cov  ``/tox.ini``                  ``[testenv]``
+pytest-cov  ``/.coveragerc``              All
+codecov     ``/codecov.yml``              All
+doc8        ``/tox.ini``                  ``[testenv:lint]``
+pydocstyle  ``/pyproject.toml``           ``[tool.pydocstyle]``
+mypy        ``/tox.ini``                  ``[testenv:mypy]``
+Black       ``/pyproject.toml``           ``[tool.black]``
+Bandit      ``/pyproject.toml``           ``[tool.bandit]``
+tox         ``/tox.ini``                  ``[tox]``
+sphinx      ``/doc/source/conf.py``       All
+RTD         ``/.readthedocs.yml``         All
+Precommit   ``/.pre-commit-config.yaml``  All
+Reuse       ``/.reuse/dep5``              All
+Pypi        tbd                           tbd
+=========== ============================  =======================
 
 
 
