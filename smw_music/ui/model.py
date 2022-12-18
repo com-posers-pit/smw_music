@@ -202,8 +202,9 @@ class Model(QObject):
         }
 
         print(contents)
-        with open(self._save_fname, "w", encoding="latin1") as fobj:
-            json.dump(contents, fobj)
+        if self._save_fname is not None:
+            with open(self._save_fname, "w", encoding="latin1") as fobj:
+                json.dump(contents, fobj)
 
     ###########################################################################
 
