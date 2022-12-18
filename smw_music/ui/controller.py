@@ -6,6 +6,12 @@
 """Dashboard Controller."""
 
 ###############################################################################
+# Standard library imports
+###############################################################################
+
+from typing import Optional
+
+###############################################################################
 # Library imports
 ###############################################################################
 
@@ -61,7 +67,7 @@ class Controller(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         self._control_panel = ControlPanel()

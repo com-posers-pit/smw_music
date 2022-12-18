@@ -51,7 +51,7 @@ class ArticPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         artics = [
@@ -135,7 +135,7 @@ class ControlPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self._musicxml_picker = FilePicker(
             "MusicXML",
@@ -236,7 +236,7 @@ class DynamicsPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         dynamics = [
@@ -319,7 +319,7 @@ class EchoPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         self._enable = QCheckBox("Echo Enabled")

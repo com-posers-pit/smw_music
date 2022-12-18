@@ -9,7 +9,7 @@
 # Standard library imports
 ###############################################################################
 
-from typing import Any
+from typing import Any, Optional
 
 ###############################################################################
 # Library imports
@@ -66,7 +66,7 @@ class ArticSlider(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, label: str, parent: QWidget = None) -> None:
+    def __init__(self, label: str, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         self._length_slider: QSlider = QSlider(Qt.Orientation.Vertical)
@@ -156,7 +156,7 @@ class FilePicker(QWidget):
         save: bool,
         caption: str,
         filt: str,
-        parent: QWidget = None,
+        parent: Optional[QWidget] = None,
     ) -> None:
         super().__init__(parent)
         self.fname = ""
@@ -224,7 +224,7 @@ class PanControl(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: QWidget = None) -> None:
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
 
         self._slider = QDial()
@@ -316,7 +316,7 @@ class PctSlider(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, label: str, parent: QWidget = None) -> None:
+    def __init__(self, label: str, parent: Optional[QWidget] = None) -> None:
         super().__init__(parent)
         self._slider = QSlider(Qt.Orientation.Vertical)
         self._control = QLineEdit()
@@ -426,7 +426,7 @@ class VolSlider(QWidget):
         label: str,
         init: int = 0,
         hex_disp: bool = True,
-        parent: QWidget = None,
+        parent: Optional[QWidget] = None,
     ) -> None:
         super().__init__(parent)
         self._fmt = "x{:02x}" if hex_disp else "{}"
