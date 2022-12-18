@@ -18,7 +18,7 @@ import logging
 # Library imports
 ###############################################################################
 
-from PyQt6.QtWidgets import QApplication  # type: ignore
+from PyQt6.QtWidgets import QApplication
 
 ###############################################################################
 # Project imports
