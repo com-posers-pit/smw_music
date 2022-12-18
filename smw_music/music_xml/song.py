@@ -317,10 +317,10 @@ class Song:
     # Private method definitions
     ###########################################################################
 
-    def _collect_instruments(self):
+    def _collect_instruments(self) -> None:
         instruments: dict[str, set[str]] = {}
         transposes: dict[str, int] = {}
-        inst: str = ""
+
         for channel in self.channels:
             for token in channel.tokens:
                 if isinstance(token, Instrument):
@@ -331,18 +331,18 @@ class Song:
                 if isinstance(token, Dynamic):
                     instruments[inst].add(token.level.upper())
                 if isinstance(token, Crescendo):
-                    instruments[inst].add(token.level.upper())
+                    instruments[inst].add(token.target.upper())
 
-        inst = sorted(instruments)
+        inst_names = sorted(instruments)
 
         self.instruments = [
             InstrumentConfig(
-                x,
-                inst_from_name(x),
-                dynamics_present=instruments[x],
-                transpose=transposes[x],
+                inst,
+                inst_from_name(inst),
+                dynamics_present=instruments[inst],
+                transpose=transposes[inst],
             )
-            for x in inst
+            for inst in inst_names
         ]
 
     ###########################################################################
