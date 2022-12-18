@@ -29,7 +29,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.11"
+python = "^3.10,<3.12"
 music21 = "^7.1.0"
 Mako = "^1.1.6"
 Flask = {version = "^2.0.2", optional = true}
@@ -41,7 +41,7 @@ Sphinx = "^4.3.2"
 sphinx-rtd-theme = "^1.0.0"
 tox = "^3.24.4"
 pre-commit = "^2.16.0"
-pyinstaller = "^4.9"
+pyinstaller = "^5.7.0"
 pyqt6-stubs = {git = "https://github.com/TilmanK/PyQt6-stubs", rev = "ab869638f92b7c5264d7d169093233f15716f1cc"}
 
 [tool.poetry.extras]
