@@ -8,11 +8,11 @@
 """Echo configuration logic."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from dataclasses import dataclass
-
 
 ###############################################################################
 # Private function definitions
@@ -142,7 +142,7 @@ class EchoConfig:
     @property
     def channel_reg(self) -> int:
         """Return the echo enabled channel (EON) register."""
-        return sum(2 ** x for x in self.chan_list)
+        return sum(2**x for x in self.chan_list)
 
     ###########################################################################
 

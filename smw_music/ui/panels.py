@@ -6,14 +6,13 @@
 """Dashboard Panels."""
 
 ###############################################################################
-# Standard library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from typing import cast
 
 # Library imports
-###############################################################################
-
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QBoxLayout,
@@ -28,13 +27,16 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-###############################################################################
 # Package imports
-###############################################################################
-
-from ..log import debug, info
-from ..music_xml.echo import EchoConfig
-from .widgets import ArticSlider, FilePicker, PanControl, PctSlider, VolSlider
+from smw_music.log import debug, info
+from smw_music.music_xml.echo import EchoConfig
+from smw_music.ui.widgets import (
+    ArticSlider,
+    FilePicker,
+    PanControl,
+    PctSlider,
+    VolSlider,
+)
 
 ###############################################################################
 # API Class Definitions
@@ -71,9 +73,9 @@ class ArticPanel(QWidget):
     ###########################################################################
 
     @info()
-    def update(self, artics: dict[str, int]) -> None:
+    def update_ui(self, artics: dict[str, int]) -> None:
         for artic, val in artics.items():
-            self._sliders[artic].update(val)
+            self._sliders[artic].update_ui(val)
 
     ###########################################################################
 
@@ -269,7 +271,7 @@ class DynamicsPanel(QWidget):
     ###########################################################################
 
     @info()
-    def update(self, config: dict[str, int], present: set[str]) -> None:
+    def update_ui(self, config: dict[str, int], present: set[str]) -> None:
         for dyn, vol in config.items():
             self._sliders[dyn].set_volume(vol)
             self._sliders[dyn].setEnabled(dyn in present)
@@ -338,7 +340,7 @@ class EchoPanel(QWidget):
         self._update_delay_display(0)
         self._filter[1].click()
         self._update_enables(False)
-        self.update(None)
+        self.update_ui(None)
 
         self._do_layout()
 
@@ -347,7 +349,7 @@ class EchoPanel(QWidget):
     ###########################################################################
 
     @info(True)
-    def update(self, config: EchoConfig | None) -> None:
+    def update_ui(self, config: EchoConfig | None) -> None:
         enable = config is not None
         self._enable.setChecked(enable)
 

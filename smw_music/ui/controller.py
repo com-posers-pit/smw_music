@@ -6,9 +6,10 @@
 """Dashboard Controller."""
 
 ###############################################################################
-# Library imports
+# Imports
 ###############################################################################
 
+# Library imports
 from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtWidgets import (
     QBoxLayout,
@@ -21,15 +22,17 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-###############################################################################
 # Package imports
-###############################################################################
-
-from ..log import info, debug
-from ..music_xml.instrument import InstrumentConfig
-from ..music_xml.song import Song
-from .panels import ArticPanel, ControlPanel, DynamicsPanel, EchoPanel
-from .widgets import VolSlider
+from smw_music.log import debug, info
+from smw_music.music_xml.instrument import InstrumentConfig
+from smw_music.music_xml.song import Song
+from smw_music.ui.panels import (
+    ArticPanel,
+    ControlPanel,
+    DynamicsPanel,
+    EchoPanel,
+)
+from smw_music.ui.widgets import VolSlider
 
 ###############################################################################
 # API Class Definitions
@@ -81,8 +84,8 @@ class Controller(QWidget):
 
     @info(True)
     def change_inst_config(self, config: InstrumentConfig) -> None:
-        self._dynamics.update(config.dynamics, config.dynamics_present)
-        self._artics.update(config.quant)
+        self._dynamics.update_ui(config.dynamics, config.dynamics_present)
+        self._artics.update_ui(config.quant)
         self._artics.update_pan(config.pan)
 
     ###########################################################################

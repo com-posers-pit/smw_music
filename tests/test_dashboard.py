@@ -18,20 +18,17 @@
 # pylint: disable=too-many-arguments
 
 ###############################################################################
-# Standard library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 import os
 import pathlib
 import re
 import sys
 
-###############################################################################
 # Library imports
-###############################################################################
-
 import pytest
-
 from PyQt6.QtCore import Qt  # pylint: disable=import-error
 from PyQt6.QtWidgets import (  # pylint: disable=import-error
     QLineEdit,
@@ -39,10 +36,7 @@ from PyQt6.QtWidgets import (  # pylint: disable=import-error
     QSlider,
 )
 
-###############################################################################
-# Project imports
-###############################################################################
-
+# Package imports
 from smw_music.ui.dashboard import Dashboard
 from smw_music.ui.panels import ControlPanel
 

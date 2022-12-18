@@ -6,33 +6,31 @@
 """Song from MusicXML file."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 import copy
 import pkgutil
-
 from datetime import datetime
 from typing import cast
 
-###############################################################################
 # Library imports
-###############################################################################
-
 import music21  # type: ignore
-
 from mako.template import Template  # type: ignore
 
-###############################################################################
-# Project imports
-###############################################################################
-
-from .channel import Channel
-from .echo import EchoConfig
-from .instrument import DEFAULT_DYN, inst_from_name, InstrumentConfig
-from .reduction import reduce, remove_unused_instruments
-from .shared import CRLF, MusicXmlException
-from .tokens import (
+# Package imports
+from smw_music import __version__
+from smw_music.music_xml.channel import Channel
+from smw_music.music_xml.echo import EchoConfig
+from smw_music.music_xml.instrument import (
+    DEFAULT_DYN,
+    InstrumentConfig,
+    inst_from_name,
+)
+from smw_music.music_xml.reduction import reduce, remove_unused_instruments
+from smw_music.music_xml.shared import CRLF, MusicXmlException
+from smw_music.music_xml.tokens import (
     Annotation,
     CrescDelim,
     Crescendo,
@@ -51,7 +49,6 @@ from .tokens import (
     Triplet,
     Vibrato,
 )
-from .. import __version__
 
 ###############################################################################
 # Private function definitions

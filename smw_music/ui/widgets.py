@@ -6,16 +6,14 @@
 """Dashboard UI Widgets."""
 
 ###############################################################################
-# Standard library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from typing import Any
 
-###############################################################################
 # Library imports
-###############################################################################
-
-from PyQt6.QtCore import pyqtSignal, Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QDoubleValidator
 from PyQt6.QtWidgets import (
     QBoxLayout,
@@ -32,11 +30,8 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-###############################################################################
 # Package imports
-###############################################################################
-
-from ..log import debug, info
+from smw_music.log import debug, info
 
 ###############################################################################
 # Private function definitions
@@ -86,7 +81,7 @@ class ArticSlider(QWidget):
     ###########################################################################
 
     @info(True)
-    def update(self, quant: int) -> None:
+    def update_ui(self, quant: int) -> None:
         length = 0x7 & (quant >> 4)
         vol = 0xF & quant
 
@@ -132,7 +127,7 @@ class ArticSlider(QWidget):
         volume = self._vol_slider.value()
         quant = ((0x7 & length) << 4) | (0xF & volume)
 
-        self.update(quant)
+        self.update_ui(quant)
 
 
 ###############################################################################

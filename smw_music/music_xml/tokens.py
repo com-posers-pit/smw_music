@@ -6,16 +6,14 @@
 """Token classes extracted from MusicXML files."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from dataclasses import dataclass
-from enum import auto, Enum
+from enum import Enum, auto
 
-###############################################################################
 # Library imports
-###############################################################################
-
 import music21  # type: ignore
 
 ###############################################################################

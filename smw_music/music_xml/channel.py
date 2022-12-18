@@ -6,21 +6,26 @@
 """Single part/channel in a MusicXML file."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import cast, Iterable, TypeVar
+from typing import Iterable, TypeVar, cast
 
-###############################################################################
-# Project imports
-###############################################################################
-
-from .mml import MmlExporter
-from .shared import CRLF, notelen_str
-from .tokens import Error, flatten, Note, Playable, RehearsalMark, Token
+# Package imports
+from smw_music.music_xml.mml import MmlExporter
+from smw_music.music_xml.shared import CRLF, notelen_str
+from smw_music.music_xml.tokens import (
+    Error,
+    Note,
+    Playable,
+    RehearsalMark,
+    Token,
+    flatten,
+)
 
 ###############################################################################
 # Private variable/constant definitions

@@ -8,9 +8,10 @@
 """Dashboard application."""
 
 ###############################################################################
-# Library imports
+# Imports
 ###############################################################################
 
+# Library imports
 from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
@@ -19,14 +20,11 @@ from PyQt6.QtWidgets import (
     QTextEdit,
 )
 
-###############################################################################
 # Package imports
-###############################################################################
-
-from .. import __version__
-from ..music_xml.echo import EchoConfig
-from .controller import Controller
-from .model import Model
+from smw_music import __version__
+from smw_music.music_xml.echo import EchoConfig
+from smw_music.ui.controller import Controller
+from smw_music.ui.model import Model
 
 ###############################################################################
 # API class definitions

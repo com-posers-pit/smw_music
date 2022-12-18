@@ -6,10 +6,11 @@
 """Song reduction logic."""
 
 ###############################################################################
-# Project imports
+# Imports
 ###############################################################################
 
-from .tokens import (
+# Package imports
+from smw_music.music_xml.tokens import (
     Annotation,
     Comment,
     CrescDelim,

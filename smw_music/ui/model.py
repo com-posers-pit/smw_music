@@ -8,30 +8,24 @@
 """Music XML -> AMK Converter."""
 
 ###############################################################################
-# Standard library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 import json
 import os
 import shutil
+from enum import IntEnum, auto
 
-from enum import auto, IntEnum
-
-###############################################################################
 # Library imports
-###############################################################################
+from PyQt6.QtCore import QObject, pyqtSignal
 
-from PyQt6.QtCore import pyqtSignal, QObject
-
-###############################################################################
 # Package imports
-###############################################################################
-
-from .. import __version__
-from ..log import debug, info
-from ..music_xml import InstrumentConfig, MusicXmlException
-from ..music_xml.echo import EchoConfig
-from ..music_xml.song import Song
+from smw_music import __version__
+from smw_music.log import debug, info
+from smw_music.music_xml import InstrumentConfig, MusicXmlException
+from smw_music.music_xml.echo import EchoConfig
+from smw_music.music_xml.song import Song
 
 ###############################################################################
 # Private Function Definitions
