@@ -22,7 +22,7 @@ from typing import Optional
 # Library imports
 ###############################################################################
 
-from PyQt6.QtCore import pyqtSignal, QObject  # type: ignore
+from PyQt6.QtCore import pyqtSignal, QObject
 
 ###############################################################################
 # Package imports

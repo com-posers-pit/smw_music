@@ -17,7 +17,7 @@ from typing import Optional
 # Library imports
 ###############################################################################
 
-from PyQt6.QtWidgets import (  # type: ignore
+from PyQt6.QtWidgets import (
     QApplication,
     QFileDialog,
     QMainWindow,

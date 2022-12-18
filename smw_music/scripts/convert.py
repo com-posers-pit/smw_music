@@ -26,7 +26,7 @@ from smw_music.music_xml import EchoConfig, Song
 ###############################################################################
 
 
-def main(args=None):
+def main(args=None) -> None:
     """Entrypoint for Music XML -> AMK Converter."""
     if args is None:
         args = sys.argv[1:]

@@ -489,7 +489,7 @@ class VolSlider(QWidget):
     ###########################################################################
 
     @debug()
-    def _update_from_control(self):
+    def _update_from_control(self) -> None:
         try:
             volume = int(255 * float(self._control.text()) / 100)
         except ValueError:

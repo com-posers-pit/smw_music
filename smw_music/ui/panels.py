@@ -15,8 +15,8 @@ from typing import cast, Optional, Union
 # Library imports
 ###############################################################################
 
-from PyQt6.QtCore import pyqtSignal  # type: ignore
-from PyQt6.QtWidgets import (  # type: ignore
+from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtWidgets import (
     QBoxLayout,
     QCheckBox,
     QGridLayout,
