@@ -9,6 +9,16 @@ exclude_dirs = ["tests"]
 [tool.black]
 line-length = 79
 
+[tool.isort]
+import_heading_stdlib = "Standard library imports"
+import_heading_thirdparty = "Library imports"
+import_heading_firstparty = "Package imports"
+line_length = 79
+profile = "black"
+filter_files = true
+known_first_party = ["smw_music"]
+known_third_party = ["music21"]
+
 [tool.poetry]
 name = "smw_music"
 version = "0.2.3"
