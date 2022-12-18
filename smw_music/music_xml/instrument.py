@@ -9,7 +9,6 @@
 ###############################################################################
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 ###############################################################################
 # API variable definitions
@@ -75,4 +74,4 @@ class InstrumentConfig:
     dynamics: dict[str, int] = field(default_factory=lambda: dict(DEFAULT_DYN))
     dynamics_present: set[str] = field(default_factory=set)
     quant: dict[str, int] = field(default_factory=lambda: dict(DEFAULT_QUANT))
-    pan: Optional[int] = None
+    pan: int | None = None

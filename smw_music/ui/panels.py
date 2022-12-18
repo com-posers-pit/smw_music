@@ -9,9 +9,8 @@
 # Standard library imports
 ###############################################################################
 
-from typing import cast, Optional, Union
+from typing import cast
 
-###############################################################################
 # Library imports
 ###############################################################################
 
@@ -51,7 +50,7 @@ class ArticPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
         artics = [
@@ -79,7 +78,7 @@ class ArticPanel(QWidget):
     ###########################################################################
 
     @info()
-    def update_pan(self, pan: Optional[int]) -> None:
+    def update_pan(self, pan: int | None) -> None:
         if pan is None:
             self._pan.set_pan(False, 10)
         else:
@@ -135,7 +134,7 @@ class ControlPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._musicxml_picker = FilePicker(
             "MusicXML",
@@ -236,7 +235,7 @@ class DynamicsPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
         dynamics = [
@@ -319,7 +318,7 @@ class EchoPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def __init__(self, parent: Optional[QWidget] = None) -> None:
+    def __init__(self, parent: QWidget | None = None) -> None:
         super().__init__(parent)
 
         self._enable = QCheckBox("Echo Enabled")
@@ -348,7 +347,7 @@ class EchoPanel(QWidget):
     ###########################################################################
 
     @info(True)
-    def update(self, config: Optional[EchoConfig]) -> None:
+    def update(self, config: EchoConfig | None) -> None:
         enable = config is not None
         self._enable.setChecked(enable)
 
@@ -370,7 +369,7 @@ class EchoPanel(QWidget):
     ###########################################################################
 
     @property
-    def config(self) -> Optional[EchoConfig]:
+    def config(self) -> EchoConfig | None:
         rv = None
         if self._enable.isChecked():
             channels = set()
@@ -455,7 +454,7 @@ class EchoPanel(QWidget):
     ###########################################################################
 
     @debug()
-    def _update_enables(self, enable: Union[bool, int]) -> None:
+    def _update_enables(self, enable: bool | int) -> None:
         enable = bool(enable)
         widgets: list[QWidget] = list(self._chan_enables)
         widgets.extend(

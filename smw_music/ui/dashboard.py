@@ -8,12 +8,6 @@
 """Dashboard application."""
 
 ###############################################################################
-# Standard Library imports
-###############################################################################
-
-from typing import Optional
-
-###############################################################################
 # Library imports
 ###############################################################################
 
@@ -89,7 +83,7 @@ class Dashboard(QMainWindow):
 
     ###########################################################################
 
-    def _generate_mml(self, fname: str, echo: Optional[EchoConfig]) -> None:
+    def _generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
         if self._edit_window.isVisible() or fname:
             self._model.generate_mml(fname, echo)
         else:

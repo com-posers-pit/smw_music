@@ -11,7 +11,6 @@
 
 from dataclasses import dataclass
 from enum import auto, Enum
-from typing import Union
 
 ###############################################################################
 # Library imports
@@ -394,7 +393,7 @@ class Measure(Token, Comment):
         The measure number
     """
 
-    number: Union[list[int], int] = 0
+    number: list[int] | int = 0
 
     ###########################################################################
     # API property definitions
@@ -484,7 +483,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def from_music_xml(
-        cls, elem: Union[music21.note.Note, music21.note.Unpitched]
+        cls, elem: music21.note.Note | music21.note.Unpitched
     ) -> "Note":
         """
         Convert a MusicXML note to a Note object.

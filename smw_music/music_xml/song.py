@@ -13,7 +13,7 @@ import copy
 import pkgutil
 
 from datetime import datetime
-from typing import cast, Optional
+from typing import cast
 
 ###############################################################################
 # Library imports
@@ -536,7 +536,7 @@ class Song:
         superloop_analysis: bool = True,
         measure_numbers: bool = True,
         include_dt: bool = True,
-        echo_config: Optional[EchoConfig] = None,
+        echo_config: EchoConfig | None = None,
         custom_samples: bool = True,
         optimize_percussion: bool = True,
     ) -> str:
@@ -613,7 +613,7 @@ class Song:
         superloop_analysis: bool = True,
         measure_numbers: bool = True,
         include_dt: bool = True,
-        echo_config: Optional[EchoConfig] = None,
+        echo_config: EchoConfig | None = None,
         custom_samples: bool = False,
         optimize_percussion: bool = True,
     ) -> str:

@@ -16,7 +16,6 @@ import os
 import shutil
 
 from enum import auto, IntEnum
-from typing import Optional
 
 ###############################################################################
 # Library imports
@@ -105,7 +104,7 @@ class Model(QObject):
     )  # arguments=["error", "title", "response"]
     song_changed = pyqtSignal(Song)  # arguments=["song"]
 
-    song: Optional[Song]
+    song: Song | None
     mml_fname: str
     global_legato: bool
     loop_analysis: bool
@@ -115,7 +114,7 @@ class Model(QObject):
     custom_percussion: bool
     active_instrument: InstrumentConfig
     _disable_interp: bool
-    _save_fname: Optional[str] = None
+    _save_fname: str | None = None
 
     ###########################################################################
 
@@ -139,7 +138,7 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def generate_mml(self, fname: str, echo: Optional[EchoConfig]) -> None:
+    def generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
         title = "MML Generation"
         error = True
         if self.song is None:
