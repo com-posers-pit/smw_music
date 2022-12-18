@@ -11,6 +11,7 @@
 # Standard library imports
 ###############################################################################
 
+import json
 import os
 import shutil
 
@@ -27,6 +28,7 @@ from PyQt6.QtCore import pyqtSignal, QObject  # type: ignore
 # Package imports
 ###############################################################################
 
+from .. import __version__
 from ..log import debug, info
 from ..music_xml import InstrumentConfig, MusicXmlException
 from ..music_xml.echo import EchoConfig
@@ -113,6 +115,7 @@ class Model(QObject):
     custom_percussion: bool
     active_instrument: InstrumentConfig
     _disable_interp: bool
+    _save_fname: Optional[str] = None
 
     ###########################################################################
 
@@ -163,6 +166,51 @@ class Model(QObject):
                 error = False
                 msg = "Done"
         self.response_generated.emit(error, title, msg)
+
+    ###########################################################################
+
+    @info(True)
+    def load(self, fname: str):
+        with open(fname, "r", encoding="latin1") as fobj:
+            contents = json.load(fobj)
+
+        self.mml_fname = contents["mml"]
+        self.global_legato = contents["global_legato"]
+        self.loop_analysis = contents["loop_analysis"]
+        self.superloop_analysis = contents["superloop_analysis"]
+        self.measure_numbers = contents["measure_numbers"]
+        self.custom_samples = contents["custom_samples"]
+        self.custom_percussion = contents["custom_percussion"]
+        self._disable_interp = contents["disable_interp"]
+
+    ###########################################################################
+
+    @info(True)
+    def save(self) -> None:
+        contents = {
+            "version": __version__,
+            "song": "",
+            "mml": self.mml_fname,
+            "global_legato": self.global_legato,
+            "loop_analysis": self.loop_analysis,
+            "superloop_analysis": self.superloop_analysis,
+            "measure_numbers": self.measure_numbers,
+            "custom_samples": self.custom_samples,
+            "custom_percussion": self.custom_percussion,
+            "disable_interp": self._disable_interp,
+            "instruments": "",
+        }
+
+        print(contents)
+        with open(self._save_fname, "w", encoding="latin1") as fobj:
+            json.dump(contents, fobj)
+
+    ###########################################################################
+
+    @info(True)
+    def save_as(self, fname: str) -> None:
+        self._save_fname = fname
+        self.save()
 
     ###########################################################################
 

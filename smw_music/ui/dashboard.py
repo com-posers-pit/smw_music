@@ -19,6 +19,7 @@ from typing import Optional
 
 from PyQt6.QtWidgets import (  # type: ignore
     QApplication,
+    QFileDialog,
     QMainWindow,
     QMessageBox,
     QTextEdit,
@@ -100,10 +101,29 @@ class Dashboard(QMainWindow):
 
     ###########################################################################
 
+    def _open(self) -> None:
+        fname, _ = QFileDialog.getOpenFileName(
+            self, "Project File", filter="*.json"
+        )
+        if fname:
+            self._model.load(fname)
+
+    ###########################################################################
+
+    def _save_as(self) -> None:
+        fname, _ = QFileDialog.getSaveFileName(
+            self, "Project File", filter="*.json"
+        )
+        if fname:
+            self._model.save_as(fname)
+
+    ###########################################################################
+
     def _setup_menus(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
-        file_menu.addAction("&Load project")
-        file_menu.addAction("&Save project")
+        file_menu.addAction("&Open...", self._open)
+        file_menu.addAction("&Save", self._model.save)
+        file_menu.addAction("&Save As...", self._save_as)
         file_menu.addSeparator()
         file_menu.addAction("&Quit", QApplication.quit)
 
