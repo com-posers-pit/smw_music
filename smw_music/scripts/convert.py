@@ -26,10 +26,10 @@ from smw_music.music_xml import EchoConfig, Song
 ###############################################################################
 
 
-def main(args=None) -> None:
+def main(arg_list: list[str] | None = None) -> None:
     """Entrypoint for Music XML -> AMK Converter."""
-    if args is None:
-        args = sys.argv[1:]
+    if arg_list is None:
+        arg_list = sys.argv[1:]
     parser = argparse.ArgumentParser(
         description=f"Music XML -> AMK Converter v{__version__}"
     )
@@ -79,7 +79,7 @@ def main(args=None) -> None:
         help="Remove repeated percussion instrument directives",
     )
 
-    args = parser.parse_args(args)
+    args = parser.parse_args(arg_list)
 
     Song.from_music_xml(args.music_xml).to_mml_file(
         args.amk,

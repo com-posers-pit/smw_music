@@ -22,8 +22,8 @@ import warnings
 
 import scipy.signal  # type: ignore
 
-import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
+import numpy.typing as npt
 
 from PyQt6 import QtCore
 from PyQt6.QtWidgets import (
@@ -57,7 +57,7 @@ from smw_music import __version__
 ###############################################################################
 
 
-def _decode_coeffs(arg: str) -> np.ndarray:
+def _decode_coeffs(arg: str) -> npt.NDArray[np.int8]:
     coeffs = list(int(x, 0) for x in arg.split(","))
 
     return np.array(coeffs, dtype=np.int8)
@@ -207,20 +207,20 @@ class MainWindow(QMainWindow):
 ###############################################################################
 
 
-def main(args=None):
+def main(arg_list: list[str] | None = None):
     """Entrypoint for Echo Filter Tool."""
-    if args is None:
-        args = sys.argv[1:]
+    if arg_list is None:
+        arg_list = sys.argv[1:]
     parser = argparse.ArgumentParser(
         description=f"SNES Echo Filter Tool v{__version__}"
     )
 
-    args = parser.parse_args(args)
+    args = parser.parse_args(arg_list)
 
     matplotlib.use("Qt5Agg")
 
     app = QApplication(sys.argv)
-    w = MainWindow()
+    window = MainWindow()
     app.exec()
 
 
