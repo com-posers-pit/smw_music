@@ -501,7 +501,7 @@ class Song:
         self,
         loop_analysis: bool,
         superloop_analysis: bool,
-    ):
+    ) -> None:
         self._reduced_channels = copy.deepcopy(self.channels)
 
         for n, chan in enumerate(self._reduced_channels):
@@ -515,7 +515,7 @@ class Song:
 
     ###########################################################################
 
-    def _validate(self):
+    def _validate(self) -> None:
         errors = []
         for n, channel in enumerate(self._reduced_channels):
             msgs = channel.check()
@@ -601,7 +601,7 @@ class Song:
         # This last bit removes any empty lines at the end (these don't
         # normally show up, but can if the last section in the last staff is
         # empty.
-        return rv.rstrip() + CRLF
+        return str(rv).rstrip() + CRLF
 
     ###########################################################################
 

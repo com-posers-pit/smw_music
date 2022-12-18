@@ -110,7 +110,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _update_state_defaults(self, notelen: int):
+    def _update_state_defaults(self, notelen: int) -> None:
         self._exporter.default_note_len = notelen
 
     ###########################################################################

@@ -170,7 +170,7 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def load(self, fname: str):
+    def load(self, fname: str) -> None:
         with open(fname, "r", encoding="latin1") as fobj:
             contents = json.load(fobj)
 

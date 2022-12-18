@@ -412,7 +412,7 @@ class Measure(Token, Comment):
     # API method definitions
     ###########################################################################
 
-    def left_join(self, prev: "Measure"):
+    def left_join(self, prev: "Measure") -> None:
         self.number = [prev.range[0], self.range[-1]]
 
 
