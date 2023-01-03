@@ -88,7 +88,7 @@ class MplCanvas(FigureCanvasQTAgg):  # type: ignore
 ###############################################################################
 
 
-def _update_slider_from_button(slider: QSlider, val: int, _) -> None:
+def _update_slider_from_button(slider: QSlider, val: int, _: bool) -> None:
     slider.setValue(val)
 
 
