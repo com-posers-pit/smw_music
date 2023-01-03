@@ -74,6 +74,8 @@ class Exporter:
     def _append(self, directive: str) -> None:
         self.directives.append(directive)
 
+    # This needs to be included to keep mypy from complaining in subclasses
+    @singledispatchmethod
     def _emit(self, token: Token) -> None:
         raise NotImplementedError
 
