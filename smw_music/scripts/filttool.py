@@ -8,23 +8,27 @@
 """SNES Echo Filter Tool."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
+# Standard Library imports
 import argparse
 import sys
-
 import warnings
+from functools import partial
+from typing import Any, Optional, cast
 
-###############################################################################
 # Library imports
-###############################################################################
-
-import scipy.signal  # type: ignore
-
+import matplotlib  # type: ignore
 import numpy as np
 import numpy.typing as npt
-
+import scipy.signal  # type: ignore
+from matplotlib.backends.backend_qt5agg import (  # type: ignore
+    FigureCanvasQTAgg,
+)
+from matplotlib.figure import Figure  # type: ignore
+from matplotlib.ticker import ScalarFormatter  # type: ignore
 from PyQt6 import QtCore
 from PyQt6.QtWidgets import (
     QApplication,
@@ -39,18 +43,12 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
-import matplotlib
-from matplotlib.backends.backend_qt5agg import (  # type: ignore
-    FigureCanvasQTAgg,
-)
-from matplotlib.figure import Figure  # type: ignore
-from matplotlib.ticker import ScalarFormatter  # type: ignore
-
-###############################################################################
 # Package imports
+from smw_music import __version__
+
+###############################################################################
 ###############################################################################
 
-from smw_music import __version__
 
 ###############################################################################
 # Private function definitions
@@ -68,8 +66,15 @@ def _decode_coeffs(arg: str) -> npt.NDArray[np.int8]:
 ###############################################################################
 
 
-class MplCanvas(FigureCanvasQTAgg):
-    def __init__(self, parent=None, width=5, height=1000, dpi=200):
+# Type info is missing, so we have to ignore typing in the subclassing
+class MplCanvas(FigureCanvasQTAgg):  # type: ignore
+    def __init__(
+        self,
+        parent: Optional[QWidget] = None,  # pylint: disable=unused-argument
+        width: int = 5,
+        height: int = 1000,
+        dpi: int = 200,
+    ):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         self.mag = self.fig.add_subplot(2, 1, 1)
         self.phase = self.fig.add_subplot(2, 1, 2)
@@ -83,18 +88,31 @@ class MplCanvas(FigureCanvasQTAgg):
 ###############################################################################
 
 
+def _update_slider_from_button(slider: QSlider, val: int, _) -> None:
+    slider.setValue(val)
+
+
+###############################################################################
+
+
 class MainWindow(QMainWindow):
-    def __init__(self, *args, **kwargs):
+    canvas: MplCanvas
+    controls: list[QLineEdit]
+    sliders: list[QSlider]
+
+    ###########################################################################
+
+    def __init__(self, *args: Any, **kwargs: Any):
         super().__init__(*args, **kwargs)
 
         # Create the maptlotlib FigureCanvas object,
         # which defines a single set of axes as self.axes.
-        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
+        self.canvas = MplCanvas(self, width=5, height=4, dpi=100)
 
         widget = QWidget()
 
         grid = QGridLayout()
-        grid.addWidget(self.sc, 0, 0, 1, 8)
+        grid.addWidget(self.canvas, 0, 0, 1, 8)
         grid.setRowStretch(0, 3)
         grid.setRowStretch(1, 1)
 
@@ -129,28 +147,35 @@ class MainWindow(QMainWindow):
 
             btn = QPushButton("Max")
             layout.addWidget(btn)
-            btn.clicked.connect(lambda _, slider=slider: slider.setValue(127))
+            btn.clicked.connect(
+                partial(_update_slider_from_button, slider, 127)
+            )
 
             btn = QPushButton("Zero")
             layout.addWidget(btn)
-            btn.clicked.connect(lambda _, slider=slider: slider.setValue(0))
+            btn.clicked.connect(partial(_update_slider_from_button, slider, 0))
 
             btn = QPushButton("Min")
             layout.addWidget(btn)
-            btn.clicked.connect(lambda _, slider=slider: slider.setValue(-128))
+            btn.clicked.connect(
+                partial(_update_slider_from_button, slider, -128)
+            )
 
             frame.setLayout(layout)
             grid.addWidget(frame, 1, n, 1, 1)
 
         widget.setLayout(grid)
 
-        for n in range(ncoeff - 1):
-            for lst in [self.sliders, self.controls]:
-                QWidget.setTabOrder(lst[n], lst[n + 1])
+        for lst in (self.sliders, self.controls):
+            lst = cast(list[QWidget], lst)
+            for this, nxt in zip(lst, lst[1:]):
+                QWidget.setTabOrder(this, nxt)
 
         self.setCentralWidget(widget)
 
         self.show()
+
+    ###########################################################################
 
     def _control_updated(self, idx: int) -> None:
         val = int(self.controls[idx].text(), 0)
@@ -158,13 +183,17 @@ class MainWindow(QMainWindow):
             val -= 256
         self.sliders[idx].setValue(val)
 
+    ###########################################################################
+
     def _slider_updated(self, idx: int, val: int) -> None:
         self.controls[idx].setText(f"0x{(0xff & val):02x}")
 
         coeffs = [slider.value() for slider in self.sliders]
         self.update_plot(np.array(coeffs, dtype=np.int8))
 
-    def update_plot(self, coeffs: np.ndarray) -> None:
+    ###########################################################################
+
+    def update_plot(self, coeffs: npt.NDArray[np.int8]) -> None:
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             w, mag, phase = scipy.signal.dbode(
@@ -174,7 +203,7 @@ class MainWindow(QMainWindow):
         phase = (phase + 180) % 360 - 180
         w /= 2 * np.pi
 
-        axes = self.sc.mag
+        axes = self.canvas.mag
         axes.cla()
         axes.semilogx(w, mag)
         axes.grid(True)
@@ -187,7 +216,7 @@ class MainWindow(QMainWindow):
             [1, 2, 4, 7, 10, 20, 40, 70, 100, 200, 400, 700, 1000, 2000, 4000]
         )
 
-        axes = self.sc.phase
+        axes = self.canvas.phase
         axes.cla()
         axes.semilogx(w, phase)
         axes.grid(True)
@@ -200,14 +229,14 @@ class MainWindow(QMainWindow):
             [1, 2, 4, 7, 10, 20, 40, 70, 100, 200, 400, 700, 1000, 2000, 4000]
         )
 
-        self.sc.fig.canvas.draw_idle()
-        self.sc.fig.tight_layout()
+        self.canvas.fig.canvas.draw_idle()
+        self.canvas.fig.tight_layout()
 
 
 ###############################################################################
 
 
-def main(arg_list: list[str] | None = None):
+def main(arg_list: Optional[list[str]] = None) -> None:
     """Entrypoint for Echo Filter Tool."""
     if arg_list is None:
         arg_list = sys.argv[1:]
@@ -215,12 +244,12 @@ def main(arg_list: list[str] | None = None):
         description=f"SNES Echo Filter Tool v{__version__}"
     )
 
-    args = parser.parse_args(arg_list)
+    args = parser.parse_args(arg_list)  # pylint: disable=unused-variable
 
     matplotlib.use("Qt5Agg")
 
     app = QApplication(sys.argv)
-    window = MainWindow()
+    window = MainWindow()  # pylint: disable=unused-variable
     app.exec()
 
 

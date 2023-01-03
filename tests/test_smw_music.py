@@ -11,7 +11,6 @@
 
 # Standard library imports
 import pathlib
-import tempfile
 
 # Library imports
 import pytest
