@@ -12,16 +12,27 @@
 # Standard library imports
 import logging
 from functools import wraps
+from typing import Any, Callable, ParamSpec, TypeVar
+
+###############################################################################
+# Private type definitions
+###############################################################################
+
+_P = ParamSpec("_P")
+_T = TypeVar("_T")
 
 ###############################################################################
 # Private function definitions
 ###############################################################################
 
 
-def _wrapper(log_type, log_args: bool, log_rv: bool):
-    def decorator(func):
+def _wrapper(
+    log_type: Callable[..., None], log_args: bool, log_rv: bool
+) -> Callable[[Callable[_P, _T]], Callable[_P, _T]]:
+    def decorator(func: Callable[_P, _T]) -> Callable[_P, _T]:
         @wraps(func)
-        def wrapper(self, *args, **kwargs):
+        def wrapper(*args: _P.args, **kwargs: _P.kwargs) -> _T:
+            self = args[0]
             log_type(
                 "Calling %s(%d):%s(%s,%s)",
                 self.__class__.__name__,
@@ -30,7 +41,7 @@ def _wrapper(log_type, log_args: bool, log_rv: bool):
                 args if log_args else "",
                 kwargs if log_args else "",
             )
-            rv = func(self, *args, **kwargs)
+            rv = func(*args, **kwargs)
             if log_rv:
                 log_type("Returns %s", rv)
 
@@ -46,7 +57,9 @@ def _wrapper(log_type, log_args: bool, log_rv: bool):
 ###############################################################################
 
 
-def debug(args: bool = False, rv: bool = False):
+def debug(
+    args: bool = False, rv: bool = False
+) -> Callable[[Callable[_P, _T]], Callable[_P, _T]]:
     """
     Decorator for logging a method invocation at DEBUG level
 
@@ -64,7 +77,9 @@ def debug(args: bool = False, rv: bool = False):
 ###############################################################################
 
 
-def info(args: bool = False, rv: bool = False):
+def info(
+    args: bool = False, rv: bool = False
+) -> Callable[[Callable[_P, _T]], Callable[_P, _T]]:
     """
     Decorator for logging a method invocation at INFO level
 
