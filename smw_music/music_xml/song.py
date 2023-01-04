@@ -16,7 +16,7 @@ from datetime import datetime
 from typing import cast
 
 # Library imports
-import music21  # type: ignore
+import music21
 from mako.template import Template  # type: ignore
 
 # Package imports
@@ -108,7 +108,7 @@ def _get_trems(part: music21.stream.Part) -> list[list[int]]:
 ###############################################################################
 
 
-def _is_crescendo(elem: music21.stream.Stream) -> bool:
+def _is_crescendo(elem: music21.Music21Object) -> bool:
     """
     Test to see if a music21 stream element is a crescendo or diminuendo
     object.
@@ -132,7 +132,7 @@ def _is_crescendo(elem: music21.stream.Stream) -> bool:
 ###############################################################################
 
 
-def _is_line(elem: music21.stream.Stream) -> bool:
+def _is_line(elem: music21.Music21Object) -> bool:
     """
     Test to see if a music21 stream element is a Line object.
 
@@ -152,7 +152,7 @@ def _is_line(elem: music21.stream.Stream) -> bool:
 ###############################################################################
 
 
-def _is_measure(elem: music21.stream.Stream) -> bool:
+def _is_measure(elem: music21.Music21Object) -> bool:
     """
     Test to see if a music21 stream element is a Measure object.
 
@@ -172,7 +172,7 @@ def _is_measure(elem: music21.stream.Stream) -> bool:
 ###############################################################################
 
 
-def _is_slur(elem: music21.stream.Stream) -> bool:
+def _is_slur(elem: music21.Music21Object) -> bool:
     """
     Test to see if a music21 stream element is a Slur object.
 
@@ -192,7 +192,7 @@ def _is_slur(elem: music21.stream.Stream) -> bool:
 ###############################################################################
 
 
-def _is_trill(elem: music21.stream.Stream) -> bool:
+def _is_trill(elem: music21.Music21Object) -> bool:
     return isinstance(elem, music21.expressions.TrillExtension)
 
 
@@ -279,6 +279,11 @@ class Song:
             stream = music21.converter.parseFile(fname)
         except music21.converter.ConverterFileException as e:
             raise MusicXmlException(str(e)) from e
+
+        if not isinstance(stream, music21.stream.Score):
+            raise MusicXmlException(
+                f"Can only operate on Scores, not {type(stream)}s"
+            )
 
         for elem in stream.flat:
             if isinstance(elem, music21.metadata.Metadata):
@@ -389,13 +394,19 @@ class Song:
                 # Pick off the instrument transposition
                 transpose = subpart.transposition
                 semitones = transpose.semitones if transpose is not None else 0
+
+                if not isinstance(semitones, int):
+                    raise MusicXmlException(
+                        f"Non-integer transposition {semitones}"
+                    )
+
                 semitones %= 12
 
                 channel_elem.append(Instrument(name, semitones))
             if not isinstance(subpart, music21.stream.Measure):
                 continue
 
-            measure = cast(music21.stream.Measure, subpart)
+            measure = subpart
             note_no = 0
             channel_elem.append(Measure(measure.number))
             if measure.number in sections:
@@ -444,10 +455,16 @@ class Song:
                         channel_elem.append(Slur(False))
 
                     # Gross, fix this
-                    if subelem.id in cresc[0]:
+                    subelem_id = subelem.id
+                    if not isinstance(subelem_id, int):
+                        raise MusicXmlException(
+                            f"Non-integer element ID {subelem_id}"
+                        )
+
+                    if subelem_id in cresc[0]:
                         channel_elem.append(
                             CrescDelim(
-                                True, cresc_type[cresc[0].index(subelem.id)]
+                                True, cresc_type[cresc[0].index(subelem_id)]
                             )
                         )
 
@@ -462,10 +479,16 @@ class Song:
                         channel_elem.append(Vibrato(False))
 
                     # Also gross, fix this
-                    if subelem.id in cresc[1]:
+                    subelem_id = subelem.id
+                    if not isinstance(subelem_id, int):
+                        raise MusicXmlException(
+                            f"Non-integer element ID {subelem_id}"
+                        )
+
+                    if subelem_id in cresc[1]:
                         channel_elem.append(
                             CrescDelim(
-                                False, cresc_type[cresc[1].index(subelem.id)]
+                                False, cresc_type[cresc[1].index(subelem_id)]
                             )
                         )
 
