@@ -244,12 +244,12 @@ def main(arg_list: Optional[list[str]] = None) -> None:
         description=f"SNES Echo Filter Tool v{__version__}"
     )
 
-    args = parser.parse_args(arg_list)  # pylint: disable=unused-variable
+    _ = parser.parse_args(arg_list)  # pylint: disable=unused-variable
 
     matplotlib.use("Qt5Agg")
 
     app = QApplication(sys.argv)
-    window = MainWindow()  # pylint: disable=unused-variable
+    _ = MainWindow()  # pylint: disable=unused-variable
     app.exec()
 
 

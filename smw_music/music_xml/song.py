@@ -13,7 +13,6 @@
 import copy
 import pkgutil
 from datetime import datetime
-from typing import cast
 
 # Library imports
 import music21

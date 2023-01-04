@@ -16,9 +16,6 @@ from enum import Enum, auto
 # Library imports
 import music21
 
-# Package imports
-from smw_music.music_xml.shared import MusicXmlException
-
 ###############################################################################
 # Private variable/constant definitions
 ###############################################################################
@@ -513,11 +510,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         ------
         Note
             A new Note object with its attributes defined by `elem`
-
-        Raises
-        ------
-        MusicXmlException:
-            Whenever the Note's duration is not an integer
         """
         articulations = [type(x) for x in elem.articulations]
 
@@ -705,11 +697,6 @@ class Rest(Token, Playable):
         ------
         Rest
             A new Rest object with its attributes defined by `elem`
-
-        Raises
-        ------
-        MusicXmlException:
-            Whenever the Rest's duration is not an integer
         """
         return cls(
             _get_duration(elem),
