@@ -4,7 +4,7 @@
 
 #spc {
     #author  "COMPOSER HERE"
-    #title   "No_Metadata.mxl"
+    #title   "TITLE HERE"
     #game    "GAME NAME HERE"
     #comment "Ported by: PORTER NAME HERE"
 }
