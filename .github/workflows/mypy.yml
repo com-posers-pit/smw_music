@@ -26,7 +26,6 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
-        run: poetry install --no-interaction --no-root
       - name: Install library
         run: poetry install --no-interaction
       - name: Test with tox
