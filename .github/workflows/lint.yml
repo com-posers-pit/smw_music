@@ -19,13 +19,13 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
+      - name: Install Poetry
+        run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
-      - name: Install Poetry
-        run: pip install poetry
       - name: Install library
         run: poetry install --no-interaction
       - name: Test with tox
