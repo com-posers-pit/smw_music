@@ -55,12 +55,13 @@ jobs:
       - name: Install Poetry
         run: pipx install poetry
       - name: Set up Python ${{ matrix.python-version }}
+        id: install_py
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
       - name: Make environment
-        run: poetry env use ${{ matrix.python-version }}
+        run: poetry env use ${{ steps.install_py.outputs.python-path }}
       - name: Verify version
         run: poetry run python -V
       - name: Install library
