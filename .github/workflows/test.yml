@@ -58,6 +58,11 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
+          cache: 'poetry'
+      - name: Make environment
+        run: poetry env use ${{ matrix.python-version }}
+      - name: Verify version
+        run: poetry run python -V
       - name: Install library
         run: poetry install --no-interaction
       - name: Test with tox
