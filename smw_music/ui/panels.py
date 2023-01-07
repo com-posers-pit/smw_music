@@ -124,6 +124,8 @@ class ControlPanel(QWidget):
 
     _musicxml_picker: FilePicker
     _mml_picker: FilePicker
+    _play: QPushButton
+    _convert: QPushButton
     _generate: QPushButton
     _global_legato: QCheckBox
     _loop_analysis: QCheckBox
@@ -146,6 +148,8 @@ class ControlPanel(QWidget):
             self,
         )
         self._mml_picker = FilePicker("MML", True, "Output MML File", "", self)
+        self._play = QPushButton("Play SPC")
+        self._convert = QPushButton("Convert MML")
         self._generate = QPushButton("Generate MML")
         self._open_quicklook = QPushButton("Open Quicklook")
         self._global_legato = QCheckBox("Global Legato")
@@ -191,8 +195,8 @@ class ControlPanel(QWidget):
         layout.addWidget(self._mml_picker)
         layout.addWidget(self._open_quicklook)
         layout.addWidget(self._generate)
-        # layout.addWidget(QPushButton("Convert"))
-        # layout.addWidget(QPushButton("Playback"))
+        layout.addWidget(self._convert)
+        layout.addWidget(self._play)
 
         self.setLayout(layout)
 
