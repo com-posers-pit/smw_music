@@ -11,6 +11,9 @@
 # Imports
 ###############################################################################
 
+# Standard library imports
+import pathlib
+
 # Library imports
 from PyQt6.QtWidgets import (
     QApplication,
@@ -32,6 +35,10 @@ from smw_music.ui.model import Model
 
 
 class Dashboard(QMainWindow):
+    _extension = "port"
+
+    ###########################################################################
+
     def __init__(self) -> None:
         super().__init__()
 
@@ -81,6 +88,15 @@ class Dashboard(QMainWindow):
 
     ###########################################################################
 
+    def _create_project(self) -> None:
+        fname, _ = QFileDialog.getSaveFileName(
+            self, "Project File", filter=f"*.{self._extension}"
+        )
+        if fname:
+            self._model.create_project(pathlib.Path(fname))
+
+    ###########################################################################
+
     def _generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
         if self._edit_window.isVisible() or fname:
             self._model.generate_mml(fname, echo)
@@ -95,10 +111,15 @@ class Dashboard(QMainWindow):
 
     def _open(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Project File", filter="*.json"
+            self, "Project File", filter=f"*.{self.extension}"
         )
         if fname:
             self._model.load(fname)
+
+    ###########################################################################
+
+    def _preferences(self) -> None:
+        pass
 
     ###########################################################################
 
@@ -113,9 +134,12 @@ class Dashboard(QMainWindow):
 
     def _setup_menus(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
+        file_menu.addAction("&Create Project...", self._create_project)
         file_menu.addAction("&Open...", self._open)
         file_menu.addAction("&Save", self._model.save)
         file_menu.addAction("&Save As...", self._save_as)
+        file_menu.addSeparator()
+        file_menu.addAction("&Preferences", self._preferences)
         file_menu.addSeparator()
         file_menu.addAction("&Quit", QApplication.quit)
 

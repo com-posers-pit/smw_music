@@ -12,16 +12,23 @@
 ###############################################################################
 
 # Standard library imports
+import configparser
 import json
 import os
+import pkgutil
+import platform
 import shutil
+import stat
+import zipfile
 from enum import IntEnum, auto
+from pathlib import Path
 
 # Library imports
+from mako.template import Template  # type: ignore
 from PyQt6.QtCore import QObject, pyqtSignal
 
 # Package imports
-from smw_music import __version__
+from smw_music import SmwMusicException, __version__
 from smw_music.log import debug, info
 from smw_music.music_xml import InstrumentConfig, MusicXmlException
 from smw_music.music_xml.echo import EchoConfig
@@ -109,6 +116,8 @@ class Model(QObject):
     active_instrument: InstrumentConfig
     _disable_interp: bool
     _save_fname: str | None = None
+    _amk_path: Path | None = None
+    _spcplay_path: Path | None = None
 
     ###########################################################################
 
@@ -127,8 +136,58 @@ class Model(QObject):
         self.active_instrument = InstrumentConfig("")
         self._disable_interp = False
 
+        self._load_prefs()
+
     ###########################################################################
     # API method definitions
+    ###########################################################################
+
+    @info(True)
+    def create_project(self, project: Path) -> None:
+        os.makedirs(project)
+
+        members = [
+            "1DF9",
+            "AddmusicK.exe",
+            "Addmusic_sample groups.txt",
+            "asar.exe",
+            "music",
+            "SPCs",
+            "1DFC",
+            "Addmusic_list.txt",
+            "Addmusic_sound effects.txt",
+            "asm",
+            "samples",
+        ]
+
+        with zipfile.ZipFile(str(self._amk_path), "r") as zobj:
+            # Extract all the files
+            zobj.extractall(path=project)
+
+            names = zobj.namelist()
+            root = sorted(names, key=len)[0]
+
+            # Move them up a directory and delete the rest
+            for member in members:
+                shutil.move(project / root / member, project / member)
+
+            shutil.rmtree(project / root)
+
+        # Create the conversion scripts
+        for tmpl_name in ["convert.bat", "convert.sh"]:
+            tmpl = (
+                Template(  # nosec - generates a .txt output, no XSS concerns
+                    pkgutil.get_data("smw_music", f"data/{tmpl_name}")
+                )
+            )
+            script = tmpl.render(project=project.name)
+            target = project / tmpl_name
+
+            with open(target, "w", encoding="utf8") as fobj:
+                fobj.write(script)
+
+            os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
+
     ###########################################################################
 
     @info(True)
@@ -279,12 +338,16 @@ class Model(QObject):
     # Private method definitions
     ###########################################################################
 
-    @debug()
-    def _signal(self) -> None:
-        self.song_changed.emit(self.song)
+    def _load_prefs(self) -> None:
+        if not self.prefs.exists():
+            self._init_prefs()
 
-    ###########################################################################
-    # Private method definitions
+        parser = configparser.ConfigParser()
+        parser.read(self.prefs)
+
+        self._amk_path = Path(parser["paths"]["amk"])
+        self._spcplay_path = Path(parser["paths"]["spcplay"])
+
     ###########################################################################
 
     @debug()
@@ -328,3 +391,31 @@ class Model(QObject):
         self.inst_config_changed.emit(self.active_instrument)
 
         self._disable_interp = False
+
+    ###########################################################################
+
+    @debug()
+    def _signal(self) -> None:
+        self.song_changed.emit(self.song)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def prefs(self) -> Path:
+        app = "xml2mml"
+        prefs = "preferences.ini"
+
+        match sys := platform.system():
+            case "Linux":
+                default = Path(os.environ["HOME"]) / ".config"
+                conf_dir = Path(os.environ.get("XDG_CONFIG_HOME", default))
+            case "Windows":
+                conf_dir = Path(os.environ["APP_DATA"])
+            case "Darwin":
+                conf_dir = Path(os.environ["HOME"]) / "Library"
+            case _:
+                raise SmwMusicException(f"Unknown OS {sys}")
+
+        return conf_dir / app / prefs
