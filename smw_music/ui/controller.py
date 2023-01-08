@@ -31,6 +31,7 @@ from smw_music.ui.panels import (
     ControlPanel,
     DynamicsPanel,
     EchoPanel,
+    SamplePanel,
 )
 from smw_music.ui.widgets import VolSlider
 
@@ -60,6 +61,7 @@ class Controller(QWidget):
     _artics: ArticPanel
     _echo: EchoPanel
     _volume: VolSlider
+    _sample: SamplePanel
 
     ###########################################################################
 
@@ -73,6 +75,7 @@ class Controller(QWidget):
         self._artics = ArticPanel()
         self._echo = EchoPanel()
         self._volume = VolSlider("Global Volume", hex_disp=False)
+        self._sample = SamplePanel()
 
         self._attach_signals()
 
@@ -146,6 +149,7 @@ class Controller(QWidget):
         tabs = QTabWidget()
         tabs.addTab(self._dynamics, "Dynamics")
         tabs.addTab(self._artics, "Articulations/Pan")
+        tabs.addTab(self._sample, "Sample")
         tabs.addTab(global_widget, "Global")
 
         layout = QHBoxLayout()

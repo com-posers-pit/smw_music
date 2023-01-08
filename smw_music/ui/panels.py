@@ -13,13 +13,14 @@
 from typing import cast
 
 # Library imports
-from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QBoxLayout,
     QCheckBox,
     QGridLayout,
     QHBoxLayout,
     QLabel,
+    QLineEdit,
     QPushButton,
     QRadioButton,
     QSlider,
@@ -470,3 +471,113 @@ class EchoPanel(QWidget):
 
         for widget in widgets:
             widget.setEnabled(enable)
+
+
+###############################################################################
+
+
+class SamplePanel(QWidget):
+    _file: FilePicker
+    _attack: QSlider
+    _delay: QSlider
+    _sustain: QSlider
+    _release: QSlider
+    _gain: QSlider
+    _tune: QSlider
+    _subtune: QSlider
+    _parameters: QLabel
+
+    ###########################################################################
+
+    @debug()
+    def __init__(self, parent: QWidget | None = None) -> None:
+        super().__init__(parent)
+
+        self._file = FilePicker("brr", False, "BRR Sample File", "*.brr", self)
+        self._attack = QSlider(Qt.Orientation.Vertical)
+        self._decay = QSlider(Qt.Orientation.Vertical)
+        self._sustain = QSlider(Qt.Orientation.Vertical)
+        self._release = QSlider(Qt.Orientation.Vertical)
+        self._gain = QSlider(Qt.Orientation.Vertical)
+        self._tune = QSlider(Qt.Orientation.Vertical)
+        self._subtune = QSlider(Qt.Orientation.Vertical)
+        self._parameters = QLabel()
+
+        self._attach_signals()
+
+        self._attack.setRange(0, 15)
+        self._decay.setRange(0, 7)
+        self._sustain.setRange(0, 7)
+        self._release.setRange(0, 31)
+        self._gain.setRange(0, 127)
+        self._tune.setRange(0, 255)
+        self._subtune.setRange(0, 255)
+
+        self.update_ui()
+
+        self._do_layout()
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    @info(True)
+    def update_ui(self) -> None:
+        pass
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def config(self) -> None:
+        pass
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @debug()
+    def _attach_signals(self) -> None:
+        pass
+
+    ###########################################################################
+
+    @debug()
+    def _do_layout(self) -> None:
+        # Enable check boxes
+        grid_layout = QGridLayout()
+
+        grid_layout.addWidget(self._file, 1, 0)
+
+        col = 1
+        grid_layout.addWidget(QLabel("Attack"), 0, col)
+        grid_layout.addWidget(self._attack, 1, col, 1, 2)
+
+        col = 2
+        grid_layout.addWidget(QLabel("Decay"), 0, col)
+        grid_layout.addWidget(self._decay, 1, col, 1, 2)
+
+        col = 3
+        grid_layout.addWidget(QLabel("Sustain"), 0, col)
+        grid_layout.addWidget(self._sustain, 1, col, 1, 2)
+
+        col = 4
+        grid_layout.addWidget(QLabel("Release"), 0, col)
+        grid_layout.addWidget(self._release, 1, col, 1, 2)
+
+        col = 5
+        grid_layout.addWidget(QLabel("Gain"), 0, col)
+        grid_layout.addWidget(self._gain, 1, col, 1, 2)
+
+        col = 6
+        grid_layout.addWidget(QLabel("Tune"), 0, col)
+        grid_layout.addWidget(self._tune, 1, col, 1, 2)
+
+        col = 7
+        grid_layout.addWidget(QLabel("Sub-tune"), 0, col)
+        grid_layout.addWidget(self._subtune, 1, col, 1, 2)
+
+        grid_layout.addWidget(self._parameters, 2, 0, 1, 2)
+
+        self.setLayout(grid_layout)

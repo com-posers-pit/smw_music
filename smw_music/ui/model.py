@@ -251,6 +251,7 @@ class Model(QObject):
             "custom_percussion": self.custom_percussion,
             "disable_interp": self._disable_interp,
             "instruments": "",
+            "samples": "",
         }
 
         print(contents)
