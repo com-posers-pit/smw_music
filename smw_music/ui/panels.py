@@ -17,6 +17,7 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import (
     QBoxLayout,
     QCheckBox,
+    QComboBox,
     QGridLayout,
     QHBoxLayout,
     QLabel,
@@ -488,6 +489,7 @@ class SamplePanel(QWidget):
     _release: QSlider
     _gain: QSlider
     _tune: QSlider
+    _smw_sample: QComboBox
     _subtune: QSlider
     _parameters: QLabel
 
@@ -506,6 +508,7 @@ class SamplePanel(QWidget):
         self._tune = QSlider(Qt.Orientation.Vertical)
         self._subtune = QSlider(Qt.Orientation.Vertical)
         self._parameters = QLabel()
+        self._smw_sample = QComboBox()
 
         self._attach_signals()
 
@@ -516,6 +519,8 @@ class SamplePanel(QWidget):
         self._gain.setRange(0, 127)
         self._tune.setRange(0, 255)
         self._subtune.setRange(0, 255)
+
+        self._populate_smw_samples()
 
         self.update_ui()
 
@@ -552,7 +557,9 @@ class SamplePanel(QWidget):
         # Enable check boxes
         grid_layout = QGridLayout()
 
-        grid_layout.addWidget(self._file, 1, 0)
+        col = 0
+        grid_layout.addWidget(self._smw_sample, 0, col)
+        grid_layout.addWidget(self._file, 1, col)
 
         col = 1
         grid_layout.addWidget(QLabel("Attack"), 0, col)
@@ -585,3 +592,34 @@ class SamplePanel(QWidget):
         grid_layout.addWidget(self._parameters, 2, 0, 1, 2)
 
         self.setLayout(grid_layout)
+
+    ###########################################################################
+
+    @debug()
+    def _populate_smw_samples(self) -> None:
+        # Names taken from Wakana's tutorial
+        self._smw_sample.addItem(" 0: Flute")
+        self._smw_sample.addItem(" 1: String")
+        self._smw_sample.addItem(" 2: Bling/Glockenspiel")
+        self._smw_sample.addItem(" 3: Marimba")
+        self._smw_sample.addItem(" 4: Cello")
+        self._smw_sample.addItem(" 5: Acoustic steel guitar")
+        self._smw_sample.addItem(" 6: Trumpet")
+        self._smw_sample.addItem(" 7: Steel drums")
+        self._smw_sample.addItem(" 8: Acoustic bass")
+        self._smw_sample.addItem(" 9: Piano")
+        self._smw_sample.addItem("10: Snare drum")
+        self._smw_sample.addItem("11: String 2")
+        self._smw_sample.addItem("12: Bongo")
+        self._smw_sample.addItem("13: Electric piano")
+        self._smw_sample.addItem("14: Slap bass")
+        self._smw_sample.addItem("15: Orchestra hit")
+        self._smw_sample.addItem("16: Harp")
+        self._smw_sample.addItem("17: Distortion guitar")
+        self._smw_sample.addItem("21: Bass drum")
+        self._smw_sample.addItem("22: Light cymbal")
+        self._smw_sample.addItem("23: Maracas")
+        self._smw_sample.addItem("24: Wood block")
+        self._smw_sample.addItem("25: Higher wood block")
+        self._smw_sample.addItem("28: Generic drums")
+        self._smw_sample.addItem("29: Power set")
