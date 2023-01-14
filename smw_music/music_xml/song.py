@@ -597,7 +597,7 @@ class Song:
 
         percussion = any(x.percussion for x in self._reduced_channels)
 
-        tmpl = Template(  # nosec - generates a .txt output, no XSS concerns
+        tmpl = Template(  # nosec B702
             pkgutil.get_data("smw_music", "data/mml.txt")
         )
 

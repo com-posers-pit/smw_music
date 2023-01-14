@@ -19,7 +19,7 @@ import pkgutil
 import platform
 import shutil
 import stat
-import subprocess
+import subprocess  # nosec 404
 import threading
 import zipfile
 from enum import IntEnum, auto
@@ -147,8 +147,9 @@ class Model(QObject):
 
     @info(True)
     def convert_mml(self) -> None:
-        print(self._project_path)
-        subprocess.call(["sh", "convert.sh"], cwd=self._project_path)
+        subprocess.call(  # nosec B603, B607
+            ["sh", "convert.sh"], cwd=self._project_path
+        )
 
     ###########################################################################
 
@@ -174,7 +175,8 @@ class Model(QObject):
         ]
 
         path = self._project_path
-        assert path is not None
+        # Since _project_file was set above this won't be None
+        assert path is not None  # nosec 703
 
         with zipfile.ZipFile(str(self._amk_path), "r") as zobj:
             # Extract all the files
@@ -191,10 +193,8 @@ class Model(QObject):
 
         # Create the conversion scripts
         for tmpl_name in ["convert.bat", "convert.sh"]:
-            tmpl = (
-                Template(  # nosec - generates a .txt output, no XSS concerns
-                    pkgutil.get_data("smw_music", f"data/{tmpl_name}")
-                )
+            tmpl = Template(  # nosec B702
+                pkgutil.get_data("smw_music", f"data/{tmpl_name}")
             )
             script = tmpl.render(project=self._project_name)
             target = path / tmpl_name
@@ -263,7 +263,6 @@ class Model(QObject):
 
         if path is not None:
             spc_name = self._project_name
-            assert spc_name is not None
 
             spc_name = f"{spc_name}.spc"
             spc_name = str(path / "SPCs" / spc_name)
