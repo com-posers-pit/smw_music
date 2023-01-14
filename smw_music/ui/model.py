@@ -375,6 +375,11 @@ class Model(QObject):
     # Private method definitions
     ###########################################################################
 
+    def _init_prefs(self) -> None:
+        pass
+
+    ###########################################################################
+
     def _load_prefs(self) -> None:
         if not self.prefs.exists():
             self._init_prefs()
