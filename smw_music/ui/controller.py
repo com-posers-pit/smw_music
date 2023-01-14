@@ -44,6 +44,7 @@ class Controller(QWidget):
     artic_changed = pyqtSignal(str, int)  # arguments=["artic", "quant"]
     config_changed = pyqtSignal(bool, bool, bool, bool, bool, bool)
     instrument_changed = pyqtSignal(str)  # arguments=["inst_name"])
+    mml_converted = pyqtSignal()
     mml_requested = pyqtSignal(
         str,
         object,  # object type lets us pass None or an EchoConfig
@@ -51,6 +52,7 @@ class Controller(QWidget):
     pan_changed = pyqtSignal(bool, int)  # arguments=["enable", "pan"]
     quicklook_opened = pyqtSignal()
     song_changed = pyqtSignal(str)  # arguments=["fname"]
+    spc_played = pyqtSignal()
     volume_changed = pyqtSignal(
         str, int, bool
     )  # arguments=["dyn", "val", "interp"]
@@ -114,11 +116,13 @@ class Controller(QWidget):
     @debug()
     def _attach_signals(self) -> None:
         self._control_panel.config_changed.connect(self.config_changed)
+        self._control_panel.mml_converted.connect(self.mml_converted)
         self._control_panel.mml_requested.connect(
             lambda x: self.mml_requested.emit(x, self._echo.config)
         )
         self._control_panel.quicklook_opened.connect(self.quicklook_opened)
         self._control_panel.song_changed.connect(self.song_changed)
+        self._control_panel.spc_played.connect(self.spc_played)
 
         self._artics.artic_changed.connect(self.artic_changed)
         self._artics.pan_changed.connect(self.pan_changed)

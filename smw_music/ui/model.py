@@ -19,6 +19,8 @@ import pkgutil
 import platform
 import shutil
 import stat
+import subprocess
+import threading
 import zipfile
 from enum import IntEnum, auto
 from pathlib import Path
@@ -115,9 +117,10 @@ class Model(QObject):
     custom_percussion: bool
     active_instrument: InstrumentConfig
     _disable_interp: bool
-    _save_fname: str | None = None
     _amk_path: Path | None = None
     _spcplay_path: Path | None = None
+    _project_file: Path | None = None
+    _project_name: str | None = None
 
     ###########################################################################
 
@@ -143,8 +146,18 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def create_project(self, project: Path) -> None:
-        os.makedirs(project)
+    def convert_mml(self) -> None:
+        print(self._project_path)
+        subprocess.call(["sh", "convert.sh"], cwd=self._project_path)
+
+    ###########################################################################
+
+    @info(True)
+    def create_project(
+        self, project_file: Path, project_name: str | None = None
+    ) -> None:
+        self._project_file = project_file
+        self._project_name = project_name or project_file.stem
 
         members = [
             "1DF9",
@@ -160,18 +173,21 @@ class Model(QObject):
             "samples",
         ]
 
+        path = self._project_path
+        assert path is not None
+
         with zipfile.ZipFile(str(self._amk_path), "r") as zobj:
             # Extract all the files
-            zobj.extractall(path=project)
+            zobj.extractall(path=path)
 
             names = zobj.namelist()
             root = sorted(names, key=len)[0]
 
             # Move them up a directory and delete the rest
             for member in members:
-                shutil.move(project / root / member, project / member)
+                shutil.move(path / root / member, path / member)
 
-            shutil.rmtree(project / root)
+            shutil.rmtree(path / root)
 
         # Create the conversion scripts
         for tmpl_name in ["convert.bat", "convert.sh"]:
@@ -180,13 +196,15 @@ class Model(QObject):
                     pkgutil.get_data("smw_music", f"data/{tmpl_name}")
                 )
             )
-            script = tmpl.render(project=project.name)
-            target = project / tmpl_name
+            script = tmpl.render(project=self._project_name)
+            target = path / tmpl_name
 
             with open(target, "w", encoding="utf8") as fobj:
                 fobj.write(script)
 
             os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
+
+        self.save()
 
     ###########################################################################
 
@@ -223,9 +241,11 @@ class Model(QObject):
 
     @info(True)
     def load(self, fname: str) -> None:
-        with open(fname, "r", encoding="latin1") as fobj:
+        with open(fname, "r", encoding="utf8") as fobj:
             contents = json.load(fobj)
 
+        self._project_name = contents["song"]
+        self._project_file = Path(fname)
         self.mml_fname = contents["mml"]
         self.global_legato = contents["global_legato"]
         self.loop_analysis = contents["loop_analysis"]
@@ -238,10 +258,27 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
+    def play_spc(self) -> None:
+        path = self._project_path
+
+        if path is not None:
+            spc_name = self._project_name
+            assert spc_name is not None
+
+            spc_name = f"{spc_name}.spc"
+            spc_name = str(path / "SPCs" / spc_name)
+            threading.Thread(
+                target=subprocess.call,
+                args=(["wine", str(self._spcplay_path), spc_name],),
+            ).start()
+
+    ###########################################################################
+
+    @info(True)
     def save(self) -> None:
         contents = {
             "version": __version__,
-            "song": "",
+            "song": self._project_name,
             "mml": self.mml_fname,
             "global_legato": self.global_legato,
             "loop_analysis": self.loop_analysis,
@@ -254,16 +291,15 @@ class Model(QObject):
             "samples": "",
         }
 
-        print(contents)
-        if self._save_fname is not None:
-            with open(self._save_fname, "w", encoding="latin1") as fobj:
+        if self._project_file is not None:
+            with open(self._project_file, "w", encoding="utf8") as fobj:
                 json.dump(contents, fobj)
 
     ###########################################################################
 
     @info(True)
     def save_as(self, fname: str) -> None:
-        self._save_fname = fname
+        self._project_file = Path(fname)
         self.save()
 
     ###########################################################################
@@ -398,6 +434,15 @@ class Model(QObject):
     @debug()
     def _signal(self) -> None:
         self.song_changed.emit(self.song)
+
+    ###########################################################################
+    # Private property definitions
+    ###########################################################################
+
+    @property
+    def _project_path(self) -> Path | None:
+        file = self._project_file
+        return None if file is None else file.parents[0]
 
     ###########################################################################
     # API property definitions

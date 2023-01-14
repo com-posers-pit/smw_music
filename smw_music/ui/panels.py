@@ -119,9 +119,11 @@ class ControlPanel(QWidget):
     config_changed = pyqtSignal([bool, bool, bool, bool, bool, bool])
     # arguments=[ "global_legato", "loop_analysis", "superloop_analysis",
     # "measure_numbers", "custom_samples", "custom_percussion", ]
+    mml_converted = pyqtSignal()
     mml_requested = pyqtSignal(str)  # arguments=["fname"]
     quicklook_opened = pyqtSignal()
     song_changed = pyqtSignal(str)  # arguments=["fname"]
+    spc_played = pyqtSignal()
 
     _musicxml_picker: FilePicker
     _mml_picker: FilePicker
@@ -179,6 +181,8 @@ class ControlPanel(QWidget):
         self._musicxml_picker.file_changed.connect(self._load_musicxml)
         self._generate.clicked.connect(self._generate_mml)
         self._open_quicklook.clicked.connect(self.quicklook_opened)
+        self._convert.clicked.connect(self.mml_converted)
+        self._play.clicked.connect(self.spc_played)
 
     ###########################################################################
 

@@ -35,7 +35,7 @@ from smw_music.ui.model import Model
 
 
 class Dashboard(QMainWindow):
-    _extension = "port"
+    _extension = "prj"
 
     ###########################################################################
 
@@ -77,9 +77,11 @@ class Dashboard(QMainWindow):
         controller.config_changed.connect(model.set_config)
         controller.instrument_changed.connect(model.set_instrument)
         controller.mml_requested.connect(self._generate_mml)
+        controller.mml_converted.connect(model.convert_mml)
         controller.pan_changed.connect(model.set_pan)
         controller.quicklook_opened.connect(self._edit_window.show)
         controller.song_changed.connect(model.set_song)
+        controller.spc_played.connect(model.play_spc)
         controller.volume_changed.connect(model.update_dynamics)
         model.inst_config_changed.connect(controller.change_inst_config)
         model.mml_generated.connect(self._edit.setText)
@@ -109,9 +111,9 @@ class Dashboard(QMainWindow):
 
     ###########################################################################
 
-    def _open(self) -> None:
+    def _open_project(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
-            self, "Project File", filter=f"*.{self.extension}"
+            self, "Project File", filter=f"*.{self._extension}"
         )
         if fname:
             self._model.load(fname)
@@ -125,7 +127,7 @@ class Dashboard(QMainWindow):
 
     def _save_as(self) -> None:
         fname, _ = QFileDialog.getSaveFileName(
-            self, "Project File", filter="*.json"
+            self, "Project File", filter=f"*.{self._extension}"
         )
         if fname:
             self._model.save_as(fname)
@@ -134,10 +136,10 @@ class Dashboard(QMainWindow):
 
     def _setup_menus(self) -> None:
         file_menu = self.menuBar().addMenu("&File")
-        file_menu.addAction("&Create Project...", self._create_project)
-        file_menu.addAction("&Open...", self._open)
+        file_menu.addAction("&New Project...", self._create_project)
+        file_menu.addAction("&Open Project...", self._open_project)
         file_menu.addAction("&Save", self._model.save)
-        file_menu.addAction("&Save As...", self._save_as)
+        file_menu.addAction("&Close Project...", lambda _: None)
         file_menu.addSeparator()
         file_menu.addAction("&Preferences", self._preferences)
         file_menu.addSeparator()
