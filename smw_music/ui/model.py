@@ -28,6 +28,7 @@ from pathlib import Path
 # Library imports
 from mako.template import Template  # type: ignore
 from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtGui import QStandardItem, QStandardItemModel
 
 # Package imports
 from smw_music import SmwMusicException, __version__
@@ -116,8 +117,10 @@ class Model(QObject):
     custom_samples: bool
     custom_percussion: bool
     active_instrument: InstrumentConfig
+    insanity_samples_model: QStandardItemModel
     _disable_interp: bool
     _amk_path: Path | None = None
+    _insanity_path: Path | None = None
     _spcplay_path: Path | None = None
     _project_file: Path | None = None
     _project_name: str | None = None
@@ -137,6 +140,7 @@ class Model(QObject):
         self.custom_percussion = False
         self.instruments = None
         self.active_instrument = InstrumentConfig("")
+        self.insanity_samples_model = QStandardItemModel()
         self._disable_interp = False
 
         self._load_prefs()
@@ -379,6 +383,26 @@ class Model(QObject):
 
     ###########################################################################
 
+    def _load_insanity_samples(self) -> None:
+        assert self._insanity_path is not None  # nosec 703
+
+        paths: dict[tuple[str, ...], QStandardItem] = {}
+        with zipfile.ZipFile(self._insanity_path) as zobj:
+            names = [x for x in zobj.namelist() if not x.endswith(".txt")]
+
+            for name in names:
+                split_name = tuple(name.split("/"))
+                if name.endswith("/"):
+                    split_name = split_name[:-1]
+
+                parent_name = split_name[:-1]
+                parent = paths.get(parent_name, self.insanity_samples_model)
+                item = QStandardItem(split_name[-1])
+                parent.appendRow(item)
+                paths[split_name] = item
+
+    ###########################################################################
+
     def _load_prefs(self) -> None:
         if not self.prefs.exists():
             self._init_prefs()
@@ -387,7 +411,11 @@ class Model(QObject):
         parser.read(self.prefs)
 
         self._amk_path = Path(parser["paths"]["amk"])
+        self._insanity_path = Path(parser["paths"]["insanity"])
         self._spcplay_path = Path(parser["paths"]["spcplay"])
+
+        if self._insanity_path:
+            self._load_insanity_samples()
 
     ###########################################################################
 

@@ -11,6 +11,7 @@
 
 # Library imports
 from PyQt6.QtCore import pyqtSignal
+from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import (
     QBoxLayout,
     QHBoxLayout,
@@ -92,6 +93,12 @@ class Controller(QWidget):
         self._dynamics.update_ui(config.dynamics, config.dynamics_present)
         self._artics.update_ui(config.quant)
         self._artics.update_pan(config.pan)
+
+    ###########################################################################
+
+    @debug()
+    def load_insanity_samples(self, model: QStandardItemModel) -> None:
+        self._sample.load_insanity_samples(model)
 
     ###########################################################################
 

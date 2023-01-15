@@ -14,6 +14,7 @@ from typing import cast
 
 # Library imports
 from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import (
     QBoxLayout,
     QCheckBox,
@@ -25,6 +26,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QSlider,
+    QTreeView,
     QVBoxLayout,
     QWidget,
 )
@@ -489,9 +491,10 @@ class SamplePanel(QWidget):
     _release: QSlider
     _gain: QSlider
     _tune: QSlider
-    _smw_sample: QComboBox
     _subtune: QSlider
     _parameters: QLabel
+    _insanity_sample: QTreeView
+    _smw_sample: QComboBox
 
     ###########################################################################
 
@@ -508,6 +511,7 @@ class SamplePanel(QWidget):
         self._tune = QSlider(Qt.Orientation.Vertical)
         self._subtune = QSlider(Qt.Orientation.Vertical)
         self._parameters = QLabel()
+        self._insanity_sample = QTreeView()
         self._smw_sample = QComboBox()
 
         self._attach_signals()
@@ -528,6 +532,12 @@ class SamplePanel(QWidget):
 
     ###########################################################################
     # API method definitions
+    ###########################################################################
+
+    @debug()
+    def load_insanity_samples(self, model: QStandardItemModel) -> None:
+        self._insanity_sample.setModel(model)
+
     ###########################################################################
 
     @info(True)
@@ -559,7 +569,8 @@ class SamplePanel(QWidget):
 
         col = 0
         grid_layout.addWidget(self._smw_sample, 0, col)
-        grid_layout.addWidget(self._file, 1, col)
+        grid_layout.addWidget(self._insanity_sample, 1, col)
+        grid_layout.addWidget(self._file, 2, col)
 
         col = 1
         grid_layout.addWidget(QLabel("Attack"), 0, col)
