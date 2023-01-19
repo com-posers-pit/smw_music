@@ -12,8 +12,6 @@
 ###############################################################################
 
 # Standard library imports
-import configparser
-import json
 import os
 import pkgutil
 import platform
@@ -26,6 +24,7 @@ from enum import IntEnum, auto
 from pathlib import Path
 
 # Library imports
+import yaml
 from mako.template import Template  # type: ignore
 from PyQt6.QtCore import QObject, pyqtSignal
 from PyQt6.QtGui import QStandardItem, QStandardItemModel
@@ -246,7 +245,7 @@ class Model(QObject):
     @info(True)
     def load(self, fname: str) -> None:
         with open(fname, "r", encoding="utf8") as fobj:
-            contents = json.load(fobj)
+            contents = yaml.safe_load(fobj)
 
         self._project_name = contents["song"]
         self._project_file = Path(fname)
@@ -296,7 +295,7 @@ class Model(QObject):
 
         if self._project_file is not None:
             with open(self._project_file, "w", encoding="utf8") as fobj:
-                json.dump(contents, fobj)
+                yaml.dump(contents, fobj)
 
     ###########################################################################
 
@@ -407,15 +406,15 @@ class Model(QObject):
         if not self.prefs.exists():
             self._init_prefs()
 
-        parser = configparser.ConfigParser()
-        parser.read(self.prefs)
+        with open(self.prefs, "r", encoding="utf8") as fobj:
+            prefs = yaml.safe_load(fobj)
 
-        self._amk_path = Path(parser["paths"]["amk"])
-        self._insanity_path = Path(parser["paths"]["insanity"])
-        self._spcplay_path = Path(parser["paths"]["spcplay"])
+        self._amk_path = Path(prefs["amk"]["path"])
+        self._sample_packs = prefs["sample_packs"]
+        self._spcplay_path = Path(prefs["spcplay"]["path"])
 
-        if self._insanity_path:
-            self._load_insanity_samples()
+        if self._sample_packs:
+            self._load_sample_packs()
 
     ###########################################################################
 
@@ -483,7 +482,7 @@ class Model(QObject):
     @property
     def prefs(self) -> Path:
         app = "xml2mml"
-        prefs = "preferences.ini"
+        prefs = "preferences.yaml"
 
         match sys := platform.system():
             case "Linux":
