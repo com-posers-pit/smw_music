@@ -97,8 +97,8 @@ class Controller(QWidget):
     ###########################################################################
 
     @debug()
-    def load_insanity_samples(self, model: QStandardItemModel) -> None:
-        self._sample.load_insanity_samples(model)
+    def load_sample_packs(self, model: QStandardItemModel) -> None:
+        self._sample.load_sample_packs(model)
 
     ###########################################################################
 

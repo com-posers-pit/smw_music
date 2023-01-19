@@ -493,7 +493,7 @@ class SamplePanel(QWidget):
     _tune: QSlider
     _subtune: QSlider
     _parameters: QLabel
-    _insanity_sample: QTreeView
+    _sample_packs: QTreeView
     _smw_sample: QComboBox
 
     ###########################################################################
@@ -511,7 +511,7 @@ class SamplePanel(QWidget):
         self._tune = QSlider(Qt.Orientation.Vertical)
         self._subtune = QSlider(Qt.Orientation.Vertical)
         self._parameters = QLabel()
-        self._insanity_sample = QTreeView()
+        self._sample_packs = QTreeView()
         self._smw_sample = QComboBox()
 
         self._attach_signals()
@@ -535,8 +535,8 @@ class SamplePanel(QWidget):
     ###########################################################################
 
     @debug()
-    def load_insanity_samples(self, model: QStandardItemModel) -> None:
-        self._insanity_sample.setModel(model)
+    def load_sample_packs(self, model: QStandardItemModel) -> None:
+        self._sample_packs.setModel(model)
 
     ###########################################################################
 
@@ -569,7 +569,7 @@ class SamplePanel(QWidget):
 
         col = 0
         grid_layout.addWidget(self._smw_sample, 0, col)
-        grid_layout.addWidget(self._insanity_sample, 1, col)
+        grid_layout.addWidget(self._sample_packs, 1, col)
         grid_layout.addWidget(self._file, 2, col)
 
         col = 1

@@ -46,9 +46,7 @@ class Dashboard(QMainWindow):
         self._controller = Controller()
         self._edit_window = QMainWindow(parent=self)
         self._edit = QTextEdit()
-        self._controller.load_insanity_samples(
-            self._model.insanity_samples_model
-        )
+        self._controller.load_sample_packs(self._model.sample_packs_model)
 
         self._edit_window.setMinimumSize(800, 600)
 

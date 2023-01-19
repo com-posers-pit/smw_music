@@ -41,6 +41,39 @@ from smw_music.music_xml.song import Song
 ###############################################################################
 
 
+def _add_sample_pack_to_model(
+    model: QStandardItemModel, pack: str, path: Path
+) -> None:
+
+    parents: dict[tuple[str, ...], QStandardItem] = {}
+
+    with zipfile.ZipFile(path) as zobj:
+        names = zobj.namelist()
+
+    # Add the pack as a top-level item
+    pack_item = QStandardItem(pack)
+    model.appendRow(pack_item)
+
+    brrs = [x for x in names if x.endswith(".brr")]
+
+    for brr in brrs:
+        fname = tuple(brr.split("/"))
+
+        parent = pack_item
+        for n, path_item in enumerate(fname):
+            partial_path = fname[: n + 1]
+            try:
+                parent = parents[partial_path]
+            except KeyError:
+                item = QStandardItem(path_item)
+                parents[partial_path] = item
+                parent.appendRow(item)
+                parent = item
+
+
+###############################################################################
+
+
 def _dyn_to_str(dyn: "_DynEnum") -> str:
     lut = {
         _DynEnum.PPPP: "PPPP",
@@ -116,10 +149,10 @@ class Model(QObject):
     custom_samples: bool
     custom_percussion: bool
     active_instrument: InstrumentConfig
-    insanity_samples_model: QStandardItemModel
+    sample_packs_model: QStandardItemModel
     _disable_interp: bool
     _amk_path: Path | None = None
-    _insanity_path: Path | None = None
+    _sample_packs: dict[str, dict[str, str]] | None = None
     _spcplay_path: Path | None = None
     _project_file: Path | None = None
     _project_name: str | None = None
@@ -139,7 +172,7 @@ class Model(QObject):
         self.custom_percussion = False
         self.instruments = None
         self.active_instrument = InstrumentConfig("")
-        self.insanity_samples_model = QStandardItemModel()
+        self.sample_packs_model = QStandardItemModel()
         self._disable_interp = False
 
         self._load_prefs()
@@ -382,23 +415,13 @@ class Model(QObject):
 
     ###########################################################################
 
-    def _load_insanity_samples(self) -> None:
-        assert self._insanity_path is not None  # nosec 703
+    def _load_sample_packs(self) -> None:
+        assert self._sample_packs is not None  # nosec 703
 
-        paths: dict[tuple[str, ...], QStandardItem] = {}
-        with zipfile.ZipFile(self._insanity_path) as zobj:
-            names = [x for x in zobj.namelist() if not x.endswith(".txt")]
-
-            for name in names:
-                split_name = tuple(name.split("/"))
-                if name.endswith("/"):
-                    split_name = split_name[:-1]
-
-                parent_name = split_name[:-1]
-                parent = paths.get(parent_name, self.insanity_samples_model)
-                item = QStandardItem(split_name[-1])
-                parent.appendRow(item)
-                paths[split_name] = item
+        for pack_name, pack in self._sample_packs.items():
+            _add_sample_pack_to_model(
+                self.sample_packs_model, pack_name, Path(pack["path"])
+            )
 
     ###########################################################################
 
