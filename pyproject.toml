@@ -45,6 +45,8 @@ Mako = "^1.1.6"
 Flask = {version = "^2.0.2", optional = true}
 PyQt6 = "^6.2.3"
 scipy = "^1.8.0"
+pyyaml = "^6.0"
+types-pyyaml = "^6.0.12.2"
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^5.0.0"
