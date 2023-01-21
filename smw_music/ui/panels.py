@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QSlider,
+    QTabWidget,
     QTreeView,
     QVBoxLayout,
     QWidget,
@@ -564,39 +565,50 @@ class SamplePanel(QWidget):
         top_layout = QHBoxLayout()
         sample_layout = QVBoxLayout()
         sample_widget = QWidget()
-        radio_layout = QVBoxLayout()
-        radio_widget = QWidget()
-        slider_layout = QHBoxLayout()
-        slider_widget = QWidget()
+        envelope_widget = QTabWidget()
+        gainmode_layout = QVBoxLayout()
+        gainmode_widget = QWidget()
+        adsr_layout = QHBoxLayout()
+        adsr_widget = QWidget()
+        gain_layout = QHBoxLayout()
+        gain_widget = QWidget()
+        tune_layout = QHBoxLayout()
+        tune_widget = QWidget()
 
         sample_layout.addWidget(self._smw_sample)
         sample_layout.addWidget(self._sample_packs)
         sample_layout.addWidget(self._file)
         sample_widget.setLayout(sample_layout)
 
-        radio_layout.addWidget(QLabel("Gain Mode"))
-        radio_layout.addWidget(QRadioButton("ADSR"))
-        radio_layout.addWidget(QRadioButton("Increasing Linear"))
-        radio_layout.addWidget(QRadioButton("Increasing Bent"))
-        radio_layout.addWidget(QRadioButton("Decreasing Linear"))
-        radio_layout.addWidget(QRadioButton("Decreasing Exponential"))
-        radio_layout.addStretch()
-        radio_layout.addWidget(self._settings)
-        radio_widget.setLayout(radio_layout)
+        adsr_layout.addWidget(self._attack)
+        adsr_layout.addWidget(self._decay)
+        adsr_layout.addWidget(self._sustain)
+        adsr_layout.addWidget(self._release)
+        adsr_widget.setLayout(adsr_layout)
 
-        slider_layout.addWidget(self._attack)
-        slider_layout.addWidget(self._decay)
-        slider_layout.addWidget(self._sustain)
-        slider_layout.addWidget(self._release)
-        slider_layout.addWidget(self._gain)
-        slider_layout.addWidget(self._tune)
-        slider_layout.addWidget(self._subtune)
+        gainmode_layout.addWidget(QLabel("Gain Mode"))
+        gainmode_layout.addWidget(QRadioButton("Direct"))
+        gainmode_layout.addWidget(QRadioButton("Increasing Linear"))
+        gainmode_layout.addWidget(QRadioButton("Increasing Bent"))
+        gainmode_layout.addWidget(QRadioButton("Decreasing Linear"))
+        gainmode_layout.addWidget(QRadioButton("Decreasing Exponential"))
+        gainmode_layout.addStretch()
+        gainmode_widget.setLayout(gainmode_layout)
+        gain_layout.addWidget(gainmode_widget)
+        gain_layout.addWidget(self._gain)
+        gain_widget.setLayout(gain_layout)
 
-        slider_widget.setLayout(slider_layout)
+        envelope_widget.addTab(adsr_widget, "ADSR")
+        envelope_widget.addTab(gain_widget, "Gain")
+
+        tune_layout.addWidget(self._tune)
+        tune_layout.addWidget(self._subtune)
+        tune_layout.addStretch()
+        tune_widget.setLayout(tune_layout)
 
         top_layout.addWidget(sample_widget)
-        top_layout.addWidget(radio_widget)
-        top_layout.addWidget(slider_widget)
+        top_layout.addWidget(envelope_widget)
+        top_layout.addWidget(tune_widget)
 
         self.setLayout(top_layout)
 
