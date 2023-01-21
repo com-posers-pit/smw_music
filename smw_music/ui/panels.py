@@ -492,7 +492,6 @@ class SamplePanel(QWidget):
     _gain: QSlider
     _tune: QSlider
     _subtune: QSlider
-    _parameters: QLabel
     _sample_packs: QTreeView
     _smw_sample: QComboBox
 
@@ -510,7 +509,6 @@ class SamplePanel(QWidget):
         self._gain = QSlider(Qt.Orientation.Vertical)
         self._tune = QSlider(Qt.Orientation.Vertical)
         self._subtune = QSlider(Qt.Orientation.Vertical)
-        self._parameters = QLabel()
         self._sample_packs = QTreeView()
         self._smw_sample = QComboBox()
 
@@ -565,44 +563,64 @@ class SamplePanel(QWidget):
     @debug()
     def _do_layout(self) -> None:
         # Enable check boxes
-        grid_layout = QGridLayout()
+        top_layout = QHBoxLayout()
+        sample_layout = QVBoxLayout()
+        sample_widget = QWidget()
+        radio_layout = QVBoxLayout()
+        radio_widget = QWidget()
+        slider_layout = QGridLayout()
+        slider_widget = QWidget()
 
-        col = 0
-        grid_layout.addWidget(self._smw_sample, 0, col)
-        grid_layout.addWidget(self._sample_packs, 1, col)
-        grid_layout.addWidget(self._file, 2, col)
+        sample_layout.addWidget(self._smw_sample)
+        sample_layout.addWidget(self._sample_packs)
+        sample_layout.addWidget(self._file)
+        sample_widget.setLayout(sample_layout)
+
+        radio_layout.addWidget(QLabel("Gain Mode"))
+        radio_layout.addWidget(QRadioButton("Direct"))
+        radio_layout.addWidget(QRadioButton("Increasing Linear"))
+        radio_layout.addWidget(QRadioButton("Increasing Bent"))
+        radio_layout.addWidget(QRadioButton("Decreasing Linear"))
+        radio_layout.addWidget(QRadioButton("Decreasing Exponential"))
+        radio_layout.addStretch()
+        radio_widget.setLayout(radio_layout)
 
         col = 1
-        grid_layout.addWidget(QLabel("Attack"), 0, col)
-        grid_layout.addWidget(self._attack, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Attack"), 0, col)
+        slider_layout.addWidget(self._attack, 1, col, 1, 2)
 
         col = 2
-        grid_layout.addWidget(QLabel("Decay"), 0, col)
-        grid_layout.addWidget(self._decay, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Decay"), 0, col)
+        slider_layout.addWidget(self._decay, 1, col, 1, 2)
 
         col = 3
-        grid_layout.addWidget(QLabel("Sustain"), 0, col)
-        grid_layout.addWidget(self._sustain, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Sustain"), 0, col)
+        slider_layout.addWidget(self._sustain, 1, col, 1, 2)
 
         col = 4
-        grid_layout.addWidget(QLabel("Release"), 0, col)
-        grid_layout.addWidget(self._release, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Release"), 0, col)
+        slider_layout.addWidget(self._release, 1, col, 1, 2)
 
         col = 5
-        grid_layout.addWidget(QLabel("Gain"), 0, col)
-        grid_layout.addWidget(self._gain, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Gain"), 0, col)
+        slider_layout.addWidget(self._gain, 1, col, 1, 2)
 
         col = 6
-        grid_layout.addWidget(QLabel("Tune"), 0, col)
-        grid_layout.addWidget(self._tune, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Tune"), 0, col)
+        slider_layout.addWidget(self._tune, 1, col, 1, 2)
 
         col = 7
-        grid_layout.addWidget(QLabel("Sub-tune"), 0, col)
-        grid_layout.addWidget(self._subtune, 1, col, 1, 2)
+        slider_layout.addWidget(QLabel("Sub-tune"), 0, col)
+        slider_layout.addWidget(self._subtune, 1, col, 1, 2)
 
-        grid_layout.addWidget(self._parameters, 2, 0, 1, 2)
+        slider_widget.setLayout(slider_layout)
+        # slider_layout.addWidget(self._parameters, 2, 0, 1, 2)
 
-        self.setLayout(grid_layout)
+        top_layout.addWidget(sample_widget)
+        top_layout.addWidget(radio_widget)
+        top_layout.addWidget(slider_widget)
+
+        self.setLayout(top_layout)
 
     ###########################################################################
 

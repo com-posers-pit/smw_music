@@ -18,6 +18,7 @@ import platform
 import shutil
 import stat
 import subprocess  # nosec 404
+import tempfile
 import threading
 import zipfile
 from enum import IntEnum, auto
@@ -35,9 +36,34 @@ from smw_music.log import debug, info
 from smw_music.music_xml import InstrumentConfig, MusicXmlException
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
+from smw_music.ramfs import RamFs
+from smw_music.ui.sample import Sample
 
 ###############################################################################
 # Private Function Definitions
+###############################################################################
+
+
+def _add_brr_to_model(
+    pack_item: QStandardItem,
+    name: str,
+    parents: dict[tuple[str, ...], QStandardItem],
+    samples: dict[str, Sample] = {},
+) -> None:
+    fname = tuple(name.split("/"))
+
+    parent = pack_item
+    for n, path_item in enumerate(fname):
+        partial_path = fname[: (n + 1)]
+        try:
+            parent = parents[partial_path]
+        except KeyError:
+            item = QStandardItem(path_item)
+            parents[partial_path] = item
+            parent.appendRow(item)
+            parent = item
+
+
 ###############################################################################
 
 
@@ -46,6 +72,7 @@ def _add_sample_pack_to_model(
 ) -> None:
 
     parents: dict[tuple[str, ...], QStandardItem] = {}
+    samples: dict[str, Sample] = {}
 
     with zipfile.ZipFile(path) as zobj:
         names = zobj.namelist()
@@ -54,21 +81,11 @@ def _add_sample_pack_to_model(
     pack_item = QStandardItem(pack)
     model.appendRow(pack_item)
 
-    brrs = [x for x in names if x.endswith(".brr")]
-
-    for brr in brrs:
-        fname = tuple(brr.split("/"))
-
-        parent = pack_item
-        for n, path_item in enumerate(fname):
-            partial_path = fname[: n + 1]
-            try:
-                parent = parents[partial_path]
-            except KeyError:
-                item = QStandardItem(path_item)
-                parents[partial_path] = item
-                parent.appendRow(item)
-                parent = item
+    for name in names:
+        if name.endswith("!patterns.txt"):
+            pass
+        elif name.endswith(".brr"):
+            _add_brr_to_model(pack_item, name, parents)
 
 
 ###############################################################################
