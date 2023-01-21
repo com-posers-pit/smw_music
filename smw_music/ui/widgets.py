@@ -10,11 +10,11 @@
 ###############################################################################
 
 # Standard library imports
-from typing import Any
+from typing import Any, Callable
 
 # Library imports
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QDoubleValidator
+from PyQt6.QtGui import QDoubleValidator, QIntValidator
 from PyQt6.QtWidgets import (
     QBoxLayout,
     QCheckBox,
@@ -39,9 +39,9 @@ from smw_music.log import debug, info
 
 
 # h/t: https://stackoverflow.com/questions/47285303
-def _fix_width(edit: QLineEdit) -> None:
+def _fix_width(edit: QLineEdit, bound: str) -> None:
     font_metrics = edit.fontMetrics()
-    width = font_metrics.boundingRect("1000.0").width()
+    width = font_metrics.boundingRect(bound).width()
     edit.setFixedWidth(width)
 
 
@@ -210,6 +210,89 @@ class FilePicker(QWidget):
 ###############################################################################
 
 
+class GainSlider(QWidget):
+    setting_changed = pyqtSignal(int)
+    _slider: QSlider
+    _control: QLineEdit
+    _conversion: Callable[[int], str]
+    _display: QLabel
+    _eu: QLabel
+
+    ###########################################################################
+
+    @debug()
+    def __init__(
+        self,
+        label: str,
+        limit: int,
+        conversion: Callable[[int], str],
+        init: int = 0,
+        parent: QWidget | None = None,
+    ) -> None:
+        super().__init__(parent)
+        self._conversion = conversion
+
+        self._slider = QSlider(Qt.Orientation.Vertical)
+        self._control = QLineEdit()
+        self._display = QLabel()
+        self._display.setToolTip(f"{label} hex value")
+        self._eu = QLabel()
+
+        self._slider.setRange(0, limit)
+        # TODO: self._control.setValidator(QIntValidator(0, limit))
+        _fix_width(self._control, "00000")
+
+        self._attach_signals()
+
+        self.apply_setting(init)
+
+        self._do_layout(label)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    @info(True)
+    def apply_setting(self, setting: int) -> None:
+        self._slider.setValue(setting)
+        self._control.setText(f"0x{setting:x}")
+        self._display.setText(f"x{setting:x}")
+        self._eu.setText(self._conversion(setting))
+        self.setting_changed.emit(setting)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    @debug()
+    def _attach_signals(self) -> None:
+        self._slider.valueChanged.connect(self.apply_setting)
+        self._control.editingFinished.connect(self._update_from_control)
+
+    ###########################################################################
+
+    @debug()
+    def _do_layout(self, label: str) -> None:
+        layout = QVBoxLayout()
+
+        layout.addWidget(QLabel(label))
+        layout.addWidget(self._slider)
+        layout.addWidget(self._control)
+        layout.addWidget(self._display)
+        layout.addWidget(self._eu)
+
+        self.setLayout(layout)
+
+    ###########################################################################
+
+    @debug()
+    def _update_from_control(self) -> None:
+        self.apply_setting(int(self._control.text, 0))
+
+
+###############################################################################
+
+
 class PanControl(QWidget):
     pan_changed = pyqtSignal(bool, int)  # arguments=["enable", "pan"]
     _slider: QDial
@@ -322,7 +405,7 @@ class PctSlider(QWidget):
 
         self._slider.setRange(0, 1000)
         self._control.setValidator(QDoubleValidator(0, 100, 1))
-        _fix_width(self._control)
+        _fix_width(self._control, "1000.0")
         self.set_pct(0, False)
 
         self._do_layout(label)
@@ -432,7 +515,7 @@ class VolSlider(QWidget):
 
         self._slider.setRange(0, 255)
         self._control.setValidator(QDoubleValidator(0, 100, 1))
-        _fix_width(self._control)
+        _fix_width(self._control, "1000.0")
 
         self._attach_signals()
 

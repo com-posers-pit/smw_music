@@ -34,9 +34,11 @@ from PyQt6.QtWidgets import (
 # Package imports
 from smw_music.log import debug, info
 from smw_music.music_xml.echo import EchoConfig
+from smw_music.ui import sample
 from smw_music.ui.widgets import (
     ArticSlider,
     FilePicker,
+    GainSlider,
     PanControl,
     PctSlider,
     VolSlider,
@@ -493,8 +495,11 @@ class SamplePanel(QWidget):
     _tune: QSlider
     _subtune: QSlider
     _sample_packs: QTreeView
+    _settings: QLabel
     _smw_sample: QComboBox
 
+    ###########################################################################
+    # Constructor definitions
     ###########################################################################
 
     @debug()
@@ -502,25 +507,18 @@ class SamplePanel(QWidget):
         super().__init__(parent)
 
         self._file = FilePicker("brr", False, "BRR Sample File", "*.brr", self)
-        self._attack = QSlider(Qt.Orientation.Vertical)
-        self._decay = QSlider(Qt.Orientation.Vertical)
-        self._sustain = QSlider(Qt.Orientation.Vertical)
-        self._release = QSlider(Qt.Orientation.Vertical)
-        self._gain = QSlider(Qt.Orientation.Vertical)
-        self._tune = QSlider(Qt.Orientation.Vertical)
-        self._subtune = QSlider(Qt.Orientation.Vertical)
+        self._attack = GainSlider("Attack", 15, sample.attack_dn2eu)
+        self._decay = GainSlider("Decay", 7, sample.decay_dn2eu)
+        self._sustain = GainSlider("Sustain", 7, sample.sustain_dn2eu)
+        self._release = GainSlider("Release", 31, sample.release_dn2eu)
+        self._gain = GainSlider("Gain", 31, sample.gain_inclin_dn2eu)
+        self._tune = GainSlider("Tune", 255, lambda _: "")
+        self._subtune = GainSlider("Subtune", 255, lambda _: "")
         self._sample_packs = QTreeView()
+        self._settings = QLabel()
         self._smw_sample = QComboBox()
 
         self._attach_signals()
-
-        self._attack.setRange(0, 15)
-        self._decay.setRange(0, 7)
-        self._sustain.setRange(0, 7)
-        self._release.setRange(0, 31)
-        self._gain.setRange(0, 127)
-        self._tune.setRange(0, 255)
-        self._subtune.setRange(0, 255)
 
         self._populate_smw_samples()
 
@@ -568,7 +566,7 @@ class SamplePanel(QWidget):
         sample_widget = QWidget()
         radio_layout = QVBoxLayout()
         radio_widget = QWidget()
-        slider_layout = QGridLayout()
+        slider_layout = QHBoxLayout()
         slider_widget = QWidget()
 
         sample_layout.addWidget(self._smw_sample)
@@ -577,44 +575,24 @@ class SamplePanel(QWidget):
         sample_widget.setLayout(sample_layout)
 
         radio_layout.addWidget(QLabel("Gain Mode"))
-        radio_layout.addWidget(QRadioButton("Direct"))
+        radio_layout.addWidget(QRadioButton("ADSR"))
         radio_layout.addWidget(QRadioButton("Increasing Linear"))
         radio_layout.addWidget(QRadioButton("Increasing Bent"))
         radio_layout.addWidget(QRadioButton("Decreasing Linear"))
         radio_layout.addWidget(QRadioButton("Decreasing Exponential"))
         radio_layout.addStretch()
+        radio_layout.addWidget(self._settings)
         radio_widget.setLayout(radio_layout)
 
-        col = 1
-        slider_layout.addWidget(QLabel("Attack"), 0, col)
-        slider_layout.addWidget(self._attack, 1, col, 1, 2)
-
-        col = 2
-        slider_layout.addWidget(QLabel("Decay"), 0, col)
-        slider_layout.addWidget(self._decay, 1, col, 1, 2)
-
-        col = 3
-        slider_layout.addWidget(QLabel("Sustain"), 0, col)
-        slider_layout.addWidget(self._sustain, 1, col, 1, 2)
-
-        col = 4
-        slider_layout.addWidget(QLabel("Release"), 0, col)
-        slider_layout.addWidget(self._release, 1, col, 1, 2)
-
-        col = 5
-        slider_layout.addWidget(QLabel("Gain"), 0, col)
-        slider_layout.addWidget(self._gain, 1, col, 1, 2)
-
-        col = 6
-        slider_layout.addWidget(QLabel("Tune"), 0, col)
-        slider_layout.addWidget(self._tune, 1, col, 1, 2)
-
-        col = 7
-        slider_layout.addWidget(QLabel("Sub-tune"), 0, col)
-        slider_layout.addWidget(self._subtune, 1, col, 1, 2)
+        slider_layout.addWidget(self._attack)
+        slider_layout.addWidget(self._decay)
+        slider_layout.addWidget(self._sustain)
+        slider_layout.addWidget(self._release)
+        slider_layout.addWidget(self._gain)
+        slider_layout.addWidget(self._tune)
+        slider_layout.addWidget(self._subtune)
 
         slider_widget.setLayout(slider_layout)
-        # slider_layout.addWidget(self._parameters, 2, 0, 1, 2)
 
         top_layout.addWidget(sample_widget)
         top_layout.addWidget(radio_widget)
