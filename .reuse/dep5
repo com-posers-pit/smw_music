@@ -3,6 +3,6 @@ Upstream-Name: smw_music
 Upstream-Contact: Thomas Werne <werneta@gmail.com>
 Source: http://github.com/com-posers-pit/smw_music
 
-Files: *.rst doc poetry.lock tests/dst/* tests/src/* tox.ini misc/mml.drm
+Files: *.rst doc poetry.lock smw_music/data/dashboard.ui tests/dst/* tests/src/* tox.ini misc/mml.drm
 Copyright: The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 License: CC0-1.0
