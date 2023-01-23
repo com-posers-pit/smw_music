@@ -167,6 +167,7 @@ class Model(QObject):
     custom_percussion: bool
     active_instrument: InstrumentConfig
     sample_packs_model: QStandardItemModel
+    instruments_model: QStandardItemModel
     _disable_interp: bool
     _amk_path: Path | None = None
     _sample_packs: dict[str, dict[str, str]] | None = None
@@ -190,6 +191,7 @@ class Model(QObject):
         self.instruments = None
         self.active_instrument = InstrumentConfig("")
         self.sample_packs_model = QStandardItemModel()
+        self.instruments_model = QStandardItemModel()
         self._disable_interp = False
 
         self._load_prefs()
@@ -402,7 +404,10 @@ class Model(QObject):
         except MusicXmlException as e:
             self.response_generated.emit(True, "Song load", str(e))
         else:
-            self._signal()
+            self.instruments_model.clear()
+            for inst in self.song.instruments:
+                self.instruments_model.appendRow(QStandardItem(inst.name))
+            self.song_changed.emit(self.song)
 
     ###########################################################################
 
@@ -499,12 +504,6 @@ class Model(QObject):
         self.inst_config_changed.emit(self.active_instrument)
 
         self._disable_interp = False
-
-    ###########################################################################
-
-    @debug()
-    def _signal(self) -> None:
-        self.song_changed.emit(self.song)
 
     ###########################################################################
     # Private property definitions
