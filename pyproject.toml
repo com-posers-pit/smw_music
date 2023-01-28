@@ -18,6 +18,7 @@ profile = "black"
 filter_files = true
 known_first_party = ["smw_music"]
 known_third_party = ["music21"]
+skip_glob = ["smw_music/doc/"]
 
 [tool.poetry]
 name = "smw_music"
