@@ -1140,6 +1140,21 @@ reference = "ab869638f92b7c5264d7d169093233f15716f1cc"
 resolved_reference = "ab869638f92b7c5264d7d169093233f15716f1cc"
 
 [[package]]
+name = "pyqtgraph"
+version = "0.13.1"
+description = "Scientific Graphics and GUI Library for Python"
+category = "main"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "pyqtgraph-0.13.1-py3-none-any.whl", hash = "sha256:906b2784c213890bf2a1df43e3675eff1921ee894ab9673468747fb993ea2d6c"},
+    {file = "pyqtgraph-0.13.1.tar.gz", hash = "sha256:698f87f59db965727b33602a0b29058de21291d8b143dea878b50578aec0dc08"},
+]
+
+[package.dependencies]
+numpy = ">=1.20.0"
+
+[[package]]
 name = "python-dateutil"
 version = "2.8.2"
 description = "Extensions to the standard Python datetime module"
@@ -1448,6 +1463,18 @@ files = [
 test = ["flake8", "mypy", "pytest"]
 
 [[package]]
+name = "sphinxcontrib-mermaid"
+version = "0.7.1"
+description = "Mermaid diagrams in yours Sphinx powered docs"
+category = "dev"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sphinxcontrib-mermaid-0.7.1.tar.gz", hash = "sha256:aa8a40b50ec86ad12824b62180240ca52a9bda8424455d7eb252eae9aa5d293c"},
+    {file = "sphinxcontrib_mermaid-0.7.1-py2.py3-none-any.whl", hash = "sha256:3e20de1937c30dfa807e446bf99983d73d0dd3dc5c6524addda59800fe928762"},
+]
+
+[[package]]
 name = "sphinxcontrib-qthelp"
 version = "1.0.3"
 description = "sphinxcontrib-qthelp is a sphinx extension which outputs QtHelp document."
@@ -1605,4 +1632,4 @@ webserver = ["Flask"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.12"
-content-hash = "4ee34b0688d7743ea54b2f7f3399afb5d48b209349977487cc8d57206186a01f"
+content-hash = "3f901f4d5e2545dc3917399b37f7274d0e3d6d03993763ad0a7868f83db081db"
