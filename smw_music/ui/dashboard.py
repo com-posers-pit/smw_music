@@ -37,29 +37,15 @@ from PyQt6.QtWidgets import (
 from smw_music import __version__
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
+from smw_music.ui import sample
 from smw_music.ui.controller import Controller
+from smw_music.ui.envelope_preview import EnvelopePreview
+from smw_music.ui.file_picker import file_picker
 from smw_music.ui.model import Model
+from smw_music.ui.preferences import Preferences
 
 ###############################################################################
 # Private function definitions
-###############################################################################
-
-
-def _make_file_picker(
-    button: QPushButton, edit: QLineEdit, save: bool, caption: str, filt: str
-) -> None:
-    def callback():
-        if save:
-            dlg = QFileDialog.getSaveFileName
-        else:
-            dlg = QFileDialog.getOpenFileName
-        fname, _ = dlg(button, caption=caption, filter=filt)
-        if fname:
-            edit.setText(fname)
-
-    button.clicked.connect(callback)
-
-
 ###############################################################################
 
 
@@ -95,8 +81,10 @@ def _hookup_slider(
 class Dashboard:
     _edit: QTextEdit
     _edit_window: QMainWindow
+    _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
+    _pref_dlg: Preferences
     _view: QMainWindow
 
     ###########################################################################
@@ -108,13 +96,16 @@ class Dashboard:
         if ui_contents is None:
             raise Exception("Can't locate dashboard")
 
-        self._model = Model()
         self._view = uic.loadUi(io.BytesIO(ui_contents))
+        #        self._preferences = Preferences()
+        self._model = Model()
 
         self._edit = QTextEdit()
         self._edit_window = QMainWindow(parent=self._view)
         self._edit_window.setMinimumSize(800, 600)
         self._edit_window.setCentralWidget(self._edit)
+
+        self._envelope_preview = EnvelopePreview(self._view)
 
         self._view.sample_pack_list.setModel(self._model.sample_packs_model)
         self._view.instrument_list.setModel(self._model.instruments_model)
@@ -140,7 +131,7 @@ class Dashboard:
     def _about(self) -> None:
         title = "About MusicXML -> MML"
         text = f"Version: {__version__}"
-        text += "\nCopyright Ⓒ 2022 The SMW Music Python Project Authors"
+        text += "\nCopyright Ⓒ 2023 The SMW Music Python Project Authors"
         text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
 
         QMessageBox.about(self._view, title, text)
@@ -151,23 +142,162 @@ class Dashboard:
         model = self._model
         view = self._view
 
-        view.musicxml_fname.textChanged.connect(model.set_song)
-        view.play_spc.clicked.connect(model.play_spc)
-        view.generate_mml.clicked.connect(self._generate_mml)
-        view.open_quicklook.clicked.connect(self._edit_window.show)
-        model.song_changed.connect(self.update_song)
-        # controller.mml_converted.connect(model.convert_mml)
+        view.generate_mml.clicked.connect(
+            model.on_mml_generated
+        )  # TODO: port this over self._generate_mml
+        view.generate_spc.clicked.connect(model.on_spc_generated)
+        view.play_spc.clicked.connect(model.on_spc_played)
 
-        # controller.artic_changed.connect(model.update_artic)
-        # controller.config_changed.connect(model.set_config)
-        # controller.instrument_changed.connect(model.set_instrument)
-        # controller.pan_changed.connect(model.set_pan)
-        # controller.song_changed.connect(model.set_song)
-        # controller.volume_changed.connect(model.update_dynamics)
-        # model.inst_config_changed.connect(controller.change_inst_config)
-        # model.mml_generated.connect(self._edit.setText)
-        # model.response_generated.connect(controller.log_response)
-        # model.song_changed.connect(controller.update_song)
+        view.preview_envelope.clicked.connect(self._envelope_preview.show)
+
+        view.select_adsr_mode.released.connect(self._update_envelope)
+        view.select_gain_mode.released.connect(self._update_envelope)
+        view.gain_mode_direct.released.connect(self._update_envelope)
+        view.gain_mode_inclin.released.connect(self._update_envelope)
+        view.gain_mode_incbent.released.connect(self._update_envelope)
+        view.gain_mode_declin.released.connect(self._update_envelope)
+        view.gain_mode_decexp.released.connect(self._update_envelope)
+        view.gain_slider.valueChanged.connect(self._update_envelope)
+        view.attack_slider.valueChanged.connect(self._update_envelope)
+        view.decay_slider.valueChanged.connect(self._update_envelope)
+        view.sus_level_slider.valueChanged.connect(self._update_envelope)
+        view.sus_rate_slider.valueChanged.connect(self._update_envelope)
+
+        view.gain_mode_direct.toggled.connect(self._update_gain_limits)
+        view.gain_slider.valueChanged.connect(
+            lambda x: view.gain_setting_label.setText(f"x{x:02x}")
+        )
+
+        view.attack_slider.valueChanged.connect(
+            lambda x: view.attack_setting_label.setText(f"x{x:02x}")
+        )
+        view.attack_slider.valueChanged.connect(
+            lambda x: view.attack_eu_label.setText(sample.attack_dn2eu(x))
+        )
+        view.decay_slider.valueChanged.connect(
+            lambda x: view.decay_setting_label.setText(f"x{x:02x}")
+        )
+        view.decay_slider.valueChanged.connect(
+            lambda x: view.decay_eu_label.setText(sample.decay_dn2eu(x))
+        )
+        view.sus_level_slider.valueChanged.connect(
+            lambda x: view.sus_level_setting_label.setText(f"x{x:02x}")
+        )
+        view.sus_level_slider.valueChanged.connect(
+            lambda x: view.sus_level_eu_label.setText(
+                sample.sus_level_dn2eu(x)
+            )
+        )
+        view.sus_rate_slider.valueChanged.connect(
+            lambda x: view.sus_rate_setting_label.setText(f"x{x:02x}")
+        )
+        view.sus_rate_slider.valueChanged.connect(
+            lambda x: view.sus_rate_eu_label.setText(sample.sus_rate_dn2eu(x))
+        )
+
+        view.tune_slider.valueChanged.connect(self._update_setting)
+        view.tune_slider.valueChanged.connect(
+            lambda x: view.tune_setting.setText(f"x{x:02x}")
+        )
+        view.subtune_slider.valueChanged.connect(self._update_setting)
+        view.subtune_slider.valueChanged.connect(
+            lambda x: view.subtune_setting.setText(f"x{x:02x}")
+        )
+
+    #        view.musicxml_fname.textChanged.connect(model.set_song)
+    #        view.open_quicklook.clicked.connect(self._edit_window.show)
+    #        model.song_changed.connect(self.update_song)
+
+    # controller.artic_changed.connect(model.update_artic)
+    # controller.config_changed.connect(model.set_config)
+    # controller.instrument_changed.connect(model.set_instrument)
+    # controller.pan_changed.connect(model.set_pan)
+    # controller.song_changed.connect(model.set_song)
+    # controller.volume_changed.connect(model.update_dynamics)
+    # model.inst_config_changed.connect(controller.change_inst_config)
+    # model.mml_generated.connect(self._edit.setText)
+    # model.response_generated.connect(controller.log_response)
+    # model.song_changed.connect(controller.update_song)
+
+    ###########################################################################
+
+    def _update_gain_limits(self, toggled: bool) -> None:
+        view = self._view
+        if toggled:
+            view.gain_slider.setMaximum(127)
+        else:
+            val = min(31, view.gain_slider.value())
+            view.gain_slider.setValue(val)
+            view.gain_slider.setMaximum(31)
+
+    ###########################################################################
+
+    def _update_setting(self) -> None:
+        view = self._view
+
+        adsr_mode = view.select_adsr_mode.isChecked()
+
+        attack_reg = view.attack_slider.value()
+        decay_reg = view.decay_slider.value()
+        sus_level_reg = view.sus_level_slider.value()
+        sus_rate_reg = view.sus_rate_slider.value()
+        gain_reg = view.gain_slider.value()
+
+        vxadsr1 = (int(adsr_mode) << 7) | (decay_reg << 4) | attack_reg
+        vxadsr2 = (sus_level_reg << 5) | sus_rate_reg
+
+        if view.gain_mode_direct.isChecked():
+            vxgain = gain_reg
+        elif view.gain_mode_inclin.isChecked():
+            vxgain = 0xC0 | gain_reg
+        elif view.gain_mode_incbent.isChecked():
+            vxgain = 0xE0 | gain_reg
+        elif view.gain_mode_declin.isChecked():
+            vxgain = 0x80 | gain_reg
+        elif view.gain_mode_decexp.isChecked():
+            vxgain = 0xA0 | gain_reg
+
+        # The register values for the mode we're not in are don't care; exo
+        # likes the convention of setting them to 0.  Who am I to argue?
+        if adsr_mode:
+            vxgain = 0
+        else:
+            vxadsr1 = 0
+            vxadsr2 = 0
+
+        tune = view.tune_slider.value()
+        subtune = view.subtune_slider.value()
+        view.brr_setting.setText(
+            f"x{vxadsr1:02x} x{vxadsr2:02x} x{vxgain:02x} x{tune:02x} x{subtune:02x}"
+        )
+
+    ###########################################################################
+    def _update_envelope(self) -> None:
+        view = self._view
+        env = self._envelope_preview
+
+        gain_reg = view.gain_slider.value()
+
+        if view.select_adsr_mode.isChecked():
+            env.adsr(
+                view.attack_slider.value(),
+                view.decay_slider.value(),
+                view.sus_level_slider.value(),
+                view.sus_rate_slider.value(),
+            )
+        else:  # view.select_gain_mode
+            if view.gain_mode_direct.isChecked():
+                env.direct_gain(gain_reg)
+            elif view.gain_mode_inclin.isChecked():
+                env.inclin(gain_reg)
+            elif view.gain_mode_incbent.isChecked():
+                env.incbent(gain_reg)
+            elif view.gain_mode_declin.isChecked():
+                env.declin(gain_reg)
+            elif view.gain_mode_decexp.isChecked():
+                env.decexp(gain_reg)
+
+        self._update_setting()
 
     ###########################################################################
 
@@ -182,14 +312,14 @@ class Dashboard:
 
     def _finish_ui_setup(self) -> None:
         view = self._view
-        _make_file_picker(
+        file_picker(
             view.select_musicxml_fname,
             view.musicxml_fname,
             False,
             "Input MusicXML File",
             "MusicXML (*.mxl *.musicxml);;Any (*)",
         )
-        _make_file_picker(
+        file_picker(
             view.select_mml_fname,
             view.mml_fname,
             True,
@@ -294,8 +424,8 @@ class Dashboard:
 
     ###########################################################################
 
-    def _preferences(self) -> None:
-        pass
+    def _open_preferences(self) -> None:
+        self._preferences.exec()
 
     ###########################################################################
 
@@ -306,7 +436,7 @@ class Dashboard:
         view.open_project.triggered.connect(self._open_project)
         view.save_project.triggered.connect(self._model.save)
         view.close_project.triggered.connect(lambda _: None)
-        view.open_preferences.triggered.connect(self._preferences)
+        view.open_preferences.triggered.connect(self._open_preferences)
         view.exit_dashboard.triggered.connect(QApplication.quit)
 
         view.undo.triggered.connect(lambda _: None)

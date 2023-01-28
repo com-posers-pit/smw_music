@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-
-# SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
+# SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
+# <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
@@ -100,7 +99,14 @@ def gain_inclin_dn2eu(setting: int) -> str:
 ###############################################################################
 
 
-def release_dn2eu(setting: int) -> str:
+def sus_level_dn2eu(setting: int) -> str:
+    return ["1/8", "2/8", "3/8", "4/8", "5/8", "6/8", "7/8", "1"][setting]
+
+
+###############################################################################
+
+
+def sus_rate_dn2eu(setting: int) -> str:
     return [
         "Inf",
         "38s",
@@ -135,13 +141,6 @@ def release_dn2eu(setting: int) -> str:
         "37ms",
         "18ms",
     ][setting]
-
-
-###############################################################################
-
-
-def sustain_dn2eu(setting: int) -> str:
-    return ["1/8", "2/8", "3/8", "4/8", "5/8", "6/8", "7/8", "1"][setting]
 
 
 ###############################################################################

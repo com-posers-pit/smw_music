@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
@@ -201,14 +199,6 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def convert_mml(self) -> None:
-        subprocess.call(  # nosec B603, B607
-            ["sh", "convert.sh"], cwd=self._project_path
-        )
-
-    ###########################################################################
-
-    @info(True)
     def create_project(
         self, project_file: Path, project_name: str | None = None
     ) -> None:
@@ -264,7 +254,25 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
+    def load(self, fname: str) -> None:
+        with open(fname, "r", encoding="utf8") as fobj:
+            contents = yaml.safe_load(fobj)
+
+        self._project_name = contents["song"]
+        self._project_file = Path(fname)
+        self.mml_fname = contents["mml"]
+        self.global_legato = contents["global_legato"]
+        self.loop_analysis = contents["loop_analysis"]
+        self.superloop_analysis = contents["superloop_analysis"]
+        self.measure_numbers = contents["measure_numbers"]
+        self.custom_samples = contents["custom_samples"]
+        self.custom_percussion = contents["custom_percussion"]
+        self._disable_interp = contents["disable_interp"]
+
+    ###########################################################################
+
+    @info(True)
+    def on_mml_generated(self, fname: str, echo: EchoConfig | None) -> None:
         title = "MML Generation"
         error = True
         if self.song is None:
@@ -295,25 +303,16 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def load(self, fname: str) -> None:
-        with open(fname, "r", encoding="utf8") as fobj:
-            contents = yaml.safe_load(fobj)
-
-        self._project_name = contents["song"]
-        self._project_file = Path(fname)
-        self.mml_fname = contents["mml"]
-        self.global_legato = contents["global_legato"]
-        self.loop_analysis = contents["loop_analysis"]
-        self.superloop_analysis = contents["superloop_analysis"]
-        self.measure_numbers = contents["measure_numbers"]
-        self.custom_samples = contents["custom_samples"]
-        self.custom_percussion = contents["custom_percussion"]
-        self._disable_interp = contents["disable_interp"]
+    def on_spc_generated(self) -> None:
+        # TODO: support OSX and windows
+        subprocess.call(  # nosec B603, B607
+            ["sh", "convert.sh"], cwd=self._project_path
+        )
 
     ###########################################################################
 
     @info(True)
-    def play_spc(self) -> None:
+    def on_spc_played(self) -> None:
         path = self._project_path
 
         if path is not None:
@@ -323,6 +322,7 @@ class Model(QObject):
             spc_name = str(path / "SPCs" / spc_name)
             threading.Thread(
                 target=subprocess.call,
+                # TODO: Handle windows/OSX
                 args=(["wine", str(self._spcplay_path), spc_name],),
             ).start()
 
