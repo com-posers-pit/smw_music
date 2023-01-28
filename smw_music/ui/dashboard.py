@@ -165,23 +165,23 @@ class Dashboard:
 
         view.gain_mode_direct.toggled.connect(self._update_gain_limits)
         view.gain_slider.valueChanged.connect(
-            lambda x: view.gain_setting_label.setText(f"x{x:02x}")
+            lambda x: view.gain_setting_label.setText(f"${x:02x}")
         )
 
         view.attack_slider.valueChanged.connect(
-            lambda x: view.attack_setting_label.setText(f"x{x:02x}")
+            lambda x: view.attack_setting_label.setText(f"${x:02x}")
         )
         view.attack_slider.valueChanged.connect(
             lambda x: view.attack_eu_label.setText(sample.attack_dn2eu(x))
         )
         view.decay_slider.valueChanged.connect(
-            lambda x: view.decay_setting_label.setText(f"x{x:02x}")
+            lambda x: view.decay_setting_label.setText(f"${x:02x}")
         )
         view.decay_slider.valueChanged.connect(
             lambda x: view.decay_eu_label.setText(sample.decay_dn2eu(x))
         )
         view.sus_level_slider.valueChanged.connect(
-            lambda x: view.sus_level_setting_label.setText(f"x{x:02x}")
+            lambda x: view.sus_level_setting_label.setText(f"${x:02x}")
         )
         view.sus_level_slider.valueChanged.connect(
             lambda x: view.sus_level_eu_label.setText(
@@ -189,7 +189,7 @@ class Dashboard:
             )
         )
         view.sus_rate_slider.valueChanged.connect(
-            lambda x: view.sus_rate_setting_label.setText(f"x{x:02x}")
+            lambda x: view.sus_rate_setting_label.setText(f"${x:02x}")
         )
         view.sus_rate_slider.valueChanged.connect(
             lambda x: view.sus_rate_eu_label.setText(sample.sus_rate_dn2eu(x))
@@ -197,11 +197,11 @@ class Dashboard:
 
         view.tune_slider.valueChanged.connect(self._update_setting)
         view.tune_slider.valueChanged.connect(
-            lambda x: view.tune_setting.setText(f"x{x:02x}")
+            lambda x: view.tune_setting.setText(f"${x:02x}")
         )
         view.subtune_slider.valueChanged.connect(self._update_setting)
         view.subtune_slider.valueChanged.connect(
-            lambda x: view.subtune_setting.setText(f"x{x:02x}")
+            lambda x: view.subtune_setting.setText(f"${x:02x}")
         )
 
     #        view.musicxml_fname.textChanged.connect(model.set_song)
@@ -268,7 +268,7 @@ class Dashboard:
         tune = view.tune_slider.value()
         subtune = view.subtune_slider.value()
         view.brr_setting.setText(
-            f"x{vxadsr1:02x} x{vxadsr2:02x} x{vxgain:02x} x{tune:02x} x{subtune:02x}"
+            f"${vxadsr1:02x} x{vxadsr2:02x} x{vxgain:02x} x{tune:02x} x{subtune:02x}"
         )
 
     ###########################################################################
@@ -408,7 +408,7 @@ class Dashboard:
                 label,
                 lambda x: f"{100*x/255:5.1f}",
                 lambda x: int(255 * float(x) / 100),
-                lambda x: f"x{x:02x}",
+                lambda x: f"${x:02x}",
                 "0",
                 QDoubleValidator(0, 100, 1),
             )
