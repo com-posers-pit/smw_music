@@ -141,7 +141,7 @@
            </widget>
            <widget class="QTabWidget" name="instrument_config_tab">
             <property name="currentIndex">
-             <number>0</number>
+             <number>3</number>
             </property>
             <widget class="QWidget" name="instrument_dynamics_tab">
              <attribute name="title">
@@ -809,7 +809,158 @@
                    <widget class="QLineEdit" name="brr_fname"/>
                   </item>
                   <item row="2" column="1" colspan="2">
-                   <widget class="QComboBox" name="builtin_sample"/>
+                   <widget class="QComboBox" name="builtin_sample">
+                    <item>
+                     <property name="text">
+                      <string>@00 Flute</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@01 String</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@02 Glockenspiel</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@03 Marimba</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@04 Cello</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@05 Acoustic steel guitar</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@06 Trumpet</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@07 Steel Drums</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@08 Acoustic Bass</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@09 Piano</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@10 Snare drum</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@11 String 2</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@12 Bongo</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@13 Electric Piano</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@14 Slap bass</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@15 Orchestra Hit</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@16 Harp</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@17 Distortion Guitar</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@18</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@19</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@20</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@21 Bass Drum</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@22 Light cymbal</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@23 Maracas</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@24 Wood block</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@25 Higher wood block</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@26</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@27</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@28 Generic Drums</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>@29 Power Set</string>
+                     </property>
+                    </item>
+                   </widget>
                   </item>
                   <item row="5" column="1" colspan="2">
                    <widget class="QRadioButton" name="select_brr_sample">

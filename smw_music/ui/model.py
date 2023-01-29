@@ -229,7 +229,7 @@ class Model(QObject):
             self._history.append(new_state)
             self.state_changed.emit(new_state)
 
-    def on_musicxml_changed(self, fname: str) -> None:
+    def on_musicxml_fname_changed(self, fname: str) -> None:
         self._update_state(musicxml_fname=fname)
 
     def on_mml_fname_changed(self, fname: str) -> None:
@@ -329,6 +329,9 @@ class Model(QObject):
     def on_builtin_sample_selected(self, state: bool) -> None:
         if state:
             self._update_state(sample_source=SampleSource.BUILTIN)
+
+    def on_builtin_sample_changed(self, index: int) -> None:
+        self._update_state(builtin_sample_index=index)
 
     def on_pack_sample_selected(self, state: bool) -> None:
         if state:

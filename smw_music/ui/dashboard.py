@@ -158,6 +158,7 @@ class Dashboard:
         v.select_builtin_sample.setChecked(
             state.sample_source == SampleSource.BUILTIN
         )
+        v.builtin_sample.setCurrentIndex(state.builtin_sample_index)
         v.select_pack_sample.setChecked(
             state.sample_source == SampleSource.SAMPLEPACK
         )
@@ -244,16 +245,31 @@ class Dashboard:
     ###########################################################################
 
     def on_musicxml_fname_clicked(self) -> None:
-        pass
+        fname, _ = QFileDialog.getOpenFileName(
+            self._view,
+            caption="MusicXML Input File",
+            filter="MusicXML Files (*.musicxml *.mxl)",
+        )
+        if fname:
+            self._model.on_musicxml_fname_changed(fname)
 
     def on_mml_fname_clicked(self) -> None:
-        pass
+        fname, _ = QFileDialog.getSaveFileName(
+            self._view, caption="MML Output File", filter="MML Files (*.txt)"
+        )
+
+        if fname:
+            self._model.on_mml_fname_changed(fname)
+
+    def on_brr_clicked(self) -> None:
+        fname, _ = QFileDialog.getOpenFileName(
+            self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
+        )
+        if fname:
+            self._model.on_brr_fname_changed(fname)
 
     def on_open_quicklook_clicked(self) -> None:
         self._quicklook.show()
-
-    def on_brr_clicked(self) -> None:
-        pass
 
     def on_preview_envelope_clicked(self) -> None:
         self._envelope_preview.show()
@@ -267,7 +283,7 @@ class Dashboard:
         connections = [
             # Control Panel
             (v.select_musicxml_fname, self.on_musicxml_fname_clicked),
-            (v.musicxml_fname, m.on_musicxml_changed),
+            (v.musicxml_fname, m.on_musicxml_fname_changed),
             (v.select_mml_fname, self.on_mml_fname_clicked),
             (v.mml_fname, m.on_mml_fname_changed),
             (v.loop_analysis, m.on_loop_analysis_changed),
@@ -313,6 +329,7 @@ class Dashboard:
             (v.pan_setting, m.on_pan_setting_changed),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
+            (v.builtin_sample, m.on_builtin_sample_changed),
             (v.select_pack_sample, m.on_pack_sample_selected),
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),

@@ -67,6 +67,7 @@ class State:
     pan_enabled: bool = False
     pan_setting: int = 0
     sample_source: SampleSource = SampleSource.BUILTIN
+    builtin_sample_index: int = 0
     brr_fname: str = ""
     adsr_mode: bool = True
     attack_setting: int = 0
