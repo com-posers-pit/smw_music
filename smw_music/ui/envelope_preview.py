@@ -107,7 +107,7 @@ class EnvelopePreview(QMainWindow):
             match state:
                 case _AdsrState.ATTACK:
                     if (count + attack_offset) % attack_period == 0:
-                        envx += 32
+                        envx += 32 if attack_reg != 0xF else 1024
                         if envx >= _LIMIT:
                             envx = _LIMIT
                             times.append(n / _SAMPLE_FREQ)
@@ -116,12 +116,9 @@ class EnvelopePreview(QMainWindow):
                 case _AdsrState.DECAY:
                     if (count + decay_offset) % decay_period == 0:
                         envx -= ((envx - 1) >> 8) + 1
-                        if envx <= slevel_reg << 8:
-                            envx = slevel_reg << 8
-
                         times.append(n / _SAMPLE_FREQ)
                         envelope.append(envx / _LIMIT)
-                        if envx == slevel_reg << 8:
+                        if envx >> 8 == slevel_reg:
                             if srate_reg:
                                 state = _AdsrState.SUSTAIN
                             else:
