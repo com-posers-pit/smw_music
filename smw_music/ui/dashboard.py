@@ -215,7 +215,8 @@ class Dashboard:
 
         # Global settings
         v.global_volume_slider.setValue(state.global_volume)
-        v.global_volume_setting.setText(hexb(state.global_volume))
+        v.global_volume_setting.setText(pct(state.global_volume))
+        v.global_volume_setting_label.setText(hexb(state.global_volume))
         v.global_legato.setChecked(state.global_legato)
         v.echo_enable.setChecked(state.echo_enable)
         v.echo_ch0.setChecked(state.echo_ch0_enable)
