@@ -188,8 +188,8 @@ class Dashboard:
         v.select_brr_sampl.setChecked(state.sample_source == SampleSource.BRR)
         v.brr_fname.setText(state.brr_fname)
 
-        v.select_adsr_mode.setChecked(state.use_adsr)
-        v.select_gain_mode.setChecked(not state.use_adsr)
+        v.select_adsr_mode.setChecked(state.adsr_mode)
+        v.select_gain_mode.setChecked(not state.adsr_mode)
         v.gain_mode_direct.setChecked(state.gain_mode == GainMode.DIRECT)
         v.gain_mode_inclin.setChecked(state.gain_mode == GainMode.INCLIN)
         v.gain_mode_incbent.setChecked(state.gain_mode == GainMode.INCBENT)

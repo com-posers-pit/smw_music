@@ -68,7 +68,7 @@ class State:
     pan_setting: int = 0
     sample_source: SampleSource = SampleSource.BUILTIN
     brr_fname: str = ""
-    use_adsr: bool = True
+    adsr_mode: bool = True
     attack_setting: int = 0
     decay_setting: int = 0
     sus_level_setting: int = 0

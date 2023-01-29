@@ -322,7 +322,7 @@ class Model(QObject):
         self._update_state(brr_fname=fname)
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_state(use_adsr=state)
+        self._update_state(adsr_mode=state)
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
