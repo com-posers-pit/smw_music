@@ -115,8 +115,10 @@ class EnvelopePreview(QMainWindow):
                         envx -= ((envx - 1) >> 8) + 1
                         if envx <= slevel_reg << 8:
                             envx = slevel_reg << 8
-                            times.append(n / _SAMPLE_FREQ)
-                            envelope.append(envx / _LIMIT)
+
+                        times.append(n / _SAMPLE_FREQ)
+                        envelope.append(envx / _LIMIT)
+                        if envx == slevel_reg << 8:
                             if srate_reg:
                                 state = _AdsrState.SUSTAIN
                             else:
@@ -124,14 +126,16 @@ class EnvelopePreview(QMainWindow):
                 case _AdsrState.SUSTAIN:
                     if (count + sustain_offset) % sustain_period == 0:
                         envx -= ((envx - 1) >> 8) + 1
-                        if envx <= 0:
-                            times.append(n / _SAMPLE_FREQ)
-                            envelope.append(0)
+                        envx = max(envx, 0)
+
+                        times.append(n / _SAMPLE_FREQ)
+                        envelope.append(envx / _LIMIT)
+                        if envx == 0:
                             break
                 case _AdsrState.RELEASE:
                     pass
 
-        times.append(2 * times[-1])
+        times.append(100)
         envelope.append(envelope[-1])
 
         self._plot_data.setData(times, envelope)
