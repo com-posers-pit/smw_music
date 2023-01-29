@@ -46,31 +46,6 @@ from smw_music.ui.state import GainMode, SampleSource, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
-# Private function definitions
-###############################################################################
-
-
-def _btn_con(button: QPushButton, slot) -> None:
-    button.clicked.connect(slot)
-
-
-def _box_con(checkbox: QCheckBox, slot) -> None:
-    checkbox.stateChanged.connect(slot)
-
-
-def _edt_con(edit: QLineEdit, slot) -> None:
-    edit.editingFinished.connect(lambda: slot(edit.text()))
-
-
-def _rad_con(radio: QRadioButton, slot) -> None:
-    radio.toggled.connect(slot)
-
-
-def _sld_con(slider: QSlider, slot) -> None:
-    slider.valueChanged.connect(slot)
-
-
-###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -289,108 +264,118 @@ class Dashboard:
         m = self._model  # pylint: disable=invalid-name
         v = self._view  # pylint: disable=invalid-name
 
-        # Control Panel
-        _btn_con(v.select_musicxml_fname, self.on_musicxml_fname_clicked)
-        _edt_con(v.musicxml_fname, m.on_musicxml_changed)
-        _btn_con(v.select_mml_fname, self.on_mml_fname_clicked)
-        _edt_con(v.mml_fname, m.on_mml_fname_changed)
-        _box_con(v.loop_analysis, m.on_loop_analysis_changed)
-        _box_con(v.superloop_analysis, m.on_superloop_analysis_changed)
-        _box_con(v.measure_numbers, m.on_measure_numbers_changed)
-        _btn_con(v.open_quicklook, self.on_open_quicklook_clicked)
-        _btn_con(v.generate_mml, m.on_generate_mml_clicked)
-        _btn_con(v.generate_spc, m.on_generate_spc_clicked)
-        _btn_con(v.play_spc, m.on_play_spc_clicked)
+        connections = [
+            # Control Panel
+            (v.select_musicxml_fname, self.on_musicxml_fname_clicked),
+            (v.musicxml_fname, m.on_musicxml_changed),
+            (v.select_mml_fname, self.on_mml_fname_clicked),
+            (v.mml_fname, m.on_mml_fname_changed),
+            (v.loop_analysis, m.on_loop_analysis_changed),
+            (v.superloop_analysis, m.on_superloop_analysis_changed),
+            (v.measure_numbers, m.on_measure_numbers_changed),
+            (v.open_quicklook, self.on_open_quicklook_clicked),
+            (v.generate_mml, m.on_generate_mml_clicked),
+            (v.generate_spc, m.on_generate_spc_clicked),
+            (v.play_spc, m.on_play_spc_clicked),
+            # Instrument dynamics settings
+            (v.pppp_slider, m.on_pppp_changed),
+            (v.pppp_setting, m.on_pppp_changed),
+            (v.ppp_slider, m.on_ppp_changed),
+            (v.ppp_setting, m.on_ppp_changed),
+            (v.pp_slider, m.on_pp_changed),
+            (v.pp_setting, m.on_pp_changed),
+            (v.p_slider, m.on_p_changed),
+            (v.p_setting, m.on_p_changed),
+            (v.mp_slider, m.on_mp_changed),
+            (v.mp_setting, m.on_mp_changed),
+            (v.mf_slider, m.on_mf_changed),
+            (v.mf_setting, m.on_mf_changed),
+            (v.f_slider, m.on_f_changed),
+            (v.f_setting, m.on_f_changed),
+            (v.ff_slider, m.on_ff_changed),
+            (v.ff_setting, m.on_ff_changed),
+            (v.fff_slider, m.on_fff_changed),
+            (v.fff_setting, m.on_fff_changed),
+            (v.ffff_slider, m.on_ffff_changed),
+            (v.ffff_setting, m.on_ffff_changed),
+            (v.interpolate, m.on_interpolate_changed),
+            # Instrument articulation settings
+            (v.artic_default_length_slider, m.on_def_artic_length_changed),
+            (v.artic_default_volume_slider, m.on_def_artic_volume_changed),
+            (v.artic_acc_length_slider, m.on_accent_length_changed),
+            (v.artic_acc_volume_slider, m.on_accent_volume_changed),
+            (v.artic_stacc_length_slider, m.on_staccato_length_changed),
+            (v.artic_stacc_volume_slider, m.on_staccato_volume_changed),
+            (v.artic_accstacc_length_slider, m.on_accstacc_length_changed),
+            (v.artic_accstacc_volume_slider, m.on_accstacc_volume_changed),
+            # Instrument pan settings
+            (v.pan_enable, m.on_pan_enable_changed),
+            (v.pan_setting, m.on_pan_setting_changed),
+            # Instrument sample
+            (v.select_builtin_sample, m.on_builtin_sample_selected),
+            (v.select_pack_sample, m.on_pack_sample_selected),
+            (v.select_brr_sample, m.on_brr_sample_selected),
+            (v.select_brr_fname, self.on_brr_clicked),
+            (v.brr_fname, m.on_brr_fname_changed),
+            (v.select_adsr_mode, m.on_select_adsr_mode_selected),
+            (v.gain_mode_direct, m.on_gain_direct_selected),
+            (v.gain_mode_inclin, m.on_gain_inclin_selected),
+            (v.gain_mode_incbent, m.on_gain_incbent_selected),
+            (v.gain_mode_declin, m.on_gain_declin_selected),
+            (v.gain_mode_decexp, m.on_gain_decexp_selected),
+            (v.gain_slider, m.on_gain_changed),
+            (v.attack_slider, m.on_attack_changed),
+            (v.decay_slider, m.on_decay_changed),
+            (v.sus_level_slider, m.on_sus_level_changed),
+            (v.sus_rate_slider, m.on_sus_rate_changed),
+            (v.tune_slider, m.on_tune_changed),
+            (v.tune_setting, m.on_tune_changed),
+            (v.subtune_slider, m.on_subtune_changed),
+            (v.subtune_setting, m.on_subtune_changed),
+            (v.brr_setting, m.on_brr_setting_changed),
+            (v.preview_envelope, self.on_preview_envelope_clicked),
+            # Global settings
+            (v.global_volume_slider, m.on_global_volume_changed),
+            (v.global_volume_setting, m.on_global_volume_changed),
+            (v.global_legato, m.on_global_legato_changed),
+            (v.echo_enable, m.on_echo_enable_changed),
+            (v.echo_ch0, m.on_echo_ch0_changed),
+            (v.echo_ch1, m.on_echo_ch1_changed),
+            (v.echo_ch2, m.on_echo_ch2_changed),
+            (v.echo_ch3, m.on_echo_ch3_changed),
+            (v.echo_ch4, m.on_echo_ch4_changed),
+            (v.echo_ch5, m.on_echo_ch5_changed),
+            (v.echo_ch6, m.on_echo_ch6_changed),
+            (v.echo_ch7, m.on_echo_ch7_changed),
+            (v.echo_filter_0, m.on_filter_0_toggled),
+            (v.echo_left_slider, m.on_echo_left_changed),
+            (v.echo_left_setting, m.on_echo_left_changed),
+            (v.echo_left_surround, m.on_echo_left_surround_changed),
+            (v.echo_right_slider, m.on_echo_right_changed),
+            (v.echo_right_setting, m.on_echo_right_changed),
+            (v.echo_right_surround, m.on_echo_right_surround_changed),
+            (v.echo_feedback_slider, m.on_echo_feedback_changed),
+            (v.echo_feedback_setting, m.on_echo_feedback_changed),
+            (v.echo_feedback_surround, m.on_echo_feedback_surround_changed),
+            (v.echo_delay_slider, m.on_echo_delay_changed),
+            (v.echo_delay_setting, m.on_echo_delay_changed),
+        ]
 
-        # Instrument dynamics settings
-        _sld_con(v.pppp_slider, m.on_pppp_changed)
-        _edt_con(v.pppp_setting, m.on_pppp_changed)
-        _sld_con(v.ppp_slider, m.on_ppp_changed)
-        _edt_con(v.ppp_setting, m.on_ppp_changed)
-        _sld_con(v.pp_slider, m.on_pp_changed)
-        _edt_con(v.pp_setting, m.on_pp_changed)
-        _sld_con(v.p_slider, m.on_p_changed)
-        _edt_con(v.p_setting, m.on_p_changed)
-        _sld_con(v.mp_slider, m.on_mp_changed)
-        _edt_con(v.mp_setting, m.on_mp_changed)
-        _sld_con(v.mf_slider, m.on_mf_changed)
-        _edt_con(v.mf_setting, m.on_mf_changed)
-        _sld_con(v.f_slider, m.on_f_changed)
-        _edt_con(v.f_setting, m.on_f_changed)
-        _sld_con(v.ff_slider, m.on_ff_changed)
-        _edt_con(v.ff_setting, m.on_ff_changed)
-        _sld_con(v.fff_slider, m.on_fff_changed)
-        _edt_con(v.fff_setting, m.on_fff_changed)
-        _sld_con(v.ffff_slider, m.on_ffff_changed)
-        _edt_con(v.ffff_setting, m.on_ffff_changed)
-        _box_con(v.interpolate, m.on_interpolate_changed)
+        for widget, slot in connections:
+            if isinstance(widget, QPushButton):
+                widget.clicked.connect(slot)
+            elif isinstance(widget, QCheckBox):
+                widget.stateChanged.connect(slot)
+            elif isinstance(widget, QLineEdit):
 
-        # Instrument articulation settings
-        _sld_con(v.artic_default_length_slider, m.on_def_artic_length_changed)
-        _sld_con(v.artic_default_volume_slider, m.on_def_artic_volume_changed)
-        _sld_con(v.artic_acc_length_slider, m.on_accent_length_changed)
-        _sld_con(v.artic_acc_volume_slider, m.on_accent_volume_changed)
-        _sld_con(v.artic_stacc_length_slider, m.on_staccato_length_changed)
-        _sld_con(v.artic_stacc_volume_slider, m.on_staccato_volume_changed)
-        _sld_con(v.artic_accstacc_length_slider, m.on_accstacc_length_changed)
-        _sld_con(v.artic_accstacc_volume_slider, m.on_accstacc_volume_changed)
+                def proxy(widget=widget, slot=slot):
+                    slot(widget.text())
 
-        # Instrument pan settings
-        _btn_con(v.pan_enable, m.on_pan_enable_changed)
-        _sld_con(v.pan_setting, m.on_pan_setting_changed)
-
-        # Instrument sample
-        _rad_con(v.select_builtin_sample, m.on_builtin_sample_selected)
-        _rad_con(v.select_pack_sample, m.on_pack_sample_selected)
-        _rad_con(v.select_brr_sample, m.on_brr_sample_selected)
-        _btn_con(v.select_brr_fname, self.on_brr_clicked)
-        _edt_con(v.brr_fname, m.on_brr_fname_changed)
-
-        _rad_con(v.select_adsr_mode, m.on_select_adsr_mode_selected)
-        _rad_con(v.gain_mode_direct, m.on_gain_direct_selected)
-        _rad_con(v.gain_mode_inclin, m.on_gain_inclin_selected)
-        _rad_con(v.gain_mode_incbent, m.on_gain_incbent_selected)
-        _rad_con(v.gain_mode_declin, m.on_gain_declin_selected)
-        _rad_con(v.gain_mode_decexp, m.on_gain_decexp_selected)
-        _sld_con(v.gain_slider, m.on_gain_changed)
-        _sld_con(v.attack_slider, m.on_attack_changed)
-        _sld_con(v.decay_slider, m.on_decay_changed)
-        _sld_con(v.sus_level_slider, m.on_sus_level_changed)
-        _sld_con(v.sus_rate_slider, m.on_sus_rate_changed)
-
-        _sld_con(v.tune_slider, m.on_tune_changed)
-        _edt_con(v.tune_setting, m.on_tune_changed)
-        _sld_con(v.subtune_slider, m.on_subtune_changed)
-        _edt_con(v.subtune_setting, m.on_subtune_changed)
-
-        _edt_con(v.brr_setting, m.on_brr_setting_changed)
-        _btn_con(v.preview_envelope, self.on_preview_envelope_clicked)
-
-        # Global settings
-        _sld_con(v.global_volume_slider, m.on_global_volume_changed)
-        _edt_con(v.global_volume_setting, m.on_global_volume_changed)
-        _box_con(v.global_legato, m.on_global_legato_changed)
-        _box_con(v.echo_enable, m.on_echo_enable_changed)
-        _box_con(v.echo_ch0, m.on_echo_ch0_changed)
-        _box_con(v.echo_ch1, m.on_echo_ch1_changed)
-        _box_con(v.echo_ch2, m.on_echo_ch2_changed)
-        _box_con(v.echo_ch3, m.on_echo_ch3_changed)
-        _box_con(v.echo_ch4, m.on_echo_ch4_changed)
-        _box_con(v.echo_ch5, m.on_echo_ch5_changed)
-        _box_con(v.echo_ch6, m.on_echo_ch6_changed)
-        _box_con(v.echo_ch7, m.on_echo_ch7_changed)
-        _rad_con(v.echo_filter_0, m.on_filter_0_toggled)
-        _sld_con(v.echo_left_slider, m.on_echo_left_changed)
-        _edt_con(v.echo_left_setting, m.on_echo_left_changed)
-        _box_con(v.echo_left_surround, m.on_echo_left_surround_changed)
-        _sld_con(v.echo_right_slider, m.on_echo_right_changed)
-        _edt_con(v.echo_right_setting, m.on_echo_right_changed)
-        _box_con(v.echo_right_surround, m.on_echo_right_surround_changed)
-        _sld_con(v.echo_feedback_slider, m.on_echo_feedback_changed)
-        _edt_con(v.echo_feedback_setting, m.on_echo_feedback_changed)
-        _box_con(v.echo_feedback_surround, m.on_echo_feedback_surround_changed)
-        _sld_con(v.echo_delay_slider, m.on_echo_delay_changed)
-        _edt_con(v.echo_delay_setting, m.on_echo_delay_changed)
+                widget.editingFinished.connect(proxy)
+            elif isinstance(widget, QRadioButton):
+                widget.toggled.connect(slot)
+            elif isinstance(widget, QSlider):
+                widget.valueChanged.connect(slot)
 
         # Return signal
         m.state_changed.connect(self.on_state_changed)
