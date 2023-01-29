@@ -91,6 +91,21 @@ def _add_sample_pack_to_model(
 ###############################################################################
 
 
+def _parse_setting(val: int | str) -> int:
+    if isinstance(val, int):
+        return val
+
+    val = val.strip()
+    if val[-1] == "%":
+        return int(255 * float(val[:-1]) / 100)
+    if val[0] == "$":
+        return int(val[1:], 16)
+    return int(float(val))
+
+
+###############################################################################
+
+
 def _dyn_to_str(dyn: "_DynEnum") -> str:
     lut = {
         _DynEnum.PPPP: "PPPP",
@@ -234,43 +249,43 @@ class Model(QObject):
         pass
 
     def on_pppp_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(pppp_setting=setting)
 
     def on_ppp_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(ppp_setting=setting)
 
     def on_pp_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(pp_setting=setting)
 
     def on_p_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(p_setting=setting)
 
     def on_mp_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(mp_setting=setting)
 
     def on_mf_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(mf_setting=setting)
 
     def on_f_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(f_setting=setting)
 
     def on_ff_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(ff_setting=setting)
 
     def on_fff_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(fff_setting=setting)
 
     def on_ffff_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(ffff_setting=setting)
 
     def on_interpolate_changed(self, state: bool) -> None:
@@ -345,31 +360,31 @@ class Model(QObject):
             self._update_state(gain_mode=GainMode.DECEXP)
 
     def on_gain_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(gain_setting=setting)
 
     def on_attack_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(attack_setting=setting)
 
     def on_decay_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(decay_setting=setting)
 
     def on_sus_level_changed(self, val: int | str) -> None:
-        setting = val
-        self._update_state(sus_level=setting)
+        setting = _parse_setting(val)
+        self._update_state(sus_level_setting=setting)
 
     def on_sus_rate_changed(self, val: int | str) -> None:
-        setting = val
-        self._update_state(sus_rate=setting)
+        setting = _parse_setting(val)
+        self._update_state(sus_rate_setting=setting)
 
     def on_tune_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(tune_setting=setting)
 
     def on_subtune_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(subtune_setting=setting)
 
     def on_brr_setting_changed(self, val: str) -> None:
@@ -377,7 +392,7 @@ class Model(QObject):
         pass
 
     def on_global_volume_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(global_volume=setting)
 
     def on_global_legato_changed(self, state: bool) -> None:
@@ -414,7 +429,7 @@ class Model(QObject):
         self._update_state(echo_filter0=state)
 
     def on_echo_left_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(echo_left_setting=setting)
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
@@ -422,7 +437,7 @@ class Model(QObject):
         pass
 
     def on_echo_right_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(echo_right_setting=setting)
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
@@ -430,7 +445,7 @@ class Model(QObject):
         pass
 
     def on_echo_feedback_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(echo_feedback_setting=setting)
 
     def on_echo_feedback_surround_changed(self, state: bool) -> None:
@@ -438,7 +453,7 @@ class Model(QObject):
         pass
 
     def on_echo_delay_changed(self, val: int | str) -> None:
-        setting = val
+        setting = _parse_setting(val)
         self._update_state(echo_delay_setting=setting)
 
     ###########################################################################
