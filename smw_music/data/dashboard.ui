@@ -141,7 +141,7 @@
            </widget>
            <widget class="QTabWidget" name="instrument_config_tab">
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="instrument_dynamics_tab">
              <attribute name="title">
@@ -774,68 +774,47 @@
                   <string>Sample</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="0" column="1" colspan="2">
-                   <widget class="QLabel" name="label">
-                    <property name="text">
-                     <string>Builtin Sample</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1" colspan="2">
-                   <widget class="QComboBox" name="builtin_sample"/>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QPushButton" name="select_brr">
+                  <item row="6" column="1">
+                   <widget class="QPushButton" name="select_brr_fname">
                     <property name="text">
                      <string>brr</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="5" column="2">
-                   <widget class="QLineEdit" name="brr_fname"/>
-                  </item>
-                  <item row="3" column="1" colspan="2">
-                   <widget class="QTreeView" name="sample_pack_list">
-                    <attribute name="headerVisible">
-                     <bool>false</bool>
-                    </attribute>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
+                  <item row="1" column="1" colspan="2">
                    <widget class="QRadioButton" name="select_builtin_sample">
                     <property name="text">
-                     <string/>
+                     <string>Builtin Sample</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="0">
+                  <item row="4" column="1" colspan="2">
+                   <widget class="QTreeView" name="sample_pack_list">
+                    <attribute name="headerVisible">
+                     <bool>false</bool>
+                    </attribute>
+                   </widget>
+                  </item>
+                  <item row="3" column="1" colspan="2">
                    <widget class="QRadioButton" name="select_pack_sample">
                     <property name="text">
-                     <string/>
+                     <string>Sample Pack Sample</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="4" column="1" colspan="2">
-                   <widget class="QLabel" name="label_3">
-                    <property name="text">
-                     <string>Custom Sample</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QRadioButton" name="select_brr_sample">
-                    <property name="text">
-                     <string/>
-                    </property>
-                   </widget>
+                  <item row="6" column="2">
+                   <widget class="QLineEdit" name="brr_fname"/>
                   </item>
                   <item row="2" column="1" colspan="2">
-                   <widget class="QLabel" name="label_2">
+                   <widget class="QComboBox" name="builtin_sample"/>
+                  </item>
+                  <item row="5" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_brr_sample">
                     <property name="text">
-                     <string>Sample Packs</string>
+                     <string>Custom Sample</string>
                     </property>
                    </widget>
                   </item>
@@ -1287,6 +1266,9 @@
               <property name="maximum">
                <number>255</number>
               </property>
+              <property name="tracking">
+               <bool>false</bool>
+              </property>
               <property name="orientation">
                <enum>Qt::Vertical</enum>
               </property>
@@ -1577,20 +1559,23 @@
                  </property>
                 </widget>
                </item>
-               <item row="4" column="3">
-                <widget class="QLabel" name="echo_delay_setting_label">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="3" rowspan="3">
+               <item row="1" column="3">
                 <widget class="QSlider" name="echo_delay_slider">
                  <property name="maximum">
                   <number>15</number>
                  </property>
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="3">
+                <widget class="QLineEdit" name="echo_delay_setting"/>
+               </item>
+               <item row="4" column="3">
+                <widget class="QLabel" name="echo_delay_setting_label">
+                 <property name="text">
+                  <string/>
                  </property>
                 </widget>
                </item>
@@ -1783,10 +1768,34 @@
   <tabstop>echo_feedback_setting</tabstop>
   <tabstop>echo_feedback_surround</tabstop>
   <tabstop>echo_delay_slider</tabstop>
+  <tabstop>echo_delay_setting</tabstop>
   <tabstop>open_quicklook</tabstop>
   <tabstop>generate_mml</tabstop>
   <tabstop>generate_spc</tabstop>
   <tabstop>play_spc</tabstop>
+  <tabstop>interpolate</tabstop>
+  <tabstop>builtin_sample</tabstop>
+  <tabstop>select_brr_fname</tabstop>
+  <tabstop>brr_fname</tabstop>
+  <tabstop>sample_pack_list</tabstop>
+  <tabstop>attack_setting</tabstop>
+  <tabstop>sus_level_setting</tabstop>
+  <tabstop>attack_slider</tabstop>
+  <tabstop>decay_slider</tabstop>
+  <tabstop>decay_setting</tabstop>
+  <tabstop>sus_rate_setting</tabstop>
+  <tabstop>sus_level_slider</tabstop>
+  <tabstop>sus_rate_slider</tabstop>
+  <tabstop>select_adsr_mode</tabstop>
+  <tabstop>gain_slider</tabstop>
+  <tabstop>gain_setting</tabstop>
+  <tabstop>gain_mode_direct</tabstop>
+  <tabstop>gain_mode_inclin</tabstop>
+  <tabstop>gain_mode_incbent</tabstop>
+  <tabstop>gain_mode_declin</tabstop>
+  <tabstop>gain_mode_decexp</tabstop>
+  <tabstop>select_gain_mode</tabstop>
+  <tabstop>preview_envelope</tabstop>
  </tabstops>
  <resources/>
  <connections/>

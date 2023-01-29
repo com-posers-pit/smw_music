@@ -198,6 +198,206 @@ class Model(QObject):
     # API method definitions
     ###########################################################################
 
+    def on_musicxml_changed(self, fname: str) -> None:
+        pass
+
+    def on_mml_fname_changed(self, fname: str) -> None:
+        pass
+
+    def on_loop_analysis_changed(self, enabled: bool) -> None:
+        pass
+
+    def on_superloop_analysis_changed(self, enabled: bool) -> None:
+        pass
+
+    def on_measure_numbers_changed(self, enabled: bool) -> None:
+        pass
+
+    def on_generate_mml_clicked(self) -> None:
+        pass
+
+    def on_generate_spc_clicked(self) -> None:
+        pass
+
+    def on_play_spc_clicked(self) -> None:
+        pass
+
+    def on_pppp_changed(self, val: int | str) -> None:
+        pass
+
+    def on_ppp_changed(self, val: int | str) -> None:
+        pass
+
+    def on_pp_changed(self, val: int | str) -> None:
+        pass
+
+    def on_p_changed(self, val: int | str) -> None:
+        pass
+
+    def on_mp_changed(self, val: int | str) -> None:
+        pass
+
+    def on_mf_changed(self, val: int | str) -> None:
+        pass
+
+    def on_f_changed(self, val: int | str) -> None:
+        pass
+
+    def on_ff_changed(self, val: int | str) -> None:
+        pass
+
+    def on_fff_changed(self, val: int | str) -> None:
+        pass
+
+    def on_ffff_changed(self, val: int | str) -> None:
+        pass
+
+    def on_interpolate_changed(self, state: bool) -> None:
+        pass
+
+    def on_def_artic_length_changed(self, val: int) -> None:
+        pass
+
+    def on_def_artic_volume_changed(self, val: int) -> None:
+        pass
+
+    def on_accent_length_changed(self, val: int) -> None:
+        pass
+
+    def on_accent_volume_changed(self, val: int) -> None:
+        pass
+
+    def on_staccato_length_changed(self, val: int) -> None:
+        pass
+
+    def on_staccato_volume_changed(self, val: int) -> None:
+        pass
+
+    def on_accstacc_length_changed(self, val: int) -> None:
+        pass
+
+    def on_accstacc_volume_changed(self, val: int) -> None:
+        pass
+
+    def on_pan_enable_changed(self, state: bool) -> None:
+        pass
+
+    def on_pan_setting_changed(self, val: int) -> None:
+        pass
+
+    def on_builtin_sample_selected(self, state: bool) -> None:
+        pass
+
+    def on_pack_sample_selected(self, state: bool) -> None:
+        pass
+
+    def on_brr_sample_selected(self, state: bool) -> None:
+        pass
+
+    def on_brr_fname_changed(self, fname: str) -> None:
+        pass
+
+    def on_select_adsr_mode_selected(self, state: bool) -> None:
+        pass
+
+    def on_gain_direct_selected(self, state: bool) -> None:
+        pass
+
+    def on_gain_inclin_selected(self, state: bool) -> None:
+        pass
+
+    def on_gain_incbent_selected(self, state: bool) -> None:
+        pass
+
+    def on_gain_declin_selected(self, state: bool) -> None:
+        pass
+
+    def on_gain_decexp_selected(self, state: bool) -> None:
+        pass
+
+    def on_gain_changed(self, val: int | str) -> None:
+        pass
+
+    def on_attack_changed(self, val: int | str) -> None:
+        pass
+
+    def on_decay_changed(self, val: int | str) -> None:
+        pass
+
+    def on_sus_level_changed(self, val: int | str) -> None:
+        pass
+
+    def on_sus_rate_changed(self, val: int | str) -> None:
+        pass
+
+    def on_tune_changed(self, val: int | str) -> None:
+        pass
+
+    def on_subtune_changed(self, val: int | str) -> None:
+        pass
+
+    def on_brr_setting_changed(self, val: str) -> None:
+        pass
+
+    def on_global_volume_changed(self, val: int | str) -> None:
+        pass
+
+    def on_global_legato_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_enable_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch0_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch1_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch2_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch3_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch4_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch5_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch6_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_ch7_changed(self, state: bool) -> None:
+        pass
+
+    def on_filter_0_toggled(self, state: bool) -> None:
+        pass
+
+    def on_echo_left_changed(self, val: int | str) -> None:
+        pass
+
+    def on_echo_left_surround_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_right_changed(self, val: int | str) -> None:
+        pass
+
+    def on_echo_right_surround_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_feedback_changed(self, val: int | str) -> None:
+        pass
+
+    def on_echo_feedback_surround_changed(self, state: bool) -> None:
+        pass
+
+    def on_echo_delay_changed(self, val: int | str) -> None:
+        pass
+
+    ###########################################################################
+
     @info(True)
     def create_project(
         self, project_file: Path, project_name: str | None = None

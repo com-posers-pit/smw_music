@@ -23,12 +23,14 @@ from PyQt6.QtCore import pyqtSignal
 from PyQt6.QtGui import QDoubleValidator, QIntValidator, QValidator
 from PyQt6.QtWidgets import (
     QApplication,
+    QCheckBox,
     QFileDialog,
     QLabel,
     QLineEdit,
     QMainWindow,
     QMessageBox,
     QPushButton,
+    QRadioButton,
     QSlider,
     QTextEdit,
 )
@@ -38,9 +40,7 @@ from smw_music import __version__
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
 from smw_music.ui import sample
-from smw_music.ui.controller import Controller
 from smw_music.ui.envelope_preview import EnvelopePreview
-from smw_music.ui.file_picker import file_picker
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.utils import hexb
@@ -48,6 +48,26 @@ from smw_music.utils import hexb
 ###############################################################################
 # Private function definitions
 ###############################################################################
+
+
+def _btn_con(button: QPushButton, slot) -> None:
+    button.clicked.connect(slot)
+
+
+def _box_con(checkbox: QCheckBox, slot) -> None:
+    checkbox.stateChanged.connect(slot)
+
+
+def _edt_con(edit: QLineEdit, slot) -> None:
+    edit.textEdited.connect(slot)
+
+
+def _rad_con(radio: QRadioButton, slot) -> None:
+    radio.toggled.connect(slot)
+
+
+def _sld_con(slider: QSlider, slot) -> None:
+    slider.valueChanged.connect(slot)
 
 
 def _hookup_slider(
@@ -81,7 +101,7 @@ def _hookup_slider(
 
 class Dashboard:
     _edit: QTextEdit
-    _edit_window: QMainWindow
+    _quicklook: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
@@ -102,16 +122,15 @@ class Dashboard:
         self._model = Model()
 
         self._edit = QTextEdit()
-        self._edit_window = QMainWindow(parent=self._view)
-        self._edit_window.setMinimumSize(800, 600)
-        self._edit_window.setCentralWidget(self._edit)
+        self._quicklook = QMainWindow(parent=self._view)
+        self._quicklook.setMinimumSize(800, 600)
+        self._quicklook.setCentralWidget(self._edit)
 
         self._envelope_preview = EnvelopePreview(self._view)
 
         self._view.sample_pack_list.setModel(self._model.sample_packs_model)
         self._view.instrument_list.setModel(self._model.instruments_model)
 
-        self._finish_ui_setup()
         self._setup_menus()
         self._attach_signals()
 
@@ -139,86 +158,129 @@ class Dashboard:
 
     ###########################################################################
 
-    def _attach_signals(self) -> None:
-        model = self._model
-        view = self._view
+    def on_musicxml_fname_clicked(self) -> None:
+        pass
 
-        view.generate_mml.clicked.connect(
-            model.on_mml_generated
-        )  # TODO: port this over self._generate_mml
-        view.generate_spc.clicked.connect(model.on_spc_generated)
-        view.play_spc.clicked.connect(model.on_spc_played)
+    def on_mml_fname_clicked(self) -> None:
+        pass
 
-        view.preview_envelope.clicked.connect(self._envelope_preview.show)
+    def on_open_quicklook_clicked(self) -> None:
+        self._quicklook.show()
 
-        view.select_adsr_mode.released.connect(self._update_envelope)
-        view.select_gain_mode.released.connect(self._update_envelope)
-        view.gain_mode_direct.released.connect(self._update_envelope)
-        view.gain_mode_inclin.released.connect(self._update_envelope)
-        view.gain_mode_incbent.released.connect(self._update_envelope)
-        view.gain_mode_declin.released.connect(self._update_envelope)
-        view.gain_mode_decexp.released.connect(self._update_envelope)
-        view.gain_slider.valueChanged.connect(self._update_envelope)
-        view.attack_slider.valueChanged.connect(self._update_envelope)
-        view.decay_slider.valueChanged.connect(self._update_envelope)
-        view.sus_level_slider.valueChanged.connect(self._update_envelope)
-        view.sus_rate_slider.valueChanged.connect(self._update_envelope)
+    def on_brr_clicked(self) -> None:
+        pass
 
-        view.gain_mode_direct.toggled.connect(self._update_gain_limits)
-        view.gain_slider.valueChanged.connect(
-            lambda x: view.gain_setting_label.setText(hexb(x))
-        )
+    def on_preview_envelope_clicked(self) -> None:
+        self._envelope_preview.show()
 
-        view.attack_slider.valueChanged.connect(
-            lambda x: view.attack_setting_label.setText(hexb(x))
-        )
-        view.attack_slider.valueChanged.connect(
-            lambda x: view.attack_eu_label.setText(sample.attack_dn2eu(x))
-        )
-        view.decay_slider.valueChanged.connect(
-            lambda x: view.decay_setting_label.setText(hexb(x))
-        )
-        view.decay_slider.valueChanged.connect(
-            lambda x: view.decay_eu_label.setText(sample.decay_dn2eu(x))
-        )
-        view.sus_level_slider.valueChanged.connect(
-            lambda x: view.sus_level_setting_label.setText(hexb(x))
-        )
-        view.sus_level_slider.valueChanged.connect(
-            lambda x: view.sus_level_eu_label.setText(
-                sample.sus_level_dn2eu(x)
-            )
-        )
-        view.sus_rate_slider.valueChanged.connect(
-            lambda x: view.sus_rate_setting_label.setText(hexb(x))
-        )
-        view.sus_rate_slider.valueChanged.connect(
-            lambda x: view.sus_rate_eu_label.setText(sample.sus_rate_dn2eu(x))
-        )
+    ###########################################################################
 
-        view.tune_slider.valueChanged.connect(self._update_setting)
-        view.tune_slider.valueChanged.connect(
-            lambda x: view.tune_setting.setText(hexb(x))
-        )
-        view.subtune_slider.valueChanged.connect(self._update_setting)
-        view.subtune_slider.valueChanged.connect(
-            lambda x: view.subtune_setting.setText(hexb(x))
-        )
+    def _attach_signals(self) -> None:  # pylint: disable=too-many-statements
+        m = self._model  # pylint: disable=invalid-name
+        v = self._view  # pylint: disable=invalid-name
 
-    #        view.musicxml_fname.textChanged.connect(model.set_song)
-    #        view.open_quicklook.clicked.connect(self._edit_window.show)
-    #        model.song_changed.connect(self.update_song)
+        # Control Panel
+        _btn_con(v.select_musicxml_fname, self.on_musicxml_fname_clicked)
+        _edt_con(v.musicxml_fname, m.on_musicxml_changed)
+        _btn_con(v.select_mml_fname, self.on_mml_fname_clicked)
+        _edt_con(v.mml_fname, m.on_mml_fname_changed)
+        _box_con(v.loop_analysis, m.on_loop_analysis_changed)
+        _box_con(v.superloop_analysis, m.on_superloop_analysis_changed)
+        _box_con(v.measure_numbers, m.on_measure_numbers_changed)
+        _btn_con(v.open_quicklook, self.on_open_quicklook_clicked)
+        _btn_con(v.generate_mml, m.on_generate_mml_clicked)
+        _btn_con(v.generate_spc, m.on_generate_spc_clicked)
+        _btn_con(v.play_spc, m.on_play_spc_clicked)
 
-    # controller.artic_changed.connect(model.update_artic)
-    # controller.config_changed.connect(model.set_config)
-    # controller.instrument_changed.connect(model.set_instrument)
-    # controller.pan_changed.connect(model.set_pan)
-    # controller.song_changed.connect(model.set_song)
-    # controller.volume_changed.connect(model.update_dynamics)
-    # model.inst_config_changed.connect(controller.change_inst_config)
-    # model.mml_generated.connect(self._edit.setText)
-    # model.response_generated.connect(controller.log_response)
-    # model.song_changed.connect(controller.update_song)
+        # Instrument dynamics settings
+        _sld_con(v.pppp_slider, m.on_pppp_changed)
+        _edt_con(v.pppp_setting, m.on_pppp_changed)
+        _sld_con(v.ppp_slider, m.on_ppp_changed)
+        _edt_con(v.ppp_setting, m.on_ppp_changed)
+        _sld_con(v.pp_slider, m.on_pp_changed)
+        _edt_con(v.pp_setting, m.on_pp_changed)
+        _sld_con(v.p_slider, m.on_p_changed)
+        _edt_con(v.p_setting, m.on_p_changed)
+        _sld_con(v.mp_slider, m.on_mp_changed)
+        _edt_con(v.mp_setting, m.on_mp_changed)
+        _sld_con(v.mf_slider, m.on_mf_changed)
+        _edt_con(v.mf_setting, m.on_mf_changed)
+        _sld_con(v.f_slider, m.on_f_changed)
+        _edt_con(v.f_setting, m.on_f_changed)
+        _sld_con(v.ff_slider, m.on_ff_changed)
+        _edt_con(v.ff_setting, m.on_ff_changed)
+        _sld_con(v.fff_slider, m.on_fff_changed)
+        _edt_con(v.fff_setting, m.on_fff_changed)
+        _sld_con(v.ffff_slider, m.on_ffff_changed)
+        _edt_con(v.ffff_setting, m.on_ffff_changed)
+        _box_con(v.interpolate, m.on_interpolate_changed)
+
+        # Instrument articulation settings
+        _sld_con(v.artic_default_length_slider, m.on_def_artic_length_changed)
+        _sld_con(v.artic_default_volume_slider, m.on_def_artic_volume_changed)
+        _sld_con(v.artic_acc_length_slider, m.on_accent_length_changed)
+        _sld_con(v.artic_acc_volume_slider, m.on_accent_volume_changed)
+        _sld_con(v.artic_stacc_length_slider, m.on_staccato_length_changed)
+        _sld_con(v.artic_stacc_volume_slider, m.on_staccato_volume_changed)
+        _sld_con(v.artic_accstacc_length_slider, m.on_accstacc_length_changed)
+        _sld_con(v.artic_accstacc_volume_slider, m.on_accstacc_volume_changed)
+
+        # Instrument pan settings
+        _btn_con(v.pan_enable, m.on_pan_enable_changed)
+        _sld_con(v.pan_setting, m.on_pan_setting_changed)
+
+        # Instrument sample
+        _rad_con(v.select_builtin_sample, m.on_builtin_sample_selected)
+        _rad_con(v.select_pack_sample, m.on_pack_sample_selected)
+        _rad_con(v.select_brr_sample, m.on_brr_sample_selected)
+        _btn_con(v.select_brr_fname, self.on_brr_clicked)
+        _edt_con(v.brr_fname, m.on_brr_fname_changed)
+
+        _rad_con(v.select_adsr_mode, m.on_select_adsr_mode_selected)
+        _rad_con(v.gain_mode_direct, m.on_gain_direct_selected)
+        _rad_con(v.gain_mode_inclin, m.on_gain_inclin_selected)
+        _rad_con(v.gain_mode_incbent, m.on_gain_incbent_selected)
+        _rad_con(v.gain_mode_declin, m.on_gain_declin_selected)
+        _rad_con(v.gain_mode_decexp, m.on_gain_decexp_selected)
+        _sld_con(v.gain_slider, m.on_gain_changed)
+        _sld_con(v.attack_slider, m.on_attack_changed)
+        _sld_con(v.decay_slider, m.on_decay_changed)
+        _sld_con(v.sus_level_slider, m.on_sus_level_changed)
+        _sld_con(v.sus_rate_slider, m.on_sus_rate_changed)
+
+        _sld_con(v.tune_slider, m.on_tune_changed)
+        _edt_con(v.tune_setting, m.on_tune_changed)
+        _sld_con(v.subtune_slider, m.on_subtune_changed)
+        _edt_con(v.subtune_setting, m.on_subtune_changed)
+
+        _edt_con(v.brr_setting, m.on_brr_setting_changed)
+        _btn_con(v.preview_envelope, self.on_preview_envelope_clicked)
+
+        # Global settings
+        _sld_con(v.global_volume_slider, m.on_global_volume_changed)
+        _edt_con(v.global_volume_setting, m.on_global_volume_changed)
+        _box_con(v.global_legato, m.on_global_legato_changed)
+        _box_con(v.echo_enable, m.on_echo_enable_changed)
+        _box_con(v.echo_ch0, m.on_echo_ch0_changed)
+        _box_con(v.echo_ch1, m.on_echo_ch1_changed)
+        _box_con(v.echo_ch2, m.on_echo_ch2_changed)
+        _box_con(v.echo_ch3, m.on_echo_ch3_changed)
+        _box_con(v.echo_ch4, m.on_echo_ch4_changed)
+        _box_con(v.echo_ch5, m.on_echo_ch5_changed)
+        _box_con(v.echo_ch6, m.on_echo_ch6_changed)
+        _box_con(v.echo_ch7, m.on_echo_ch7_changed)
+        _rad_con(v.echo_filter_0, m.on_filter_0_toggled)
+        _sld_con(v.echo_left_slider, m.on_echo_left_changed)
+        _edt_con(v.echo_left_setting, m.on_echo_left_changed)
+        _box_con(v.echo_left_surround, m.on_echo_left_surround_changed)
+        _sld_con(v.echo_right_slider, m.on_echo_right_changed)
+        _edt_con(v.echo_right_setting, m.on_echo_right_changed)
+        _box_con(v.echo_right_surround, m.on_echo_right_surround_changed)
+        _sld_con(v.echo_feedback_slider, m.on_echo_feedback_changed)
+        _edt_con(v.echo_feedback_setting, m.on_echo_feedback_changed)
+        _box_con(v.echo_feedback_surround, m.on_echo_feedback_surround_changed)
+        _sld_con(v.echo_delay_slider, m.on_echo_delay_changed)
+        _edt_con(v.echo_delay_setting, m.on_echo_delay_changed)
 
     ###########################################################################
 
@@ -311,107 +373,14 @@ class Dashboard:
 
     ###########################################################################
 
-    def _finish_ui_setup(self) -> None:
-        view = self._view
-        file_picker(
-            view.select_musicxml_fname,
-            view.musicxml_fname,
-            False,
-            "Input MusicXML File",
-            "MusicXML (*.mxl *.musicxml);;Any (*)",
-        )
-        file_picker(
-            view.select_mml_fname,
-            view.mml_fname,
-            True,
-            "Output MusicXML File",
-            "",
-        )
-
-        # self._hookup_sample_sliders()
-        self._hookup_vol_sliders()
-
-    ###########################################################################
-
     def _generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
-        if self._edit_window.isVisible() or fname:
+        if self._quicklook.isVisible() or fname:
             self._model.generate_mml(fname, echo)
         else:
             self._view.log_response(
                 True,
                 "Generation Error",
                 "Select an MML file or open the Quicklook",
-            )
-
-    ###########################################################################
-
-    def _hookup_sample_sliders(self) -> None:
-        view = self._view
-        dyn = [
-            (
-                view.attack_slider,
-                view.attack_setting,
-                view.attack_setting_label,
-            ),
-            (view.decay_slider, view.decay_setting, view.decay_setting_label),
-            (
-                view.sustain_slider,
-                view.sustain_setting,
-                view.sustain_setting_label,
-            ),
-            (
-                view.release_slider,
-                view.release_setting,
-                view.release_setting_label,
-            ),
-            (view.gain_slider, view.gain_setting, view.gain_setting_label),
-            (view.tune_slider, view.tune_setting, view.tune_setting_label),
-            (
-                view.subtune_slider,
-                view.subtune_setting,
-                view.subtune_setting_label,
-            ),
-        ]
-
-        for slider, setting, label in dyn:
-            _hookup_slider(
-                slider,
-                setting,
-                label,
-                lambda x: "",
-                lambda x: 0,
-                lambda x: "",
-                "0",
-                None,
-            )
-
-    ###########################################################################
-
-    def _hookup_vol_sliders(self) -> None:
-        view = self._view
-        dyn = [
-            (view.pppp_slider, view.pppp_setting, view.pppp_setting_label),
-            (view.ppp_slider, view.ppp_setting, view.ppp_setting_label),
-            (view.pp_slider, view.pp_setting, view.pp_setting_label),
-            (view.p_slider, view.p_setting, view.p_setting_label),
-            (view.mp_slider, view.mp_setting, view.mp_setting_label),
-            (view.mf_slider, view.mf_setting, view.mf_setting_label),
-            (view.f_slider, view.f_setting, view.f_setting_label),
-            (view.ff_slider, view.ff_setting, view.ff_setting_label),
-            (view.fff_slider, view.fff_setting, view.fff_setting_label),
-            (view.ffff_slider, view.ffff_setting, view.ffff_setting_label),
-        ]
-
-        for slider, setting, label in dyn:
-            _hookup_slider(
-                slider,
-                setting,
-                label,
-                lambda x: f"{100*x/255:5.1f}",
-                lambda x: int(255 * float(x) / 100),
-                hexb,
-                "0",
-                QDoubleValidator(0, 100, 1),
             )
 
     ###########################################################################
@@ -445,130 +414,3 @@ class Dashboard:
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)
-
-
-###############################################################################
-
-
-class Dashboard2(QMainWindow):
-    _extension = "prj"
-
-    ###########################################################################
-
-    def __init__(self) -> None:
-        super().__init__()
-
-        self._model = Model()
-        self._controller = Controller()
-        self._edit_window = QMainWindow(parent=self)
-        self._edit = QTextEdit()
-        self._controller.load_sample_packs(self._model.sample_packs_model)
-
-        self._edit_window.setMinimumSize(800, 600)
-
-        self._setup_menus()
-        self._setup_output()
-        self._attach_signals()
-
-        self.setCentralWidget(self._controller)
-
-    ###########################################################################
-    # Private method definitions
-    ###########################################################################
-
-    def _about(self) -> None:
-        title = "About MusicXML -> MML"
-        text = f"Version: {__version__}"
-        text += "\nCopyright Ⓒ 2022 The SMW Music Python Project Authors"
-        text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
-
-        QMessageBox.about(self, title, text)
-
-    ###########################################################################
-
-    def _attach_signals(self) -> None:
-        controller = self._controller
-        model = self._model
-
-        controller.artic_changed.connect(model.update_artic)
-        controller.config_changed.connect(model.set_config)
-        controller.instrument_changed.connect(model.set_instrument)
-        controller.mml_requested.connect(self._generate_mml)
-        controller.mml_converted.connect(model.convert_mml)
-        controller.pan_changed.connect(model.set_pan)
-        controller.quicklook_opened.connect(self._edit_window.show)
-        controller.song_changed.connect(model.set_song)
-        controller.spc_played.connect(model.play_spc)
-        controller.volume_changed.connect(model.update_dynamics)
-        model.inst_config_changed.connect(controller.change_inst_config)
-        model.mml_generated.connect(self._edit.setText)
-        model.response_generated.connect(controller.log_response)
-        model.song_changed.connect(controller.update_song)
-
-    ###########################################################################
-
-    def _create_project(self) -> None:
-        fname, _ = QFileDialog.getSaveFileName(
-            self, "Project File", filter=f"*.{self._extension}"
-        )
-        if fname:
-            self._model.create_project(pathlib.Path(fname))
-
-    ###########################################################################
-
-    def _generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
-        if self._edit_window.isVisible() or fname:
-            self._model.generate_mml(fname, echo)
-        else:
-            self._controller.log_response(
-                True,
-                "Generation Error",
-                "Select an MML file or open the Quicklook",
-            )
-
-    ###########################################################################
-
-    def _open_project(self) -> None:
-        fname, _ = QFileDialog.getOpenFileName(
-            self, "Project File", filter=f"*.{self._extension}"
-        )
-        if fname:
-            self._model.load(fname)
-
-    ###########################################################################
-
-    def _preferences(self) -> None:
-        pass
-
-    ###########################################################################
-
-    def _save_as(self) -> None:
-        fname, _ = QFileDialog.getSaveFileName(
-            self, "Project File", filter=f"*.{self._extension}"
-        )
-        if fname:
-            self._model.save_as(fname)
-
-    ###########################################################################
-
-    def _setup_menus(self) -> None:
-        file_menu = self.menuBar().addMenu("&File")
-        file_menu.addAction("&New Project...", self._create_project)
-        file_menu.addAction("&Open Project...", self._open_project)
-        file_menu.addAction("&Save", self._model.save)
-        file_menu.addAction("&Close Project...", lambda _: None)
-        file_menu.addSeparator()
-        file_menu.addAction("&Preferences", self._preferences)
-        file_menu.addSeparator()
-        file_menu.addAction("&Quit", QApplication.quit)
-
-        help_menu = self.menuBar().addMenu("&Help")
-        help_menu.addAction("About", self._about)
-        help_menu.addAction("About Qt", QApplication.aboutQt)
-
-    ###########################################################################
-
-    def _setup_output(self) -> None:
-        self._edit.setReadOnly(True)
-        self._edit.setFontFamily("Courier")
-        self._edit_window.setCentralWidget(self._edit)

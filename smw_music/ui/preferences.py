@@ -20,9 +20,6 @@ from PyQt6 import uic
 from PyQt6.QtGui import QStandardItemModel
 from PyQt6.QtWidgets import QDialog
 
-# Package imports
-from smw_music.ui.file_picker import file_picker
-
 ###############################################################################
 # API class definitions
 ###############################################################################
@@ -52,7 +49,7 @@ class Preferences:
             ),
         ]
         for btn, edit, caption in pairs:
-            file_picker(btn, edit, False, caption, "Zip (*.zip)")
+            pass  # file_picker(btn, edit, False, caption, "Zip (*.zip)")
 
     ###########################################################################
     # API function definitions
