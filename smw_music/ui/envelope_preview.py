@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
+# SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -17,7 +17,6 @@ import numpy as np
 import numpy.typing as npt
 import pyqtgraph as pg
 from PyQt6.QtWidgets import QGraphicsScene, QMainWindow, QWidget
-from pyqtgraph import PlotWidget, plot
 
 ###############################################################################
 # Private constant definition
@@ -81,7 +80,7 @@ class EnvelopePreview(QMainWindow):
     # API method definitions
     ###########################################################################
 
-    def adsr(
+    def plot_adsr(
         self,
         attack_reg: int,
         decay_reg: int,
@@ -142,22 +141,16 @@ class EnvelopePreview(QMainWindow):
 
     ###########################################################################
 
-    def direct_gain(self, gain_reg: int) -> None:
-        gain = (gain_reg << 4) / _LIMIT
-        self._plot_data.setData([0, 100], [gain, gain])
-
-    ###########################################################################
-
-    def inclin(self, gain_reg: int) -> None:
+    def plot_declin(self, gain_reg: int) -> None:
         period = _RATES[gain_reg]
         offset = _OFFSETS[gain_reg]
         times = [0.0, 0.0, 100]
-        envelope = [0, 1, 1]
-        envx = 0
+        envelope = [1, 0, 0]
+        envx = _LIMIT
         for n, count in enumerate(self._counts):
             if (count + offset) % period == 0:
-                envx += 32
-                if envx >= _LIMIT:
+                envx -= 32
+                if envx <= 0:
                     times[1] = n / _SAMPLE_FREQ
                     break
 
@@ -165,7 +158,34 @@ class EnvelopePreview(QMainWindow):
 
     ###########################################################################
 
-    def incbent(self, gain_reg: int) -> None:
+    def plot_decexp(self, gain_reg: int) -> None:
+        period = _RATES[gain_reg]
+        offset = _OFFSETS[gain_reg]
+        times = [0.0]
+        envelope = [1.0]
+        envx = _LIMIT
+        for n, count in enumerate(self._counts):
+            if (count + offset) % period == 0:
+                envx -= ((envx - 1) >> 8) + 1
+                times.append(n / _SAMPLE_FREQ)
+                envelope.append(envx / _LIMIT)
+
+                if envx <= 0:
+                    break
+
+        times.append(100)
+        envelope.append(0)
+        self._plot_data.setData(times, envelope)
+
+    ###########################################################################
+
+    def plot_direct_gain(self, gain_reg: int) -> None:
+        gain = (gain_reg << 4) / _LIMIT
+        self._plot_data.setData([0, 100], [gain, gain])
+
+    ###########################################################################
+
+    def plot_incbent(self, gain_reg: int) -> None:
         period = _RATES[gain_reg]
         offset = _OFFSETS[gain_reg]
         times = [0.0, 0.0, 0.0, 100]
@@ -187,38 +207,17 @@ class EnvelopePreview(QMainWindow):
 
     ###########################################################################
 
-    def declin(self, gain_reg: int) -> None:
+    def plot_inclin(self, gain_reg: int) -> None:
         period = _RATES[gain_reg]
         offset = _OFFSETS[gain_reg]
         times = [0.0, 0.0, 100]
-        envelope = [1, 0, 0]
-        envx = _LIMIT
+        envelope = [0, 1, 1]
+        envx = 0
         for n, count in enumerate(self._counts):
             if (count + offset) % period == 0:
-                envx -= 32
-                if envx <= 0:
+                envx += 32
+                if envx >= _LIMIT:
                     times[1] = n / _SAMPLE_FREQ
                     break
 
-        self._plot_data.setData(times, envelope)
-
-    ###########################################################################
-
-    def decexp(self, gain_reg: int) -> None:
-        period = _RATES[gain_reg]
-        offset = _OFFSETS[gain_reg]
-        times = [0.0]
-        envelope = [1.0]
-        envx = _LIMIT
-        for n, count in enumerate(self._counts):
-            if (count + offset) % period == 0:
-                envx -= ((envx - 1) >> 8) + 1
-                times.append(n / _SAMPLE_FREQ)
-                envelope.append(envx / _LIMIT)
-
-                if envx <= 0:
-                    break
-
-        times.append(100)
-        envelope.append(0)
         self._plot_data.setData(times, envelope)

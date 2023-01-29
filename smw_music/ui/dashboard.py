@@ -279,7 +279,7 @@ class Dashboard:
         gain_reg = view.gain_slider.value()
 
         if view.select_adsr_mode.isChecked():
-            env.adsr(
+            env.plot_adsr(
                 view.attack_slider.value(),
                 view.decay_slider.value(),
                 view.sus_level_slider.value(),
@@ -287,15 +287,15 @@ class Dashboard:
             )
         else:  # view.select_gain_mode
             if view.gain_mode_direct.isChecked():
-                env.direct_gain(gain_reg)
+                env.plot_direct_gain(gain_reg)
             elif view.gain_mode_inclin.isChecked():
-                env.inclin(gain_reg)
+                env.plot_inclin(gain_reg)
             elif view.gain_mode_incbent.isChecked():
-                env.incbent(gain_reg)
+                env.plot_incbent(gain_reg)
             elif view.gain_mode_declin.isChecked():
-                env.declin(gain_reg)
+                env.plot_declin(gain_reg)
             elif view.gain_mode_decexp.isChecked():
-                env.decexp(gain_reg)
+                env.plot_decexp(gain_reg)
 
         self._update_setting()
 
