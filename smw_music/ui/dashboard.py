@@ -60,7 +60,7 @@ def _box_con(checkbox: QCheckBox, slot) -> None:
 
 
 def _edt_con(edit: QLineEdit, slot) -> None:
-    edit.textEdited.connect(slot)
+    edit.editingFinished.connect(lambda: slot(edit.text()))
 
 
 def _rad_con(radio: QRadioButton, slot) -> None:
@@ -69,30 +69,6 @@ def _rad_con(radio: QRadioButton, slot) -> None:
 
 def _sld_con(slider: QSlider, slot) -> None:
     slider.valueChanged.connect(slot)
-
-
-def _hookup_slider(
-    slider: QSlider,
-    edit: QLineEdit,
-    label: QLabel,
-    slider_to_edit: Callable[[int], str],
-    edit_to_slider: Callable[[str], int],
-    slider_to_label: Callable[[int], str],
-    init: str,
-    validator: QValidator | None,
-) -> None:
-
-    if validator:
-        edit.setValidator(validator)
-
-    slider.valueChanged.connect(lambda x: edit.setText(slider_to_edit(x)))
-    slider.valueChanged.connect(lambda x: label.setText(slider_to_label(x)))
-    edit.editingFinished.connect(
-        lambda: slider.setValue(edit_to_slider(edit.text()))
-    )
-
-    edit.insert(init)
-    edit.editingFinished.emit()
 
 
 ###############################################################################

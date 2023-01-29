@@ -3,8 +3,16 @@ Dashboard Signal/Slot Map
 
 This page includes the mapping between all signals and slots in the dashboard
 application.
-The documentation must be manually updated any time they change, so anything
-that's out of date should be reported.
+
+.. note::
+   All ``editingFinished`` signals are connected to slots via a proxy that
+   also sends the updated text.
+   Not really sure why this isn't the default.
+   ¯\\_(ツ)_/¯
+
+.. note::
+   The documentation must be manually updated any time they change, so anything
+   that's out of date should be reported.
 
 Dashboard
 ---------
@@ -21,9 +29,9 @@ Control Panel
 
    flowchart LR
       view.select_musicxml_fname.clicked --> dashboard.on_musicxml_fname_selected
-      view.musicxml_fname.textChanged --> model.on_musicxml_changed
+      view.musicxml_fname.editingFinished --> model.on_musicxml_changed
       view.select_mml_fname.clicked --> dashboard.on_mml_fname_selected
-      view.mml_fname.textChanged --> model.on_mml_fname_changed
+      view.mml_fname.editingFinished --> model.on_mml_fname_changed
       view.loop_analysis.stateChanged --> model.on_loop_analysis_changed
       view.superloop_analysis.stateChanged --> model.on_superloop_analysis_changed
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
@@ -45,25 +53,25 @@ Dynamics
 
    flowchart LR
       view.pppp_slider.valueChanged --> model.on_pppp_changed
-      view.pppp_setting.textChanged --> model.on_pppp_changed
+      view.pppp_setting.editingFinished --> model.on_pppp_changed
       view.ppp_slider.valueChanged --> model.on_ppp_changed
-      view.ppp_setting.textChanged --> model.on_ppp_changed
+      view.ppp_setting.editingFinished --> model.on_ppp_changed
       view.pp_slider.valueChanged --> model.on_pp_changed
-      view.pp_setting.textChanged --> model.on_pp_changed
+      view.pp_setting.editingFinished --> model.on_pp_changed
       view.p_slider.valueChanged --> model.on_p_changed
-      view.p_setting.textChanged --> model.on_p_changed
+      view.p_setting.editingFinished --> model.on_p_changed
       view.mp_slider.valueChanged --> model.on_mp_changed
-      view.mp_setting.textChanged --> model.on_mp_changed
+      view.mp_setting.editingFinished --> model.on_mp_changed
       view.mf_slider.valueChanged --> model.on_mf_changed
-      view.mf_setting.textChanged --> model.on_mf_changed
+      view.mf_setting.editingFinished --> model.on_mf_changed
       view.f_slider.valueChanged --> model.on_f_changed
-      view.f_setting.textChanged --> model.on_f_changed
+      view.f_setting.editingFinished --> model.on_f_changed
       view.ff_slider.valueChanged --> model.on_ff_changed
-      view.ff_setting.textChanged --> model.on_ff_changed
+      view.ff_setting.editingFinished --> model.on_ff_changed
       view.fff_slider.valueChanged --> model.on_fff_changed
-      view.fff_setting.textChanged --> model.on_fff_changed
+      view.fff_setting.editingFinished --> model.on_fff_changed
       view.ffff_slider.valueChanged --> model.on_ffff_changed
-      view.ffff_setting.textChanged --> model.on_ffff_changed
+      view.ffff_setting.editingFinished --> model.on_ffff_changed
       A["view.interpolate.stateChanged"] --> model.on_interpolate_changed
 
 Articulations
@@ -100,7 +108,7 @@ Sample
       view.select_pack_sample.toggled --> model.on_pack_sample_selected
       view.select_brr_sample.toggled --> model.on_brr_sample_selected
       view.select_brr_fname.clicked --> dashboard.on_brr_clicked
-      view.brr_fname.textChanged --> model.on_brr_fname_changed
+      view.brr_fname.editingFinished --> model.on_brr_fname_changed
       view.select_adsr_mode.toggled --> model.on_select_adsr_mode_selected
       view.gain_mode_direct.toggled --> model.on_gain_direct_selected
       view.gain_mode_inclin.toggled --> model.on_gain_inclin_selected
@@ -113,10 +121,10 @@ Sample
       view.sus_level_slider.valueChanged --> model.on_sus_level_changed
       view.sus_rate_slider.valueChanged --> model.on_sus_rate_changed
       view.tune_slider.valueChanged --> model.on_tune_changed
-      view.tune_setting.textChanged --> model.on_tune_changed
+      view.tune_setting.editingFinished --> model.on_tune_changed
       view.subtune_slider.valueChanged --> model.on_subtune_changed
-      view.subtune_setting.textChanged --> model.on_subtune_changed
-      view.brr_setting.textChanged --> model.on_brr_setting_changed
+      view.subtune_setting.editingFinished --> model.on_subtune_changed
+      view.brr_setting.editingFinished --> model.on_brr_setting_changed
       view.preview_envelope.clicked --> self.on_preview_envelope_clicked
 
 
@@ -140,13 +148,13 @@ Global Settings
      view.echo_ch7.stateChanged --> model.on_echo_ch7_changed
      view.echo_filter0.toggled --> model.on_filter_0_toggled
      view.echo_left_slider.toggled --> model.on_echo_left_changed
-     view.echo_left_setting.textChanged --> model.on_echo_left_changed
+     view.echo_left_setting.editingFinished --> model.on_echo_left_changed
      view.echo_left_surround.stateChanged --> model.on_echo_left_surround_changed
      view.echo_right_slider.toggled --> model.on_echo_right_changed
-     view.echo_right_setting.textChanged --> model.on_echo_right_changed
+     view.echo_right_setting.editingFinished --> model.on_echo_right_changed
      view.echo_right_surround.stateChanged --> model.on_echo_right_surround_changed
      view.echo_feedback_slider.toggled --> model.on_echo_feedback_changed
-     view.echo_feedback_setting.textChanged --> model.on_echo_feedback_changed
+     view.echo_feedback_setting.editingFinished --> model.on_echo_feedback_changed
      view.echo_feedback_surround.stateChanged --> model.on_echo_feedback_surround_changed
      view.echo_delay_slider.valueChanged --> model.on_echo_delay_changed
      view.echo_delay_setting.valueChanged --> model.on_echo_delay_changed
