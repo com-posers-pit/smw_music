@@ -15,7 +15,6 @@
 import io
 import pathlib
 import pkgutil
-from typing import Callable
 
 # Library imports
 from PyQt6 import uic
@@ -112,6 +111,8 @@ class Dashboard:
         self._attach_signals()
 
         self._view.show()
+
+        self._model.reinforce_state()
 
     ###########################################################################
     # API method definitions

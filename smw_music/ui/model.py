@@ -215,11 +215,12 @@ class Model(QObject):
 
         self._load_prefs()
 
-        self.state_changed.emit(self._history[-1])
-
     ###########################################################################
     # API method definitions
     ###########################################################################
+
+    def reinforce_state(self) -> None:
+        self.state_changed.emit(self._history[-1])
 
     def _update_state(self, **kwargs) -> None:
         curr_state = self._history[-1]
