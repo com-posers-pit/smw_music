@@ -6,6 +6,14 @@ application.
 The documentation must be manually updated any time they change, so anything
 that's out of date should be reported.
 
+Dashboard
+---------
+
+.. mermaid::
+
+   flowchart LR
+      model.state_changed --> view.on_state_changed
+
 Control Panel
 -------------
 

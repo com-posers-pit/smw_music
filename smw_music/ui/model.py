@@ -19,6 +19,7 @@ import subprocess  # nosec 404
 import tempfile
 import threading
 import zipfile
+from dataclasses import replace
 from enum import IntEnum, auto
 from pathlib import Path
 
@@ -36,6 +37,7 @@ from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
 from smw_music.ui.sample import Sample
+from smw_music.ui.state import GainMode, SampleSource, State
 
 ###############################################################################
 # Private Function Definitions
@@ -148,6 +150,8 @@ class _DynEnum(IntEnum):
 
 
 class Model(QObject):
+    state_changed = pyqtSignal(State)
+
     inst_config_changed = pyqtSignal(InstrumentConfig)  # arguments=["config"]
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
@@ -166,6 +170,7 @@ class Model(QObject):
     active_instrument: InstrumentConfig
     sample_packs_model: QStandardItemModel
     instruments_model: QStandardItemModel
+    _history: list[State]
     _disable_interp: bool
     _amk_path: Path | None = None
     _sample_packs: dict[str, dict[str, str]] | None = None
@@ -191,6 +196,7 @@ class Model(QObject):
         self.sample_packs_model = QStandardItemModel()
         self.instruments_model = QStandardItemModel()
         self._disable_interp = False
+        self._history = [State()]
 
         self._load_prefs()
 
@@ -198,20 +204,25 @@ class Model(QObject):
     # API method definitions
     ###########################################################################
 
+    def _update_state(self, **kwargs) -> None:
+        new_state = replace(self._history[-1], **kwargs)
+        self._history.append(new_state)
+        self.state_changed.emit(new_state)
+
     def on_musicxml_changed(self, fname: str) -> None:
-        pass
+        self._update_state(musicxml_fname=fname)
 
     def on_mml_fname_changed(self, fname: str) -> None:
-        pass
+        self._update_state(mml_fname=fname)
 
     def on_loop_analysis_changed(self, enabled: bool) -> None:
-        pass
+        self._update_state(loop_analysis=enabled)
 
     def on_superloop_analysis_changed(self, enabled: bool) -> None:
-        pass
+        self._update_state(superloop_analysis=enabled)
 
     def on_measure_numbers_changed(self, enabled: bool) -> None:
-        pass
+        self._update_state(measure_numbers=enabled)
 
     def on_generate_mml_clicked(self) -> None:
         pass
@@ -223,178 +234,212 @@ class Model(QObject):
         pass
 
     def on_pppp_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(pppp_setting=setting)
 
     def on_ppp_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(ppp_setting=setting)
 
     def on_pp_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(pp_setting=setting)
 
     def on_p_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(p_setting=setting)
 
     def on_mp_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(mp_setting=setting)
 
     def on_mf_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(mf_setting=setting)
 
     def on_f_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(f_setting=setting)
 
     def on_ff_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(ff_setting=setting)
 
     def on_fff_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(fff_setting=setting)
 
     def on_ffff_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(ffff_setting=setting)
 
     def on_interpolate_changed(self, state: bool) -> None:
-        pass
+        self._update_state(dyn_interpolate=state)
 
     def on_def_artic_length_changed(self, val: int) -> None:
-        pass
+        self._update_state(default_artic_length=val)
 
     def on_def_artic_volume_changed(self, val: int) -> None:
-        pass
+        self._update_state(default_artic_volume=val)
 
     def on_accent_length_changed(self, val: int) -> None:
-        pass
+        self._update_state(accent_length=val)
 
     def on_accent_volume_changed(self, val: int) -> None:
-        pass
+        self._update_state(accent_volume=val)
 
     def on_staccato_length_changed(self, val: int) -> None:
-        pass
+        self._update_state(staccato_length=val)
 
     def on_staccato_volume_changed(self, val: int) -> None:
-        pass
+        self._update_state(staccato_volume=val)
 
     def on_accstacc_length_changed(self, val: int) -> None:
-        pass
+        self._update_state(accstacc_length=val)
 
     def on_accstacc_volume_changed(self, val: int) -> None:
-        pass
+        self._update_state(accstacc_volume=val)
 
     def on_pan_enable_changed(self, state: bool) -> None:
-        pass
+        self._update_state(pan_enabled=state)
 
     def on_pan_setting_changed(self, val: int) -> None:
-        pass
+        self._update_state(pan_setting=val)
 
     def on_builtin_sample_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(sample_source=SampleSource.BUILTIN)
 
     def on_pack_sample_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(sample_source=SampleSource.SAMPLEPACK)
 
     def on_brr_sample_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(sample_source=SampleSource.BRR)
 
     def on_brr_fname_changed(self, fname: str) -> None:
-        pass
+        self._update_state(brr_fname=fname)
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        pass
+        self._update_state(use_adsr=state)
 
     def on_gain_direct_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(gain_mode=GainMode.DIRECT)
 
     def on_gain_inclin_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(gain_mode=GainMode.INCLIN)
 
     def on_gain_incbent_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(gain_mode=GainMode.INCBENT)
 
     def on_gain_declin_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(gain_mode=GainMode.DECLIN)
 
     def on_gain_decexp_selected(self, state: bool) -> None:
-        pass
+        if state:
+            self._update_state(gain_mode=GainMode.DECEXP)
 
     def on_gain_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(gain_setting=setting)
 
     def on_attack_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(attack_setting=setting)
 
     def on_decay_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(decay_setting=setting)
 
     def on_sus_level_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(sus_level=setting)
 
     def on_sus_rate_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(sus_rate=setting)
 
     def on_tune_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(tune_setting=setting)
 
     def on_subtune_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(subtune_setting=setting)
 
     def on_brr_setting_changed(self, val: str) -> None:
+        # TODO
         pass
 
     def on_global_volume_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(global_volume=setting)
 
     def on_global_legato_changed(self, state: bool) -> None:
-        pass
+        self._update_state(global_legato=state)
 
     def on_echo_enable_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_enable=state)
 
     def on_echo_ch0_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch0_enable=state)
 
     def on_echo_ch1_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch1_enable=state)
 
     def on_echo_ch2_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch2_enable=state)
 
     def on_echo_ch3_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch3_enable=state)
 
     def on_echo_ch4_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch4_enable=state)
 
     def on_echo_ch5_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch5_enable=state)
 
     def on_echo_ch6_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch6_enable=state)
 
     def on_echo_ch7_changed(self, state: bool) -> None:
-        pass
+        self._update_state(echo_ch7_enable=state)
 
     def on_filter_0_toggled(self, state: bool) -> None:
-        pass
+        self._update_state(echo_filter0=state)
 
     def on_echo_left_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(echo_left_setting=setting)
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
+        # TODO
         pass
 
     def on_echo_right_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(echo_right_setting=setting)
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
+        # TODO
         pass
 
     def on_echo_feedback_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(echo_feedback_setting=setting)
 
     def on_echo_feedback_surround_changed(self, state: bool) -> None:
+        # TODO
         pass
 
     def on_echo_delay_changed(self, val: int | str) -> None:
-        pass
+        setting = val
+        self._update_state(echo_delay_setting=setting)
 
     ###########################################################################
 

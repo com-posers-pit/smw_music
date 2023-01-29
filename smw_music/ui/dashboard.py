@@ -43,6 +43,7 @@ from smw_music.ui import sample
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
+from smw_music.ui.state import GainMode, SampleSource, State
 from smw_music.utils import hexb
 
 ###############################################################################
@@ -143,6 +144,125 @@ class Dashboard:
     def update_song(self, song: Song) -> None:
         pass
         # self._volume.set_volume(song.volume)
+
+    def on_state_changed(self, state: State) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        # Control Panel
+        v.musicxml_fname.setText(state.musicxml_fname)
+        v.mml_fname.setText(state.mml_fname)
+        v.loop_analysis.setChecked(state.loop_analysis)
+        v.superloop_analysis.setChecked(state.superloop_analysis)
+        v.measure_numbers.setChecked(state.measure_numbers)
+
+        # Instrument dynamics settings
+        v.pppp_slider.setValue(state.pppp_setting)
+        v.pppp_setting.setText(state.pppp_setting)
+        v.pppp_setting_label.setText(state.pppp_setting)
+        v.ppp_slider.setValue(state.ppp_setting)
+        v.ppp_setting.setText(state.ppp_setting)
+        v.ppp_setting_label.setText(state.ppp_setting)
+        v.pp_slider.setValue(state.pp_setting)
+        v.pp_setting.setText(state.pp_setting)
+        v.pp_setting_label.setText(state.pp_setting)
+        v.p_slider.setValue(state.p_setting)
+        v.p_setting.setText(state.p_setting)
+        v.p_setting_label.setText(state.p_setting)
+        v.mp_slider.setValue(state.mp_setting)
+        v.mp_setting.setText(state.mp_setting)
+        v.mp_setting_label.setText(state.mp_setting)
+        v.mf_slider.setValue(state.mf_setting)
+        v.mf_setting.setText(state.mf_setting)
+        v.mf_setting_label.setText(state.mf_setting)
+        v.f_slider.setValue(state.f_setting)
+        v.f_setting.setText(state.f_setting)
+        v.f_setting_label.setText(state.f_setting)
+        v.ff_slider.setValue(state.ff_setting)
+        v.ff_setting.setText(state.ff_setting)
+        v.ff_setting_label.setText(state.ff_setting)
+        v.fff_slider.setValue(state.fff_setting)
+        v.fff_setting.setText(state.fff_setting)
+        v.fff_setting_label.setText(state.fff_setting)
+        v.ffff_slider.setValue(state.ffff_setting)
+        v.ffff_setting.setText(state.ffff_setting)
+        v.ffff_setting_label.setText(state.ffff_setting)
+        v.interpolate.setChecked(state.dyn_interpolate)
+
+        # Instrument articulation settings
+        v.artic_default_length_slider.setValue(state.default_artic_length)
+        v.artic_default_volume_slider.setText(state.default_artic_volume)
+        v.artic_acc_length_slider.setValue(state.accent_length)
+        v.artic_acc_volume_slider.setText(state.accent_volume)
+        v.artic_stacc_length_slider.setValue(state.staccato_length)
+        v.artic_stacc_volume_slider.setText(state.staccato_volume)
+        v.artic_accstacc_length_slider.setValue(state.accstacc_length)
+        v.artic_accstacc_volume_slider.setText(state.accstacc_volume)
+
+        # Instrument pan settings
+        v.pan_enable.setChecked(state.pan_enabled)
+        v.pan_setting.setValue(state.pan_setting)
+
+        # Instrument sample
+        v.select_builtin_sample.setChecked(
+            state.sample_source == SampleSource.BUILTIN
+        )
+        v.select_pack_sample.setChecked(
+            state.sample_source == SampleSource.SAMPLEPACK
+        )
+        v.select_brr_sampl.setChecked(state.sample_source == SampleSource.BRR)
+        v.brr_fname.setText(state.brr_fname)
+
+        v.select_adsr_mode.setChecked(state.use_adsr)
+        v.select_gain_mode.setChecked(not state.use_adsr)
+        v.gain_mode_direct.setChecked(state.gain_mode == GainMode.DIRECT)
+        v.gain_mode_inclin.setChecked(state.gain_mode == GainMode.INCLIN)
+        v.gain_mode_incbent.setChecked(state.gain_mode == GainMode.INCBENT)
+        v.gain_mode_declin.setChecked(state.gain_mode == GainMode.DECLIN)
+        v.gain_mode_decexp.setChecked(state.gain_mode == GainMode.DECEXP)
+        v.gain_slider.setValue(state.gain_setting)
+        v.gain_setting.setText(state.gain_setting)
+        v.attack_slider.setValue(state.attack_setting)
+        v.attack_setting.setText(state.attack_setting)
+        v.decay_slider.setValue(state.decay_setting)
+        v.decay_setting.setText(state.decay_setting)
+        v.sus_level_slider.setValue(state.sus_level_setting)
+        v.sus_level_setting.setText(state.sus_level_setting)
+        v.sus_rate_slider.setValue(state.sus_rate_setting)
+        v.sus_rate_setting.setText(state.sus_rate_setting)
+
+        v.tune_slider.setValue(state.tune_setting)
+        v.tune_setting.setText(state.tune_setting)
+        v.subtune_slider.setValue(state.subtune_setting)
+        v.subtune_setting.setText(state.subtune_setting)
+
+        v.brr_setting.setText(state.brr_setting)
+
+        # Global settings
+        v.global_volume_slider.setValue(state.global_volume)
+        v.global_volume_setting.setText(state.global_volume)
+        v.global_legato.setChecked(state.global_legato)
+        v.echo_enable.setChecked(state.echo_enable)
+        v.echo_ch0.setChecked(state.echo_ch0_enable)
+        v.echo_ch1.setChecked(state.echo_ch1_enable)
+        v.echo_ch2.setChecked(state.echo_ch2_enable)
+        v.echo_ch3.setChecked(state.echo_ch3_enable)
+        v.echo_ch4.setChecked(state.echo_ch4_enable)
+        v.echo_ch5.setChecked(state.echo_ch5_enable)
+        v.echo_ch6.setChecked(state.echo_ch6_enable)
+        v.echo_ch7.setChecked(state.echo_ch7_enable)
+        v.echo_filter_0.setChecked(state.echo_filter0)
+        v.echo_filter_1.setChecked(not state.echo_filter0)
+        v.echo_left_slider.setValue(state.echo_left_setting)
+        v.echo_left_setting.setText(state.echo_left_setting)
+        v.echo_left_surround.setChecked(False)  # TODO
+        v.echo_right_slider.setValue(state.echo_right_setting)
+        v.echo_right_setting.setText(state.echo_right_setting)
+        v.echo_right_surround.setChecked(False)  # TODO
+        v.echo_feedback_slider.setValue(state.echo_feedback_setting)
+        v.echo_feedback_setting.setText(state.echo_feedback_setting)
+        v.echo_feedback_surround.setChecked(False)  # TODO
+        v.echo_delay_slider.setValue(state.echo_delay_setting)
+        v.echo_delay_setting.setText(state.echo_delay_setting)
 
     ###########################################################################
     # Private method definitions
@@ -281,6 +401,9 @@ class Dashboard:
         _box_con(v.echo_feedback_surround, m.on_echo_feedback_surround_changed)
         _sld_con(v.echo_delay_slider, m.on_echo_delay_changed)
         _edt_con(v.echo_delay_setting, m.on_echo_delay_changed)
+
+        # Return signal
+        m.state_changed.connect(self.on_state_changed)
 
     ###########################################################################
 
