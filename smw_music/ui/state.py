@@ -94,6 +94,39 @@ class State:
     echo_feedback_setting: int = 0
     echo_delay_setting: int = 0
 
+    ###########################################################################
+
     @property
     def brr_setting(self) -> tuple[int, int, int, int, int]:
-        return (0, 0, 0, 0, 0)
+        vxadsr1 = int(self.adsr_mode) << 7
+        vxadsr1 |= self.decay_setting << 4
+        vxadsr1 |= self.attack_setting
+        vxadsr2 = (self.sus_level_setting << 5) | self.sus_rate_setting
+
+        match self.gain_mode:
+            case GainMode.DIRECT:
+                vxgain = self.gain_setting
+            case GainMode.INCLIN:
+                vxgain = 0xC0 | self.gain_setting
+            case GainMode.INCBENT:
+                vxgain = 0xE0 | self.gain_setting
+            case GainMode.DECLIN:
+                vxgain = 0x80 | self.gain_setting
+            case GainMode.DECEXP:
+                vxgain = 0xA0 | self.gain_setting
+
+        # The register values for the mode we're not in are don't care; exo
+        # likes the convention of setting them to 0.  Who am I to argue?
+        if self.adsr_mode:
+            vxgain = 0
+        else:
+            vxadsr1 = 0
+            vxadsr2 = 0
+
+        return (
+            vxadsr1,
+            vxadsr2,
+            vxgain,
+            self.tune_setting,
+            self.subtune_setting,
+        )

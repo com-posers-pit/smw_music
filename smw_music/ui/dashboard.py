@@ -211,7 +211,7 @@ class Dashboard:
         v.subtune_slider.setValue(state.subtune_setting)
         v.subtune_setting.setText(state.subtune_setting)
 
-        v.brr_setting.setText(state.brr_setting)
+        v.brr_setting.setText(" ".join(hexb(x) for x in state.brr_setting))
 
         # Global settings
         v.global_volume_slider.setValue(state.global_volume)
@@ -391,46 +391,6 @@ class Dashboard:
             val = min(31, view.gain_slider.value())
             view.gain_slider.setValue(val)
             view.gain_slider.setMaximum(31)
-
-    ###########################################################################
-
-    def _update_setting(self) -> None:
-        view = self._view
-
-        adsr_mode = view.select_adsr_mode.isChecked()
-
-        attack_reg = view.attack_slider.value()
-        decay_reg = view.decay_slider.value()
-        sus_level_reg = view.sus_level_slider.value()
-        sus_rate_reg = view.sus_rate_slider.value()
-        gain_reg = view.gain_slider.value()
-
-        vxadsr1 = (int(adsr_mode) << 7) | (decay_reg << 4) | attack_reg
-        vxadsr2 = (sus_level_reg << 5) | sus_rate_reg
-
-        if view.gain_mode_direct.isChecked():
-            vxgain = gain_reg
-        elif view.gain_mode_inclin.isChecked():
-            vxgain = 0xC0 | gain_reg
-        elif view.gain_mode_incbent.isChecked():
-            vxgain = 0xE0 | gain_reg
-        elif view.gain_mode_declin.isChecked():
-            vxgain = 0x80 | gain_reg
-        elif view.gain_mode_decexp.isChecked():
-            vxgain = 0xA0 | gain_reg
-
-        # The register values for the mode we're not in are don't care; exo
-        # likes the convention of setting them to 0.  Who am I to argue?
-        if adsr_mode:
-            vxgain = 0
-        else:
-            vxadsr1 = 0
-            vxadsr2 = 0
-
-        tune = view.tune_slider.value()
-        subtune = view.subtune_slider.value()
-        regs = [vxadsr1, vxadsr2, vxgain, tune, subtune]
-        view.brr_setting.setText(" ".join(hexb(x) for x in regs))
 
     ###########################################################################
 
