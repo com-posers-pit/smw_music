@@ -58,6 +58,10 @@ class EnvelopePreview(QMainWindow):
     _plot_data: pg.graphicsItems.PlotDataItem.PlotDataItem
     _counts: npt.NDArray
 
+    ###########################################################################
+    # Constructor definitions
+    ###########################################################################
+
     def __init__(self, parent: QWidget | None = None):
         super().__init__(parent)
 
