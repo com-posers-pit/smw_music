@@ -44,7 +44,7 @@ from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.state import GainMode, SampleSource, State
-from smw_music.utils import hexb
+from smw_music.utils import hexb, pct
 
 ###############################################################################
 # Private function definitions
@@ -133,46 +133,46 @@ class Dashboard:
 
         # Instrument dynamics settings
         v.pppp_slider.setValue(state.pppp_setting)
-        v.pppp_setting.setText(state.pppp_setting)
-        v.pppp_setting_label.setText(state.pppp_setting)
+        v.pppp_setting.setText(pct(state.pppp_setting))
+        v.pppp_setting_label.setText(hexb(state.pppp_setting))
         v.ppp_slider.setValue(state.ppp_setting)
-        v.ppp_setting.setText(state.ppp_setting)
-        v.ppp_setting_label.setText(state.ppp_setting)
+        v.ppp_setting.setText(pct(state.ppp_setting))
+        v.ppp_setting_label.setText(hexb(state.ppp_setting))
         v.pp_slider.setValue(state.pp_setting)
-        v.pp_setting.setText(state.pp_setting)
-        v.pp_setting_label.setText(state.pp_setting)
+        v.pp_setting.setText(pct(state.pp_setting))
+        v.pp_setting_label.setText(hexb(state.pp_setting))
         v.p_slider.setValue(state.p_setting)
-        v.p_setting.setText(state.p_setting)
-        v.p_setting_label.setText(state.p_setting)
+        v.p_setting.setText(pct(state.p_setting))
+        v.p_setting_label.setText(hexb(state.p_setting))
         v.mp_slider.setValue(state.mp_setting)
-        v.mp_setting.setText(state.mp_setting)
-        v.mp_setting_label.setText(state.mp_setting)
+        v.mp_setting.setText(pct(state.mp_setting))
+        v.mp_setting_label.setText(hexb(state.mp_setting))
         v.mf_slider.setValue(state.mf_setting)
-        v.mf_setting.setText(state.mf_setting)
-        v.mf_setting_label.setText(state.mf_setting)
+        v.mf_setting.setText(pct(state.mf_setting))
+        v.mf_setting_label.setText(hexb(state.mf_setting))
         v.f_slider.setValue(state.f_setting)
-        v.f_setting.setText(state.f_setting)
-        v.f_setting_label.setText(state.f_setting)
+        v.f_setting.setText(pct(state.f_setting))
+        v.f_setting_label.setText(hexb(state.f_setting))
         v.ff_slider.setValue(state.ff_setting)
-        v.ff_setting.setText(state.ff_setting)
-        v.ff_setting_label.setText(state.ff_setting)
+        v.ff_setting.setText(pct(state.ff_setting))
+        v.ff_setting_label.setText(hexb(state.ff_setting))
         v.fff_slider.setValue(state.fff_setting)
-        v.fff_setting.setText(state.fff_setting)
-        v.fff_setting_label.setText(state.fff_setting)
+        v.fff_setting.setText(pct(state.fff_setting))
+        v.fff_setting_label.setText(hexb(state.fff_setting))
         v.ffff_slider.setValue(state.ffff_setting)
-        v.ffff_setting.setText(state.ffff_setting)
-        v.ffff_setting_label.setText(state.ffff_setting)
+        v.ffff_setting.setText(pct(state.ffff_setting))
+        v.ffff_setting_label.setText(hexb(state.ffff_setting))
         v.interpolate.setChecked(state.dyn_interpolate)
 
         # Instrument articulation settings
         v.artic_default_length_slider.setValue(state.default_artic_length)
-        v.artic_default_volume_slider.setText(state.default_artic_volume)
+        v.artic_default_volume_slider.setValue(state.default_artic_volume)
         v.artic_acc_length_slider.setValue(state.accent_length)
-        v.artic_acc_volume_slider.setText(state.accent_volume)
+        v.artic_acc_volume_slider.setValue(state.accent_volume)
         v.artic_stacc_length_slider.setValue(state.staccato_length)
-        v.artic_stacc_volume_slider.setText(state.staccato_volume)
+        v.artic_stacc_volume_slider.setValue(state.staccato_volume)
         v.artic_accstacc_length_slider.setValue(state.accstacc_length)
-        v.artic_accstacc_volume_slider.setText(state.accstacc_volume)
+        v.artic_accstacc_volume_slider.setValue(state.accstacc_volume)
 
         # Instrument pan settings
         v.pan_enable.setChecked(state.pan_enabled)
@@ -185,7 +185,7 @@ class Dashboard:
         v.select_pack_sample.setChecked(
             state.sample_source == SampleSource.SAMPLEPACK
         )
-        v.select_brr_sampl.setChecked(state.sample_source == SampleSource.BRR)
+        v.select_brr_sample.setChecked(state.sample_source == SampleSource.BRR)
         v.brr_fname.setText(state.brr_fname)
 
         v.select_adsr_mode.setChecked(state.adsr_mode)
@@ -196,26 +196,26 @@ class Dashboard:
         v.gain_mode_declin.setChecked(state.gain_mode == GainMode.DECLIN)
         v.gain_mode_decexp.setChecked(state.gain_mode == GainMode.DECEXP)
         v.gain_slider.setValue(state.gain_setting)
-        v.gain_setting.setText(state.gain_setting)
+        v.gain_setting.setText(hexb(state.gain_setting))
         v.attack_slider.setValue(state.attack_setting)
-        v.attack_setting.setText(state.attack_setting)
+        v.attack_setting.setText(hexb(state.attack_setting))
         v.decay_slider.setValue(state.decay_setting)
-        v.decay_setting.setText(state.decay_setting)
+        v.decay_setting.setText(hexb(state.decay_setting))
         v.sus_level_slider.setValue(state.sus_level_setting)
-        v.sus_level_setting.setText(state.sus_level_setting)
+        v.sus_level_setting.setText(hexb(state.sus_level_setting))
         v.sus_rate_slider.setValue(state.sus_rate_setting)
-        v.sus_rate_setting.setText(state.sus_rate_setting)
+        v.sus_rate_setting.setText(hexb(state.sus_rate_setting))
 
         v.tune_slider.setValue(state.tune_setting)
-        v.tune_setting.setText(state.tune_setting)
+        v.tune_setting.setText(hexb(state.tune_setting))
         v.subtune_slider.setValue(state.subtune_setting)
-        v.subtune_setting.setText(state.subtune_setting)
+        v.subtune_setting.setText(hexb(state.subtune_setting))
 
         v.brr_setting.setText(" ".join(hexb(x) for x in state.brr_setting))
 
         # Global settings
         v.global_volume_slider.setValue(state.global_volume)
-        v.global_volume_setting.setText(state.global_volume)
+        v.global_volume_setting.setText(hexb(state.global_volume))
         v.global_legato.setChecked(state.global_legato)
         v.echo_enable.setChecked(state.echo_enable)
         v.echo_ch0.setChecked(state.echo_ch0_enable)
@@ -229,16 +229,16 @@ class Dashboard:
         v.echo_filter_0.setChecked(state.echo_filter0)
         v.echo_filter_1.setChecked(not state.echo_filter0)
         v.echo_left_slider.setValue(state.echo_left_setting)
-        v.echo_left_setting.setText(state.echo_left_setting)
+        v.echo_left_setting.setText(hexb(state.echo_left_setting))
         v.echo_left_surround.setChecked(False)  # TODO
         v.echo_right_slider.setValue(state.echo_right_setting)
-        v.echo_right_setting.setText(state.echo_right_setting)
+        v.echo_right_setting.setText(hexb(state.echo_right_setting))
         v.echo_right_surround.setChecked(False)  # TODO
         v.echo_feedback_slider.setValue(state.echo_feedback_setting)
-        v.echo_feedback_setting.setText(state.echo_feedback_setting)
+        v.echo_feedback_setting.setText(hexb(state.echo_feedback_setting))
         v.echo_feedback_surround.setChecked(False)  # TODO
         v.echo_delay_slider.setValue(state.echo_delay_setting)
-        v.echo_delay_setting.setText(state.echo_delay_setting)
+        v.echo_delay_setting.setText(hexb(state.echo_delay_setting))
 
     ###########################################################################
     # Private method definitions
