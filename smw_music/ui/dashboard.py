@@ -240,6 +240,18 @@ class Dashboard:
         v.echo_delay_slider.setValue(state.echo_delay_setting)
         v.echo_delay_setting.setText(hexb(state.echo_delay_setting))
 
+        # Apply the more interesting UI updates
+        self._update_gain_limits(state.gain_mode == GainMode.DIRECT)
+        self._update_envelope(
+            state.adsr_mode,
+            state.attack_setting,
+            state.decay_setting,
+            state.sus_level_setting,
+            state.sus_rate_setting,
+            state.gain_mode,
+            state.gain_setting,
+        )
+
     ###########################################################################
     # Private method definitions
     ###########################################################################
@@ -383,9 +395,9 @@ class Dashboard:
 
     ###########################################################################
 
-    def _update_gain_limits(self, toggled: bool) -> None:
+    def _update_gain_limits(self, direct_mode: bool) -> None:
         view = self._view
-        if toggled:
+        if direct_mode:
             view.gain_slider.setMaximum(127)
         else:
             val = min(31, view.gain_slider.value())
@@ -394,32 +406,32 @@ class Dashboard:
 
     ###########################################################################
 
-    def _update_envelope(self) -> None:
-        view = self._view
+    def _update_envelope(
+        self,
+        adsr_mode: bool,
+        attack_reg: int,
+        decay_reg: int,
+        sus_level_reg: int,
+        sus_rate_reg: int,
+        gain_mode: GainMode,
+        gain_reg: int,
+    ) -> None:
         env = self._envelope_preview
 
-        gain_reg = view.gain_slider.value()
-
-        if view.select_adsr_mode.isChecked():
-            env.plot_adsr(
-                view.attack_slider.value(),
-                view.decay_slider.value(),
-                view.sus_level_slider.value(),
-                view.sus_rate_slider.value(),
-            )
-        else:  # view.select_gain_mode
-            if view.gain_mode_direct.isChecked():
-                env.plot_direct_gain(gain_reg)
-            elif view.gain_mode_inclin.isChecked():
-                env.plot_inclin(gain_reg)
-            elif view.gain_mode_incbent.isChecked():
-                env.plot_incbent(gain_reg)
-            elif view.gain_mode_declin.isChecked():
-                env.plot_declin(gain_reg)
-            elif view.gain_mode_decexp.isChecked():
-                env.plot_decexp(gain_reg)
-
-        self._update_setting()
+        if adsr_mode:
+            env.plot_adsr(attack_reg, decay_reg, sus_level_reg, sus_rate_reg)
+        else:  # gain mode
+            match gain_mode:
+                case GainMode.DIRECT:
+                    env.plot_direct_gain(gain_reg)
+                case GainMode.INCLIN:
+                    env.plot_inclin(gain_reg)
+                case GainMode.INCBENT:
+                    env.plot_incbent(gain_reg)
+                case GainMode.DECLIN:
+                    env.plot_declin(gain_reg)
+                case GainMode.DECEXP:
+                    env.plot_decexp(gain_reg)
 
     ###########################################################################
 
