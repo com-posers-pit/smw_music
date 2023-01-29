@@ -481,7 +481,7 @@ class Dashboard:
         view.open_preferences.triggered.connect(self._open_preferences)
         view.exit_dashboard.triggered.connect(QApplication.quit)
 
-        view.undo.triggered.connect(lambda _: None)
+        view.undo.triggered.connect(self._model.undo)
         view.redo.triggered.connect(lambda _: None)
 
         view.show_about.triggered.connect(self._about)

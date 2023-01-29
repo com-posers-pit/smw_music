@@ -222,9 +222,11 @@ class Model(QObject):
     ###########################################################################
 
     def _update_state(self, **kwargs) -> None:
-        new_state = replace(self._history[-1], **kwargs)
-        self._history.append(new_state)
-        self.state_changed.emit(new_state)
+        curr_state = self._history[-1]
+        new_state = replace(curr_state, **kwargs)
+        if new_state != curr_state:
+            self._history.append(new_state)
+            self.state_changed.emit(new_state)
 
     def on_musicxml_changed(self, fname: str) -> None:
         self._update_state(musicxml_fname=fname)
@@ -457,6 +459,13 @@ class Model(QObject):
     def on_echo_delay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
         self._update_state(echo_delay_setting=setting)
+
+    ###########################################################################
+
+    def undo(self) -> None:
+        if len(self._history) > 1:
+            self._history.pop()
+            self.state_changed.emit(self._history[-1])
 
     ###########################################################################
 
