@@ -393,8 +393,42 @@ class Model(QObject):
         self._update_state(subtune_setting=setting)
 
     def on_brr_setting_changed(self, val: str) -> None:
-        # TODO
-        pass
+        val = val.strip()
+        regs = [int(x[1:], 16) for x in val.split(" ")]
+
+        adsr_mode = bool(regs[0] >> 7)
+        decay_setting = 0x7 & (regs[0] >> 4)
+        attack_setting = 0xF & regs[0]
+        sus_level_setting = regs[1] >> 5
+        sus_rate_setting = 0x1F & regs[1]
+        if regs[2] & 0x80:
+            gain_mode = GainMode.DIRECT
+            gain_setting = regs[2] & 0x7F
+        else:
+            gain_setting = regs[2] & 0x1F
+            match regs[2] >> 5:
+                case 0b00:
+                    gain_mode = GainMode.DECLIN
+                case 0b01:
+                    gain_mode = GainMode.DECEXP
+                case 0b10:
+                    gain_mode = GainMode.INCLIN
+                case 0b11:
+                    gain_mode = GainMode.INCBENT
+
+        tune_setting = regs[3]
+        subtune_setting = regs[4]
+        self._update_state(
+            adsr_mode=adsr_mode,
+            attack_setting=attack_setting,
+            decay_setting=decay_setting,
+            sus_level_setting=sus_level_setting,
+            sus_rate_setting=sus_rate_setting,
+            gain_mode=gain_mode,
+            gain_setting=gain_setting,
+            tune_setting=tune_setting,
+            subtune_setting=subtune_setting,
+        )
 
     def on_global_volume_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
