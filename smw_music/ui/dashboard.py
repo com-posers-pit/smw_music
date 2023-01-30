@@ -18,13 +18,12 @@ import pkgutil
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import pyqtSignal
-from PyQt6.QtGui import QDoubleValidator, QIntValidator, QValidator
 from PyQt6.QtWidgets import (
+    QAbstractItemView,
+    QAbstractSlider,
     QApplication,
     QCheckBox,
     QFileDialog,
-    QLabel,
     QLineEdit,
     QMainWindow,
     QMessageBox,
@@ -38,7 +37,6 @@ from PyQt6.QtWidgets import (
 from smw_music import __version__
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
-from smw_music.ui import sample
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
@@ -152,7 +150,17 @@ class Dashboard:
 
         # Instrument pan settings
         v.pan_enable.setChecked(state.pan_enabled)
+        v.pan_setting.setEnabled(state.pan_enabled)
+        v.pan_setting_label.setEnabled(state.pan_enabled)
         v.pan_setting.setValue(state.pan_setting)
+        pan = state.pan_setting
+        if pan == 10:
+            text = "C"
+        elif pan < 10:
+            text = f"{10*(10 - pan)}% R"
+        else:
+            text = f"{10*(pan - 10)}% L"
+        v.pan_setting_label.setText(text)
 
         # Instrument sample
         v.select_builtin_sample.setChecked(
@@ -393,7 +401,7 @@ class Dashboard:
                 widget.editingFinished.connect(proxy)
             elif isinstance(widget, QRadioButton):
                 widget.toggled.connect(slot)
-            elif isinstance(widget, QSlider):
+            elif isinstance(widget, QAbstractSlider):
                 widget.valueChanged.connect(slot)
             elif isinstance(widget, QAbstractItemView):
                 widget.activated.connect(slot)

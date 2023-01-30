@@ -141,7 +141,7 @@
            </widget>
            <widget class="QTabWidget" name="instrument_config_tab">
             <property name="currentIndex">
-             <number>3</number>
+             <number>0</number>
             </property>
             <widget class="QWidget" name="instrument_dynamics_tab">
              <attribute name="title">
@@ -728,6 +728,18 @@
                <widget class="QDial" name="pan_setting">
                 <property name="enabled">
                  <bool>false</bool>
+                </property>
+                <property name="maximum">
+                 <number>20</number>
+                </property>
+                <property name="value">
+                 <number>10</number>
+                </property>
+                <property name="invertedAppearance">
+                 <bool>true</bool>
+                </property>
+                <property name="invertedControls">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
