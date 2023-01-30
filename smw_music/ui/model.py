@@ -176,22 +176,14 @@ class Model(QObject):
     song_changed = pyqtSignal(Song)  # arguments=["song"]
 
     song: Song | None
-    mml_fname: str
-    global_legato: bool
-    loop_analysis: bool
-    superloop_analysis: bool
-    measure_numbers: bool
-    custom_samples: bool
-    custom_percussion: bool
     active_instrument: InstrumentConfig
     sample_packs_model: QStandardItemModel
     _history: list[State]
-    _disable_interp: bool
-    _amk_path: Path | None = None
-    _sample_packs: dict[str, dict[str, str]] | None = None
-    _spcplay_path: Path | None = None
-    _project_file: Path | None = None
-    _project_name: str | None = None
+    _amk_path: Path | None
+    _sample_packs: dict[str, dict[str, str]] | None
+    _spcplay_path: Path | None
+    _project_file: Path | None
+    _project_name: str | None
 
     ###########################################################################
 
@@ -199,16 +191,8 @@ class Model(QObject):
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.mml_fname = ""
-        self.global_legato = False
-        self.loop_analysis = False
-        self.superloop_analysis = False
-        self.measure_numbers = False
-        self.custom_samples = False
-        self.custom_percussion = False
         self.active_instrument = InstrumentConfig("")
         self.sample_packs_model = QStandardItemModel()
-        self._disable_interp = False
         self._history = [State()]
 
         self._load_prefs()
@@ -254,10 +238,24 @@ class Model(QObject):
         pass
 
     def on_generate_spc_clicked(self) -> None:
-        pass
+        # TODO: support OSX and windows
+        subprocess.call(  # nosec B603, B607
+            ["sh", "convert.sh"], cwd=self._project_path
+        )
 
     def on_play_spc_clicked(self) -> None:
-        pass
+        path = self._project_path
+
+        if path is not None:
+            spc_name = self._project_name
+
+            spc_name = f"{spc_name}.spc"
+            spc_name = str(path / "SPCs" / spc_name)
+            threading.Thread(
+                target=subprocess.call,
+                # TODO: Handle windows/OSX
+                args=(["wine", str(self._spcplay_path), spc_name],),
+            ).start()
 
     def on_pppp_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
@@ -547,14 +545,6 @@ class Model(QObject):
 
         self._project_name = contents["song"]
         self._project_file = Path(fname)
-        self.mml_fname = contents["mml"]
-        self.global_legato = contents["global_legato"]
-        self.loop_analysis = contents["loop_analysis"]
-        self.superloop_analysis = contents["superloop_analysis"]
-        self.measure_numbers = contents["measure_numbers"]
-        self.custom_samples = contents["custom_samples"]
-        self.custom_percussion = contents["custom_percussion"]
-        self._disable_interp = contents["disable_interp"]
 
     ###########################################################################
 
@@ -570,14 +560,14 @@ class Model(QObject):
                     shutil.copy2(fname, f"{fname}.bak")
                 mml = self.song.to_mml_file(
                     fname,
-                    self.global_legato,
-                    self.loop_analysis,
-                    self.superloop_analysis,
-                    self.measure_numbers,
+                    self.state.global_legato,
+                    self.state.loop_analysis,
+                    self.state.superloop_analysis,
+                    self.state.measure_numbers,
                     True,
                     echo,
-                    self.custom_samples,
-                    self.custom_percussion,
+                    True,
+                    True,
                 )
                 self.mml_generated.emit(mml)
             except MusicXmlException as e:
@@ -590,44 +580,10 @@ class Model(QObject):
     ###########################################################################
 
     @info(True)
-    def on_spc_generated(self) -> None:
-        # TODO: support OSX and windows
-        subprocess.call(  # nosec B603, B607
-            ["sh", "convert.sh"], cwd=self._project_path
-        )
-
-    ###########################################################################
-
-    @info(True)
-    def on_spc_played(self) -> None:
-        path = self._project_path
-
-        if path is not None:
-            spc_name = self._project_name
-
-            spc_name = f"{spc_name}.spc"
-            spc_name = str(path / "SPCs" / spc_name)
-            threading.Thread(
-                target=subprocess.call,
-                # TODO: Handle windows/OSX
-                args=(["wine", str(self._spcplay_path), spc_name],),
-            ).start()
-
-    ###########################################################################
-
-    @info(True)
     def save(self) -> None:
         contents = {
             "version": __version__,
             "song": self._project_name,
-            "mml": self.mml_fname,
-            "global_legato": self.global_legato,
-            "loop_analysis": self.loop_analysis,
-            "superloop_analysis": self.superloop_analysis,
-            "measure_numbers": self.measure_numbers,
-            "custom_samples": self.custom_samples,
-            "custom_percussion": self.custom_percussion,
-            "disable_interp": self._disable_interp,
             "samples": "",
         }
 
@@ -654,39 +610,6 @@ class Model(QObject):
                     self.inst_config_changed.emit(inst)
                     self._disable_interp = False
                     break
-
-    ###########################################################################
-
-    @info()
-    def set_config(
-        self,
-        global_legato: bool,
-        loop_analysis: bool,
-        superloop_analysis: bool,
-        measure_numbers: bool,
-        custom_samples: bool,
-        custom_percussion: bool,
-    ) -> None:
-        self.global_legato = global_legato
-        self.loop_analysis = loop_analysis
-        self.superloop_analysis = superloop_analysis
-        self.measure_numbers = measure_numbers
-        self.custom_samples = custom_samples
-        self.custom_percussion = custom_percussion
-
-    ###########################################################################
-
-    @info(True)
-    def set_pan(self, enabled: bool, pan: int) -> None:
-        if self.song is not None:
-            self.active_instrument.pan = pan if enabled else None
-
-    ###########################################################################
-
-    @info(True)
-    def update_artic(self, artic: str, quant: int) -> None:
-        if self.song is not None:
-            self.active_instrument.quant[artic] = quant
 
     ###########################################################################
 
