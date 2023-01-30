@@ -166,6 +166,7 @@ class _DynEnum(IntEnum):
 
 class Model(QObject):
     state_changed = pyqtSignal(State)
+    instruments_changed = pyqtSignal(list)
 
     inst_config_changed = pyqtSignal(InstrumentConfig)  # arguments=["config"]
     mml_generated = pyqtSignal(str)  # arguments=['mml']
@@ -184,7 +185,6 @@ class Model(QObject):
     custom_percussion: bool
     active_instrument: InstrumentConfig
     sample_packs_model: QStandardItemModel
-    instruments_model: QStandardItemModel
     _history: list[State]
     _disable_interp: bool
     _amk_path: Path | None = None
@@ -206,10 +206,8 @@ class Model(QObject):
         self.measure_numbers = False
         self.custom_samples = False
         self.custom_percussion = False
-        self.instruments = None
         self.active_instrument = InstrumentConfig("")
         self.sample_packs_model = QStandardItemModel()
-        self.instruments_model = QStandardItemModel()
         self._disable_interp = False
         self._history = [State()]
 
@@ -229,6 +227,15 @@ class Model(QObject):
             self.state_changed.emit(new_state)
 
     def on_musicxml_fname_changed(self, fname: str) -> None:
+        try:
+            self.song = Song.from_music_xml(fname)
+        except MusicXmlException as e:
+            self.response_generated.emit(True, "Song load", str(e))
+        else:
+            self.song_changed.emit(self.song)
+            self.instruments_changed.emit(
+                [x.name for x in self.song.instruments]
+            )
         self._update_state(musicxml_fname=fname)
 
     def on_mml_fname_changed(self, fname: str) -> None:
@@ -621,7 +628,6 @@ class Model(QObject):
             "custom_samples": self.custom_samples,
             "custom_percussion": self.custom_percussion,
             "disable_interp": self._disable_interp,
-            "instruments": "",
             "samples": "",
         }
 
@@ -674,20 +680,6 @@ class Model(QObject):
     def set_pan(self, enabled: bool, pan: int) -> None:
         if self.song is not None:
             self.active_instrument.pan = pan if enabled else None
-
-    ###########################################################################
-
-    @info(True)
-    def set_song(self, fname: str) -> None:
-        try:
-            self.song = Song.from_music_xml(fname)
-        except MusicXmlException as e:
-            self.response_generated.emit(True, "Song load", str(e))
-        else:
-            self.instruments_model.clear()
-            for inst in self.song.instruments:
-                self.instruments_model.appendRow(QStandardItem(inst.name))
-            self.song_changed.emit(self.song)
 
     ###########################################################################
 

@@ -20,7 +20,8 @@ Dashboard
 .. mermaid::
 
    flowchart LR
-      model.state_changed --> view.on_state_changed
+      model.state_changed --> dashboard.on_state_changed
+      model.instruments_changed --> dashboard.on_instruments_changed
 
 Menus
 -----

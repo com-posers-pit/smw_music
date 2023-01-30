@@ -78,7 +78,6 @@ class Dashboard:
         self._envelope_preview = EnvelopePreview(self._view)
 
         self._view.sample_pack_list.setModel(self._model.sample_packs_model)
-        self._view.instrument_list.setModel(self._model.instruments_model)
 
         self._setup_menus()
         self._attach_signals()
@@ -94,6 +93,13 @@ class Dashboard:
     def update_song(self, song: Song) -> None:
         pass
         # self._volume.set_volume(song.volume)
+
+    def on_instruments_changed(self, names: list[str]) -> None:
+        print("in on_instruments_changed")
+        widget = self._view.instrument_list
+        widget.clear()
+        for name in names:
+            widget.addItem(name)
 
     def on_state_changed(self, state: State) -> None:
         v = self._view  # pylint: disable=invalid-name
@@ -406,8 +412,9 @@ class Dashboard:
             elif isinstance(widget, QAbstractItemView):
                 widget.activated.connect(slot)
 
-        # Return signal
+        # Return signals
         m.state_changed.connect(self.on_state_changed)
+        m.instruments_changed.connect(self.on_instruments_changed)
 
     ###########################################################################
 
