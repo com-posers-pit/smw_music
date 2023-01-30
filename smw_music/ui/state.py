@@ -132,3 +132,33 @@ class State:
             self.tune_setting,
             self.subtune_setting,
         )
+
+    ###########################################################################
+
+    @brr_setting.setter
+    def brr_setting(self, val: str) -> None:
+        val = val.strip()
+        regs = [int(x[1:], 16) for x in val.split(" ")]
+
+        self.adsr_mode = bool(regs[0] >> 7)
+        self.decay_setting = 0x7 & (regs[0] >> 4)
+        self.attack_setting = 0xF & regs[0]
+        self.sus_level_setting = regs[1] >> 5
+        self.sus_rate_setting = 0x1F & regs[1]
+        if regs[2] & 0x80:
+            self.gain_mode = GainMode.DIRECT
+            self.gain_setting = regs[2] & 0x7F
+        else:
+            self.gain_setting = regs[2] & 0x1F
+            match regs[2] >> 5:
+                case 0b00:
+                    self.gain_mode = GainMode.DECLIN
+                case 0b01:
+                    self.gain_mode = GainMode.DECEXP
+                case 0b10:
+                    self.gain_mode = GainMode.INCLIN
+                case 0b11:
+                    self.gain_mode = GainMode.INCBENT
+
+        self.tune_setting = regs[3]
+        self.subtune_setting = regs[4]
