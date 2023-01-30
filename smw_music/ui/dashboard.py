@@ -162,6 +162,7 @@ class Dashboard:
         v.select_pack_sample.setChecked(
             state.sample_source == SampleSource.SAMPLEPACK
         )
+        v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
         v.select_brr_sample.setChecked(state.sample_source == SampleSource.BRR)
         v.brr_fname.setText(state.brr_fname)
 
@@ -331,6 +332,7 @@ class Dashboard:
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
             (v.select_pack_sample, m.on_pack_sample_selected),
+            (v.sample_pack_list, m.on_pack_sample_changed),
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),
@@ -393,6 +395,8 @@ class Dashboard:
                 widget.toggled.connect(slot)
             elif isinstance(widget, QSlider):
                 widget.valueChanged.connect(slot)
+            elif isinstance(widget, QAbstractItemView):
+                widget.activated.connect(slot)
 
         # Return signal
         m.state_changed.connect(self.on_state_changed)

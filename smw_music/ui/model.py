@@ -220,12 +220,11 @@ class Model(QObject):
     ###########################################################################
 
     def reinforce_state(self) -> None:
-        self.state_changed.emit(self._history[-1])
+        self.state_changed.emit(self.state)
 
     def _update_state(self, **kwargs) -> None:
-        curr_state = self._history[-1]
-        new_state = replace(curr_state, **kwargs)
-        if new_state != curr_state:
+        new_state = replace(self.state, **kwargs)
+        if new_state != self.state:
             self._history.append(new_state)
             self.state_changed.emit(new_state)
 
@@ -336,6 +335,13 @@ class Model(QObject):
     def on_pack_sample_selected(self, state: bool) -> None:
         if state:
             self._update_state(sample_source=SampleSource.SAMPLEPACK)
+
+    def on_pack_sample_changed(self, index: int) -> None:
+        new_state: dict[str, int | str] = {"pack_sample_index": index}
+        if self.state.sample_source == SampleSource.SAMPLEPACK:
+            new_state["brr_setting"] = "$80 $00 $00 $00 $00"
+
+        self._update_state(**new_state)
 
     def on_brr_sample_selected(self, state: bool) -> None:
         if state:
@@ -503,7 +509,7 @@ class Model(QObject):
     def undo(self) -> None:
         if len(self._history) > 1:
             self._history.pop()
-            self.state_changed.emit(self._history[-1])
+            self.state_changed.emit(self.state)
 
     ###########################################################################
 
@@ -844,3 +850,9 @@ class Model(QObject):
                 raise SmwMusicException(f"Unknown OS {sys}")
 
         return conf_dir / app / prefs
+
+    ###########################################################################
+
+    @property
+    def state(self) -> State:
+        return self._history[-1]

@@ -124,6 +124,7 @@ Sample
       view.select_builtin_sample.toggled --> model.on_builtin_sample_selected
       view.builtin_sample.currentIndexChanged --> model.on_builtin_sample_changed
       view.select_pack_sample.toggled --> model.on_pack_sample_selected
+      view.sample_pack_list.activated --> model.on_pack_sample_changed
       view.select_brr_sample.toggled --> model.on_brr_sample_selected
       view.select_brr_fname.clicked --> dashboard.on_brr_clicked
       view.brr_fname.editingFinished --> model.on_brr_fname_changed
