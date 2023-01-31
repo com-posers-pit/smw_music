@@ -263,14 +263,14 @@ class Model(QObject):
     def on_artic_length_changed(self, val: int | str, artic: Artic) -> None:
         artics = dict(self.state.artic_settings)
         artics[artic] = replace(artics[artic], length=_parse_setting(val))
-        self._update_state(artics_settings=artics)
+        self._update_state(artic_settings=artics)
 
     ###########################################################################
 
     def on_artic_volume_changed(self, val: int | str, artic: Artic) -> None:
         artics = dict(self.state.artic_settings)
         artics[artic] = replace(artics[artic], volume=_parse_setting(val))
-        self._update_state(artics_settings=artics)
+        self._update_state(artic_settings=artics)
 
     ###########################################################################
 
@@ -313,7 +313,7 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_dynamics_update(self, val: int | str, level: Dynamics) -> None:
+    def on_dynamics_changed(self, val: int | str, level: Dynamics) -> None:
         dynamics = dict(self.state.dynamics_settings)
         dynamics[level] = _parse_setting(val)
         self._update_state(dynamics_settings=dynamics)
