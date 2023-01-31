@@ -97,13 +97,13 @@ def _add_sample_pack_to_model(
 ###############################################################################
 
 
-def _parse_setting(val: int | str) -> int:
+def _parse_setting(val: int | str, maxval: int = 255) -> int:
     if isinstance(val, int):
         return val
 
     val = val.strip()
     if val[-1] == "%":
-        return int(255 * float(val[:-1]) / 100)
+        return int(maxval * float(val[:-1]) / 100)
     if val[0] == "$":
         return int(val[1:], 16)
     return int(float(val))
@@ -261,15 +261,21 @@ class Model(QObject):
     ###########################################################################
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
+        max_len = 7
         artics = dict(self.state.artic_settings)
-        artics[artic] = replace(artics[artic], length=_parse_setting(val))
+        artics[artic] = replace(
+            artics[artic], length=_parse_setting(val, max_len)
+        )
         self._update_state(artic_settings=artics)
 
     ###########################################################################
 
     def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
+        max_vol = 15
         artics = dict(self.state.artic_settings)
-        artics[artic] = replace(artics[artic], volume=_parse_setting(val))
+        artics[artic] = replace(
+            artics[artic], volume=_parse_setting(val, max_vol)
+        )
         self._update_state(artic_settings=artics)
 
     ###########################################################################
