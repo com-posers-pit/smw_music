@@ -246,7 +246,7 @@ class Dashboard:
         v.select_pack_sample.setChecked(
             state.sample_source == SampleSource.SAMPLEPACK
         )
-        v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
+        # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
         v.select_brr_sample.setChecked(state.sample_source == SampleSource.BRR)
         v.brr_fname.setText(state.brr_fname)
 
@@ -440,7 +440,7 @@ class Dashboard:
             (v.echo_ch4, partial(m.on_echo_en_changed, EchoCh.CH4)),
             (v.echo_ch5, partial(m.on_echo_en_changed, EchoCh.CH5)),
             (v.echo_ch6, partial(m.on_echo_en_changed, EchoCh.CH6)),
-            (v.echo_ch0, partial(m.on_echo_en_changed, EchoCh.CH7)),
+            (v.echo_ch7, partial(m.on_echo_en_changed, EchoCh.CH7)),
             (v.echo_filter_0, m.on_filter_0_toggled),
             (v.echo_left_slider, m.on_echo_left_changed),
             (v.echo_left_setting, m.on_echo_left_changed),
