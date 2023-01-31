@@ -47,6 +47,24 @@ from smw_music.ui.state import EchoCh, GainMode, SampleSource, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
+# Private class definitions
+###############################################################################
+
+# h/t: https://stackoverflow.com/questions/47285303
+def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
+    fontmetrics = edit.fontMetrics()
+    tmargins = edit.textMargins()
+    cmargins = edit.contentsMargins()
+    edit.setFixedWidth(
+        fontmetrics.boundingRect(limit).width()
+        + tmargins.left()
+        + tmargins.right()
+        + cmargins.left()
+        + cmargins.right()
+    )
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -83,6 +101,7 @@ class Dashboard:
         self._view.sample_pack_list.setModel(self._model.sample_packs_model)
 
         self._setup_menus()
+        self._fix_edit_widths()
         self._attach_signals()
 
         self._view.show()
@@ -466,6 +485,48 @@ class Dashboard:
         )
         if fname:
             self._model.create_project(pathlib.Path(fname))
+
+    ###########################################################################
+
+    def _fix_edit_widths(self) -> None:
+        v = self._view  # pylint: disable=invalid-name
+        widgets: list[QLineEdit] = [
+            v.pppp_setting,
+            v.ppp_setting,
+            v.pp_setting,
+            v.p_setting,
+            v.mp_setting,
+            v.mf_setting,
+            v.f_setting,
+            v.ff_setting,
+            v.fff_setting,
+            v.ffff_setting,
+            v.artic_default_length_setting,
+            v.artic_default_volume_setting,
+            v.artic_acc_length_setting,
+            v.artic_acc_volume_setting,
+            v.artic_stacc_length_setting,
+            v.artic_stacc_volume_setting,
+            v.artic_accstacc_length_setting,
+            v.artic_accstacc_volume_setting,
+            v.attack_setting,
+            v.decay_setting,
+            v.sus_level_setting,
+            v.sus_rate_setting,
+            v.gain_setting,
+            v.tune_setting,
+            v.subtune_setting,
+            v.global_volume_setting,
+            v.echo_left_setting,
+            v.echo_right_setting,
+            v.echo_feedback_setting,
+            v.echo_delay_setting,
+        ]
+
+        for widget in widgets:
+            _set_lineedit_width(widget)
+
+        _set_lineedit_width(v.brr_setting, " ".join(5 * hexb(0)))
 
     ###########################################################################
 
