@@ -116,10 +116,10 @@ class State:
     dyn_interpolate: bool = False
     artic_settings: dict[Artic, ArticSetting] = field(
         default_factory=lambda: {
-            Artic.ACCENT: ArticSetting(0, 0),
-            Artic.ACCSTAC: ArticSetting(0, 0),
-            Artic.DEFAULT: ArticSetting(0, 0),
-            Artic.STACCATO: ArticSetting(0, 0),
+            Artic.ACCENT: ArticSetting(0x7, 0xF),
+            Artic.ACCSTAC: ArticSetting(0x5, 0xF),
+            Artic.DEFAULT: ArticSetting(0x7, 0xA),
+            Artic.STACCATO: ArticSetting(0x5, 0xA),
         }
     )
     pan_enabled: bool = False
