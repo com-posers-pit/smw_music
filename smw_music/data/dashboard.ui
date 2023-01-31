@@ -963,7 +963,7 @@
                   <item>
                    <widget class="QTabWidget" name="sample_settings_tabs">
                     <property name="currentIndex">
-                     <number>1</number>
+                     <number>0</number>
                     </property>
                     <widget class="QWidget" name="envelope_tab">
                      <attribute name="title">
