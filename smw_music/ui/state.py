@@ -222,3 +222,17 @@ class State:
 
         self.tune_setting = regs[3]
         self.subtune_setting = regs[4]
+
+    ###########################################################################
+
+    @property
+    def pan_description(self) -> str:
+        pan = self.pan_setting
+        if pan == 10:
+            text = "C"
+        elif pan < 10:
+            text = f"{10*(10 - pan)}% R"
+        else:
+            text = f"{10*(pan - 10)}% L"
+
+        return text

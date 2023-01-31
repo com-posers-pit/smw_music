@@ -217,14 +217,7 @@ class Dashboard:
         v.pan_setting.setEnabled(state.pan_enabled)
         v.pan_setting_label.setEnabled(state.pan_enabled)
         v.pan_setting.setValue(state.pan_setting)
-        pan = state.pan_setting
-        if pan == 10:
-            text = "C"
-        elif pan < 10:
-            text = f"{10*(10 - pan)}% R"
-        else:
-            text = f"{10*(pan - 10)}% L"
-        v.pan_setting_label.setText(text)
+        v.pan_setting_label.setText(state.pan_description)
 
         # Instrument sample
         v.select_builtin_sample.setChecked(
