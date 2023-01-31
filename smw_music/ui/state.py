@@ -18,6 +18,56 @@ from enum import IntEnum, auto
 ###############################################################################
 
 
+class Artic(IntEnum):
+    ACCENT = auto()
+    ACCSTAC = auto()
+    DEFAULT = auto()
+    STACCATO = auto()
+
+
+###############################################################################
+
+
+@dataclass
+class ArticSetting:
+    length: int
+    volume: int
+
+
+###############################################################################
+
+
+class Dynamics(IntEnum):
+    PPPP = auto()
+    PPP = auto()
+    PP = auto()
+    P = auto()
+    MP = auto()
+    MF = auto()
+    F = auto()
+    FF = auto()
+    FFF = auto()
+    FFFF = auto()
+
+
+###############################################################################
+
+
+class EchoCh(IntEnum):
+    GLOBAL = auto()
+    CH0 = auto()
+    CH1 = auto()
+    CH2 = auto()
+    CH3 = auto()
+    CH4 = auto()
+    CH5 = auto()
+    CH6 = auto()
+    CH7 = auto()
+
+
+###############################################################################
+
+
 class GainMode(IntEnum):
     DIRECT = auto()
     INCLIN = auto()
@@ -45,25 +95,25 @@ class State:
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
-    pppp_setting: int = 0
-    ppp_setting: int = 0
-    pp_setting: int = 0
-    p_setting: int = 0
-    mp_setting: int = 0
-    mf_setting: int = 0
-    f_setting: int = 0
-    ff_setting: int = 0
-    fff_setting: int = 0
-    ffff_setting: int = 0
+    dynamics_settings: dict[Dynamics, int] = {
+        Dynamics.PPPP: 0,
+        Dynamics.PPP: 0,
+        Dynamics.PP: 0,
+        Dynamics.P: 0,
+        Dynamics.MP: 0,
+        Dynamics.MF: 0,
+        Dynamics.F: 0,
+        Dynamics.FF: 0,
+        Dynamics.FFF: 0,
+        Dynamics.FFFF: 0,
+    }
     dyn_interpolate: bool = False
-    default_artic_length: int = 0
-    default_artic_volume: int = 0
-    accent_length: int = 0
-    accent_volume: int = 0
-    staccato_length: int = 0
-    staccato_volume: int = 0
-    accstacc_length: int = 0
-    accstacc_volume: int = 0
+    artic_settings: dict[Artic, ArticSetting] = {
+        Artic.ACCENT: ArticSetting(0, 0),
+        Artic.ACCSTAC: ArticSetting(0, 0),
+        Artic.DEFAULT: ArticSetting(0, 0),
+        Artic.STACCATO: ArticSetting(0, 0),
+    }
     pan_enabled: bool = False
     pan_setting: int = 0
     sample_source: SampleSource = SampleSource.BUILTIN
@@ -81,15 +131,17 @@ class State:
     subtune_setting: int = 0
     global_volume: int = 0
     global_legato: bool = True
-    echo_enable: bool = False
-    echo_ch0_enable: bool = False
-    echo_ch1_enable: bool = False
-    echo_ch2_enable: bool = False
-    echo_ch3_enable: bool = False
-    echo_ch4_enable: bool = False
-    echo_ch5_enable: bool = False
-    echo_ch6_enable: bool = False
-    echo_ch7_enable: bool = False
+    echo_enable: dict[EchoCh, bool] = {
+        EchoCh.GLOBAL: False,
+        EchoCh.CH0: False,
+        EchoCh.CH1: False,
+        EchoCh.CH2: False,
+        EchoCh.CH3: False,
+        EchoCh.CH4: False,
+        EchoCh.CH5: False,
+        EchoCh.CH6: False,
+        EchoCh.CH7: False,
+    }
     echo_filter0: bool = True
     echo_left_setting: int = 0
     echo_right_setting: int = 0

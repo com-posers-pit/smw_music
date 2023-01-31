@@ -31,13 +31,19 @@ from PyQt6.QtGui import QStandardItem, QStandardItemModel
 
 # Package imports
 from smw_music import SmwMusicException, __version__
-from smw_music.log import debug, info
 from smw_music.music_xml import InstrumentConfig, MusicXmlException
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
 from smw_music.ui.sample import Sample
-from smw_music.ui.state import GainMode, SampleSource, State
+from smw_music.ui.state import (
+    Artic,
+    Dynamics,
+    EchoCh,
+    GainMode,
+    SampleSource,
+    State,
+)
 
 ###############################################################################
 # Private Function Definitions
@@ -106,18 +112,18 @@ def _parse_setting(val: int | str) -> int:
 ###############################################################################
 
 
-def _dyn_to_str(dyn: "_DynEnum") -> str:
+def _dyn_to_str(dyn: Dynamics) -> str:
     lut = {
-        _DynEnum.PPPP: "PPPP",
-        _DynEnum.PPP: "PPP",
-        _DynEnum.PP: "PP",
-        _DynEnum.P: "P",
-        _DynEnum.MP: "MP",
-        _DynEnum.MF: "MF",
-        _DynEnum.F: "F",
-        _DynEnum.FF: "FF",
-        _DynEnum.FFF: "FFF",
-        _DynEnum.FFFF: "FFFF",
+        Dynamics.PPPP: "PPPP",
+        Dynamics.PPP: "PPP",
+        Dynamics.PP: "PP",
+        Dynamics.P: "P",
+        Dynamics.MP: "MP",
+        Dynamics.MF: "MF",
+        Dynamics.F: "F",
+        Dynamics.FF: "FF",
+        Dynamics.FFF: "FFF",
+        Dynamics.FFFF: "FFFF",
     }
     return lut[dyn]
 
@@ -125,38 +131,20 @@ def _dyn_to_str(dyn: "_DynEnum") -> str:
 ###############################################################################
 
 
-def _str_to_dyn(dyn: str) -> "_DynEnum":
+def _str_to_dyn(dyn: str) -> Dynamics:
     lut = {
-        "PPPP": _DynEnum.PPPP,
-        "PPP": _DynEnum.PPP,
-        "PP": _DynEnum.PP,
-        "P": _DynEnum.P,
-        "MP": _DynEnum.MP,
-        "MF": _DynEnum.MF,
-        "F": _DynEnum.F,
-        "FF": _DynEnum.FF,
-        "FFF": _DynEnum.FFF,
-        "FFFF": _DynEnum.FFFF,
+        "PPPP": Dynamics.PPPP,
+        "PPP": Dynamics.PPP,
+        "PP": Dynamics.PP,
+        "P": Dynamics.P,
+        "MP": Dynamics.MP,
+        "MF": Dynamics.MF,
+        "F": Dynamics.F,
+        "FF": Dynamics.FF,
+        "FFF": Dynamics.FFF,
+        "FFFF": Dynamics.FFFF,
     }
     return lut[dyn]
-
-
-###############################################################################
-# Private Class Definitions
-###############################################################################
-
-
-class _DynEnum(IntEnum):
-    PPPP = auto()
-    PPP = auto()
-    PP = auto()
-    P = auto()
-    MP = auto()
-    MF = auto()
-    F = auto()
-    FF = auto()
-    FFF = auto()
-    FFFF = auto()
 
 
 ###############################################################################
@@ -272,23 +260,17 @@ class Model(QObject):
     # API slot  definitions
     ###########################################################################
 
-    def on_accent_length_changed(self, val: int) -> None:
-        self._update_state(accent_length=val)
+    def on_artic_length_changed(self, val: int | str, artic: Artic) -> None:
+        artics = dict(self.state.artic_settings)
+        artics[artic] = replace(artics[artic], length=_parse_setting(val))
+        self._update_state(artics_settings=artics)
 
     ###########################################################################
 
-    def on_accent_volume_changed(self, val: int) -> None:
-        self._update_state(accent_volume=val)
-
-    ###########################################################################
-
-    def on_accstacc_length_changed(self, val: int) -> None:
-        self._update_state(accstacc_length=val)
-
-    ###########################################################################
-
-    def on_accstacc_volume_changed(self, val: int) -> None:
-        self._update_state(accstacc_volume=val)
+    def on_artic_volume_changed(self, val: int | str, artic: Artic) -> None:
+        artics = dict(self.state.artic_settings)
+        artics[artic] = replace(artics[artic], volume=_parse_setting(val))
+        self._update_state(artics_settings=artics)
 
     ###########################################################################
 
@@ -331,18 +313,17 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_def_artic_length_changed(self, val: int) -> None:
-        self._update_state(default_artic_length=val)
+    def on_dynamics_update(self, val: int | str, level: Dynamics) -> None:
+        dynamics = dict(self.state.dynamics_settings)
+        dynamics[level] = _parse_setting(val)
+        self._update_state(dynamics_settings=dynamics)
 
     ###########################################################################
 
-    def on_def_artic_volume_changed(self, val: int) -> None:
-        self._update_state(default_artic_volume=val)
-
-    ###########################################################################
-
-    def on_echo_enable_changed(self, state: bool) -> None:
-        self._update_state(echo_enable=state)
+    def on_echo_en_changed(self, state: bool, chan: EchoCh) -> None:
+        echo_enable = dict(self.state.echo_enable)
+        echo_enable[chan] = state
+        self._update_state(echo_enable=echo_enable)
 
     ###########################################################################
 
@@ -428,32 +409,8 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_f_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(f_setting=setting)
-
-    ###########################################################################
-
-    def on_ff_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(ff_setting=setting)
-
-    ###########################################################################
-
     def on_filter_0_toggled(self, state: bool) -> None:
         self._update_state(echo_filter0=state)
-
-    ###########################################################################
-
-    def on_fff_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(fff_setting=setting)
-
-    ###########################################################################
-
-    def on_ffff_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(ffff_setting=setting)
 
     ###########################################################################
 
@@ -532,18 +489,11 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_mf_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(mf_setting=setting)
-
-    ###########################################################################
-
     def on_mml_fname_changed(self, fname: str) -> None:
         self._update_state(mml_fname=fname)
 
     ###########################################################################
 
-    @info(True)
     def on_mml_generated(self, fname: str, echo: EchoConfig | None) -> None:
         title = "MML Generation"
         error = True
@@ -574,12 +524,6 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_mp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(mp_setting=setting)
-
-    ###########################################################################
-
     def on_musicxml_fname_changed(self, fname: str) -> None:
         try:
             self.song = Song.from_music_xml(fname)
@@ -591,12 +535,6 @@ class Model(QObject):
                 [x.name for x in self.song.instruments]
             )
         self._update_state(musicxml_fname=fname)
-
-    ###########################################################################
-
-    def on_p_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(p_setting=setting)
 
     ###########################################################################
 
@@ -641,36 +579,8 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_pp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(pp_setting=setting)
-
-    ###########################################################################
-
-    def on_ppp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(ppp_setting=setting)
-
-    ###########################################################################
-
-    def on_pppp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(pppp_setting=setting)
-
-    ###########################################################################
-
     def on_select_adsr_mode_selected(self, state: bool) -> None:
         self._update_state(adsr_mode=state)
-
-    ###########################################################################
-
-    def on_staccato_length_changed(self, val: int) -> None:
-        self._update_state(staccato_length=val)
-
-    ###########################################################################
-
-    def on_staccato_volume_changed(self, val: int) -> None:
-        self._update_state(staccato_volume=val)
 
     ###########################################################################
 
@@ -710,7 +620,6 @@ class Model(QObject):
 
     ###########################################################################
 
-    @info(True)
     def save(self) -> None:
         contents = {
             "version": __version__,
@@ -724,14 +633,12 @@ class Model(QObject):
 
     ###########################################################################
 
-    @info(True)
     def save_as(self, fname: str) -> None:
         self._project_file = Path(fname)
         self.save()
 
     ###########################################################################
 
-    @info(True)
     def set_instrument(self, name: str) -> None:
         if self.song is not None:
             for inst in self.song.instruments:
@@ -744,7 +651,6 @@ class Model(QObject):
 
     ###########################################################################
 
-    @info(True)
     def update_dynamics(self, dyn: str, val: int, interp: bool) -> None:
         if self.song is not None:
             if dyn == "global":

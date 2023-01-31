@@ -40,7 +40,9 @@ from smw_music.music_xml.song import Song
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.state import GainMode, SampleSource, State
+from smw_music.ui.state import Artic, ArticSetting
+from smw_music.ui.state import Dynamics as Dyn
+from smw_music.ui.state import EchoCh, GainMode, SampleSource, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -150,47 +152,49 @@ class Dashboard:
         v.measure_numbers.setChecked(state.measure_numbers)
 
         # Instrument dynamics settings
-        v.pppp_slider.setValue(state.pppp_setting)
-        v.pppp_setting.setText(pct(state.pppp_setting))
-        v.pppp_setting_label.setText(hexb(state.pppp_setting))
-        v.ppp_slider.setValue(state.ppp_setting)
-        v.ppp_setting.setText(pct(state.ppp_setting))
-        v.ppp_setting_label.setText(hexb(state.ppp_setting))
-        v.pp_slider.setValue(state.pp_setting)
-        v.pp_setting.setText(pct(state.pp_setting))
-        v.pp_setting_label.setText(hexb(state.pp_setting))
-        v.p_slider.setValue(state.p_setting)
-        v.p_setting.setText(pct(state.p_setting))
-        v.p_setting_label.setText(hexb(state.p_setting))
-        v.mp_slider.setValue(state.mp_setting)
-        v.mp_setting.setText(pct(state.mp_setting))
-        v.mp_setting_label.setText(hexb(state.mp_setting))
-        v.mf_slider.setValue(state.mf_setting)
-        v.mf_setting.setText(pct(state.mf_setting))
-        v.mf_setting_label.setText(hexb(state.mf_setting))
-        v.f_slider.setValue(state.f_setting)
-        v.f_setting.setText(pct(state.f_setting))
-        v.f_setting_label.setText(hexb(state.f_setting))
-        v.ff_slider.setValue(state.ff_setting)
-        v.ff_setting.setText(pct(state.ff_setting))
-        v.ff_setting_label.setText(hexb(state.ff_setting))
-        v.fff_slider.setValue(state.fff_setting)
-        v.fff_setting.setText(pct(state.fff_setting))
-        v.fff_setting_label.setText(hexb(state.fff_setting))
-        v.ffff_slider.setValue(state.ffff_setting)
-        v.ffff_setting.setText(pct(state.ffff_setting))
-        v.ffff_setting_label.setText(hexb(state.ffff_setting))
+        dynamics = state.dynamics_settings
+        v.pppp_slider.setValue(dynamics[Dyn.PPPP])
+        v.pppp_settings.setText(pct(dynamics[Dyn.PPPP]))
+        v.pppp_settings_label.setText(hexb(dynamics[Dyn.PPPP]))
+        v.ppp_slider.setValue(dynamics[Dyn.PPP])
+        v.ppp_settings.setText(pct(dynamics[Dyn.PPP]))
+        v.ppp_settings_label.setText(hexb(dynamics[Dyn.PPP]))
+        v.pp_slider.setValue(dynamics[Dyn.PP])
+        v.pp_settings.setText(pct(dynamics[Dyn.PP]))
+        v.pp_settings_label.setText(hexb(dynamics[Dyn.PP]))
+        v.p_slider.setValue(dynamics[Dyn.P])
+        v.p_settings.setText(pct(dynamics[Dyn.P]))
+        v.p_settings_label.setText(hexb(dynamics[Dyn.P]))
+        v.mp_slider.setValue(dynamics[Dyn.MP])
+        v.mp_settings.setText(pct(dynamics[Dyn.MP]))
+        v.mp_settings_label.setText(hexb(dynamics[Dyn.MP]))
+        v.mf_slider.setValue(dynamics[Dyn.MF])
+        v.mf_settings.setText(pct(dynamics[Dyn.MF]))
+        v.mf_settings_label.setText(hexb(dynamics[Dyn.MF]))
+        v.f_slider.setValue(dynamics[Dyn.F])
+        v.f_settings.setText(pct(dynamics[Dyn.F]))
+        v.f_settings_label.setText(hexb(dynamics[Dyn.F]))
+        v.ff_slider.setValue(dynamics[Dyn.FF])
+        v.ff_settings.setText(pct(dynamics[Dyn.FF]))
+        v.ff_settings_label.setText(hexb(dynamics[Dyn.FF]))
+        v.fff_slider.setValue(dynamics[Dyn.FFF])
+        v.fff_settings.setText(pct(dynamics[Dyn.FFF]))
+        v.fff_settings_label.setText(hexb(dynamics[Dyn.FFF]))
+        v.ffff_slider.setValue(dynamics[Dyn.FFFF])
+        v.ffff_settings.setText(pct(dynamics[Dyn.FFFF]))
+        v.ffff_settings_label.setText(hexb(dynamics[Dyn.FFFF]))
         v.interpolate.setChecked(state.dyn_interpolate)
 
         # Instrument articulation settings
-        v.artic_default_length_slider.setValue(state.default_artic_length)
-        v.artic_default_volume_slider.setValue(state.default_artic_volume)
-        v.artic_acc_length_slider.setValue(state.accent_length)
-        v.artic_acc_volume_slider.setValue(state.accent_volume)
-        v.artic_stacc_length_slider.setValue(state.staccato_length)
-        v.artic_stacc_volume_slider.setValue(state.staccato_volume)
-        v.artic_accstacc_length_slider.setValue(state.accstacc_length)
-        v.artic_accstacc_volume_slider.setValue(state.accstacc_volume)
+        artics = state.artic_settings
+        v.artic_default_length_slider.setValue(artics[Artic.DEFAULT].length)
+        v.artic_default_volume_slider.setValue(artics[Artic.DEFAULT].volume)
+        v.artic_acc_length_slider.setValue(artics[Artic.ACCENT].volume)
+        v.artic_acc_volume_slider.setValue(artics[Artic.ACCENT].volume)
+        v.artic_stacc_length_slider.setValue(artics[Artic.STACCATO].volume)
+        v.artic_stacc_volume_slider.setValue(artics[Artic.STACCATO].volume)
+        v.artic_accstacc_length_slider.setValue(artics[Artic.ACCSTAC].volume)
+        v.artic_accstacc_volume_slider.setValue(artics[Artic.ACCSTAC].volume)
 
         # Instrument pan settings
         v.pan_enable.setChecked(state.pan_enabled)
@@ -248,15 +252,15 @@ class Dashboard:
         v.global_volume_setting.setText(pct(state.global_volume))
         v.global_volume_setting_label.setText(hexb(state.global_volume))
         v.global_legato.setChecked(state.global_legato)
-        v.echo_enable.setChecked(state.echo_enable)
-        v.echo_ch0.setChecked(state.echo_ch0_enable)
-        v.echo_ch1.setChecked(state.echo_ch1_enable)
-        v.echo_ch2.setChecked(state.echo_ch2_enable)
-        v.echo_ch3.setChecked(state.echo_ch3_enable)
-        v.echo_ch4.setChecked(state.echo_ch4_enable)
-        v.echo_ch5.setChecked(state.echo_ch5_enable)
-        v.echo_ch6.setChecked(state.echo_ch6_enable)
-        v.echo_ch7.setChecked(state.echo_ch7_enable)
+        v.echo_enable.setChecked(state.echo_enable[EchoCh.GLOBAL])
+        v.echo_ch0.setChecked(state.echo_enable[EchoCh.CH0])
+        v.echo_ch1.setChecked(state.echo_enable[EchoCh.CH1])
+        v.echo_ch2.setChecked(state.echo_enable[EchoCh.CH2])
+        v.echo_ch3.setChecked(state.echo_enable[EchoCh.CH3])
+        v.echo_ch4.setChecked(state.echo_enable[EchoCh.CH4])
+        v.echo_ch5.setChecked(state.echo_enable[EchoCh.CH5])
+        v.echo_ch6.setChecked(state.echo_enable[EchoCh.CH6])
+        v.echo_ch7.setChecked(state.echo_enable[EchoCh.CH7])
         v.echo_filter_0.setChecked(state.echo_filter0)
         v.echo_filter_1.setChecked(not state.echo_filter0)
         v.echo_left_slider.setValue(state.echo_left_setting)
@@ -307,6 +311,10 @@ class Dashboard:
         m = self._model  # pylint: disable=invalid-name
         v = self._view  # pylint: disable=invalid-name
 
+        # Short aliases to avoid line wrapping
+        alen = m.on_artic_length_changed
+        avol = m.on_artic_volume_changed
+
         connections = [
             # Control Panel
             (v.select_musicxml_fname, self.on_musicxml_fname_clicked),
@@ -321,36 +329,36 @@ class Dashboard:
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
             # Instrument dynamics settings
-            (v.pppp_slider, m.on_pppp_changed),
-            (v.pppp_setting, m.on_pppp_changed),
-            (v.ppp_slider, m.on_ppp_changed),
-            (v.ppp_setting, m.on_ppp_changed),
-            (v.pp_slider, m.on_pp_changed),
-            (v.pp_setting, m.on_pp_changed),
-            (v.p_slider, m.on_p_changed),
-            (v.p_setting, m.on_p_changed),
-            (v.mp_slider, m.on_mp_changed),
-            (v.mp_setting, m.on_mp_changed),
-            (v.mf_slider, m.on_mf_changed),
-            (v.mf_setting, m.on_mf_changed),
-            (v.f_slider, m.on_f_changed),
-            (v.f_setting, m.on_f_changed),
-            (v.ff_slider, m.on_ff_changed),
-            (v.ff_setting, m.on_ff_changed),
-            (v.fff_slider, m.on_fff_changed),
-            (v.fff_setting, m.on_fff_changed),
-            (v.ffff_slider, m.on_ffff_changed),
-            (v.ffff_setting, m.on_ffff_changed),
+            (v.pppp_slider, lambda x: m.on_dynamics_changed(x, Dyn.PPPP)),
+            (v.pppp_setting, lambda x: m.on_dynamics_changed(x, Dyn.PPPP)),
+            (v.ppp_slider, lambda x: m.on_dynamics_changed(x, Dyn.PPP)),
+            (v.ppp_setting, lambda x: m.on_dynamics_changed(x, Dyn.PPP)),
+            (v.pp_slider, lambda x: m.on_dynamics_changed(x, Dyn.PP)),
+            (v.pp_setting, lambda x: m.on_dynamics_changed(x, Dyn.PP)),
+            (v.p_slider, lambda x: m.on_dynamics_changed(x, Dyn.P)),
+            (v.p_setting, lambda x: m.on_dynamics_changed(x, Dyn.P)),
+            (v.mp_slider, lambda x: m.on_dynamics_changed(x, Dyn.MP)),
+            (v.mp_setting, lambda x: m.on_dynamics_changed(x, Dyn.MP)),
+            (v.mf_slider, lambda x: m.on_dynamics_changed(x, Dyn.MF)),
+            (v.mf_setting, lambda x: m.on_dynamics_changed(x, Dyn.MF)),
+            (v.f_slider, lambda x: m.on_dynamics_changed(x, Dyn.F)),
+            (v.f_setting, lambda x: m.on_dynamics_changed(x, Dyn.F)),
+            (v.ff_slider, lambda x: m.on_dynamics_changed(x, Dyn.FF)),
+            (v.ff_setting, lambda x: m.on_dynamics_changed(x, Dyn.FF)),
+            (v.fff_slider, lambda x: m.on_dynamics_changed(x, Dyn.FFF)),
+            (v.fff_setting, lambda x: m.on_dynamics_changed(x, Dyn.FFF)),
+            (v.ffff_slider, lambda x: m.on_dynamics_changed(x, Dyn.FFFF)),
+            (v.ffff_setting, lambda x: m.on_dynamics_changed(x, Dyn.FFFF)),
             (v.interpolate, m.on_interpolate_changed),
             # Instrument articulation settings
-            (v.artic_default_length_slider, m.on_def_artic_length_changed),
-            (v.artic_default_volume_slider, m.on_def_artic_volume_changed),
-            (v.artic_acc_length_slider, m.on_accent_length_changed),
-            (v.artic_acc_volume_slider, m.on_accent_volume_changed),
-            (v.artic_stacc_length_slider, m.on_staccato_length_changed),
-            (v.artic_stacc_volume_slider, m.on_staccato_volume_changed),
-            (v.artic_accstacc_length_slider, m.on_accstacc_length_changed),
-            (v.artic_accstacc_volume_slider, m.on_accstacc_volume_changed),
+            (v.artic_default_length_slider, lambda x: alen(x, Artic.DEFAULT)),
+            (v.artic_default_volume_slider, lambda x: avol(x, Artic.DEFAULT)),
+            (v.artic_acc_length_slider, lambda x: alen(x, Artic.ACCENT)),
+            (v.artic_acc_volume_slider, lambda x: avol(x, Artic.ACCENT)),
+            (v.artic_stacc_length_slider, lambda x: alen(x, Artic.STACCATO)),
+            (v.artic_stacc_volume_slider, lambda x: avol(x, Artic.STACCATO)),
+            (v.artic_accstacc_length_slider, lambda x: alen(x, Artic.ACCSTAC)),
+            (v.artic_accstacc_volume_slider, lambda x: avol(x, Artic.ACCSTAC)),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),
@@ -383,15 +391,15 @@ class Dashboard:
             (v.global_volume_slider, m.on_global_volume_changed),
             (v.global_volume_setting, m.on_global_volume_changed),
             (v.global_legato, m.on_global_legato_changed),
-            (v.echo_enable, m.on_echo_enable_changed),
-            (v.echo_ch0, m.on_echo_ch0_changed),
-            (v.echo_ch1, m.on_echo_ch1_changed),
-            (v.echo_ch2, m.on_echo_ch2_changed),
-            (v.echo_ch3, m.on_echo_ch3_changed),
-            (v.echo_ch4, m.on_echo_ch4_changed),
-            (v.echo_ch5, m.on_echo_ch5_changed),
-            (v.echo_ch6, m.on_echo_ch6_changed),
-            (v.echo_ch7, m.on_echo_ch7_changed),
+            (v.echo_enable, lambda x: m.on_echo_en_changed(x, EchoCh.GLOBAL)),
+            (v.echo_ch0, lambda x: m.on_echo_en_changed(x, EchoCh.CH0)),
+            (v.echo_ch1, lambda x: m.on_echo_en_changed(x, EchoCh.CH1)),
+            (v.echo_ch2, lambda x: m.on_echo_en_changed(x, EchoCh.CH2)),
+            (v.echo_ch3, lambda x: m.on_echo_en_changed(x, EchoCh.CH3)),
+            (v.echo_ch4, lambda x: m.on_echo_en_changed(x, EchoCh.CH4)),
+            (v.echo_ch5, lambda x: m.on_echo_en_changed(x, EchoCh.CH5)),
+            (v.echo_ch6, lambda x: m.on_echo_en_changed(x, EchoCh.CH6)),
+            (v.echo_ch0, lambda x: m.on_echo_en_changed(x, EchoCh.CH7)),
             (v.echo_filter_0, m.on_filter_0_toggled),
             (v.echo_left_slider, m.on_echo_left_changed),
             (v.echo_left_setting, m.on_echo_left_changed),

@@ -70,26 +70,26 @@ Dynamics
 .. mermaid::
 
    flowchart LR
-      view.pppp_slider.valueChanged --> model.on_pppp_changed
-      view.pppp_setting.editingFinished --> model.on_pppp_changed
-      view.ppp_slider.valueChanged --> model.on_ppp_changed
-      view.ppp_setting.editingFinished --> model.on_ppp_changed
-      view.pp_slider.valueChanged --> model.on_pp_changed
-      view.pp_setting.editingFinished --> model.on_pp_changed
-      view.p_slider.valueChanged --> model.on_p_changed
-      view.p_setting.editingFinished --> model.on_p_changed
-      view.mp_slider.valueChanged --> model.on_mp_changed
-      view.mp_setting.editingFinished --> model.on_mp_changed
-      view.mf_slider.valueChanged --> model.on_mf_changed
-      view.mf_setting.editingFinished --> model.on_mf_changed
-      view.f_slider.valueChanged --> model.on_f_changed
-      view.f_setting.editingFinished --> model.on_f_changed
-      view.ff_slider.valueChanged --> model.on_ff_changed
-      view.ff_setting.editingFinished --> model.on_ff_changed
-      view.fff_slider.valueChanged --> model.on_fff_changed
-      view.fff_setting.editingFinished --> model.on_fff_changed
-      view.ffff_slider.valueChanged --> model.on_ffff_changed
-      view.ffff_setting.editingFinished --> model.on_ffff_changed
+      view.pppp_slider.valueChanged --> model.on_dynamics_changed
+      view.pppp_setting.editingFinished --> model.on_dynamics_changed
+      view.ppp_slider.valueChanged --> model.on_dynamics_changed
+      view.ppp_setting.editingFinished --> model.on_dynamics_changed
+      view.pp_slider.valueChanged --> model.on_dynamics_changed
+      view.pp_setting.editingFinished --> model.on_dynamics_changed
+      view.p_slider.valueChanged --> model.on_dynamics_changed
+      view.p_setting.editingFinished --> model.on_dynamics_changed
+      view.mp_slider.valueChanged --> model.on_dynamics_changed
+      view.mp_setting.editingFinished --> model.on_dynamics_changed
+      view.mf_slider.valueChanged --> model.on_dynamics_changed
+      view.mf_setting.editingFinished --> model.on_dynamics_changed
+      view.f_slider.valueChanged --> model.on_dynamics_changed
+      view.f_setting.editingFinished --> model.on_dynamics_changed
+      view.ff_slider.valueChanged --> model.on_dynamics_changed
+      view.ff_setting.editingFinished --> model.on_dynamics_changed
+      view.fff_slider.valueChanged --> model.on_dynamics_changed
+      view.fff_setting.editingFinished --> model.on_dynamics_changed
+      view.ffff_slider.valueChanged --> model.on_dynamics_changed
+      view.ffff_setting.editingFinished --> model.on_dynamics_changed
       A["view.interpolate.stateChanged"] --> model.on_interpolate_changed
 
 Articulations
@@ -98,14 +98,14 @@ Articulations
 .. mermaid::
 
    flowchart LR
-      view.artic_default_length_slider.valueChanged --> model.on_default_artic_length_changed
-      view.artic_default_volume_slider.valueChanged --> model.on_default_artic_volume_changed
-      view.artic_acc_length_slider.valueChanged --> model.on_acc_artic_length_changed
-      view.artic_acc_volume_slider.valueChanged --> model.on_acc_artic_volume_changed
-      view.artic_stacc_length_slider.valueChanged --> model.on_stacc_artic_length_changed
-      view.artic_stacc_volume_slider.valueChanged --> model.on_stacc_artic_volume_changed
-      view.artic_accstac_length_slider.valueChanged --> model.on_accstac_artic_length_changed
-      view.artic_accstac_volume_slider.valueChanged --> model.on_accstac_artic_volume_changed
+      view.artic_default_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_default_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_acc_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_acc_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_stacc_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_stacc_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_accstac_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_accstac_volume_slider.valueChanged --> model.on_artic_volume_changed
 
 Pan
 ~~~
@@ -157,15 +157,15 @@ Global Settings
      view.global_volume_slider.valueChanged --> model.on_global_volume_changed
      view.global_volume_setting.textEdited --> model.on_global_volume_changed
      view.global_legato.stateChanged --> model.on_global_legato_changed
-     view.echo_enable.stateChanged --> model.on_echo_enable_changed
-     view.echo_ch0.stateChanged --> model.on_echo_ch0_changed
-     view.echo_ch1.stateChanged --> model.on_echo_ch1_changed
-     view.echo_ch2.stateChanged --> model.on_echo_ch2_changed
-     view.echo_ch3.stateChanged --> model.on_echo_ch3_changed
-     view.echo_ch4.stateChanged --> model.on_echo_ch4_changed
-     view.echo_ch5.stateChanged --> model.on_echo_ch5_changed
-     view.echo_ch6.stateChanged --> model.on_echo_ch6_changed
-     view.echo_ch7.stateChanged --> model.on_echo_ch7_changed
+     view.echo_enable.stateChanged --> model.on_echo_en_changed
+     view.echo_ch0.stateChanged --> model.on_echo_en_changed
+     view.echo_ch1.stateChanged --> model.on_echo_en_changed
+     view.echo_ch2.stateChanged --> model.on_echo_en_changed
+     view.echo_ch3.stateChanged --> model.on_echo_en_changed
+     view.echo_ch4.stateChanged --> model.on_echo_en_changed
+     view.echo_ch5.stateChanged --> model.on_echo_en_changed
+     view.echo_ch6.stateChanged --> model.on_echo_en_changed
+     view.echo_ch7.stateChanged --> model.on_echo_en_changed
      view.echo_filter0.toggled --> model.on_filter_0_toggled
      view.echo_left_slider.toggled --> model.on_echo_left_changed
      view.echo_left_setting.editingFinished --> model.on_echo_left_changed
