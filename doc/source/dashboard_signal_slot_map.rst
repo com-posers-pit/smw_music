@@ -144,10 +144,15 @@ Sample
       view.gain_mode_declin.toggled --> model.on_gain_declin_selected
       view.gain_mode_decexp.toggled --> model.on_gain_decexp_selected
       view.gain_slider.valueChanged --> model.on_gain_changed
+      view.gain_setting.valueChanged --> model.on_gain_changed
       view.attack_slider.valueChanged --> model.on_attack_changed
+      view.attack_setting.valueChanged --> model.on_attack_changed
       view.decay_slider.valueChanged --> model.on_decay_changed
+      view.decay_setting.valueChanged --> model.on_decay_changed
       view.sus_level_slider.valueChanged --> model.on_sus_level_changed
+      view.sus_level_setting.valueChanged --> model.on_sus_level_changed
       view.sus_rate_slider.valueChanged --> model.on_sus_rate_changed
+      view.sus_rate_setting.valueChanged --> model.on_sus_rate_changed
       view.tune_slider.valueChanged --> model.on_tune_changed
       view.tune_setting.editingFinished --> model.on_tune_changed
       view.subtune_slider.valueChanged --> model.on_subtune_changed
