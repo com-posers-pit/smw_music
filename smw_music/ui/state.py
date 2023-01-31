@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, auto
 
 ###############################################################################
@@ -95,25 +95,29 @@ class State:
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
-    dynamics_settings: dict[Dynamics, int] = {
-        Dynamics.PPPP: 0,
-        Dynamics.PPP: 0,
-        Dynamics.PP: 0,
-        Dynamics.P: 0,
-        Dynamics.MP: 0,
-        Dynamics.MF: 0,
-        Dynamics.F: 0,
-        Dynamics.FF: 0,
-        Dynamics.FFF: 0,
-        Dynamics.FFFF: 0,
-    }
+    dynamics_settings: dict[Dynamics, int] = field(
+        default_factory=lambda: {
+            Dynamics.PPPP: 0,
+            Dynamics.PPP: 0,
+            Dynamics.PP: 0,
+            Dynamics.P: 0,
+            Dynamics.MP: 0,
+            Dynamics.MF: 0,
+            Dynamics.F: 0,
+            Dynamics.FF: 0,
+            Dynamics.FFF: 0,
+            Dynamics.FFFF: 0,
+        }
+    )
     dyn_interpolate: bool = False
-    artic_settings: dict[Artic, ArticSetting] = {
-        Artic.ACCENT: ArticSetting(0, 0),
-        Artic.ACCSTAC: ArticSetting(0, 0),
-        Artic.DEFAULT: ArticSetting(0, 0),
-        Artic.STACCATO: ArticSetting(0, 0),
-    }
+    artic_settings: dict[Artic, ArticSetting] = field(
+        default_factory=lambda: {
+            Artic.ACCENT: ArticSetting(0, 0),
+            Artic.ACCSTAC: ArticSetting(0, 0),
+            Artic.DEFAULT: ArticSetting(0, 0),
+            Artic.STACCATO: ArticSetting(0, 0),
+        }
+    )
     pan_enabled: bool = False
     pan_setting: int = 0
     sample_source: SampleSource = SampleSource.BUILTIN
@@ -131,17 +135,19 @@ class State:
     subtune_setting: int = 0
     global_volume: int = 0
     global_legato: bool = True
-    echo_enable: dict[EchoCh, bool] = {
-        EchoCh.GLOBAL: False,
-        EchoCh.CH0: False,
-        EchoCh.CH1: False,
-        EchoCh.CH2: False,
-        EchoCh.CH3: False,
-        EchoCh.CH4: False,
-        EchoCh.CH5: False,
-        EchoCh.CH6: False,
-        EchoCh.CH7: False,
-    }
+    echo_enable: dict[EchoCh, bool] = field(
+        default_factory=lambda: {
+            EchoCh.GLOBAL: False,
+            EchoCh.CH0: False,
+            EchoCh.CH1: False,
+            EchoCh.CH2: False,
+            EchoCh.CH3: False,
+            EchoCh.CH4: False,
+            EchoCh.CH5: False,
+            EchoCh.CH6: False,
+            EchoCh.CH7: False,
+        }
+    )
     echo_filter0: bool = True
     echo_left_setting: int = 0
     echo_right_setting: int = 0
