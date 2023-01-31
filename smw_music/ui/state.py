@@ -119,7 +119,7 @@ class State:
         }
     )
     pan_enabled: bool = False
-    pan_setting: int = 0
+    pan_setting: int = 10
     sample_source: SampleSource = SampleSource.BUILTIN
     builtin_sample_index: int = 0
     pack_sample_index: int = 0
