@@ -281,7 +281,7 @@ class Model(QObject):
     ###########################################################################
 
     def on_attack_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
+        setting = _parse_setting(val, 15)
         self._update_state(attack_setting=setting)
 
     ###########################################################################
@@ -314,7 +314,7 @@ class Model(QObject):
     ###########################################################################
 
     def on_decay_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
+        setting = _parse_setting(val, 7)
         self._update_state(decay_setting=setting)
 
     ###########################################################################
@@ -411,7 +411,8 @@ class Model(QObject):
     ###########################################################################
 
     def on_gain_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
+        limit = 127 if self.state.gain_mode == GainMode.DIRECT else 31
+        setting = _parse_setting(val, limit)
         self._update_state(gain_setting=setting)
 
     ###########################################################################
@@ -562,13 +563,13 @@ class Model(QObject):
     ###########################################################################
 
     def on_sus_level_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
+        setting = _parse_setting(val, 7)
         self._update_state(sus_level_setting=setting)
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
+        setting = _parse_setting(val, 31)
         self._update_state(sus_rate_setting=setting)
 
     ###########################################################################
