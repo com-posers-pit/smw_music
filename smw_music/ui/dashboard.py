@@ -40,7 +40,7 @@ from smw_music.music_xml.song import Song
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.state import Artic, ArticSetting
+from smw_music.ui.state import Artic
 from smw_music.ui.state import Dynamics as Dyn
 from smw_music.ui.state import EchoCh, GainMode, SampleSource, State
 from smw_music.utils import hexb, pct
@@ -154,35 +154,35 @@ class Dashboard:
         # Instrument dynamics settings
         dynamics = state.dynamics_settings
         v.pppp_slider.setValue(dynamics[Dyn.PPPP])
-        v.pppp_settings.setText(pct(dynamics[Dyn.PPPP]))
-        v.pppp_settings_label.setText(hexb(dynamics[Dyn.PPPP]))
+        v.pppp_setting.setText(pct(dynamics[Dyn.PPPP]))
+        v.pppp_setting_label.setText(hexb(dynamics[Dyn.PPPP]))
         v.ppp_slider.setValue(dynamics[Dyn.PPP])
-        v.ppp_settings.setText(pct(dynamics[Dyn.PPP]))
-        v.ppp_settings_label.setText(hexb(dynamics[Dyn.PPP]))
+        v.ppp_setting.setText(pct(dynamics[Dyn.PPP]))
+        v.ppp_setting_label.setText(hexb(dynamics[Dyn.PPP]))
         v.pp_slider.setValue(dynamics[Dyn.PP])
-        v.pp_settings.setText(pct(dynamics[Dyn.PP]))
-        v.pp_settings_label.setText(hexb(dynamics[Dyn.PP]))
+        v.pp_setting.setText(pct(dynamics[Dyn.PP]))
+        v.pp_setting_label.setText(hexb(dynamics[Dyn.PP]))
         v.p_slider.setValue(dynamics[Dyn.P])
-        v.p_settings.setText(pct(dynamics[Dyn.P]))
-        v.p_settings_label.setText(hexb(dynamics[Dyn.P]))
+        v.p_setting.setText(pct(dynamics[Dyn.P]))
+        v.p_setting_label.setText(hexb(dynamics[Dyn.P]))
         v.mp_slider.setValue(dynamics[Dyn.MP])
-        v.mp_settings.setText(pct(dynamics[Dyn.MP]))
-        v.mp_settings_label.setText(hexb(dynamics[Dyn.MP]))
+        v.mp_setting.setText(pct(dynamics[Dyn.MP]))
+        v.mp_setting_label.setText(hexb(dynamics[Dyn.MP]))
         v.mf_slider.setValue(dynamics[Dyn.MF])
-        v.mf_settings.setText(pct(dynamics[Dyn.MF]))
-        v.mf_settings_label.setText(hexb(dynamics[Dyn.MF]))
+        v.mf_setting.setText(pct(dynamics[Dyn.MF]))
+        v.mf_setting_label.setText(hexb(dynamics[Dyn.MF]))
         v.f_slider.setValue(dynamics[Dyn.F])
-        v.f_settings.setText(pct(dynamics[Dyn.F]))
-        v.f_settings_label.setText(hexb(dynamics[Dyn.F]))
+        v.f_setting.setText(pct(dynamics[Dyn.F]))
+        v.f_setting_label.setText(hexb(dynamics[Dyn.F]))
         v.ff_slider.setValue(dynamics[Dyn.FF])
-        v.ff_settings.setText(pct(dynamics[Dyn.FF]))
-        v.ff_settings_label.setText(hexb(dynamics[Dyn.FF]))
+        v.ff_setting.setText(pct(dynamics[Dyn.FF]))
+        v.ff_setting_label.setText(hexb(dynamics[Dyn.FF]))
         v.fff_slider.setValue(dynamics[Dyn.FFF])
-        v.fff_settings.setText(pct(dynamics[Dyn.FFF]))
-        v.fff_settings_label.setText(hexb(dynamics[Dyn.FFF]))
+        v.fff_setting.setText(pct(dynamics[Dyn.FFF]))
+        v.fff_setting_label.setText(hexb(dynamics[Dyn.FFF]))
         v.ffff_slider.setValue(dynamics[Dyn.FFFF])
-        v.ffff_settings.setText(pct(dynamics[Dyn.FFFF]))
-        v.ffff_settings_label.setText(hexb(dynamics[Dyn.FFFF]))
+        v.ffff_setting.setText(pct(dynamics[Dyn.FFFF]))
+        v.ffff_setting_label.setText(hexb(dynamics[Dyn.FFFF]))
         v.interpolate.setChecked(state.dyn_interpolate)
 
         # Instrument articulation settings
