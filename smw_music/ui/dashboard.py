@@ -187,31 +187,30 @@ class Dashboard:
         v.interpolate.setChecked(state.dyn_interpolate)
 
         # Instrument articulation settings
-        artics = state.artic_settings
-        val = artics[Artic.DEFAULT].length
-        v.artic_default_length_slider.setValue(val)
-        v.artic_default_length_setting_label.setText(hexb(val))
-        val = artics[Artic.DEFAULT].volume
-        v.artic_default_volume_slider.setValue(val)
-        v.artic_default_volume_setting_label.setText(hexb(val))
-        val = artics[Artic.ACCENT].length
-        v.artic_acc_length_slider.setValue(val)
-        v.artic_acc_length_setting_label.setText(hexb(val))
-        val = artics[Artic.ACCENT].volume
-        v.artic_acc_volume_slider.setValue(val)
-        v.artic_acc_volume_setting_label.setText(hexb(val))
-        val = artics[Artic.STACCATO].length
-        v.artic_stacc_length_slider.setValue(val)
-        v.artic_stacc_length_setting_label.setText(hexb(val))
-        val = artics[Artic.STACCATO].volume
-        v.artic_stacc_volume_slider.setValue(val)
-        v.artic_stacc_volume_setting_label.setText(hexb(val))
-        val = artics[Artic.ACCSTAC].length
-        v.artic_accstacc_length_slider.setValue(val)
-        v.artic_accstacc_length_setting_label.setText(hexb(val))
-        val = artics[Artic.ACCSTAC].volume
-        v.artic_accstacc_volume_slider.setValue(val)
-        v.artic_accstacc_volume_setting_label.setText(hexb(val))
+        artic = state.artic_settings[Artic.DEFAULT]
+        v.artic_default_length_slider.setValue(artic.length)
+        v.artic_default_length_setting.setText(hexb(artic.length))
+        v.artic_default_volume_slider.setValue(artic.volume)
+        v.artic_default_volume_setting.setText(hexb(artic.volume))
+        v.artic_default_setting_label.setText(hexb(artic.setting))
+        artic = state.artic_settings[Artic.ACCENT]
+        v.artic_acc_length_slider.setValue(artic.length)
+        v.artic_acc_length_setting.setText(hexb(artic.length))
+        v.artic_acc_volume_slider.setValue(artic.volume)
+        v.artic_acc_volume_setting.setText(hexb(artic.volume))
+        v.artic_acc_setting_label.setText(hexb(artic.setting))
+        artic = state.artic_settings[Artic.STACCATO]
+        v.artic_stacc_length_slider.setValue(artic.length)
+        v.artic_stacc_length_setting.setText(hexb(artic.length))
+        v.artic_stacc_volume_slider.setValue(artic.volume)
+        v.artic_stacc_volume_setting.setText(hexb(artic.volume))
+        v.artic_stacc_setting_label.setText(hexb(artic.setting))
+        artic = state.artic_settings[Artic.ACCSTAC]
+        v.artic_accstacc_length_slider.setValue(artic.length)
+        v.artic_accstacc_length_setting.setText(hexb(artic.length))
+        v.artic_accstacc_volume_slider.setValue(artic.volume)
+        v.artic_accstacc_volume_setting.setText(hexb(artic.volume))
+        v.artic_accstacc_setting_label.setText(hexb(artic.setting))
 
         # Instrument pan settings
         v.pan_enable.setChecked(state.pan_enabled)
@@ -361,14 +360,22 @@ class Dashboard:
             (v.ffff_setting, partial(m.on_dynamics_changed, Dyn.FFFF)),
             (v.interpolate, m.on_interpolate_changed),
             # Instrument articulation settings
-            (v.artic_default_length_slider, lambda x: alen(x, Artic.DEFAULT)),
-            (v.artic_default_volume_slider, lambda x: avol(x, Artic.DEFAULT)),
-            (v.artic_acc_length_slider, lambda x: alen(x, Artic.ACCENT)),
-            (v.artic_acc_volume_slider, lambda x: avol(x, Artic.ACCENT)),
-            (v.artic_stacc_length_slider, lambda x: alen(x, Artic.STACCATO)),
-            (v.artic_stacc_volume_slider, lambda x: avol(x, Artic.STACCATO)),
-            (v.artic_accstacc_length_slider, lambda x: alen(x, Artic.ACCSTAC)),
-            (v.artic_accstacc_volume_slider, lambda x: avol(x, Artic.ACCSTAC)),
+            (v.artic_default_length_slider, partial(alen, Artic.DEFAULT)),
+            (v.artic_default_length_setting, partial(alen, Artic.DEFAULT)),
+            (v.artic_default_volume_slider, partial(avol, Artic.DEFAULT)),
+            (v.artic_default_volume_setting, partial(avol, Artic.DEFAULT)),
+            (v.artic_acc_length_slider, partial(alen, Artic.ACCENT)),
+            (v.artic_acc_length_setting, partial(alen, Artic.ACCENT)),
+            (v.artic_acc_volume_slider, partial(avol, Artic.ACCENT)),
+            (v.artic_acc_volume_setting, partial(avol, Artic.ACCENT)),
+            (v.artic_stacc_length_slider, partial(alen, Artic.STACCATO)),
+            (v.artic_stacc_length_setting, partial(alen, Artic.STACCATO)),
+            (v.artic_stacc_volume_slider, partial(avol, Artic.STACCATO)),
+            (v.artic_stacc_volume_setting, partial(avol, Artic.STACCATO)),
+            (v.artic_accstacc_length_slider, partial(alen, Artic.ACCSTAC)),
+            (v.artic_accstacc_length_setting, partial(alen, Artic.ACCSTAC)),
+            (v.artic_accstacc_volume_slider, partial(avol, Artic.ACCSTAC)),
+            (v.artic_accstacc_volume_setting, partial(avol, Artic.ACCSTAC)),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),

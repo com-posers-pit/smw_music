@@ -33,6 +33,10 @@ class ArticSetting:
     length: int
     volume: int
 
+    @property
+    def setting(self) -> int:
+        return (0x7 & self.length) << 4 | (0xF & self.volume)
+
 
 ###############################################################################
 

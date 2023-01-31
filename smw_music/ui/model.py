@@ -260,14 +260,14 @@ class Model(QObject):
     # API slot  definitions
     ###########################################################################
 
-    def on_artic_length_changed(self, val: int | str, artic: Artic) -> None:
+    def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
         artics = dict(self.state.artic_settings)
         artics[artic] = replace(artics[artic], length=_parse_setting(val))
         self._update_state(artic_settings=artics)
 
     ###########################################################################
 
-    def on_artic_volume_changed(self, val: int | str, artic: Artic) -> None:
+    def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
         artics = dict(self.state.artic_settings)
         artics[artic] = replace(artics[artic], volume=_parse_setting(val))
         self._update_state(artic_settings=artics)
