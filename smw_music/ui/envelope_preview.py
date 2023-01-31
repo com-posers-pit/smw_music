@@ -142,23 +142,6 @@ class EnvelopePreview(QMainWindow):
 
     ###########################################################################
 
-    def plot_declin(self, gain_reg: int) -> None:
-        period = _RATES[gain_reg]
-        offset = _OFFSETS[gain_reg]
-        times = [0.0, 0.0, 100]
-        envelope = [1, 0, 0]
-        envx = _LIMIT
-        for n, count in enumerate(self._counts):
-            if (count + offset) % period == 0:
-                envx -= 32
-                if envx <= 0:
-                    times[1] = n / _SAMPLE_FREQ
-                    break
-
-        self._plot_data.setData(times, envelope)
-
-    ###########################################################################
-
     def plot_decexp(self, gain_reg: int) -> None:
         period = _RATES[gain_reg]
         offset = _OFFSETS[gain_reg]
@@ -176,6 +159,23 @@ class EnvelopePreview(QMainWindow):
 
         times.append(100)
         envelope.append(0)
+        self._plot_data.setData(times, envelope)
+
+    ###########################################################################
+
+    def plot_declin(self, gain_reg: int) -> None:
+        period = _RATES[gain_reg]
+        offset = _OFFSETS[gain_reg]
+        times = [0.0, 0.0, 100]
+        envelope = [1, 0, 0]
+        envx = _LIMIT
+        for n, count in enumerate(self._counts):
+            if (count + offset) % period == 0:
+                envx -= 32
+                if envx <= 0:
+                    times[1] = n / _SAMPLE_FREQ
+                    break
+
         self._plot_data.setData(times, envelope)
 
     ###########################################################################

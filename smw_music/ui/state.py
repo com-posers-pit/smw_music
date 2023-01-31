@@ -97,6 +97,8 @@ class State:
     echo_delay_setting: int = 0
 
     ###########################################################################
+    # Property definitions
+    ###########################################################################
 
     @property
     def brr_setting(self) -> tuple[int, int, int, int, int]:

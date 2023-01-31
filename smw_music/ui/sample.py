@@ -173,6 +173,8 @@ class Sample:
     subtuning: int = 0
 
     ###########################################################################
+    # Constructor definitions
+    ###########################################################################
 
     @classmethod
     def from_regs(cls, fname: str, regs: list[int]) -> "Sample":

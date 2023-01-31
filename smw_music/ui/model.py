@@ -186,8 +186,9 @@ class Model(QObject):
     _project_name: str | None
 
     ###########################################################################
+    # Constructor definitions
+    ###########################################################################
 
-    @debug()
     def __init__(self) -> None:
         super().__init__()
         self.song = None
@@ -201,289 +202,6 @@ class Model(QObject):
     # API method definitions
     ###########################################################################
 
-    def reinforce_state(self) -> None:
-        self.state_changed.emit(self.state)
-
-    def _update_state(self, **kwargs) -> None:
-        new_state = replace(self.state, **kwargs)
-        if new_state != self.state:
-            self._history.append(new_state)
-            self.state_changed.emit(new_state)
-
-    def on_musicxml_fname_changed(self, fname: str) -> None:
-        try:
-            self.song = Song.from_music_xml(fname)
-        except MusicXmlException as e:
-            self.response_generated.emit(True, "Song load", str(e))
-        else:
-            self.song_changed.emit(self.song)
-            self.instruments_changed.emit(
-                [x.name for x in self.song.instruments]
-            )
-        self._update_state(musicxml_fname=fname)
-
-    def on_mml_fname_changed(self, fname: str) -> None:
-        self._update_state(mml_fname=fname)
-
-    def on_loop_analysis_changed(self, enabled: bool) -> None:
-        self._update_state(loop_analysis=enabled)
-
-    def on_superloop_analysis_changed(self, enabled: bool) -> None:
-        self._update_state(superloop_analysis=enabled)
-
-    def on_measure_numbers_changed(self, enabled: bool) -> None:
-        self._update_state(measure_numbers=enabled)
-
-    def on_generate_mml_clicked(self) -> None:
-        pass
-
-    def on_generate_spc_clicked(self) -> None:
-        # TODO: support OSX and windows
-        subprocess.call(  # nosec B603, B607
-            ["sh", "convert.sh"], cwd=self._project_path
-        )
-
-    def on_play_spc_clicked(self) -> None:
-        path = self._project_path
-
-        if path is not None:
-            spc_name = self._project_name
-
-            spc_name = f"{spc_name}.spc"
-            spc_name = str(path / "SPCs" / spc_name)
-            threading.Thread(
-                target=subprocess.call,
-                # TODO: Handle windows/OSX
-                args=(["wine", str(self._spcplay_path), spc_name],),
-            ).start()
-
-    def on_pppp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(pppp_setting=setting)
-
-    def on_ppp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(ppp_setting=setting)
-
-    def on_pp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(pp_setting=setting)
-
-    def on_p_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(p_setting=setting)
-
-    def on_mp_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(mp_setting=setting)
-
-    def on_mf_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(mf_setting=setting)
-
-    def on_f_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(f_setting=setting)
-
-    def on_ff_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(ff_setting=setting)
-
-    def on_fff_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(fff_setting=setting)
-
-    def on_ffff_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(ffff_setting=setting)
-
-    def on_interpolate_changed(self, state: bool) -> None:
-        self._update_state(dyn_interpolate=state)
-
-    def on_def_artic_length_changed(self, val: int) -> None:
-        self._update_state(default_artic_length=val)
-
-    def on_def_artic_volume_changed(self, val: int) -> None:
-        self._update_state(default_artic_volume=val)
-
-    def on_accent_length_changed(self, val: int) -> None:
-        self._update_state(accent_length=val)
-
-    def on_accent_volume_changed(self, val: int) -> None:
-        self._update_state(accent_volume=val)
-
-    def on_staccato_length_changed(self, val: int) -> None:
-        self._update_state(staccato_length=val)
-
-    def on_staccato_volume_changed(self, val: int) -> None:
-        self._update_state(staccato_volume=val)
-
-    def on_accstacc_length_changed(self, val: int) -> None:
-        self._update_state(accstacc_length=val)
-
-    def on_accstacc_volume_changed(self, val: int) -> None:
-        self._update_state(accstacc_volume=val)
-
-    def on_pan_enable_changed(self, state: bool) -> None:
-        self._update_state(pan_enabled=state)
-
-    def on_pan_setting_changed(self, val: int) -> None:
-        self._update_state(pan_setting=val)
-
-    def on_builtin_sample_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(sample_source=SampleSource.BUILTIN)
-
-    def on_builtin_sample_changed(self, index: int) -> None:
-        self._update_state(builtin_sample_index=index)
-
-    def on_pack_sample_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(sample_source=SampleSource.SAMPLEPACK)
-
-    def on_pack_sample_changed(self, index: int) -> None:
-        new_state: dict[str, int | str] = {"pack_sample_index": index}
-        if self.state.sample_source == SampleSource.SAMPLEPACK:
-            new_state["brr_setting"] = "$80 $00 $00 $00 $00"
-
-        self._update_state(**new_state)
-
-    def on_brr_sample_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(sample_source=SampleSource.BRR)
-
-    def on_brr_fname_changed(self, fname: str) -> None:
-        self._update_state(brr_fname=fname)
-
-    def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_state(adsr_mode=state)
-
-    def on_gain_direct_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(gain_mode=GainMode.DIRECT)
-
-    def on_gain_inclin_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(gain_mode=GainMode.INCLIN)
-
-    def on_gain_incbent_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(gain_mode=GainMode.INCBENT)
-
-    def on_gain_declin_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(gain_mode=GainMode.DECLIN)
-
-    def on_gain_decexp_selected(self, state: bool) -> None:
-        if state:
-            self._update_state(gain_mode=GainMode.DECEXP)
-
-    def on_gain_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(gain_setting=setting)
-
-    def on_attack_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(attack_setting=setting)
-
-    def on_decay_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(decay_setting=setting)
-
-    def on_sus_level_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(sus_level_setting=setting)
-
-    def on_sus_rate_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(sus_rate_setting=setting)
-
-    def on_tune_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(tune_setting=setting)
-
-    def on_subtune_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(subtune_setting=setting)
-
-    def on_brr_setting_changed(self, val: str) -> None:
-        self._update_state(brr_setting=val)
-
-    def on_global_volume_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(global_volume=setting)
-
-    def on_global_legato_changed(self, state: bool) -> None:
-        self._update_state(global_legato=state)
-
-    def on_echo_enable_changed(self, state: bool) -> None:
-        self._update_state(echo_enable=state)
-
-    def on_echo_ch0_changed(self, state: bool) -> None:
-        self._update_state(echo_ch0_enable=state)
-
-    def on_echo_ch1_changed(self, state: bool) -> None:
-        self._update_state(echo_ch1_enable=state)
-
-    def on_echo_ch2_changed(self, state: bool) -> None:
-        self._update_state(echo_ch2_enable=state)
-
-    def on_echo_ch3_changed(self, state: bool) -> None:
-        self._update_state(echo_ch3_enable=state)
-
-    def on_echo_ch4_changed(self, state: bool) -> None:
-        self._update_state(echo_ch4_enable=state)
-
-    def on_echo_ch5_changed(self, state: bool) -> None:
-        self._update_state(echo_ch5_enable=state)
-
-    def on_echo_ch6_changed(self, state: bool) -> None:
-        self._update_state(echo_ch6_enable=state)
-
-    def on_echo_ch7_changed(self, state: bool) -> None:
-        self._update_state(echo_ch7_enable=state)
-
-    def on_filter_0_toggled(self, state: bool) -> None:
-        self._update_state(echo_filter0=state)
-
-    def on_echo_left_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_left_setting=setting)
-
-    def on_echo_left_surround_changed(self, state: bool) -> None:
-        # TODO
-        pass
-
-    def on_echo_right_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_right_setting=setting)
-
-    def on_echo_right_surround_changed(self, state: bool) -> None:
-        # TODO
-        pass
-
-    def on_echo_feedback_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_feedback_setting=setting)
-
-    def on_echo_feedback_surround_changed(self, state: bool) -> None:
-        # TODO
-        pass
-
-    def on_echo_delay_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_delay_setting=setting)
-
-    ###########################################################################
-
-    def undo(self) -> None:
-        if len(self._history) > 1:
-            self._history.pop()
-            self.state_changed.emit(self.state)
-
-    ###########################################################################
-
-    @info(True)
     def create_project(
         self, project_file: Path, project_name: str | None = None
     ) -> None:
@@ -538,13 +256,290 @@ class Model(QObject):
 
     ###########################################################################
 
-    @info(True)
     def load(self, fname: str) -> None:
         with open(fname, "r", encoding="utf8") as fobj:
             contents = yaml.safe_load(fobj)
 
         self._project_name = contents["song"]
         self._project_file = Path(fname)
+
+    ###########################################################################
+
+    def reinforce_state(self) -> None:
+        self.state_changed.emit(self.state)
+
+    ###########################################################################
+    # API slot  definitions
+    ###########################################################################
+
+    def on_accent_length_changed(self, val: int) -> None:
+        self._update_state(accent_length=val)
+
+    ###########################################################################
+
+    def on_accent_volume_changed(self, val: int) -> None:
+        self._update_state(accent_volume=val)
+
+    ###########################################################################
+
+    def on_accstacc_length_changed(self, val: int) -> None:
+        self._update_state(accstacc_length=val)
+
+    ###########################################################################
+
+    def on_accstacc_volume_changed(self, val: int) -> None:
+        self._update_state(accstacc_volume=val)
+
+    ###########################################################################
+
+    def on_attack_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(attack_setting=setting)
+
+    ###########################################################################
+
+    def on_brr_fname_changed(self, fname: str) -> None:
+        self._update_state(brr_fname=fname)
+
+    ###########################################################################
+
+    def on_brr_sample_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(sample_source=SampleSource.BRR)
+
+    ###########################################################################
+
+    def on_brr_setting_changed(self, val: str) -> None:
+        self._update_state(brr_setting=val)
+
+    ###########################################################################
+
+    def on_builtin_sample_changed(self, index: int) -> None:
+        self._update_state(builtin_sample_index=index)
+
+    ###########################################################################
+
+    def on_builtin_sample_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(sample_source=SampleSource.BUILTIN)
+
+    ###########################################################################
+
+    def on_decay_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(decay_setting=setting)
+
+    ###########################################################################
+
+    def on_def_artic_length_changed(self, val: int) -> None:
+        self._update_state(default_artic_length=val)
+
+    ###########################################################################
+
+    def on_def_artic_volume_changed(self, val: int) -> None:
+        self._update_state(default_artic_volume=val)
+
+    ###########################################################################
+
+    def on_echo_enable_changed(self, state: bool) -> None:
+        self._update_state(echo_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch0_changed(self, state: bool) -> None:
+        self._update_state(echo_ch0_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch1_changed(self, state: bool) -> None:
+        self._update_state(echo_ch1_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch2_changed(self, state: bool) -> None:
+        self._update_state(echo_ch2_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch3_changed(self, state: bool) -> None:
+        self._update_state(echo_ch3_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch4_changed(self, state: bool) -> None:
+        self._update_state(echo_ch4_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch5_changed(self, state: bool) -> None:
+        self._update_state(echo_ch5_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch6_changed(self, state: bool) -> None:
+        self._update_state(echo_ch6_enable=state)
+
+    ###########################################################################
+
+    def on_echo_ch7_changed(self, state: bool) -> None:
+        self._update_state(echo_ch7_enable=state)
+
+    ###########################################################################
+
+    def on_echo_feedback_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(echo_feedback_setting=setting)
+
+    ###########################################################################
+
+    def on_echo_feedback_surround_changed(self, state: bool) -> None:
+        # TODO
+        pass
+
+    ###########################################################################
+
+    def on_echo_left_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(echo_left_setting=setting)
+
+    ###########################################################################
+
+    def on_echo_left_surround_changed(self, state: bool) -> None:
+        # TODO
+        pass
+
+    ###########################################################################
+
+    def on_echo_right_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(echo_right_setting=setting)
+
+    ###########################################################################
+
+    def on_echo_right_surround_changed(self, state: bool) -> None:
+        # TODO
+        pass
+
+    ###########################################################################
+
+    def on_echo_delay_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(echo_delay_setting=setting)
+
+    ###########################################################################
+
+    def on_f_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(f_setting=setting)
+
+    ###########################################################################
+
+    def on_ff_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(ff_setting=setting)
+
+    ###########################################################################
+
+    def on_filter_0_toggled(self, state: bool) -> None:
+        self._update_state(echo_filter0=state)
+
+    ###########################################################################
+
+    def on_fff_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(fff_setting=setting)
+
+    ###########################################################################
+
+    def on_ffff_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(ffff_setting=setting)
+
+    ###########################################################################
+
+    def on_gain_declin_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(gain_mode=GainMode.DECLIN)
+
+    ###########################################################################
+
+    def on_gain_decexp_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(gain_mode=GainMode.DECEXP)
+
+    ###########################################################################
+
+    def on_gain_direct_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(gain_mode=GainMode.DIRECT)
+
+    ###########################################################################
+
+    def on_gain_incbent_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(gain_mode=GainMode.INCBENT)
+
+    ###########################################################################
+
+    def on_gain_inclin_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(gain_mode=GainMode.INCLIN)
+
+    ###########################################################################
+
+    def on_gain_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(gain_setting=setting)
+
+    ###########################################################################
+
+    def on_generate_mml_clicked(self) -> None:
+        pass
+
+    ###########################################################################
+
+    def on_generate_spc_clicked(self) -> None:
+        # TODO: support OSX and windows
+        subprocess.call(  # nosec B603, B607
+            ["sh", "convert.sh"], cwd=self._project_path
+        )
+
+    ###########################################################################
+
+    def on_global_volume_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(global_volume=setting)
+
+    ###########################################################################
+
+    def on_global_legato_changed(self, state: bool) -> None:
+        self._update_state(global_legato=state)
+
+    ###########################################################################
+
+    def on_interpolate_changed(self, state: bool) -> None:
+        self._update_state(dyn_interpolate=state)
+
+    ###########################################################################
+
+    def on_loop_analysis_changed(self, enabled: bool) -> None:
+        self._update_state(loop_analysis=enabled)
+
+    ###########################################################################
+
+    def on_measure_numbers_changed(self, enabled: bool) -> None:
+        self._update_state(measure_numbers=enabled)
+
+    ###########################################################################
+
+    def on_mf_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(mf_setting=setting)
+
+    ###########################################################################
+
+    def on_mml_fname_changed(self, fname: str) -> None:
+        self._update_state(mml_fname=fname)
 
     ###########################################################################
 
@@ -576,6 +571,142 @@ class Model(QObject):
                 error = False
                 msg = "Done"
         self.response_generated.emit(error, title, msg)
+
+    ###########################################################################
+
+    def on_mp_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(mp_setting=setting)
+
+    ###########################################################################
+
+    def on_musicxml_fname_changed(self, fname: str) -> None:
+        try:
+            self.song = Song.from_music_xml(fname)
+        except MusicXmlException as e:
+            self.response_generated.emit(True, "Song load", str(e))
+        else:
+            self.song_changed.emit(self.song)
+            self.instruments_changed.emit(
+                [x.name for x in self.song.instruments]
+            )
+        self._update_state(musicxml_fname=fname)
+
+    ###########################################################################
+
+    def on_p_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(p_setting=setting)
+
+    ###########################################################################
+
+    def on_pack_sample_changed(self, index: int) -> None:
+        new_state: dict[str, int | str] = {"pack_sample_index": index}
+        if self.state.sample_source == SampleSource.SAMPLEPACK:
+            new_state["brr_setting"] = "$80 $00 $00 $00 $00"
+
+        self._update_state(**new_state)
+
+    ###########################################################################
+
+    def on_pack_sample_selected(self, state: bool) -> None:
+        if state:
+            self._update_state(sample_source=SampleSource.SAMPLEPACK)
+
+    ###########################################################################
+
+    def on_pan_enable_changed(self, state: bool) -> None:
+        self._update_state(pan_enabled=state)
+
+    ###########################################################################
+
+    def on_pan_setting_changed(self, val: int) -> None:
+        self._update_state(pan_setting=val)
+
+    ###########################################################################
+
+    def on_play_spc_clicked(self) -> None:
+        path = self._project_path
+
+        if path is not None:
+            spc_name = self._project_name
+
+            spc_name = f"{spc_name}.spc"
+            spc_name = str(path / "SPCs" / spc_name)
+            threading.Thread(
+                target=subprocess.call,
+                # TODO: Handle windows/OSX
+                args=(["wine", str(self._spcplay_path), spc_name],),
+            ).start()
+
+    ###########################################################################
+
+    def on_pp_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(pp_setting=setting)
+
+    ###########################################################################
+
+    def on_ppp_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(ppp_setting=setting)
+
+    ###########################################################################
+
+    def on_pppp_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(pppp_setting=setting)
+
+    ###########################################################################
+
+    def on_select_adsr_mode_selected(self, state: bool) -> None:
+        self._update_state(adsr_mode=state)
+
+    ###########################################################################
+
+    def on_staccato_length_changed(self, val: int) -> None:
+        self._update_state(staccato_length=val)
+
+    ###########################################################################
+
+    def on_staccato_volume_changed(self, val: int) -> None:
+        self._update_state(staccato_volume=val)
+
+    ###########################################################################
+
+    def on_subtune_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(subtune_setting=setting)
+
+    ###########################################################################
+
+    def on_superloop_analysis_changed(self, enabled: bool) -> None:
+        self._update_state(superloop_analysis=enabled)
+
+    ###########################################################################
+
+    def on_sus_level_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(sus_level_setting=setting)
+
+    ###########################################################################
+
+    def on_sus_rate_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(sus_rate_setting=setting)
+
+    ###########################################################################
+
+    def on_tune_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(tune_setting=setting)
+
+    ###########################################################################
+
+    def on_undo_clicked(self) -> None:
+        if len(self._history) > 1:
+            self._history.pop()
+            self.state_changed.emit(self.state)
 
     ###########################################################################
 
@@ -632,33 +763,6 @@ class Model(QObject):
 
     ###########################################################################
 
-    def _load_sample_packs(self) -> None:
-        assert self._sample_packs is not None  # nosec 703
-
-        for pack_name, pack in self._sample_packs.items():
-            _add_sample_pack_to_model(
-                self.sample_packs_model, pack_name, Path(pack["path"])
-            )
-
-    ###########################################################################
-
-    def _load_prefs(self) -> None:
-        if not self.prefs.exists():
-            self._init_prefs()
-
-        with open(self.prefs, "r", encoding="utf8") as fobj:
-            prefs = yaml.safe_load(fobj)
-
-        self._amk_path = Path(prefs["amk"]["path"])
-        self._sample_packs = prefs["sample_packs"]
-        self._spcplay_path = Path(prefs["spcplay"]["path"])
-
-        if self._sample_packs:
-            self._load_sample_packs()
-
-    ###########################################################################
-
-    @debug()
     def _interpolate(self, dyn_str: str, level: int) -> None:
         self._disable_interp = True
 
@@ -699,6 +803,40 @@ class Model(QObject):
         self.inst_config_changed.emit(self.active_instrument)
 
         self._disable_interp = False
+
+    ###########################################################################
+
+    def _load_prefs(self) -> None:
+        if not self.prefs.exists():
+            self._init_prefs()
+
+        with open(self.prefs, "r", encoding="utf8") as fobj:
+            prefs = yaml.safe_load(fobj)
+
+        self._amk_path = Path(prefs["amk"]["path"])
+        self._sample_packs = prefs["sample_packs"]
+        self._spcplay_path = Path(prefs["spcplay"]["path"])
+
+        if self._sample_packs:
+            self._load_sample_packs()
+
+    ###########################################################################
+
+    def _load_sample_packs(self) -> None:
+        assert self._sample_packs is not None  # nosec 703
+
+        for pack_name, pack in self._sample_packs.items():
+            _add_sample_pack_to_model(
+                self.sample_packs_model, pack_name, Path(pack["path"])
+            )
+
+    ###########################################################################
+
+    def _update_state(self, **kwargs) -> None:
+        new_state = replace(self.state, **kwargs)
+        if new_state != self.state:
+            self._history.append(new_state)
+            self.state_changed.emit(new_state)
 
     ###########################################################################
     # Private property definitions

@@ -87,12 +87,17 @@ class Dashboard:
         self._model.reinforce_state()
 
     ###########################################################################
-    # API method definitions
+    # API signal definitions
     ###########################################################################
 
-    def update_song(self, song: Song) -> None:
-        pass
-        # self._volume.set_volume(song.volume)
+    def on_brr_clicked(self) -> None:
+        fname, _ = QFileDialog.getOpenFileName(
+            self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
+        )
+        if fname:
+            self._model.on_brr_fname_changed(fname)
+
+    ###########################################################################
 
     def on_instruments_changed(self, names: list[str]) -> None:
         print("in on_instruments_changed")
@@ -100,6 +105,39 @@ class Dashboard:
         widget.clear()
         for name in names:
             widget.addItem(name)
+
+    ###########################################################################
+
+    def on_mml_fname_clicked(self) -> None:
+        fname, _ = QFileDialog.getSaveFileName(
+            self._view, caption="MML Output File", filter="MML Files (*.txt)"
+        )
+
+        if fname:
+            self._model.on_mml_fname_changed(fname)
+
+    ###########################################################################
+
+    def on_musicxml_fname_clicked(self) -> None:
+        fname, _ = QFileDialog.getOpenFileName(
+            self._view,
+            caption="MusicXML Input File",
+            filter="MusicXML Files (*.musicxml *.mxl)",
+        )
+        if fname:
+            self._model.on_musicxml_fname_changed(fname)
+
+    ###########################################################################
+
+    def on_open_quicklook_clicked(self) -> None:
+        self._quicklook.show()
+
+    ###########################################################################
+
+    def on_preview_envelope_clicked(self) -> None:
+        self._envelope_preview.show()
+
+    ###########################################################################
 
     def on_state_changed(self, state: State) -> None:
         v = self._view  # pylint: disable=invalid-name
@@ -246,6 +284,12 @@ class Dashboard:
         )
 
     ###########################################################################
+
+    def update_song(self, song: Song) -> None:
+        pass
+        # self._volume.set_volume(song.volume)
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -256,38 +300,6 @@ class Dashboard:
         text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
 
         QMessageBox.about(self._view, title, text)
-
-    ###########################################################################
-
-    def on_musicxml_fname_clicked(self) -> None:
-        fname, _ = QFileDialog.getOpenFileName(
-            self._view,
-            caption="MusicXML Input File",
-            filter="MusicXML Files (*.musicxml *.mxl)",
-        )
-        if fname:
-            self._model.on_musicxml_fname_changed(fname)
-
-    def on_mml_fname_clicked(self) -> None:
-        fname, _ = QFileDialog.getSaveFileName(
-            self._view, caption="MML Output File", filter="MML Files (*.txt)"
-        )
-
-        if fname:
-            self._model.on_mml_fname_changed(fname)
-
-    def on_brr_clicked(self) -> None:
-        fname, _ = QFileDialog.getOpenFileName(
-            self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
-        )
-        if fname:
-            self._model.on_brr_fname_changed(fname)
-
-    def on_open_quicklook_clicked(self) -> None:
-        self._quicklook.show()
-
-    def on_preview_envelope_clicked(self) -> None:
-        self._envelope_preview.show()
 
     ###########################################################################
 
@@ -418,46 +430,6 @@ class Dashboard:
 
     ###########################################################################
 
-    def _update_gain_limits(self, direct_mode: bool) -> None:
-        view = self._view
-        if direct_mode:
-            view.gain_slider.setMaximum(127)
-        else:
-            val = min(31, view.gain_slider.value())
-            view.gain_slider.setValue(val)
-            view.gain_slider.setMaximum(31)
-
-    ###########################################################################
-
-    def _update_envelope(
-        self,
-        adsr_mode: bool,
-        attack_reg: int,
-        decay_reg: int,
-        sus_level_reg: int,
-        sus_rate_reg: int,
-        gain_mode: GainMode,
-        gain_reg: int,
-    ) -> None:
-        env = self._envelope_preview
-
-        if adsr_mode:
-            env.plot_adsr(attack_reg, decay_reg, sus_level_reg, sus_rate_reg)
-        else:  # gain mode
-            match gain_mode:
-                case GainMode.DIRECT:
-                    env.plot_direct_gain(gain_reg)
-                case GainMode.INCLIN:
-                    env.plot_inclin(gain_reg)
-                case GainMode.INCBENT:
-                    env.plot_incbent(gain_reg)
-                case GainMode.DECLIN:
-                    env.plot_declin(gain_reg)
-                case GainMode.DECEXP:
-                    env.plot_decexp(gain_reg)
-
-    ###########################################################################
-
     def _create_project(self) -> None:
         fname, _ = QFileDialog.getSaveFileName(
             self._view, "Project File", filter=f"*.{self._extension}"
@@ -503,8 +475,48 @@ class Dashboard:
         view.open_preferences.triggered.connect(self._open_preferences)
         view.exit_dashboard.triggered.connect(QApplication.quit)
 
-        view.undo.triggered.connect(self._model.undo)
+        view.undo.triggered.connect(self._model.on_undo_clicked)
         view.redo.triggered.connect(lambda _: None)
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)
+
+    ###########################################################################
+
+    def _update_envelope(  # pylint: disable=too-many-arguments
+        self,
+        adsr_mode: bool,
+        attack_reg: int,
+        decay_reg: int,
+        sus_level_reg: int,
+        sus_rate_reg: int,
+        gain_mode: GainMode,
+        gain_reg: int,
+    ) -> None:
+        env = self._envelope_preview
+
+        if adsr_mode:
+            env.plot_adsr(attack_reg, decay_reg, sus_level_reg, sus_rate_reg)
+        else:  # gain mode
+            match gain_mode:
+                case GainMode.DIRECT:
+                    env.plot_direct_gain(gain_reg)
+                case GainMode.INCLIN:
+                    env.plot_inclin(gain_reg)
+                case GainMode.INCBENT:
+                    env.plot_incbent(gain_reg)
+                case GainMode.DECLIN:
+                    env.plot_declin(gain_reg)
+                case GainMode.DECEXP:
+                    env.plot_decexp(gain_reg)
+
+    ###########################################################################
+
+    def _update_gain_limits(self, direct_mode: bool) -> None:
+        view = self._view
+        if direct_mode:
+            view.gain_slider.setMaximum(127)
+        else:
+            val = min(31, view.gain_slider.value())
+            view.gain_slider.setValue(val)
+            view.gain_slider.setMaximum(31)
