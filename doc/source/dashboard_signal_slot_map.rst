@@ -29,16 +29,16 @@ Menus
 .. mermaid::
 
    flowchart LR
-      view.new_project.triggered -> dashboard._create_project
-      view.open_project.triggered -> dashboard._open_project
-      view.save_project.triggered -> model.save
-      view.close_project.triggered -> TBD
-      view.open_preferences.triggered -> dashboard._open_preferences
-      view.exit_dashboard.triggered -> QApplication.quit
-      view.undo.triggered -> model.on_undo_clicked
-      view.redo.triggered -> model.redo
-      view.show_about.triggered -> dashboard._about
-      view.show_about_qt.triggered -> QApplication.aboutQt
+      view.new_project.triggered --> dashboard._create_project
+      view.open_project.triggered --> dashboard._open_project
+      view.save_project.triggered --> model.save
+      view.close_project.triggered --> TBD
+      view.open_preferences.triggered --> dashboard._open_preferences
+      view.exit_dashboard.triggered --> QApplication.quit
+      view.undo.triggered --> model.on_undo_clicked
+      view.redo.triggered --> model.redo
+      view.show_about.triggered --> dashboard._about
+      view.show_about_qt.triggered --> QApplication.aboutQt
 
 Control Panel
 -------------
