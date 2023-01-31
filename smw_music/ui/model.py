@@ -313,57 +313,17 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_dynamics_changed(self, val: int | str, level: Dynamics) -> None:
+    def on_dynamics_changed(self, level: Dynamics, val: int | str) -> None:
         dynamics = dict(self.state.dynamics_settings)
         dynamics[level] = _parse_setting(val)
         self._update_state(dynamics_settings=dynamics)
 
     ###########################################################################
 
-    def on_echo_en_changed(self, state: bool, chan: EchoCh) -> None:
+    def on_echo_en_changed(self, chan: EchoCh, state: bool) -> None:
         echo_enable = dict(self.state.echo_enable)
         echo_enable[chan] = state
         self._update_state(echo_enable=echo_enable)
-
-    ###########################################################################
-
-    def on_echo_ch0_changed(self, state: bool) -> None:
-        self._update_state(echo_ch0_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch1_changed(self, state: bool) -> None:
-        self._update_state(echo_ch1_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch2_changed(self, state: bool) -> None:
-        self._update_state(echo_ch2_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch3_changed(self, state: bool) -> None:
-        self._update_state(echo_ch3_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch4_changed(self, state: bool) -> None:
-        self._update_state(echo_ch4_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch5_changed(self, state: bool) -> None:
-        self._update_state(echo_ch5_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch6_changed(self, state: bool) -> None:
-        self._update_state(echo_ch6_enable=state)
-
-    ###########################################################################
-
-    def on_echo_ch7_changed(self, state: bool) -> None:
-        self._update_state(echo_ch7_enable=state)
 
     ###########################################################################
 
@@ -648,17 +608,6 @@ class Model(QObject):
                     self.inst_config_changed.emit(inst)
                     self._disable_interp = False
                     break
-
-    ###########################################################################
-
-    def update_dynamics(self, dyn: str, val: int, interp: bool) -> None:
-        if self.song is not None:
-            if dyn == "global":
-                self.song.volume = val
-            else:
-                self.active_instrument.dynamics[dyn] = val
-                if interp and not self._disable_interp:
-                    self._interpolate(dyn, val)
 
     ###########################################################################
     # Private method definitions
