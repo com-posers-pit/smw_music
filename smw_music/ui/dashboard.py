@@ -187,14 +187,30 @@ class Dashboard:
 
         # Instrument articulation settings
         artics = state.artic_settings
-        v.artic_default_length_slider.setValue(artics[Artic.DEFAULT].length)
-        v.artic_default_volume_slider.setValue(artics[Artic.DEFAULT].volume)
-        v.artic_acc_length_slider.setValue(artics[Artic.ACCENT].volume)
-        v.artic_acc_volume_slider.setValue(artics[Artic.ACCENT].volume)
-        v.artic_stacc_length_slider.setValue(artics[Artic.STACCATO].volume)
-        v.artic_stacc_volume_slider.setValue(artics[Artic.STACCATO].volume)
-        v.artic_accstacc_length_slider.setValue(artics[Artic.ACCSTAC].volume)
-        v.artic_accstacc_volume_slider.setValue(artics[Artic.ACCSTAC].volume)
+        val = artics[Artic.DEFAULT].length
+        v.artic_default_length_slider.setValue(val)
+        v.artic_default_length_setting_label.setText(hexb(val))
+        val = artics[Artic.DEFAULT].volume
+        v.artic_default_volume_slider.setValue(val)
+        v.artic_default_volume_setting_label.setText(hexb(val))
+        val = artics[Artic.ACCENT].length
+        v.artic_acc_length_slider.setValue(val)
+        v.artic_acc_length_setting_label.setText(hexb(val))
+        val = artics[Artic.ACCENT].volume
+        v.artic_acc_volume_slider.setValue(val)
+        v.artic_acc_volume_setting_label.setText(hexb(val))
+        val = artics[Artic.STACCATO].length
+        v.artic_stacc_length_slider.setValue(val)
+        v.artic_stacc_length_setting_label.setText(hexb(val))
+        val = artics[Artic.STACCATO].volume
+        v.artic_stacc_volume_slider.setValue(val)
+        v.artic_stacc_volume_setting_label.setText(hexb(val))
+        val = artics[Artic.ACCSTAC].length
+        v.artic_accstacc_length_slider.setValue(val)
+        v.artic_accstacc_length_setting_label.setText(hexb(val))
+        val = artics[Artic.ACCSTAC].volume
+        v.artic_accstacc_volume_slider.setValue(val)
+        v.artic_accstacc_volume_setting_label.setText(hexb(val))
 
         # Instrument pan settings
         v.pan_enable.setChecked(state.pan_enabled)

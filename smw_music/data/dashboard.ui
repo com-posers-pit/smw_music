@@ -531,7 +531,7 @@
                </widget>
               </item>
               <item row="3" column="1">
-               <widget class="QLabel" name="artic_defaul_volume_setting_label">
+               <widget class="QLabel" name="artic_default_volume_setting_label">
                 <property name="text">
                  <string/>
                 </property>
