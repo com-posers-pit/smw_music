@@ -99,13 +99,21 @@ Articulations
 
    flowchart LR
       view.artic_default_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_default_length_setting.valueChanged --> model.on_artic_length_changed
       view.artic_default_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_default_volume_setting.valueChanged --> model.on_artic_volume_changed
       view.artic_acc_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_acc_length_setting.valueChanged --> model.on_artic_length_changed
       view.artic_acc_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_acc_volume_setting.valueChanged --> model.on_artic_volume_changed
       view.artic_stacc_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_stacc_length_setting.valueChanged --> model.on_artic_length_changed
       view.artic_stacc_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_stacc_volume_setting.valueChanged --> model.on_artic_volume_changed
       view.artic_accstac_length_slider.valueChanged --> model.on_artic_length_changed
+      view.artic_accstac_length_setting.valueChanged --> model.on_artic_length_changed
       view.artic_accstac_volume_slider.valueChanged --> model.on_artic_volume_changed
+      view.artic_accstac_volume_setting.valueChanged --> model.on_artic_volume_changed
 
 Pan
 ~~~
