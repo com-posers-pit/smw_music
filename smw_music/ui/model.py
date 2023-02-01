@@ -20,7 +20,6 @@ import tempfile
 import threading
 import zipfile
 from dataclasses import replace
-from enum import IntEnum, auto
 from pathlib import Path
 
 # Library imports
@@ -155,6 +154,7 @@ def _str_to_dyn(dyn: str) -> Dynamics:
 class Model(QObject):
     state_changed = pyqtSignal(State)
     instruments_changed = pyqtSignal(list)
+    sample_packs_changed = pyqtSignal(list)
 
     inst_config_changed = pyqtSignal(InstrumentConfig)  # arguments=["config"]
     mml_generated = pyqtSignal(str)  # arguments=['mml']
@@ -167,6 +167,7 @@ class Model(QObject):
     active_instrument: InstrumentConfig
     sample_packs_model: QStandardItemModel
     _history: list[State]
+    _undo_level: int
     _amk_path: Path | None
     _sample_packs: dict[str, dict[str, str]] | None
     _spcplay_path: Path | None
@@ -183,6 +184,7 @@ class Model(QObject):
         self.active_instrument = InstrumentConfig("")
         self.sample_packs_model = QStandardItemModel()
         self._history = [State()]
+        self._undo_level = 0
 
         self._load_prefs()
 
@@ -546,6 +548,13 @@ class Model(QObject):
 
     ###########################################################################
 
+    def on_redo_clicked(self) -> None:
+        if self._undo_level > 0:
+            self._undo_level -= 1
+            self.state_changed.emit(self.state)
+
+    ###########################################################################
+
     def on_select_adsr_mode_selected(self, state: bool) -> None:
         self._update_state(adsr_mode=state)
 
@@ -581,8 +590,8 @@ class Model(QObject):
     ###########################################################################
 
     def on_undo_clicked(self) -> None:
-        if len(self._history) > 1:
-            self._history.pop()
+        if self._undo_level < len(self._history) - 1:
+            self._undo_level += 1
             self.state_changed.emit(self.state)
 
     ###########################################################################
@@ -611,9 +620,7 @@ class Model(QObject):
             for inst in self.song.instruments:
                 if inst.name == name:
                     self.active_instrument = inst
-                    self._disable_interp = True
                     self.inst_config_changed.emit(inst)
-                    self._disable_interp = False
                     break
 
     ###########################################################################
@@ -626,8 +633,6 @@ class Model(QObject):
     ###########################################################################
 
     def _interpolate(self, dyn_str: str, level: int) -> None:
-        self._disable_interp = True
-
         moved_dyn = _str_to_dyn(dyn_str)
         dyns = [
             _str_to_dyn(x) for x in self.active_instrument.dynamics_present
@@ -664,8 +669,6 @@ class Model(QObject):
 
         self.inst_config_changed.emit(self.active_instrument)
 
-        self._disable_interp = False
-
     ###########################################################################
 
     def _load_prefs(self) -> None:
@@ -697,6 +700,10 @@ class Model(QObject):
     def _update_state(self, **kwargs) -> None:
         new_state = replace(self.state, **kwargs)
         if new_state != self.state:
+            while self._undo_level:
+                self._history.pop()
+                self._undo_level -= 1
+
             self._history.append(new_state)
             self.state_changed.emit(new_state)
 
@@ -735,4 +742,4 @@ class Model(QObject):
 
     @property
     def state(self) -> State:
-        return self._history[-1]
+        return self._history[-1 - self._undo_level]

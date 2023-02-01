@@ -558,16 +558,17 @@ class Dashboard:
 
     def _setup_menus(self) -> None:
         view = self._view
+        model = self._model
 
         view.new_project.triggered.connect(self._create_project)
         view.open_project.triggered.connect(self._open_project)
-        view.save_project.triggered.connect(self._model.save)
+        view.save_project.triggered.connect(model.save)
         view.close_project.triggered.connect(lambda _: None)
         view.open_preferences.triggered.connect(self._open_preferences)
         view.exit_dashboard.triggered.connect(QApplication.quit)
 
-        view.undo.triggered.connect(self._model.on_undo_clicked)
-        view.redo.triggered.connect(lambda _: None)
+        view.undo.triggered.connect(model.on_undo_clicked)
+        view.redo.triggered.connect(model.on_redo_clicked)
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)

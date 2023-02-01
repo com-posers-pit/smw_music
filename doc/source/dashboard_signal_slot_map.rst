@@ -36,7 +36,7 @@ Menus
       view.open_preferences.triggered --> dashboard._open_preferences
       view.exit_dashboard.triggered --> QApplication.quit
       view.undo.triggered --> model.on_undo_clicked
-      view.redo.triggered --> model.redo
+      view.redo.triggered --> model.on_redo_clicked
       view.show_about.triggered --> dashboard._about
       view.show_about_qt.triggered --> QApplication.aboutQt
 
