@@ -33,7 +33,7 @@ class Preferences:
     # Constructor definitions
     ###########################################################################
 
-    def __init__(self, model: QStandardItemModel):
+    def __init__(self):  # , model: QStandardItemModel):
         ui_contents = pkgutil.get_data("smw_music", "/data/preferences.ui")
         if ui_contents is None:
             raise Exception("Can't locate preferences")
@@ -43,7 +43,7 @@ class Preferences:
         pairs = [
             (dialog.select_amk_fname, dialog.amk_fname, "AMK Zip File"),
             (
-                dialog.select_sample_pack_name,
+                dialog.select_sample_pack_fname,
                 dialog.sample_pack_fname,
                 "Sample pack",
             ),

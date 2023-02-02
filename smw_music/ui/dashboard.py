@@ -88,7 +88,7 @@ class Dashboard:
             raise Exception("Can't locate dashboard")
 
         self._view = uic.loadUi(io.BytesIO(ui_contents))
-        #        self._preferences = Preferences()
+        self._preferences = Preferences()
         self._model = Model()
 
         self._edit = QTextEdit()
