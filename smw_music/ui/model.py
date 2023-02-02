@@ -16,7 +16,6 @@ import platform
 import shutil
 import stat
 import subprocess  # nosec 404
-import tempfile
 import threading
 import zipfile
 from dataclasses import replace
@@ -25,7 +24,7 @@ from pathlib import Path
 # Library imports
 import yaml
 from mako.template import Template  # type: ignore
-from PyQt6.QtCore import QObject, pyqtSignal
+from PyQt6.QtCore import QModelIndex, QObject, Qt, pyqtSignal
 from PyQt6.QtGui import QStandardItem, QStandardItemModel
 
 # Package imports
@@ -34,7 +33,7 @@ from smw_music.music_xml import InstrumentConfig, MusicXmlException
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
-from smw_music.ui.sample import Sample
+from smw_music.ui.sample import SampleParams, extract_sample_pack
 from smw_music.ui.state import (
     Artic,
     Dynamics,
@@ -50,14 +49,12 @@ from smw_music.ui.state import (
 
 
 def _add_brr_to_model(
-    pack_item: QStandardItem,
-    name: str,
+    top_item: QStandardItem,
     parents: dict[tuple[str, ...], QStandardItem],
-    samples: dict[str, Sample] = {},
+    fname: tuple[str, ...],
+    params: SampleParams,
 ) -> None:
-    fname = tuple(name.split("/"))
-
-    parent = pack_item
+    parent = top_item
     for n, path_item in enumerate(fname):
         partial_path = fname[: (n + 1)]
         try:
@@ -68,6 +65,9 @@ def _add_brr_to_model(
             parent.appendRow(item)
             parent = item
 
+    # Set the data of the leaf to the sample parameters
+    item.setData(params, Qt.ItemDataRole.UserRole)
+
 
 ###############################################################################
 
@@ -77,20 +77,15 @@ def _add_sample_pack_to_model(
 ) -> None:
 
     parents: dict[tuple[str, ...], QStandardItem] = {}
-    samples: dict[str, Sample] = {}
 
-    with zipfile.ZipFile(path) as zobj:
-        names = zobj.namelist()
+    extracted_pack = extract_sample_pack(path)
 
     # Add the pack as a top-level item
-    pack_item = QStandardItem(pack)
-    model.appendRow(pack_item)
+    top_item = QStandardItem(pack)
+    model.appendRow(top_item)
 
-    for name in names:
-        if name.endswith("!patterns.txt"):
-            pass
-        elif name.endswith(".brr"):
-            _add_brr_to_model(pack_item, name, parents)
+    for sample_name, params in extracted_pack.items():
+        _add_brr_to_model(top_item, parents, sample_name, params)
 
 
 ###############################################################################
@@ -507,12 +502,9 @@ class Model(QObject):
 
     ###########################################################################
 
-    def on_pack_sample_changed(self, index: int) -> None:
-        new_state: dict[str, int | str] = {"pack_sample_index": index}
+    def on_pack_sample_changed(self, index: QModelIndex) -> None:
         if self.state.sample_source == SampleSource.SAMPLEPACK:
-            new_state["brr_setting"] = "$80 $00 $00 $00 $00"
-
-        self._update_state(**new_state)
+            self._load_sample_settings(index)
 
     ###########################################################################
 
@@ -694,6 +686,24 @@ class Model(QObject):
             _add_sample_pack_to_model(
                 self.sample_packs_model, pack_name, Path(pack["path"])
             )
+
+    ###########################################################################
+
+    def _load_sample_settings(self, index: QModelIndex) -> None:
+        params: SampleParams | None = index.data(Qt.ItemDataRole.UserRole)
+        if params is not None:
+            new_state = {
+                "attack_setting": params.attack,
+                "decay_setting": params.decay,
+                "sus_level_setting": params.sustain_level,
+                "sus_rate_setting": params.sustain_rate,
+                "adsr_mode": params.adsr_mode,
+                "gain_mode": params.gain_mode,
+                "gain_setting": params.gain,
+                "tune_setting": params.tuning,
+                "subtune_setting": params.subtuning,
+            }
+            self._update_state(**new_state)
 
     ###########################################################################
 

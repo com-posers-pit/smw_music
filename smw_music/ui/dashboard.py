@@ -122,7 +122,6 @@ class Dashboard:
     ###########################################################################
 
     def on_instruments_changed(self, names: list[str]) -> None:
-        print("in on_instruments_changed")
         widget = self._view.instrument_list
         widget.clear()
         for name in names:
@@ -471,7 +470,7 @@ class Dashboard:
             elif isinstance(widget, QAbstractSlider):
                 widget.valueChanged.connect(slot)
             elif isinstance(widget, QAbstractItemView):
-                widget.activated.connect(slot)
+                widget.selectionModel().currentChanged.connect(slot)
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
