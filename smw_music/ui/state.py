@@ -181,14 +181,6 @@ class State:
             case GainMode.DECEXP:
                 vxgain = 0xA0 | self.gain_setting
 
-        # The register values for the mode we're not in are don't care; exo
-        # likes the convention of setting them to 0.  Who am I to argue?
-        if self.adsr_mode:
-            vxgain = 0
-        else:
-            vxadsr1 = 0
-            vxadsr2 = 0
-
         return (
             vxadsr1,
             vxadsr2,
