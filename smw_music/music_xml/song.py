@@ -22,11 +22,7 @@ from mako.template import Template  # type: ignore
 from smw_music import __version__
 from smw_music.music_xml.channel import Channel
 from smw_music.music_xml.echo import EchoConfig
-from smw_music.music_xml.instrument import (
-    DEFAULT_DYN,
-    InstrumentConfig,
-    inst_from_name,
-)
+from smw_music.music_xml.instrument import Dynamics, InstrumentConfig
 from smw_music.music_xml.reduction import reduce, remove_unused_instruments
 from smw_music.music_xml.shared import CRLF, MusicXmlException
 from smw_music.music_xml.tokens import (
@@ -319,28 +315,25 @@ class Song:
     ###########################################################################
 
     def _collect_instruments(self) -> None:
-        instruments: dict[str, set[str]] = {}
+        inst_dyns: dict[str, set[Dynamics]] = {}
         transposes: dict[str, int] = {}
 
         for channel in self.channels:
             for token in channel.tokens:
                 if isinstance(token, Instrument):
                     inst = token.name
-                    if inst not in instruments:
-                        instruments[inst] = set()
+                    if inst not in inst_dyns:
+                        inst_dyns[inst] = set()
                         transposes[inst] = token.transpose
-                if isinstance(token, Dynamic):
-                    instruments[inst].add(token.level.upper())
-                if isinstance(token, Crescendo):
-                    instruments[inst].add(token.target.upper())
+                if isinstance(token, (Crescendo, Dynamic)):
+                    inst_dyns[inst].add(Dynamics[token.level.upper()])
 
-        inst_names = sorted(instruments)
+        inst_names = sorted(inst_dyns)
 
         self.instruments = [
             InstrumentConfig(
                 inst,
-                inst_from_name(inst),
-                dynamics_present=instruments[inst],
+                dynamics_present=inst_dyns[inst],
                 transpose=transposes[inst],
             )
             for inst in inst_names

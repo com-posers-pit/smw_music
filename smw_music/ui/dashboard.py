@@ -37,13 +37,14 @@ from PyQt6.QtWidgets import (
 # Package imports
 from smw_music import __version__
 from smw_music.music_xml.echo import EchoConfig
+from smw_music.music_xml.instrument import Artic
+from smw_music.music_xml.instrument import Dynamics as Dyn
+from smw_music.music_xml.instrument import GainMode, SampleSource
 from smw_music.music_xml.song import Song
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.state import Artic
-from smw_music.ui.state import Dynamics as Dyn
-from smw_music.ui.state import EchoCh, GainMode, SampleSource, State
+from smw_music.ui.state import EchoCh, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -162,6 +163,7 @@ class Dashboard:
 
     def on_state_changed(self, state: State) -> None:
         v = self._view  # pylint: disable=invalid-name
+        inst = state.inst
 
         # Control Panel
         v.musicxml_fname.setText(state.musicxml_fname)
@@ -171,7 +173,7 @@ class Dashboard:
         v.measure_numbers.setChecked(state.measure_numbers)
 
         # Instrument dynamics settings
-        dynamics = state.dynamics_settings
+        dynamics = inst.dynamics_settings
         v.pppp_slider.setValue(dynamics[Dyn.PPPP])
         v.pppp_setting.setText(pct(dynamics[Dyn.PPPP]))
         v.pppp_setting_label.setText(hexb(dynamics[Dyn.PPPP]))
@@ -202,28 +204,28 @@ class Dashboard:
         v.ffff_slider.setValue(dynamics[Dyn.FFFF])
         v.ffff_setting.setText(pct(dynamics[Dyn.FFFF]))
         v.ffff_setting_label.setText(hexb(dynamics[Dyn.FFFF]))
-        v.interpolate.setChecked(state.dyn_interpolate)
+        v.interpolate.setChecked(inst.dyn_interpolate)
 
         # Instrument articulation settings
-        artic = state.artic_settings[Artic.DEFAULT]
+        artic = inst.artic_settings[Artic.DEFAULT]
         v.artic_default_length_slider.setValue(artic.length)
         v.artic_default_length_setting.setText(hexb(artic.length))
         v.artic_default_volume_slider.setValue(artic.volume)
         v.artic_default_volume_setting.setText(hexb(artic.volume))
         v.artic_default_setting_label.setText(hexb(artic.setting))
-        artic = state.artic_settings[Artic.ACCENT]
+        artic = inst.artic_settings[Artic.ACCENT]
         v.artic_acc_length_slider.setValue(artic.length)
         v.artic_acc_length_setting.setText(hexb(artic.length))
         v.artic_acc_volume_slider.setValue(artic.volume)
         v.artic_acc_volume_setting.setText(hexb(artic.volume))
         v.artic_acc_setting_label.setText(hexb(artic.setting))
-        artic = state.artic_settings[Artic.STACCATO]
+        artic = inst.artic_settings[Artic.STACCATO]
         v.artic_stacc_length_slider.setValue(artic.length)
         v.artic_stacc_length_setting.setText(hexb(artic.length))
         v.artic_stacc_volume_slider.setValue(artic.volume)
         v.artic_stacc_volume_setting.setText(hexb(artic.volume))
         v.artic_stacc_setting_label.setText(hexb(artic.setting))
-        artic = state.artic_settings[Artic.ACCSTAC]
+        artic = inst.artic_settings[Artic.ACCSTAC]
         v.artic_accstacc_length_slider.setValue(artic.length)
         v.artic_accstacc_length_setting.setText(hexb(artic.length))
         v.artic_accstacc_volume_slider.setValue(artic.volume)
@@ -231,48 +233,48 @@ class Dashboard:
         v.artic_accstacc_setting_label.setText(hexb(artic.setting))
 
         # Instrument pan settings
-        v.pan_enable.setChecked(state.pan_enabled)
-        v.pan_setting.setEnabled(state.pan_enabled)
-        v.pan_setting_label.setEnabled(state.pan_enabled)
-        v.pan_setting.setValue(state.pan_setting)
-        v.pan_setting_label.setText(state.pan_description)
+        v.pan_enable.setChecked(inst.pan_enabled)
+        v.pan_setting.setEnabled(inst.pan_enabled)
+        v.pan_setting_label.setEnabled(inst.pan_enabled)
+        v.pan_setting.setValue(inst.pan_setting)
+        v.pan_setting_label.setText(inst.pan_description)
 
         # Instrument sample
         v.select_builtin_sample.setChecked(
-            state.sample_source == SampleSource.BUILTIN
+            inst.sample_source == SampleSource.BUILTIN
         )
-        v.builtin_sample.setCurrentIndex(state.builtin_sample_index)
+        v.builtin_sample.setCurrentIndex(inst.builtin_sample_index)
         v.select_pack_sample.setChecked(
-            state.sample_source == SampleSource.SAMPLEPACK
+            inst.sample_source == SampleSource.SAMPLEPACK
         )
         # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
-        v.select_brr_sample.setChecked(state.sample_source == SampleSource.BRR)
-        v.brr_fname.setText(state.brr_fname)
+        v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
+        v.brr_fname.setText(inst.brr_fname)
 
-        v.select_adsr_mode.setChecked(state.adsr_mode)
-        v.select_gain_mode.setChecked(not state.adsr_mode)
-        v.gain_mode_direct.setChecked(state.gain_mode == GainMode.DIRECT)
-        v.gain_mode_inclin.setChecked(state.gain_mode == GainMode.INCLIN)
-        v.gain_mode_incbent.setChecked(state.gain_mode == GainMode.INCBENT)
-        v.gain_mode_declin.setChecked(state.gain_mode == GainMode.DECLIN)
-        v.gain_mode_decexp.setChecked(state.gain_mode == GainMode.DECEXP)
-        v.gain_slider.setValue(state.gain_setting)
-        v.gain_setting.setText(hexb(state.gain_setting))
-        v.attack_slider.setValue(state.attack_setting)
-        v.attack_setting.setText(hexb(state.attack_setting))
-        v.decay_slider.setValue(state.decay_setting)
-        v.decay_setting.setText(hexb(state.decay_setting))
-        v.sus_level_slider.setValue(state.sus_level_setting)
-        v.sus_level_setting.setText(hexb(state.sus_level_setting))
-        v.sus_rate_slider.setValue(state.sus_rate_setting)
-        v.sus_rate_setting.setText(hexb(state.sus_rate_setting))
+        v.select_adsr_mode.setChecked(inst.adsr_mode)
+        v.select_gain_mode.setChecked(not inst.adsr_mode)
+        v.gain_mode_direct.setChecked(inst.gain_mode == GainMode.DIRECT)
+        v.gain_mode_inclin.setChecked(inst.gain_mode == GainMode.INCLIN)
+        v.gain_mode_incbent.setChecked(inst.gain_mode == GainMode.INCBENT)
+        v.gain_mode_declin.setChecked(inst.gain_mode == GainMode.DECLIN)
+        v.gain_mode_decexp.setChecked(inst.gain_mode == GainMode.DECEXP)
+        v.gain_slider.setValue(inst.gain_setting)
+        v.gain_setting.setText(hexb(inst.gain_setting))
+        v.attack_slider.setValue(inst.attack_setting)
+        v.attack_setting.setText(hexb(inst.attack_setting))
+        v.decay_slider.setValue(inst.decay_setting)
+        v.decay_setting.setText(hexb(inst.decay_setting))
+        v.sus_level_slider.setValue(inst.sus_level_setting)
+        v.sus_level_setting.setText(hexb(inst.sus_level_setting))
+        v.sus_rate_slider.setValue(inst.sus_rate_setting)
+        v.sus_rate_setting.setText(hexb(inst.sus_rate_setting))
 
-        v.tune_slider.setValue(state.tune_setting)
-        v.tune_setting.setText(hexb(state.tune_setting))
-        v.subtune_slider.setValue(state.subtune_setting)
-        v.subtune_setting.setText(hexb(state.subtune_setting))
+        v.tune_slider.setValue(inst.tune_setting)
+        v.tune_setting.setText(hexb(inst.tune_setting))
+        v.subtune_slider.setValue(inst.subtune_setting)
+        v.subtune_setting.setText(hexb(inst.subtune_setting))
 
-        v.brr_setting.setText(" ".join(hexb(x) for x in state.brr_setting))
+        v.brr_setting.setText(" ".join(map(hexb, inst.brr_setting)))
 
         # Global settings
         v.global_volume_slider.setValue(state.global_volume)
@@ -303,15 +305,15 @@ class Dashboard:
         v.echo_delay_setting.setText(hexb(state.echo_delay_setting))
 
         # Apply the more interesting UI updates
-        self._update_gain_limits(state.gain_mode == GainMode.DIRECT)
+        self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)
         self._update_envelope(
-            state.adsr_mode,
-            state.attack_setting,
-            state.decay_setting,
-            state.sus_level_setting,
-            state.sus_rate_setting,
-            state.gain_mode,
-            state.gain_setting,
+            inst.adsr_mode,
+            inst.attack_setting,
+            inst.decay_setting,
+            inst.sus_level_setting,
+            inst.sus_rate_setting,
+            inst.gain_mode,
+            inst.gain_setting,
         )
 
     ###########################################################################

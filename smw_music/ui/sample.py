@@ -17,7 +17,7 @@ from typing import TextIO
 from zipfile import ZipFile
 
 # Package imports
-from smw_music.ui.state import GainMode
+from smw_music.music_xml.instrument import GainMode
 
 ###############################################################################
 # API Function Definitions

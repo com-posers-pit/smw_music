@@ -29,19 +29,18 @@ from PyQt6.QtGui import QStandardItem, QStandardItemModel
 
 # Package imports
 from smw_music import SmwMusicException, __version__
-from smw_music.music_xml import InstrumentConfig, MusicXmlException
+from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoConfig
+from smw_music.music_xml.instrument import (
+    Artic,
+    Dynamics,
+    GainMode,
+    SampleSource,
+)
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
 from smw_music.ui.sample import SampleParams, extract_sample_pack
-from smw_music.ui.state import (
-    Artic,
-    Dynamics,
-    EchoCh,
-    GainMode,
-    SampleSource,
-    State,
-)
+from smw_music.ui.state import EchoCh, State
 
 ###############################################################################
 # Private Function Definitions
@@ -146,20 +145,17 @@ def _str_to_dyn(dyn: str) -> Dynamics:
 ###############################################################################
 
 
-class Model(QObject):
+class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(State)
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(list)
 
-    inst_config_changed = pyqtSignal(InstrumentConfig)  # arguments=["config"]
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
         bool, str, str
     )  # arguments=["error", "title", "response"]
-    song_changed = pyqtSignal(Song)  # arguments=["song"]
 
     song: Song | None
-    active_instrument: InstrumentConfig
     sample_packs_model: QStandardItemModel
     _history: list[State]
     _undo_level: int
@@ -176,7 +172,6 @@ class Model(QObject):
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.active_instrument = InstrumentConfig("")
         self.sample_packs_model = QStandardItemModel()
         self._history = [State()]
         self._undo_level = 0
@@ -259,67 +254,67 @@ class Model(QObject):
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
         max_len = 7
-        artics = dict(self.state.artic_settings)
+        artics = dict(self.state.inst.artic_settings)
         artics[artic] = replace(
             artics[artic], length=_parse_setting(val, max_len)
         )
-        self._update_state(artic_settings=artics)
+        self._update_inst_state(artic_settings=artics)
 
     ###########################################################################
 
     def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
         max_vol = 15
-        artics = dict(self.state.artic_settings)
+        artics = dict(self.state.inst.artic_settings)
         artics[artic] = replace(
             artics[artic], volume=_parse_setting(val, max_vol)
         )
-        self._update_state(artic_settings=artics)
+        self._update_inst_state(artic_settings=artics)
 
     ###########################################################################
 
     def on_attack_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 15)
-        self._update_state(attack_setting=setting)
+        self._update_inst_state(attack_setting=setting)
 
     ###########################################################################
 
     def on_brr_fname_changed(self, fname: str) -> None:
-        self._update_state(brr_fname=fname)
+        self._update_inst_state(brr_fname=fname)
 
     ###########################################################################
 
     def on_brr_sample_selected(self, state: bool) -> None:
         if state:
-            self._update_state(sample_source=SampleSource.BRR)
+            self._update_inst_state(sample_source=SampleSource.BRR)
 
     ###########################################################################
 
     def on_brr_setting_changed(self, val: str) -> None:
-        self._update_state(brr_setting=val)
+        self._update_inst_state(brr_setting=val)
 
     ###########################################################################
 
     def on_builtin_sample_changed(self, index: int) -> None:
-        self._update_state(builtin_sample_index=index)
+        self._update_inst_state(builtin_sample_index=index)
 
     ###########################################################################
 
     def on_builtin_sample_selected(self, state: bool) -> None:
         if state:
-            self._update_state(sample_source=SampleSource.BUILTIN)
+            self._update_inst_state(sample_source=SampleSource.BUILTIN)
 
     ###########################################################################
 
     def on_decay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_state(decay_setting=setting)
+        self._update_inst_state(decay_setting=setting)
 
     ###########################################################################
 
     def on_dynamics_changed(self, level: Dynamics, val: int | str) -> None:
-        dynamics = dict(self.state.dynamics_settings)
+        dynamics = dict(self.state.inst.dynamics_settings)
         dynamics[level] = _parse_setting(val)
-        self._update_state(dynamics_settings=dynamics)
+        self._update_inst_state(dynamics_settings=dynamics)
 
     ###########################################################################
 
@@ -379,38 +374,38 @@ class Model(QObject):
 
     def on_gain_declin_selected(self, state: bool) -> None:
         if state:
-            self._update_state(gain_mode=GainMode.DECLIN)
+            self._update_inst_state(gain_mode=GainMode.DECLIN)
 
     ###########################################################################
 
     def on_gain_decexp_selected(self, state: bool) -> None:
         if state:
-            self._update_state(gain_mode=GainMode.DECEXP)
+            self._update_inst_state(gain_mode=GainMode.DECEXP)
 
     ###########################################################################
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
-            self._update_state(gain_mode=GainMode.DIRECT)
+            self._update_inst_state(gain_mode=GainMode.DIRECT)
 
     ###########################################################################
 
     def on_gain_incbent_selected(self, state: bool) -> None:
         if state:
-            self._update_state(gain_mode=GainMode.INCBENT)
+            self._update_inst_state(gain_mode=GainMode.INCBENT)
 
     ###########################################################################
 
     def on_gain_inclin_selected(self, state: bool) -> None:
         if state:
-            self._update_state(gain_mode=GainMode.INCLIN)
+            self._update_inst_state(gain_mode=GainMode.INCLIN)
 
     ###########################################################################
 
     def on_gain_changed(self, val: int | str) -> None:
-        limit = 127 if self.state.gain_mode == GainMode.DIRECT else 31
+        limit = 127 if self.state.inst.gain_mode == GainMode.DIRECT else 31
         setting = _parse_setting(val, limit)
-        self._update_state(gain_setting=setting)
+        self._update_inst_state(gain_setting=setting)
 
     ###########################################################################
 
@@ -439,7 +434,7 @@ class Model(QObject):
     ###########################################################################
 
     def on_interpolate_changed(self, state: bool) -> None:
-        self._update_state(dyn_interpolate=state)
+        self._update_inst_state(dyn_interpolate=state)
 
     ###########################################################################
 
@@ -494,7 +489,6 @@ class Model(QObject):
         except MusicXmlException as e:
             self.response_generated.emit(True, "Song load", str(e))
         else:
-            self.song_changed.emit(self.song)
             self.instruments_changed.emit(
                 [x.name for x in self.song.instruments]
             )
@@ -503,24 +497,24 @@ class Model(QObject):
     ###########################################################################
 
     def on_pack_sample_changed(self, index: QModelIndex) -> None:
-        if self.state.sample_source == SampleSource.SAMPLEPACK:
+        if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
             self._load_sample_settings(index)
 
     ###########################################################################
 
     def on_pack_sample_selected(self, state: bool) -> None:
         if state:
-            self._update_state(sample_source=SampleSource.SAMPLEPACK)
+            self._update_inst_state(sample_source=SampleSource.SAMPLEPACK)
 
     ###########################################################################
 
     def on_pan_enable_changed(self, state: bool) -> None:
-        self._update_state(pan_enabled=state)
+        self._update_inst_state(pan_enabled=state)
 
     ###########################################################################
 
     def on_pan_setting_changed(self, val: int) -> None:
-        self._update_state(pan_setting=val)
+        self._update_inst_state(pan_setting=val)
 
     ###########################################################################
 
@@ -548,13 +542,13 @@ class Model(QObject):
     ###########################################################################
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_state(adsr_mode=state)
+        self._update_inst_state(adsr_mode=state)
 
     ###########################################################################
 
     def on_subtune_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
-        self._update_state(subtune_setting=setting)
+        self._update_inst_state(subtune_setting=setting)
 
     ###########################################################################
 
@@ -565,19 +559,19 @@ class Model(QObject):
 
     def on_sus_level_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_state(sus_level_setting=setting)
+        self._update_inst_state(sus_level_setting=setting)
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 31)
-        self._update_state(sus_rate_setting=setting)
+        self._update_inst_state(sus_rate_setting=setting)
 
     ###########################################################################
 
     def on_tune_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
-        self._update_state(tune_setting=setting)
+        self._update_inst_state(tune_setting=setting)
 
     ###########################################################################
 
@@ -606,16 +600,6 @@ class Model(QObject):
         self.save()
 
     ###########################################################################
-
-    def set_instrument(self, name: str) -> None:
-        if self.song is not None:
-            for inst in self.song.instruments:
-                if inst.name == name:
-                    self.active_instrument = inst
-                    self.inst_config_changed.emit(inst)
-                    break
-
-    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -625,6 +609,7 @@ class Model(QObject):
     ###########################################################################
 
     def _interpolate(self, dyn_str: str, level: int) -> None:
+        inst = self.state.inst
         moved_dyn = _str_to_dyn(dyn_str)
         dyns = [
             _str_to_dyn(x) for x in self.active_instrument.dynamics_present
@@ -703,16 +688,40 @@ class Model(QObject):
                 "tune_setting": params.tuning,
                 "subtune_setting": params.subtuning,
             }
-            self._update_state(**new_state)
+            print("update sample settings")
+            self._update_inst_state(**new_state)
+
+    ###########################################################################
+
+    def _rollback_undo(self) -> None:
+        while self._undo_level:
+            self._history.pop()
+            self._undo_level -= 1
+
+    ###########################################################################
+
+    def _update_inst_state(self, **kwargs) -> None:
+        try:
+            new_inst = replace(self.state.inst, **kwargs)
+        except TypeError:
+            new_inst = replace(self.state.inst)
+            for key, val in kwargs.items():
+                setattr(new_inst, key, val)
+
+        if new_inst != self.state.inst:
+            self._rollback_undo()
+
+            new_state = replace(self.state)
+            new_state.inst = new_inst
+            self._history.append(new_state)
+            self.state_changed.emit(new_state)
 
     ###########################################################################
 
     def _update_state(self, **kwargs) -> None:
         new_state = replace(self.state, **kwargs)
         if new_state != self.state:
-            while self._undo_level:
-                self._history.pop()
-                self._undo_level -= 1
+            self._rollback_undo()
 
             self._history.append(new_state)
             self.state_changed.emit(new_state)
