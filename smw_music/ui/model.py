@@ -313,9 +313,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_dynamics_changed(self, level: Dynamics, val: int | str) -> None:
-        dynamics = dict(self.state.inst.dynamics_settings)
-        dynamics[level] = _parse_setting(val)
-        self._update_inst_state(dynamics_settings=dynamics)
+        setting = _parse_setting(val)
+        if self.state.inst.dyn_interpolate:
+            self._interpolate(level, setting)
+        else:
+            dynamics = dict(self.state.inst.dynamics_settings)
+            dynamics[level] = setting
+            self._update_inst_state(dynamics_settings=dynamics)
 
     ###########################################################################
 
@@ -615,43 +619,41 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _interpolate(self, dyn_str: str, level: int) -> None:
+    def _interpolate(self, level: Dynamics, setting: int) -> None:
         inst = self.state.inst
-        moved_dyn = _str_to_dyn(dyn_str)
-        dyns = [
-            _str_to_dyn(x) for x in self.active_instrument.dynamics_present
-        ]
+        dyns = sorted(inst.dynamics_present)
+        dynamics = dict(inst.dynamics_settings)
 
         min_dyn = min(dyns)
         max_dyn = max(dyns)
 
-        min_val = self.active_instrument.dynamics[_dyn_to_str(min_dyn).upper()]
-        max_val = self.active_instrument.dynamics[_dyn_to_str(max_dyn).upper()]
+        min_setting = dynamics[min_dyn]
+        max_setting = dynamics[max_dyn]
 
-        if moved_dyn != min_dyn:
-            level = max(min_val, level)
-        if moved_dyn != max_dyn:
-            level = min(max_val, level)
+        # Clip the setting
+        if level != min_dyn:
+            setting = max(min_setting, setting)
+        if level != max_dyn:
+            setting = min(max_setting, setting)
 
-        for dyn in dyns:
-            if dyn == moved_dyn:
-                val = level
-            elif dyn in [min_dyn, max_dyn]:
-                continue
-            if dyn < moved_dyn:
-                numer = 1 + sum(dyn < x < moved_dyn for x in dyns)
-                denom = 1 + sum(min_dyn < x < moved_dyn for x in dyns)
+        for dyn in dyns[1:-1]:
+            if dyn == level:
+                val = setting
+            elif dyn < level:
+                numer = 1 + sum(dyn < x < level for x in dyns)
+                denom = 1 + sum(min_dyn < x < level for x in dyns)
                 val = round(
-                    min_val + (level - min_val) * (denom - numer) / denom
+                    min_setting
+                    + (setting - min_setting) * (denom - numer) / denom
                 )
-            elif dyn > moved_dyn:
-                numer = 1 + sum(moved_dyn < x < dyn for x in dyns)
-                denom = 1 + sum(moved_dyn < x < max_dyn for x in dyns)
-                val = round(level + (max_val - level) * numer / denom)
+            else:  # dyn > level
+                numer = 1 + sum(level < x < dyn for x in dyns)
+                denom = 1 + sum(level < x < max_dyn for x in dyns)
+                val = round(val + (max_setting - val) * numer / denom)
 
-            self.active_instrument.dynamics[_dyn_to_str(dyn)] = val
+            dynamics[dyn] = val
 
-        self.inst_config_changed.emit(self.active_instrument)
+        self._update_inst_state(dynamics_settings=dynamics)
 
     ###########################################################################
 
