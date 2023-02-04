@@ -64,7 +64,7 @@ webserver = ["flask"]
 [tool.poetry.scripts]
 smw_music_filttool = "smw_music.scripts.filttool:main"
 smw_music_xml_to_mml = "smw_music.scripts.convert:main"
-smw_music_xml_dashboard = "smw_music.scripts.dashboard:main"
+beer = "smw_music.scripts.dashboard:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
