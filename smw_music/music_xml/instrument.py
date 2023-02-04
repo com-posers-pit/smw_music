@@ -95,7 +95,9 @@ class InstrumentConfig:
             Dynamics.FFFF: 245,
         }
     )
-    dynamics_present: set[Dynamics] = field(default_factory=set)
+    dynamics_present: set[Dynamics] = field(
+        default_factory=lambda: set(Dynamics)
+    )
     dyn_interpolate: bool = False
     artic_settings: dict[Artic, ArticSetting] = field(
         default_factory=lambda: {
