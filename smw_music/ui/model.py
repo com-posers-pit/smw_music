@@ -636,9 +636,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if level != max_dyn:
             setting = min(max_setting, setting)
 
-        for dyn in dyns[1:-1]:
+        for dyn in dyns:
             if dyn == level:
                 val = setting
+            elif dyn in [min_dyn, max_dyn]:
+                continue
             elif dyn < level:
                 numer = 1 + sum(dyn < x < level for x in dyns)
                 denom = 1 + sum(min_dyn < x < level for x in dyns)
@@ -649,7 +651,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             else:  # dyn > level
                 numer = 1 + sum(level < x < dyn for x in dyns)
                 denom = 1 + sum(level < x < max_dyn for x in dyns)
-                val = round(val + (max_setting - val) * numer / denom)
+                val = round(setting + (max_setting - setting) * numer / denom)
 
             dynamics[dyn] = val
 
