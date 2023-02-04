@@ -18,10 +18,15 @@ from enum import IntEnum, auto
 
 
 class Artic(IntEnum):
-    ACCENT = auto()
+    STAC = auto()
+    ACC = auto()
+    DEF = auto()
     ACCSTAC = auto()
-    DEFAULT = auto()
-    STACCATO = auto()
+
+    ###########################################################################
+
+    def __str__(self) -> str:
+        return self.name
 
 
 ###############################################################################
@@ -31,6 +36,8 @@ class Artic(IntEnum):
 class ArticSetting:
     length: int
     volume: int
+
+    ###########################################################################
 
     @property
     def setting(self) -> int:
@@ -51,6 +58,11 @@ class Dynamics(IntEnum):
     FF = auto()
     FFF = auto()
     FFFF = auto()
+
+    ###########################################################################
+
+    def __str__(self) -> str:
+        return self.name
 
 
 ###############################################################################
@@ -101,10 +113,10 @@ class InstrumentConfig:
     dyn_interpolate: bool = False
     artics: dict[Artic, ArticSetting] = field(
         default_factory=lambda: {
-            Artic.ACCENT: ArticSetting(0x7, 0xF),
+            Artic.DEF: ArticSetting(0x7, 0xA),
+            Artic.STAC: ArticSetting(0x5, 0xA),
+            Artic.ACC: ArticSetting(0x7, 0xF),
             Artic.ACCSTAC: ArticSetting(0x5, 0xF),
-            Artic.DEFAULT: ArticSetting(0x7, 0xA),
-            Artic.STACCATO: ArticSetting(0x5, 0xA),
         }
     )
     pan_enabled: bool = False

@@ -491,21 +491,21 @@ class Dashboard:
         )
 
         self._artic_widgets = {}
-        self._artic_widgets[Artic.DEFAULT] = _ArticWidgets(
+        self._artic_widgets[Artic.ACC] = _ArticWidgets(
             v.artic_acc_length_slider,
             v.artic_acc_length_setting,
             v.artic_acc_volume_slider,
             v.artic_acc_volume_setting,
             v.artic_acc_setting_label,
         )
-        self._artic_widgets[Artic.ACCENT] = _ArticWidgets(
+        self._artic_widgets[Artic.DEF] = _ArticWidgets(
             v.artic_default_length_slider,
             v.artic_default_length_setting,
             v.artic_default_volume_slider,
             v.artic_default_volume_setting,
             v.artic_default_setting_label,
         )
-        self._artic_widgets[Artic.STACCATO] = _ArticWidgets(
+        self._artic_widgets[Artic.STAC] = _ArticWidgets(
             v.artic_stacc_length_slider,
             v.artic_stacc_length_setting,
             v.artic_stacc_volume_slider,
