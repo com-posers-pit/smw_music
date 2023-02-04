@@ -226,7 +226,6 @@ class Dashboard:
         v.pan_setting_label.setEnabled(inst.pan_enabled)
         v.pan_setting.setValue(inst.pan_setting)
         v.pan_setting_label.setText(inst.pan_description)
-
         # Instrument sample
         v.select_builtin_sample.setChecked(
             inst.sample_source == SampleSource.BUILTIN
@@ -347,6 +346,7 @@ class Dashboard:
             (v.play_spc, m.on_play_spc_clicked),
             # Instrument settings
             (v.instrument_list, m.on_instrument_changed),
+            (v.interpolate, m.on_interpolate_changed),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),

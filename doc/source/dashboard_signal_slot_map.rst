@@ -64,6 +64,11 @@ Instrument Settings
 Instruments
 ~~~~~~~~~~~
 
+.. mermaid::
+
+   flowchart LR
+      view.instrument_list.currentRowChanged --> model.on_instrument_changed
+
 Dynamics
 ~~~~~~~~
 
