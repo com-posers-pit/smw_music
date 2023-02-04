@@ -20,6 +20,7 @@ from typing import NamedTuple
 
 # Library imports
 from PyQt6 import uic
+from PyQt6.QtCore import QSignalBlocker
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QAbstractSlider,
@@ -204,10 +205,12 @@ class Dashboard:
         for dkey, dval in inst.dynamics_settings.items():
             dwidgets = self._dyn_widgets[dkey]
             enable = dkey in inst.dynamics_present
-            dwidgets.slider.setValue(dval)
-            dwidgets.slider.setEnabled(enable)
-            dwidgets.setting.setText(pct(dval))
-            dwidgets.setting.setEnabled(enable)
+            with QSignalBlocker(dwidgets.slider):
+                dwidgets.slider.setValue(dval)
+                dwidgets.slider.setEnabled(enable)
+            with QSignalBlocker(dwidgets.setting):
+                dwidgets.setting.setText(pct(dval))
+                dwidgets.setting.setEnabled(enable)
             dwidgets.label.setText(hexb(dval))
             dwidgets.label.setEnabled(enable)
 
