@@ -44,9 +44,7 @@ class State:
     superloop_analysis: bool = False
     measure_numbers: bool = True
     global_instrument: InstrumentConfig = InstrumentConfig("")
-    instrument_settings: list[InstrumentConfig] = field(
-        default_factory=lambda: []
-    )
+    instruments: list[InstrumentConfig] = field(default_factory=lambda: [])
     instrument_idx: int | None = None
     global_volume: int = 0
     global_legato: bool = True
@@ -76,16 +74,16 @@ class State:
     @property
     def inst(self) -> InstrumentConfig:
         idx = self.instrument_idx
-        if idx is None or not 0 <= idx < len(self.instrument_settings):
+        if idx is None or not 0 <= idx < len(self.instruments):
             return self.global_instrument
-        return self.instrument_settings[idx]
+        return self.instruments[idx]
 
     ###########################################################################
 
     @inst.setter
     def inst(self, inst: InstrumentConfig) -> None:
         idx = self.instrument_idx
-        if idx is None or not 0 <= idx < len(self.instrument_settings):
+        if idx is None or not 0 <= idx < len(self.instruments):
             self.global_instrument = inst
         else:
-            self.instrument_settings[idx] = inst
+            self.instruments[idx] = inst

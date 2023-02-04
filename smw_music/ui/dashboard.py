@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QFileDialog,
     QLineEdit,
+    QListWidget,
     QMainWindow,
     QMessageBox,
     QPushButton,
@@ -357,6 +358,8 @@ class Dashboard:
             (v.generate_mml, m.on_generate_mml_clicked),
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
+            # Instrument settings
+            (v.instrument_list, m.on_instrument_changed),
             # Instrument dynamics settings
             (v.pppp_slider, partial(m.on_dynamics_changed, Dyn.PPPP)),
             (v.pppp_setting, partial(m.on_dynamics_changed, Dyn.PPPP)),
@@ -471,6 +474,8 @@ class Dashboard:
                 widget.toggled.connect(slot)
             elif isinstance(widget, QAbstractSlider):
                 widget.valueChanged.connect(slot)
+            elif isinstance(widget, QListWidget):
+                widget.currentRowChanged.connect(slot)
             elif isinstance(widget, QAbstractItemView):
                 widget.selectionModel().currentChanged.connect(slot)
 

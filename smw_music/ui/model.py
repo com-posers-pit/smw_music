@@ -148,7 +148,6 @@ def _str_to_dyn(dyn: str) -> Dynamics:
 class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(State)
     instruments_changed = pyqtSignal(list)
-    sample_packs_changed = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
@@ -157,6 +156,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     song: Song | None
     sample_packs_model: QStandardItemModel
+    instrument_model: QStandardItemModel
     _history: list[State]
     _undo_level: int
     _amk_path: Path | None
@@ -173,6 +173,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         super().__init__()
         self.song = None
         self.sample_packs_model = QStandardItemModel()
+        self.instrument_model = QStandardItemModel()
         self._history = [State()]
         self._undo_level = 0
 
@@ -433,6 +434,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_instrument_changed(self, index: int) -> None:
+        self._update_state(instrument_idx=index)
+
+    ###########################################################################
+
     def on_interpolate_changed(self, state: bool) -> None:
         self._update_inst_state(dyn_interpolate=state)
 
@@ -489,6 +495,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         except MusicXmlException as e:
             self.response_generated.emit(True, "Song load", str(e))
         else:
+            self.state.instruments = self.song.instruments
             self.instruments_changed.emit(
                 [x.name for x in self.song.instruments]
             )
@@ -688,7 +695,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 "tune_setting": params.tuning,
                 "subtune_setting": params.subtuning,
             }
-            print("update sample settings")
             self._update_inst_state(**new_state)
 
     ###########################################################################
