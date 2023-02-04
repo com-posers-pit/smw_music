@@ -205,6 +205,10 @@ class Dashboard:
         for dkey, dval in inst.dynamics_settings.items():
             dwidgets = self._dyn_widgets[dkey]
             enable = dkey in inst.dynamics_present
+
+            # These widgets can be modified indirectly when interpolation is
+            # enabled, which causes recursive loops.  Blocking signals works
+            # around this behavior.
             with QSignalBlocker(dwidgets.slider):
                 dwidgets.slider.setValue(dval)
                 dwidgets.slider.setEnabled(enable)
