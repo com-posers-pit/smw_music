@@ -188,6 +188,15 @@ class InstrumentConfig:
     ###########################################################################
 
     @property
+    def instrument_idx(self) -> int:
+        if self.sample_source == SampleSource.BUILTIN:
+            return self.builtin_sample_index
+        assert 1 == 0
+        return 0
+
+    ###########################################################################
+
+    @property
     def pan_description(self) -> str:
         pan = self.pan_setting
         if pan == 10:
