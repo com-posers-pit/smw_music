@@ -604,7 +604,7 @@ class Song:
             echo_config=echo_config,
             instruments=self.instruments,
             custom_samples=custom_samples,
-            dynamics=list(DEFAULT_DYN.keys()),
+            dynamics=list(Dynamics),
         )
 
         rv = rv.replace(" ^", "^")
