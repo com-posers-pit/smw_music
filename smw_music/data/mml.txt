@@ -61,12 +61,12 @@ w${song.volume}
 
     def artic_str(inst):
         rv = []
-        for artic, val in inst.quant.items():
-            rv.append(f'\\"q{artic}=q{val:02X}\\"')
+        for artic, val in inst.artics.items():
+            rv.append(f'\\"q{artic}=q{val.setting:02X}\\"')
         return ' '.join(rv)
 
     def pan_str(inst):
-        return '' if inst.pan is None else f'y{inst.pan}'
+        return f'y{inst.pan_setting}' if inst.pan_enabled else ''
 
     def transpose(inst):
         return f' h{inst.transpose}' if do_transpose else ''
@@ -74,7 +74,7 @@ w${song.volume}
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
 %for inst in instruments:
-"${f'{voice(inst):{voice_sz}}'} = ${f'{inst.instrument:3} o{inst.octave}'}"
+"${f'{voice(inst):{voice_sz}}'} = ${f'{inst.instrument_idx:3} o{inst.octave}'}"
 %endfor
 
 ; Instrument dynamics definitions
