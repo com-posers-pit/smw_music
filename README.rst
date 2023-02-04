@@ -12,7 +12,7 @@ The tooling has only been tested with exported MusicXML files from MuseScore
 3.6.2, but it should work with outputs from other music notation software.
 Output files are tested against `AddMusicK`_ 1.0.8.
 
-The software (and especially the libraries) are alpha.  APIs may change at
+The software (and especially the libraries) are beta.  APIs may change at
 any time for any/no reason.
 
 Webserver
@@ -151,19 +151,19 @@ Acknowledgements
    :target: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml
    :alt: Unit test status
 .. |license| image:: https://img.shields.io/pypi/l/smw_music
-   :target: https://pypi.com/l/smw_music
+   :target: https://pypi.org/project/smw_music
    :alt: PyPI - License
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
    :target: https://api.reuse.software/info/github.com/com-posers-pit/smw_music
    :alt: REUSE Status
 .. |package-version| image:: https://img.shields.io/pypi/v/smw_music
-   :target: https://pypi.com/l/smw_music
+   :target: https://pypi.org/project/smw_music
    :alt: PyPI - Package Version
 .. |python-version| image:: https://img.shields.io/pypi/pyversions/smw_music
-   :target: https://pypi.com/l/smw_music
+   :target: https://pypi.org/project/smw_music
    :alt: PyPI - Python Version
 .. |package-status| image:: https://img.shields.io/pypi/status/smw_music
-   :target: https://pypi.com/l/smw_music
+   :target: https://pypi.org/project/smw_music
    :alt: PyPI - Status
 .. |python-style| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
