@@ -255,21 +255,21 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
         max_len = 7
-        artics = dict(self.state.inst.artic_settings)
+        artics = dict(self.state.inst.artics)
         artics[artic] = replace(
             artics[artic], length=_parse_setting(val, max_len)
         )
-        self._update_inst_state(artic_settings=artics)
+        self._update_inst_state(artics=artics)
 
     ###########################################################################
 
     def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
         max_vol = 15
-        artics = dict(self.state.inst.artic_settings)
+        artics = dict(self.state.inst.artics)
         artics[artic] = replace(
             artics[artic], volume=_parse_setting(val, max_vol)
         )
-        self._update_inst_state(artic_settings=artics)
+        self._update_inst_state(artics=artics)
 
     ###########################################################################
 
@@ -317,9 +317,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if self.state.inst.dyn_interpolate:
             self._interpolate(level, setting)
         else:
-            dynamics = dict(self.state.inst.dynamics_settings)
+            dynamics = dict(self.state.inst.dynamics)
             dynamics[level] = setting
-            self._update_inst_state(dynamics_settings=dynamics)
+            self._update_inst_state(dynamics=dynamics)
 
     ###########################################################################
 
@@ -622,7 +622,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _interpolate(self, level: Dynamics, setting: int) -> None:
         inst = self.state.inst
         dyns = sorted(inst.dynamics_present)
-        dynamics = dict(inst.dynamics_settings)
+        dynamics = dict(inst.dynamics)
 
         min_dyn = min(dyns)
         max_dyn = max(dyns)
@@ -655,7 +655,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             dynamics[dyn] = val
 
-        self._update_inst_state(dynamics_settings=dynamics)
+        self._update_inst_state(dynamics=dynamics)
 
     ###########################################################################
 

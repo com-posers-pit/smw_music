@@ -202,7 +202,7 @@ class Dashboard:
         v.measure_numbers.setChecked(state.measure_numbers)
 
         # Instrument dynamics settings
-        for dkey, dval in inst.dynamics_settings.items():
+        for dkey, dval in inst.dynamics.items():
             dwidgets = self._dyn_widgets[dkey]
             enable = dkey in inst.dynamics_present
 
@@ -219,7 +219,7 @@ class Dashboard:
             dwidgets.label.setEnabled(enable)
 
         # Instrument articulation settings
-        for akey, aval in inst.artic_settings.items():
+        for akey, aval in inst.artics.items():
             awidgets = self._artic_widgets[akey]
             awidgets.length_slider.setValue(aval.length)
             awidgets.length_setting.setText(hexb(aval.length))

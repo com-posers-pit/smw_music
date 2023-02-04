@@ -81,7 +81,7 @@ class InstrumentConfig:
     name: str
     octave: int = 3
     transpose: int = 0
-    dynamics_settings: dict[Dynamics, int] = field(
+    dynamics: dict[Dynamics, int] = field(
         default_factory=lambda: {
             Dynamics.PPPP: 26,
             Dynamics.PPP: 38,
@@ -99,7 +99,7 @@ class InstrumentConfig:
         default_factory=lambda: set(Dynamics)
     )
     dyn_interpolate: bool = False
-    artic_settings: dict[Artic, ArticSetting] = field(
+    artics: dict[Artic, ArticSetting] = field(
         default_factory=lambda: {
             Artic.ACCENT: ArticSetting(0x7, 0xF),
             Artic.ACCSTAC: ArticSetting(0x5, 0xF),
