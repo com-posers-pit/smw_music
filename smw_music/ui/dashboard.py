@@ -16,6 +16,7 @@ import io
 import pathlib
 import pkgutil
 from functools import partial
+from typing import NamedTuple
 
 # Library imports
 from PyQt6 import uic
@@ -25,6 +26,7 @@ from PyQt6.QtWidgets import (
     QApplication,
     QCheckBox,
     QFileDialog,
+    QLabel,
     QLineEdit,
     QListWidget,
     QMainWindow,
@@ -49,7 +51,7 @@ from smw_music.ui.state import EchoCh, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
-# Private class definitions
+# Private function definitions
 ###############################################################################
 
 # h/t: https://stackoverflow.com/questions/47285303
@@ -67,6 +69,28 @@ def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
 
 
 ###############################################################################
+# Private class definitions
+###############################################################################
+
+
+class _ArticWidgets(NamedTuple):
+    length_slider: QSlider
+    length_setting: QLineEdit
+    volume_slider: QSlider
+    volume_setting: QLineEdit
+    setting_label: QLabel
+
+
+###############################################################################
+
+
+class _DynamicsWidgets(NamedTuple):
+    slider: QSlider
+    setting: QLineEdit
+    label: QLabel
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -79,6 +103,8 @@ class Dashboard:
     _model: Model
     _pref_dlg: Preferences
     _view: QMainWindow
+    _dyn_widgets: dict[Dyn, _DynamicsWidgets]
+    _artic_widgets: dict[Artic, _ArticWidgets]
 
     ###########################################################################
     # Constructor definitions
@@ -104,6 +130,7 @@ class Dashboard:
 
         self._setup_menus()
         self._fix_edit_widths()
+        self._combine_widgets()
         self._attach_signals()
 
         self._view.show()
@@ -174,64 +201,20 @@ class Dashboard:
         v.measure_numbers.setChecked(state.measure_numbers)
 
         # Instrument dynamics settings
-        dynamics = inst.dynamics_settings
-        v.pppp_slider.setValue(dynamics[Dyn.PPPP])
-        v.pppp_setting.setText(pct(dynamics[Dyn.PPPP]))
-        v.pppp_setting_label.setText(hexb(dynamics[Dyn.PPPP]))
-        v.ppp_slider.setValue(dynamics[Dyn.PPP])
-        v.ppp_setting.setText(pct(dynamics[Dyn.PPP]))
-        v.ppp_setting_label.setText(hexb(dynamics[Dyn.PPP]))
-        v.pp_slider.setValue(dynamics[Dyn.PP])
-        v.pp_setting.setText(pct(dynamics[Dyn.PP]))
-        v.pp_setting_label.setText(hexb(dynamics[Dyn.PP]))
-        v.p_slider.setValue(dynamics[Dyn.P])
-        v.p_setting.setText(pct(dynamics[Dyn.P]))
-        v.p_setting_label.setText(hexb(dynamics[Dyn.P]))
-        v.mp_slider.setValue(dynamics[Dyn.MP])
-        v.mp_setting.setText(pct(dynamics[Dyn.MP]))
-        v.mp_setting_label.setText(hexb(dynamics[Dyn.MP]))
-        v.mf_slider.setValue(dynamics[Dyn.MF])
-        v.mf_setting.setText(pct(dynamics[Dyn.MF]))
-        v.mf_setting_label.setText(hexb(dynamics[Dyn.MF]))
-        v.f_slider.setValue(dynamics[Dyn.F])
-        v.f_setting.setText(pct(dynamics[Dyn.F]))
-        v.f_setting_label.setText(hexb(dynamics[Dyn.F]))
-        v.ff_slider.setValue(dynamics[Dyn.FF])
-        v.ff_setting.setText(pct(dynamics[Dyn.FF]))
-        v.ff_setting_label.setText(hexb(dynamics[Dyn.FF]))
-        v.fff_slider.setValue(dynamics[Dyn.FFF])
-        v.fff_setting.setText(pct(dynamics[Dyn.FFF]))
-        v.fff_setting_label.setText(hexb(dynamics[Dyn.FFF]))
-        v.ffff_slider.setValue(dynamics[Dyn.FFFF])
-        v.ffff_setting.setText(pct(dynamics[Dyn.FFFF]))
-        v.ffff_setting_label.setText(hexb(dynamics[Dyn.FFFF]))
-        v.interpolate.setChecked(inst.dyn_interpolate)
+        for dkey, dval in inst.dynamics_settings.items():
+            dwidgets = self._dyn_widgets[dkey]
+            dwidgets.slider.setValue(dval)
+            dwidgets.setting.setText(pct(dval))
+            dwidgets.label.setText(hexb(dval))
 
         # Instrument articulation settings
-        artic = inst.artic_settings[Artic.DEFAULT]
-        v.artic_default_length_slider.setValue(artic.length)
-        v.artic_default_length_setting.setText(hexb(artic.length))
-        v.artic_default_volume_slider.setValue(artic.volume)
-        v.artic_default_volume_setting.setText(hexb(artic.volume))
-        v.artic_default_setting_label.setText(hexb(artic.setting))
-        artic = inst.artic_settings[Artic.ACCENT]
-        v.artic_acc_length_slider.setValue(artic.length)
-        v.artic_acc_length_setting.setText(hexb(artic.length))
-        v.artic_acc_volume_slider.setValue(artic.volume)
-        v.artic_acc_volume_setting.setText(hexb(artic.volume))
-        v.artic_acc_setting_label.setText(hexb(artic.setting))
-        artic = inst.artic_settings[Artic.STACCATO]
-        v.artic_stacc_length_slider.setValue(artic.length)
-        v.artic_stacc_length_setting.setText(hexb(artic.length))
-        v.artic_stacc_volume_slider.setValue(artic.volume)
-        v.artic_stacc_volume_setting.setText(hexb(artic.volume))
-        v.artic_stacc_setting_label.setText(hexb(artic.setting))
-        artic = inst.artic_settings[Artic.ACCSTAC]
-        v.artic_accstacc_length_slider.setValue(artic.length)
-        v.artic_accstacc_length_setting.setText(hexb(artic.length))
-        v.artic_accstacc_volume_slider.setValue(artic.volume)
-        v.artic_accstacc_volume_setting.setText(hexb(artic.volume))
-        v.artic_accstacc_setting_label.setText(hexb(artic.setting))
+        for akey, aval in inst.artic_settings.items():
+            awidgets = self._artic_widgets[akey]
+            awidgets.length_slider.setValue(aval.length)
+            awidgets.length_setting.setText(hexb(aval.length))
+            awidgets.volume_slider.setValue(aval.length)
+            awidgets.volume_setting.setText(hexb(aval.length))
+            awidgets.setting_label.setText(hexb(aval.setting))
 
         # Instrument pan settings
         v.pan_enable.setChecked(inst.pan_enabled)
@@ -360,45 +343,6 @@ class Dashboard:
             (v.play_spc, m.on_play_spc_clicked),
             # Instrument settings
             (v.instrument_list, m.on_instrument_changed),
-            # Instrument dynamics settings
-            (v.pppp_slider, partial(m.on_dynamics_changed, Dyn.PPPP)),
-            (v.pppp_setting, partial(m.on_dynamics_changed, Dyn.PPPP)),
-            (v.ppp_slider, partial(m.on_dynamics_changed, Dyn.PPP)),
-            (v.ppp_setting, partial(m.on_dynamics_changed, Dyn.PPP)),
-            (v.pp_slider, partial(m.on_dynamics_changed, Dyn.PP)),
-            (v.pp_setting, partial(m.on_dynamics_changed, Dyn.PP)),
-            (v.p_slider, partial(m.on_dynamics_changed, Dyn.P)),
-            (v.p_setting, partial(m.on_dynamics_changed, Dyn.P)),
-            (v.mp_slider, partial(m.on_dynamics_changed, Dyn.MP)),
-            (v.mp_setting, partial(m.on_dynamics_changed, Dyn.MP)),
-            (v.mf_slider, partial(m.on_dynamics_changed, Dyn.MF)),
-            (v.mf_setting, partial(m.on_dynamics_changed, Dyn.MF)),
-            (v.f_slider, partial(m.on_dynamics_changed, Dyn.F)),
-            (v.f_setting, partial(m.on_dynamics_changed, Dyn.F)),
-            (v.ff_slider, partial(m.on_dynamics_changed, Dyn.FF)),
-            (v.ff_setting, partial(m.on_dynamics_changed, Dyn.FF)),
-            (v.fff_slider, partial(m.on_dynamics_changed, Dyn.FFF)),
-            (v.fff_setting, partial(m.on_dynamics_changed, Dyn.FFF)),
-            (v.ffff_slider, partial(m.on_dynamics_changed, Dyn.FFFF)),
-            (v.ffff_setting, partial(m.on_dynamics_changed, Dyn.FFFF)),
-            (v.interpolate, m.on_interpolate_changed),
-            # Instrument articulation settings
-            (v.artic_default_length_slider, partial(alen, Artic.DEFAULT)),
-            (v.artic_default_length_setting, partial(alen, Artic.DEFAULT)),
-            (v.artic_default_volume_slider, partial(avol, Artic.DEFAULT)),
-            (v.artic_default_volume_setting, partial(avol, Artic.DEFAULT)),
-            (v.artic_acc_length_slider, partial(alen, Artic.ACCENT)),
-            (v.artic_acc_length_setting, partial(alen, Artic.ACCENT)),
-            (v.artic_acc_volume_slider, partial(avol, Artic.ACCENT)),
-            (v.artic_acc_volume_setting, partial(avol, Artic.ACCENT)),
-            (v.artic_stacc_length_slider, partial(alen, Artic.STACCATO)),
-            (v.artic_stacc_length_setting, partial(alen, Artic.STACCATO)),
-            (v.artic_stacc_volume_slider, partial(avol, Artic.STACCATO)),
-            (v.artic_stacc_volume_setting, partial(avol, Artic.STACCATO)),
-            (v.artic_accstacc_length_slider, partial(alen, Artic.ACCSTAC)),
-            (v.artic_accstacc_length_setting, partial(alen, Artic.ACCSTAC)),
-            (v.artic_accstacc_volume_slider, partial(avol, Artic.ACCSTAC)),
-            (v.artic_accstacc_volume_setting, partial(avol, Artic.ACCSTAC)),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),
@@ -459,6 +403,21 @@ class Dashboard:
             (v.echo_delay_setting, m.on_echo_delay_changed),
         ]
 
+        # Instrument dynamics settings
+        for dkey, dwidgets in self._dyn_widgets.items():
+            dyn_slot = partial(m.on_dynamics_changed, dkey)
+            connections.append((dwidgets.slider, dyn_slot))
+            connections.append((dwidgets.setting, dyn_slot))
+
+        # Instrument articulation settings
+        for akey, awidgets in self._artic_widgets.items():
+            alen_slot = partial(alen, akey)
+            avol_slot = partial(avol, akey)
+            connections.append((awidgets.length_slider, alen_slot))
+            connections.append((awidgets.length_setting, alen_slot))
+            connections.append((awidgets.volume_slider, avol_slot))
+            connections.append((awidgets.volume_setting, avol_slot))
+
         for widget, slot in connections:
             if isinstance(widget, QPushButton):
                 widget.clicked.connect(slot)
@@ -482,6 +441,73 @@ class Dashboard:
         # Return signals
         m.state_changed.connect(self.on_state_changed)
         m.instruments_changed.connect(self.on_instruments_changed)
+
+    ###########################################################################
+
+    def _combine_widgets(self) -> None:
+        v = self._view  # pylint: disable=invalid-name
+        self._dyn_widgets = {}
+        dyns = self._dyn_widgets
+        dyns[Dyn.PPPP] = _DynamicsWidgets(
+            v.pppp_slider, v.pppp_setting, v.pppp_setting_label
+        )
+        dyns[Dyn.PPP] = _DynamicsWidgets(
+            v.ppp_slider, v.ppp_setting, v.ppp_setting_label
+        )
+        dyns[Dyn.PP] = _DynamicsWidgets(
+            v.pp_slider, v.pp_setting, v.pp_setting_label
+        )
+        dyns[Dyn.P] = _DynamicsWidgets(
+            v.p_slider, v.p_setting, v.p_setting_label
+        )
+        dyns[Dyn.MP] = _DynamicsWidgets(
+            v.mp_slider, v.mp_setting, v.mp_setting_label
+        )
+        dyns[Dyn.MF] = _DynamicsWidgets(
+            v.mf_slider, v.mf_setting, v.mf_setting_label
+        )
+        dyns[Dyn.F] = _DynamicsWidgets(
+            v.f_slider, v.f_setting, v.f_setting_label
+        )
+        dyns[Dyn.FF] = _DynamicsWidgets(
+            v.ff_slider, v.ff_setting, v.ff_setting_label
+        )
+        dyns[Dyn.FFF] = _DynamicsWidgets(
+            v.fff_slider, v.fff_setting, v.fff_setting_label
+        )
+        dyns[Dyn.FFFF] = _DynamicsWidgets(
+            v.ffff_slider, v.ffff_setting, v.ffff_setting_label
+        )
+
+        self._artic_widgets = {}
+        self._artic_widgets[Artic.DEFAULT] = _ArticWidgets(
+            v.artic_acc_length_slider,
+            v.artic_acc_length_setting,
+            v.artic_acc_volume_slider,
+            v.artic_acc_volume_setting,
+            v.artic_acc_setting_label,
+        )
+        self._artic_widgets[Artic.ACCENT] = _ArticWidgets(
+            v.artic_default_length_slider,
+            v.artic_default_length_setting,
+            v.artic_default_volume_slider,
+            v.artic_default_volume_setting,
+            v.artic_default_setting_label,
+        )
+        self._artic_widgets[Artic.STACCATO] = _ArticWidgets(
+            v.artic_stacc_length_slider,
+            v.artic_stacc_length_setting,
+            v.artic_stacc_volume_slider,
+            v.artic_stacc_volume_setting,
+            v.artic_stacc_setting_label,
+        )
+        self._artic_widgets[Artic.ACCSTAC] = _ArticWidgets(
+            v.artic_accstacc_length_slider,
+            v.artic_accstacc_length_setting,
+            v.artic_accstacc_volume_slider,
+            v.artic_accstacc_volume_setting,
+            v.artic_accstacc_setting_label,
+        )
 
     ###########################################################################
 
