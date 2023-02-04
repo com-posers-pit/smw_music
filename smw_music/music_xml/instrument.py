@@ -124,6 +124,27 @@ class InstrumentConfig:
     subtune_setting: int = 0
 
     ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __post_init__(self) -> None:
+        # Default instrument mapping, from Wakana's tutorial
+        inst_map = {
+            "flute": 0,
+            "marimba": 3,
+            "cello": 4,
+            "trumpet": 6,
+            "bass": 8,
+            "bassguitar": 8,
+            "electricbass": 8,
+            "piano": 13,
+            "guitar": 17,
+            "electricguitar": 17,
+        }
+
+        self.builtin_sample_index = inst_map.get(self.name.lower(), 0)
+
+    ###########################################################################
     # Property definitions
     ###########################################################################
 
