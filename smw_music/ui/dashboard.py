@@ -203,9 +203,13 @@ class Dashboard:
         # Instrument dynamics settings
         for dkey, dval in inst.dynamics_settings.items():
             dwidgets = self._dyn_widgets[dkey]
+            enable = dkey in inst.dynamics_present
             dwidgets.slider.setValue(dval)
+            dwidgets.slider.setEnabled(enable)
             dwidgets.setting.setText(pct(dval))
+            dwidgets.setting.setEnabled(enable)
             dwidgets.label.setText(hexb(dval))
+            dwidgets.label.setEnabled(enable)
 
         # Instrument articulation settings
         for akey, aval in inst.artic_settings.items():
