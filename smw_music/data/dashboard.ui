@@ -1376,7 +1376,7 @@
                      <item>
                       <widget class="QLabel" name="brr_setting_label">
                        <property name="text">
-                        <string>Setting:</string>
+                        <string>Sample Settings:</string>
                        </property>
                       </widget>
                      </item>

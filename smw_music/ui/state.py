@@ -46,7 +46,7 @@ class State:
     global_instrument: InstrumentConfig = InstrumentConfig("")
     instruments: list[InstrumentConfig] = field(default_factory=lambda: [])
     instrument_idx: int | None = None
-    global_volume: int = 0
+    global_volume: int = 128
     global_legato: bool = True
     echo_enable: dict[EchoCh, bool] = field(
         default_factory=lambda: {
