@@ -17,5 +17,5 @@ def hexb(val: int) -> str:
 ###############################################################################
 
 
-def pct(val: int, lim: int = 255) -> str:
+def pct(val: float, lim: float = 255) -> str:
     return f"{100*val/lim:3.1f}%"

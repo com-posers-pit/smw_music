@@ -13,6 +13,7 @@
 
 # Standard library imports
 from dataclasses import dataclass
+from enum import IntEnum
 
 ###############################################################################
 # Private function definitions
@@ -37,6 +38,21 @@ def _truthy(arg: str) -> bool:
 ###############################################################################
 
 
+class EchoCh(IntEnum):
+    GLOBAL = -1
+    CH0 = 0
+    CH1 = 1
+    CH2 = 2
+    CH3 = 3
+    CH4 = 4
+    CH5 = 5
+    CH6 = 6
+    CH7 = 7
+
+
+###############################################################################
+
+
 @dataclass
 class EchoConfig:
     """
@@ -44,8 +60,8 @@ class EchoConfig:
 
     Parameters
     ----------
-    chan_list: set
-        The set of channels that start with echo on (0-7, inclusive)
+    enables: set
+        The set of channels that start with echo on
     vol_mag: tuple
         The (left, right) echo volume magnitudes (0-127, inclusive)
     vol_inv: tuple
@@ -62,7 +78,7 @@ class EchoConfig:
 
     Attributes
     ----------
-    chan_list: set
+    enables: set
         The set of channels that start with echo on (0-7, inclusive)
     vol_mag: tuple
         The (left, right) echo volume magnitudes (0-127, inclusive)
@@ -79,7 +95,7 @@ class EchoConfig:
         FIR filter selection (0 and 1 supported)
     """
 
-    chan_list: set[int]
+    enables: set[EchoCh]
     vol_mag: tuple[float, float]
     vol_inv: tuple[bool, bool]
     delay: int
@@ -125,10 +141,10 @@ class EchoConfig:
         lvol_inv = _truthy(fields.pop())
         lvol_mag = float(fields.pop())
 
-        chan_list = set(map(int, fields))
+        enables = set(map(lambda x: EchoCh(int(x)), fields))
 
         return cls(
-            chan_list,
+            enables,
             (lvol_mag, rvol_mag),
             (lvol_inv, rvol_inv),
             delay,
@@ -142,7 +158,7 @@ class EchoConfig:
     @property
     def channel_reg(self) -> int:
         """Return the echo enabled channel (EON) register."""
-        return sum(2**x for x in self.chan_list)
+        return sum(2**x.value for x in self.enables)
 
     ###########################################################################
 

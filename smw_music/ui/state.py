@@ -11,28 +11,13 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from enum import IntEnum, auto
 
 # Package imports
+from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig
 
 ###############################################################################
 # API class definitions
-###############################################################################
-
-
-class EchoCh(IntEnum):
-    GLOBAL = auto()
-    CH0 = auto()
-    CH1 = auto()
-    CH2 = auto()
-    CH3 = auto()
-    CH4 = auto()
-    CH5 = auto()
-    CH6 = auto()
-    CH7 = auto()
-
-
 ###############################################################################
 
 
@@ -48,24 +33,11 @@ class State:
     instrument_idx: int | None = None
     global_volume: int = 128
     global_legato: bool = True
-    echo_enable: dict[EchoCh, bool] = field(
-        default_factory=lambda: {
-            EchoCh.GLOBAL: False,
-            EchoCh.CH0: False,
-            EchoCh.CH1: False,
-            EchoCh.CH2: False,
-            EchoCh.CH3: False,
-            EchoCh.CH4: False,
-            EchoCh.CH5: False,
-            EchoCh.CH6: False,
-            EchoCh.CH7: False,
-        }
+    echo: EchoConfig = field(
+        default_factory=lambda: EchoConfig(
+            set(), (0, 0), (False, False), 0, 0, False, 0
+        )
     )
-    echo_filter0: bool = True
-    echo_left_setting: int = 0
-    echo_right_setting: int = 0
-    echo_feedback_setting: int = 0
-    echo_delay_setting: int = 0
 
     ###########################################################################
     # Property definitions

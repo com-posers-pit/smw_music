@@ -40,7 +40,7 @@ from PyQt6.QtWidgets import (
 
 # Package imports
 from smw_music import __version__
-from smw_music.music_xml.echo import EchoConfig
+from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
@@ -48,7 +48,7 @@ from smw_music.music_xml.song import Song
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.state import EchoCh, State
+from smw_music.ui.state import State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -275,28 +275,39 @@ class Dashboard:
         v.global_volume_setting.setText(pct(state.global_volume))
         v.global_volume_setting_label.setText(hexb(state.global_volume))
         v.global_legato.setChecked(state.global_legato)
-        v.echo_enable.setChecked(state.echo_enable[EchoCh.GLOBAL])
-        v.echo_ch0.setChecked(state.echo_enable[EchoCh.CH0])
-        v.echo_ch1.setChecked(state.echo_enable[EchoCh.CH1])
-        v.echo_ch2.setChecked(state.echo_enable[EchoCh.CH2])
-        v.echo_ch3.setChecked(state.echo_enable[EchoCh.CH3])
-        v.echo_ch4.setChecked(state.echo_enable[EchoCh.CH4])
-        v.echo_ch5.setChecked(state.echo_enable[EchoCh.CH5])
-        v.echo_ch6.setChecked(state.echo_enable[EchoCh.CH6])
-        v.echo_ch7.setChecked(state.echo_enable[EchoCh.CH7])
-        v.echo_filter_0.setChecked(state.echo_filter0)
-        v.echo_filter_1.setChecked(not state.echo_filter0)
-        v.echo_left_slider.setValue(state.echo_left_setting)
-        v.echo_left_setting.setText(hexb(state.echo_left_setting))
-        v.echo_left_surround.setChecked(False)  # TODO
-        v.echo_right_slider.setValue(state.echo_right_setting)
-        v.echo_right_setting.setText(hexb(state.echo_right_setting))
-        v.echo_right_surround.setChecked(False)  # TODO
-        v.echo_feedback_slider.setValue(state.echo_feedback_setting)
-        v.echo_feedback_setting.setText(hexb(state.echo_feedback_setting))
-        v.echo_feedback_surround.setChecked(False)  # TODO
-        v.echo_delay_slider.setValue(state.echo_delay_setting)
-        v.echo_delay_setting.setText(hexb(state.echo_delay_setting))
+        v.echo_enable.setChecked(EchoCh.GLOBAL in state.echo.enables)
+        v.echo_ch0.setChecked(EchoCh.CH0 in state.echo.enables)
+        v.echo_ch1.setChecked(EchoCh.CH1 in state.echo.enables)
+        v.echo_ch2.setChecked(EchoCh.CH2 in state.echo.enables)
+        v.echo_ch3.setChecked(EchoCh.CH3 in state.echo.enables)
+        v.echo_ch4.setChecked(EchoCh.CH4 in state.echo.enables)
+        v.echo_ch5.setChecked(EchoCh.CH5 in state.echo.enables)
+        v.echo_ch6.setChecked(EchoCh.CH6 in state.echo.enables)
+        v.echo_ch7.setChecked(EchoCh.CH7 in state.echo.enables)
+        v.echo_filter_0.setChecked(state.echo.fir_filt == 0)
+        v.echo_filter_1.setChecked(state.echo.fir_filt == 1)
+
+        v.echo_left_slider.setValue(
+            int(v.echo_left_slider.maximum() * state.echo.vol_mag[0])
+        )
+        v.echo_left_setting.setText(pct(state.echo.vol_mag[0], 1.0))
+        v.echo_left_surround.setChecked(state.echo.vol_inv[0])
+        v.echo_left_setting_label.setText(hexb(state.echo.left_vol_reg))
+        v.echo_right_slider.setValue(
+            int(v.echo_right_slider.maximum() * state.echo.vol_mag[1])
+        )
+        v.echo_right_setting.setText(pct(state.echo.vol_mag[1], 1.0))
+        v.echo_right_surround.setChecked(state.echo.vol_inv[1])
+        v.echo_right_setting_label.setText(hexb(state.echo.right_vol_reg))
+        v.echo_feedback_slider.setValue(
+            int(v.echo_feedback_slider.maximum() * state.echo.fb_mag)
+        )
+        v.echo_feedback_setting.setText(pct(state.echo.fb_mag, 1.0))
+        v.echo_feedback_surround.setChecked(state.echo.fb_inv)
+        v.echo_feedback_setting_label.setText(hexb(state.echo.fb_reg))
+        v.echo_delay_slider.setValue(state.echo.delay)
+        v.echo_delay_setting.setText(hexb(state.echo.delay))
+        v.echo_delay_setting_label.setText(f"{16*state.echo.delay}ms")
 
         # Apply the more interesting UI updates
         self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)

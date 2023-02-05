@@ -30,7 +30,7 @@ from PyQt6.QtGui import QStandardItem, QStandardItemModel
 # Package imports
 from smw_music import SmwMusicException, __version__
 from smw_music.music_xml import MusicXmlException
-from smw_music.music_xml.echo import EchoConfig
+from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import (
     Artic,
     Dynamics,
@@ -40,7 +40,7 @@ from smw_music.music_xml.instrument import (
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
 from smw_music.ui.sample import SampleParams, extract_sample_pack
-from smw_music.ui.state import EchoCh, State
+from smw_music.ui.state import State
 
 ###############################################################################
 # Private Function Definitions
@@ -324,56 +324,56 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_echo_en_changed(self, chan: EchoCh, state: bool) -> None:
-        echo_enable = dict(self.state.echo_enable)
-        echo_enable[chan] = state
-        self._update_state(echo_enable=echo_enable)
+        enables = self.state.echo.enables.copy()
+        if state:
+            enables.add(chan)
+        else:
+            enables.remove(chan)
+        self._update_echo_state(enables=enables)
 
     ###########################################################################
 
     def on_echo_feedback_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_feedback_setting=setting)
+        setting = _parse_setting(val, 128) / 128
+        self._update_echo_state(fb_mag=setting)
 
     ###########################################################################
 
     def on_echo_feedback_surround_changed(self, state: bool) -> None:
-        # TODO
-        pass
+        self._update_echo_state(fb_inv=state)
 
     ###########################################################################
 
     def on_echo_left_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_left_setting=setting)
+        setting = _parse_setting(val, 128) / 128
+        self._update_echo_state(vol_mag=(setting, self.state.echo.vol_mag[1]))
 
     ###########################################################################
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
-        # TODO
-        pass
+        self._update_echo_state(vol_inv=(state, self.state.echo.vol_inv[1]))
 
     ###########################################################################
 
     def on_echo_right_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_right_setting=setting)
+        setting = _parse_setting(val, 128) / 128
+        self._update_echo_state(vol_mag=(self.state.echo.vol_mag[0], setting))
 
     ###########################################################################
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
-        # TODO
-        pass
+        self._update_echo_state(vol_inv=(self.state.echo.vol_inv[0], state))
 
     ###########################################################################
 
     def on_echo_delay_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(echo_delay_setting=setting)
+        setting = _parse_setting(val, 15)
+        self._update_echo_state(delay=setting)
 
     ###########################################################################
 
     def on_filter_0_toggled(self, state: bool) -> None:
-        self._update_state(echo_filter0=state)
+        self._update_echo_state(fir_filt=0 if state else 1)
 
     ###########################################################################
 
@@ -707,6 +707,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         while self._undo_level:
             self._history.pop()
             self._undo_level -= 1
+
+    ###########################################################################
+
+    def _update_echo_state(self, **kwargs) -> None:
+        new_echo = replace(self.state.echo, **kwargs)
+        self._update_state(echo=new_echo)
 
     ###########################################################################
 
