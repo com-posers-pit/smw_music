@@ -131,7 +131,7 @@ class InstrumentConfig(yaml.YAMLObject):
     pan_enabled: bool = False
     pan_setting: int = 10
     sample_source: SampleSource = SampleSource.BUILTIN
-    builtin_sample_index: int = 0
+    builtin_sample_index: int = -1
     pack_sample_index: int = 0
     brr_fname: Path = field(default_factory=Path)
     # TODO: see if the following settings can be rolled into a Sample object
@@ -166,7 +166,8 @@ class InstrumentConfig(yaml.YAMLObject):
             "electricguitar": 17,
         }
 
-        self.builtin_sample_index = inst_map.get(self.name.lower(), 0)
+        if self.builtin_sample_index == -1:
+            self.builtin_sample_index = inst_map.get(self.name.lower(), 0)
 
     ###########################################################################
     # Property definitions

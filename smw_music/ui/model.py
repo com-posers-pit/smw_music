@@ -380,6 +380,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             try:
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
+
+                # Update the instruments in the song
+                # Applying this here means we can reload
+                self.song.instruments = self.state.instruments
+
                 mml = self.song.to_mml_file(
                     fname,
                     self.state.global_legato,
@@ -443,6 +448,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._project_name = contents["song"]
         self._project_path = fname.parent
         self.song = Song.from_music_xml(self.state.musicxml_fname)
+        self.song.instruments[:] = self.state.instruments
 
         self.reinforce_state()
 
