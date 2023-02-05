@@ -170,7 +170,7 @@ from smw_music.music_xml import EchoConfig
 )
 def test_echo(csv, exp):
     cfg = EchoConfig.from_csv(csv)
-    assert cfg.chan_list == exp[0], "Channel list"
+    assert cfg.enables == exp[0], "Channel list"
     assert cfg.vol_mag[0] == pytest.approx(exp[1][0]), "Left Volume"
     assert cfg.vol_mag[1] == pytest.approx(exp[1][1]), "Right Volume"
     assert cfg.vol_inv == exp[2], "Volume phase invert"
