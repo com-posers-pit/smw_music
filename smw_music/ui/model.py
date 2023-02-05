@@ -103,44 +103,6 @@ def _parse_setting(val: int | str, maxval: int = 255) -> int:
 
 
 ###############################################################################
-
-
-def _dyn_to_str(dyn: Dynamics) -> str:
-    lut = {
-        Dynamics.PPPP: "PPPP",
-        Dynamics.PPP: "PPP",
-        Dynamics.PP: "PP",
-        Dynamics.P: "P",
-        Dynamics.MP: "MP",
-        Dynamics.MF: "MF",
-        Dynamics.F: "F",
-        Dynamics.FF: "FF",
-        Dynamics.FFF: "FFF",
-        Dynamics.FFFF: "FFFF",
-    }
-    return lut[dyn]
-
-
-###############################################################################
-
-
-def _str_to_dyn(dyn: str) -> Dynamics:
-    lut = {
-        "PPPP": Dynamics.PPPP,
-        "PPP": Dynamics.PPP,
-        "PP": Dynamics.PP,
-        "P": Dynamics.P,
-        "MP": Dynamics.MP,
-        "MF": Dynamics.MF,
-        "F": Dynamics.F,
-        "FF": Dynamics.FF,
-        "FFF": Dynamics.FFF,
-        "FFFF": Dynamics.FFFF,
-    }
-    return lut[dyn]
-
-
-###############################################################################
 # API Class Definitions
 ###############################################################################
 
