@@ -239,8 +239,8 @@ class Dashboard:
             awidgets = self._artic_widgets[akey]
             awidgets.length_slider.setValue(aval.length)
             awidgets.length_setting.setText(hexb(aval.length))
-            awidgets.volume_slider.setValue(aval.length)
-            awidgets.volume_setting.setText(hexb(aval.length))
+            awidgets.volume_slider.setValue(aval.volume)
+            awidgets.volume_setting.setText(hexb(aval.volume))
             awidgets.setting_label.setText(hexb(aval.setting))
 
         # Instrument pan settings
