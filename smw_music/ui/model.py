@@ -242,6 +242,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def reinforce_state(self) -> None:
+        self._update_instruments()
         self.state_changed.emit(self.state)
 
     ###########################################################################
@@ -475,13 +476,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         with open(fname, "r", encoding="utf8") as fobj:
-            contents = yaml.safe_load(fobj)
+            contents = yaml.unsafe_load(fobj)
 
         self._undo_level = 0
-        self._history = [contents["state"].copy()]
-        self.reinforce_state()
+        self._history = [replace(contents["state"])]
         self._project_name = contents["song"]
         self._project_path = fname.parent
+        self.song = Song.from_music_xml(self.state.musicxml_fname)
+
+        self.reinforce_state()
 
     ###########################################################################
 
@@ -507,9 +510,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.response_generated.emit(True, "Song load", str(e))
         else:
             self.state.instruments = self.song.instruments
-            self.instruments_changed.emit(
-                [x.name for x in self.song.instruments]
-            )
+            self._update_instruments()
         self._update_state(musicxml_fname=fname)
 
     ###########################################################################
@@ -738,6 +739,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             new_state.inst = new_inst
             self._history.append(new_state)
             self.state_changed.emit(new_state)
+
+    ###########################################################################
+
+    def _update_instruments(self) -> None:
+        print("updating state")
+        if song := self.song:
+            print("really updating state")
+            self.instruments_changed.emit([x.name for x in song.instruments])
 
     ###########################################################################
 

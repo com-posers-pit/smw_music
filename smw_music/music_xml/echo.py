@@ -15,6 +15,9 @@
 from dataclasses import dataclass
 from enum import IntEnum
 
+# Library imports
+import yaml
+
 ###############################################################################
 # Private function definitions
 ###############################################################################
@@ -54,7 +57,7 @@ class EchoCh(IntEnum):
 
 
 @dataclass
-class EchoConfig:
+class EchoConfig(yaml.YAMLObject):
     """
     Configuration settings for setting up echo/reverb
 
@@ -94,6 +97,8 @@ class EchoConfig:
     fir_filt: int
         FIR filter selection (0 and 1 supported)
     """
+
+    yaml_tag = "!EchoConfig"
 
     enables: set[EchoCh]
     vol_mag: tuple[float, float]
