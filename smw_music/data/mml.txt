@@ -136,7 +136,7 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 ; values because that's how volume fades work.  Update the corresponding
 ; dynamics marks in each instrument.
 %for dyn in dynamics:
-${f'"v{dyn: <4} = $E7$_{dyn}"'}
+${f'"v{str(dyn): <4} = $E7$_{dyn}"'}
 %endfor
 
 ; Magic hex values are no fun, we'll give them nicer names
