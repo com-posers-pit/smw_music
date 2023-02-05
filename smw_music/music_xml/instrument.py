@@ -12,6 +12,9 @@
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 
+# Package imports
+from smw_music.utils import hexb
+
 ###############################################################################
 # API class definitions
 ###############################################################################
@@ -217,6 +220,12 @@ class InstrumentConfig:
 
         self.tune_setting = regs[3]
         self.subtune_setting = regs[4]
+
+    ###########################################################################
+
+    @property
+    def brr_str(self) -> str:
+        return " ".join(map(hexb, self.brr_setting))
 
     ###########################################################################
 

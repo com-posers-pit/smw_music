@@ -283,7 +283,7 @@ class Dashboard:
         v.subtune_slider.setValue(inst.subtune_setting)
         v.subtune_setting.setText(hexb(inst.subtune_setting))
 
-        v.brr_setting.setText(" ".join(map(hexb, inst.brr_setting)))
+        v.brr_setting.setText(inst.brr_str)
 
         # Global settings
         v.global_volume_slider.setValue(state.global_volume)
