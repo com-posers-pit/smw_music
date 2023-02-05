@@ -118,7 +118,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     song: Song | None
     sample_packs_model: QStandardItemModel
-    instrument_model: QStandardItemModel
     _history: list[State]
     _undo_level: int
     _amk_path: Path | None
@@ -135,7 +134,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         super().__init__()
         self.song = None
         self.sample_packs_model = QStandardItemModel()
-        self.instrument_model = QStandardItemModel()
         self._history = [State()]
         self._undo_level = 0
 
@@ -193,13 +191,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
 
-        self.on_save()
-
         self._update_state(
             mml_fname=str(
                 self._project_path / "music" / f"{self._project_name}.txt"
             )
         )
+
+        self.on_save()
 
     ###########################################################################
 
@@ -705,9 +703,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_instruments(self) -> None:
-        print("updating state")
         if song := self.song:
-            print("really updating state")
             self.instruments_changed.emit([x.name for x in song.instruments])
 
     ###########################################################################
