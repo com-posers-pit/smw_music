@@ -415,7 +415,33 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_mml_clicked(self) -> None:
-        pass
+        title = "MML Generation"
+        error = True
+        fname = self.state.mml_fname
+        if self.song is None:
+            msg = "Song not loaded"
+        else:
+            try:
+                if os.path.exists(fname):
+                    shutil.copy2(fname, f"{fname}.bak")
+                mml = self.song.to_mml_file(
+                    fname,
+                    self.state.global_legato,
+                    self.state.loop_analysis,
+                    self.state.superloop_analysis,
+                    self.state.measure_numbers,
+                    True,
+                    self.state.echo,
+                    True,
+                    True,
+                )
+                self.mml_generated.emit(mml)
+            except MusicXmlException as e:
+                msg = str(e)
+            else:
+                error = False
+                msg = "Done"
+        self.response_generated.emit(error, title, msg)
 
     ###########################################################################
 
@@ -460,36 +486,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_mml_fname_changed(self, fname: str) -> None:
         self._update_state(mml_fname=fname)
-
-    ###########################################################################
-
-    def on_mml_generated(self, fname: str, echo: EchoConfig | None) -> None:
-        title = "MML Generation"
-        error = True
-        if self.song is None:
-            msg = "Song not loaded"
-        else:
-            try:
-                if os.path.exists(fname):
-                    shutil.copy2(fname, f"{fname}.bak")
-                mml = self.song.to_mml_file(
-                    fname,
-                    self.state.global_legato,
-                    self.state.loop_analysis,
-                    self.state.superloop_analysis,
-                    self.state.measure_numbers,
-                    True,
-                    echo,
-                    True,
-                    True,
-                )
-                self.mml_generated.emit(mml)
-            except MusicXmlException as e:
-                msg = str(e)
-            else:
-                error = False
-                msg = "Done"
-        self.response_generated.emit(error, title, msg)
 
     ###########################################################################
 

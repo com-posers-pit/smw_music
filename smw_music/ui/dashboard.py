@@ -97,8 +97,8 @@ class _DynamicsWidgets(NamedTuple):
 
 
 class Dashboard:
-    _edit: QTextEdit
     _quicklook: QMainWindow
+    _quicklook_edit: QTextEdit
     _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
@@ -120,10 +120,10 @@ class Dashboard:
         self._preferences = Preferences()
         self._model = Model()
 
-        self._edit = QTextEdit()
+        self._quicklook_edit = QTextEdit()
         self._quicklook = QMainWindow(parent=self._view)
         self._quicklook.setMinimumSize(800, 600)
-        self._quicklook.setCentralWidget(self._edit)
+        self._quicklook.setCentralWidget(self._quicklook_edit)
 
         self._envelope_preview = EnvelopePreview(self._view)
 
@@ -169,6 +169,11 @@ class Dashboard:
 
     ###########################################################################
 
+    def on_mml_generated(self, mml: str) -> None:
+        self._quicklook_edit.setText(mml)
+
+    ###########################################################################
+
     def on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view,
@@ -187,6 +192,16 @@ class Dashboard:
 
     def on_preview_envelope_clicked(self) -> None:
         self._envelope_preview.show()
+
+    ###########################################################################
+
+    def on_response_generated(
+        self, error: bool, title: str, results: str
+    ) -> None:
+        if error:
+            QMessageBox.critical(self._view, title, results)
+        else:
+            QMessageBox.information(self._view, title, results)
 
     ###########################################################################
 
@@ -463,6 +478,8 @@ class Dashboard:
         # Return signals
         m.state_changed.connect(self.on_state_changed)
         m.instruments_changed.connect(self.on_instruments_changed)
+        m.mml_generated.connect(self.on_mml_generated)
+        m.response_generated.connect(self.on_response_generated)
 
     ###########################################################################
 

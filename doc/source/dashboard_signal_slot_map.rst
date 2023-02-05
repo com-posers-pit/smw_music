@@ -22,6 +22,8 @@ Dashboard
    flowchart LR
       model.state_changed --> dashboard.on_state_changed
       model.instruments_changed --> dashboard.on_instruments_changed
+      model.mml_generated --> dashboard.on_mml_generated
+      model.response_generated --> dashboard.on_response_generated
 
 Menus
 -----
