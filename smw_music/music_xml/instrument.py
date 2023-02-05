@@ -11,6 +11,7 @@
 # Standard library imports
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
+from pathlib import Path
 
 # Package imports
 from smw_music.utils import hexb
@@ -127,7 +128,7 @@ class InstrumentConfig:
     sample_source: SampleSource = SampleSource.BUILTIN
     builtin_sample_index: int = 0
     pack_sample_index: int = 0
-    brr_fname: str = ""
+    brr_fname: Path = field(default_factory=Path)
     adsr_mode: bool = True
     attack_setting: int = 0
     decay_setting: int = 0
@@ -137,6 +138,8 @@ class InstrumentConfig:
     gain_setting: int = 0
     tune_setting: int = 0
     subtune_setting: int = 0
+
+    _instrument_idx: int = field(default=0, init=False)
 
     ###########################################################################
     # Data model method definitions
@@ -233,8 +236,14 @@ class InstrumentConfig:
     def instrument_idx(self) -> int:
         if self.sample_source == SampleSource.BUILTIN:
             return self.builtin_sample_index
-        assert 1 == 0
-        return 0
+        return self._instrument_idx
+
+    ###########################################################################
+
+    @instrument_idx.setter
+    def instrument_idx(self, idx: int) -> None:
+        if self.sample_source != SampleSource.BUILTIN:
+            self._instrument_idx = idx
 
     ###########################################################################
 

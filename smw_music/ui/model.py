@@ -280,7 +280,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_brr_fname_changed(self, fname: str) -> None:
-        self._update_inst_state(brr_fname=fname)
+        self._update_inst_state(brr_fname=Path(fname))
 
     ###########################################################################
 
@@ -432,7 +432,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     self.state.measure_numbers,
                     True,
                     self.state.echo,
-                    True,
                     True,
                 )
                 self.mml_generated.emit(mml)

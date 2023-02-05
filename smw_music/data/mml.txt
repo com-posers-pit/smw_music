@@ -17,18 +17,17 @@
 }
 %if custom_samples:
 
-; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
-#path "folder name"
-
 #samples {
     #optimized ;Don't touch/delete this line, just replace the sample brr files below
-    "Sample1.brr"
-    "Sample2.brr"
+%for sample in set(x[0] for x in custom_samples):
+    "${sample}"
+%endfor
 }
 
 #instruments {
-    "Sample1.brr"        $00$00 $00 $00$00 ;@30
-    "Sample2.brr"        $00$00 $00 $00$00 ;@31
+%for sample, settings, idx in custom_samples:
+    "${sample}"          ${settings} ; @${idx}
+%endfor
 }
 %endif
 

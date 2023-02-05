@@ -22,7 +22,11 @@ from mako.template import Template  # type: ignore
 from smw_music import __version__
 from smw_music.music_xml.channel import Channel
 from smw_music.music_xml.echo import EchoConfig
-from smw_music.music_xml.instrument import Dynamics, InstrumentConfig
+from smw_music.music_xml.instrument import (
+    Dynamics,
+    InstrumentConfig,
+    SampleSource,
+)
 from smw_music.music_xml.reduction import reduce, remove_unused_instruments
 from smw_music.music_xml.shared import CRLF, MusicXmlException
 from smw_music.music_xml.tokens import (
@@ -549,7 +553,6 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
-        custom_samples: bool = True,
         optimize_percussion: bool = True,
     ) -> str:
         """
@@ -569,8 +572,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        custom_samples: bool
-            True iff the custom samples header should be included in the MML
         optimize_percussion: bool
             True iff repeated percussion notes should not repeat their
             instrument
@@ -590,6 +591,18 @@ class Song:
 
         percussion = any(x.percussion for x in self._reduced_channels)
 
+        instruments = self.instruments.copy()
+        samples: list[tuple[str, str, int]] = []
+        sample_id = 30
+        for inst in instruments:
+            if inst.sample_source == SampleSource.SAMPLEPACK:
+                pass
+            if inst.sample_source == SampleSource.BRR:
+                fname = inst.brr_fname.name
+                samples.append((fname, inst.brr_str, sample_id))
+                inst.instrument_idx = sample_id
+                sample_id += 1
+
         tmpl = Template(  # nosec B702
             pkgutil.get_data("smw_music", "data/mml.txt")
         )
@@ -603,7 +616,7 @@ class Song:
             percussion=percussion,
             echo_config=echo_config,
             instruments=self.instruments,
-            custom_samples=custom_samples,
+            custom_samples=samples,
             dynamics=list(Dynamics),
         )
 
@@ -626,7 +639,6 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
-        custom_samples: bool = False,
         optimize_percussion: bool = True,
     ) -> str:
         """
@@ -648,8 +660,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        custom_samples: bool
-            True iff the custom samples header should be included in the MML
         optimize_percussion: bool
             True iff repeated percussion notes should not repeat their
             instrument
@@ -661,7 +671,6 @@ class Song:
             measure_numbers,
             include_dt,
             echo_config,
-            custom_samples,
             optimize_percussion,
         )
 
