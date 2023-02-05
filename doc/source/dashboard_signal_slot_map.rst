@@ -33,7 +33,7 @@ Menus
    flowchart LR
       view.new_project.triggered --> dashboard._create_project
       view.open_project.triggered --> dashboard._open_project
-      view.save_project.triggered --> model.save
+      view.save_project.triggered --> model.on_save
       view.close_project.triggered --> TBD
       view.open_preferences.triggered --> dashboard._open_preferences
       view.exit_dashboard.triggered --> QApplication.quit

@@ -231,22 +231,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
 
-        self.save()
+        self.on_save()
 
         self._update_state(
             mml_fname=str(
                 self._project_path / "music" / f"{self._project_name}.txt"
             )
         )
-
-    ###########################################################################
-
-    def load(self, fname: str) -> None:
-        with open(fname, "r", encoding="utf8") as fobj:
-            contents = yaml.safe_load(fobj)
-
-        # self._project_name = contents["song"]
-        # self._project_file = Path(fname)
 
     ###########################################################################
 
@@ -482,6 +473,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_load(self, fname: Path) -> None:
+        with open(fname, "r", encoding="utf8") as fobj:
+            contents = yaml.safe_load(fobj)
+
+        self._undo_level = 0
+        self._history = [contents["state"].copy()]
+        self.reinforce_state()
+        self._project_name = contents["song"]
+        self._project_path = fname.parent
+
+    ###########################################################################
+
     def on_loop_analysis_changed(self, enabled: bool) -> None:
         self._update_state(loop_analysis=enabled)
 
@@ -556,6 +559,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_save(self) -> None:
+        contents = {
+            "version": __version__,
+            "song": self._project_name,
+            "state": self.state,
+        }
+
+        fname = self._project_path / (self._project_name + ".prj")
+        with open(fname, "w", encoding="utf8") as fobj:
+            yaml.dump(contents, fobj)
+
+    ###########################################################################
+
     def on_select_adsr_mode_selected(self, state: bool) -> None:
         self._update_inst_state(adsr_mode=state)
 
@@ -594,19 +610,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
             self.state_changed.emit(self.state)
-
-    ###########################################################################
-
-    def save(self) -> None:
-        contents = {
-            "version": __version__,
-            "song": self._project_name,
-            "samples": "",
-        }
-
-        fname = self._project_path / (self._project_name + ".prj")
-        with open(fname, "w", encoding="utf8") as fobj:
-            yaml.dump(contents, fobj)
 
     ###########################################################################
 

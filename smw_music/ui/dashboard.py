@@ -13,9 +13,9 @@
 
 # Standard library imports
 import io
-import pathlib
 import pkgutil
 from functools import partial
+from pathlib import Path
 from typing import NamedTuple
 
 # Library imports
@@ -559,7 +559,7 @@ class Dashboard:
     def _create_project(self) -> None:
         proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir:
-            self._model.create_project(pathlib.Path(proj_dir))
+            self._model.create_project(Path(proj_dir))
 
     ###########################################################################
 
@@ -622,7 +622,7 @@ class Dashboard:
             self._view, "Project File", filter=f"*.{self._extension}"
         )
         if fname:
-            self._model.load(fname)
+            self._model.on_load(Path(fname))
 
     ###########################################################################
 
@@ -637,7 +637,7 @@ class Dashboard:
 
         view.new_project.triggered.connect(self._create_project)
         view.open_project.triggered.connect(self._open_project)
-        view.save_project.triggered.connect(model.save)
+        view.save_project.triggered.connect(model.on_save)
         view.close_project.triggered.connect(lambda _: None)
         view.open_preferences.triggered.connect(self._open_preferences)
         view.exit_dashboard.triggered.connect(QApplication.quit)
