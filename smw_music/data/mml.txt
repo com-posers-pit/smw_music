@@ -4,7 +4,7 @@
 ## SPDX-License-Identifier: AGPL-3.0-only
 #amk 2
 
-; MusicXML->AMK v${version}
+; beer v${version}
 %if datetime:
 ; Built: ${datetime}
 %endif
