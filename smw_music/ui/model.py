@@ -162,7 +162,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _amk_path: Path | None
     _sample_packs: dict[str, dict[str, str]] | None
     _spcplay_path: Path | None
-    _project_file: Path | None
+    _project_path: Path | None
     _project_name: str | None
 
     ###########################################################################
@@ -178,16 +178,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._undo_level = 0
 
         self._load_prefs()
+        self._project_path = None
+        self._project_name = None
 
     ###########################################################################
     # API method definitions
     ###########################################################################
 
     def create_project(
-        self, project_file: Path, project_name: str | None = None
+        self, path: Path, project_name: str | None = None
     ) -> None:
-        self._project_file = project_file
-        self._project_name = project_name or project_file.stem
+        self._project_path = path
+        self._project_name = project_name or path.name
 
         members = [
             "1DF9",
@@ -202,10 +204,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "asm",
             "samples",
         ]
-
-        path = self._project_path
-        # Since _project_file was set above this won't be None
-        assert path is not None  # nosec 703
 
         with zipfile.ZipFile(str(self._amk_path), "r") as zobj:
             # Extract all the files
@@ -235,14 +233,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self.save()
 
+        self._update_state(
+            mml_fname=str(
+                self._project_path / "music" / f"{self._project_name}.txt"
+            )
+        )
+
     ###########################################################################
 
     def load(self, fname: str) -> None:
         with open(fname, "r", encoding="utf8") as fobj:
             contents = yaml.safe_load(fobj)
 
-        self._project_name = contents["song"]
-        self._project_file = Path(fname)
+        # self._project_name = contents["song"]
+        # self._project_file = Path(fname)
 
     ###########################################################################
 
@@ -445,10 +449,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_spc_clicked(self) -> None:
+        for inst in self.state.instruments:
+            if inst.sample_source == SampleSource.BRR:
+                shutil.copy2(inst.brr_fname, self._project_path / "samples")
+
         # TODO: support OSX and windows
-        subprocess.call(  # nosec B603, B607
+        msg = subprocess.check_output(  # nosec B603, B607
             ["sh", "convert.sh"], cwd=self._project_path
         )
+        self.response_generated.emit(False, "SPC Generated", msg.decode())
 
     ###########################################################################
 
@@ -595,16 +604,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "samples": "",
         }
 
-        if self._project_file is not None:
-            with open(self._project_file, "w", encoding="utf8") as fobj:
-                yaml.dump(contents, fobj)
+        fname = self._project_path / (self._project_name + ".prj")
+        with open(fname, "w", encoding="utf8") as fobj:
+            yaml.dump(contents, fobj)
 
     ###########################################################################
 
-    def save_as(self, fname: str) -> None:
-        self._project_file = Path(fname)
-        self.save()
-
+    #    def save_as(self, fname: str) -> None:
+    #        self._project_file = Path(fname)
+    #        self.save()
+    #
     ###########################################################################
     # Private method definitions
     ###########################################################################
@@ -736,15 +745,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             self._history.append(new_state)
             self.state_changed.emit(new_state)
-
-    ###########################################################################
-    # Private property definitions
-    ###########################################################################
-
-    @property
-    def _project_path(self) -> Path | None:
-        file = self._project_file
-        return None if file is None else file.parents[0]
 
     ###########################################################################
     # API property definitions

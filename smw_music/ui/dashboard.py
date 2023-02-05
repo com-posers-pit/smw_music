@@ -258,7 +258,7 @@ class Dashboard:
         )
         # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
         v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
-        v.brr_fname.setText(inst.brr_fname)
+        v.brr_fname.setText(str(inst.brr_fname))
 
         v.select_adsr_mode.setChecked(inst.adsr_mode)
         v.select_gain_mode.setChecked(not inst.adsr_mode)
@@ -551,11 +551,9 @@ class Dashboard:
     ###########################################################################
 
     def _create_project(self) -> None:
-        fname, _ = QFileDialog.getSaveFileName(
-            self._view, "Project File", filter=f"*.{self._extension}"
-        )
-        if fname:
-            self._model.create_project(pathlib.Path(fname))
+        proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
+        if proj_dir:
+            self._model.create_project(pathlib.Path(proj_dir))
 
     ###########################################################################
 

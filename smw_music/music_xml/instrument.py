@@ -129,6 +129,7 @@ class InstrumentConfig:
     builtin_sample_index: int = 0
     pack_sample_index: int = 0
     brr_fname: Path = field(default_factory=Path)
+    # TODO: see if the following settings can be rolled into a Sample object
     adsr_mode: bool = True
     attack_setting: int = 0
     decay_setting: int = 0
