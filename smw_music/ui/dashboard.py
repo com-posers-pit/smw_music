@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
     QCheckBox,
+    QComboBox,
     QFileDialog,
     QLabel,
     QLineEdit,
@@ -458,6 +459,8 @@ class Dashboard:
         for widget, slot in connections:
             if isinstance(widget, QPushButton):
                 widget.clicked.connect(slot)
+            elif isinstance(widget, QComboBox):
+                widget.currentIndexChanged.connect(slot)
             elif isinstance(widget, QCheckBox):
                 widget.stateChanged.connect(slot)
             elif isinstance(widget, QLineEdit):
@@ -474,6 +477,9 @@ class Dashboard:
                 widget.currentRowChanged.connect(slot)
             elif isinstance(widget, QAbstractItemView):
                 widget.selectionModel().currentChanged.connect(slot)
+            else:
+                # This is basically a compile-time exception
+                raise Exception(f"Unhandled widget connection {widget}")
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
