@@ -70,6 +70,7 @@ Instruments
 
    flowchart LR
       view.instrument_list.currentRowChanged --> model.on_instrument_changed
+      view.octave.valueChanged --> model.on_octave_changed
 
 Dynamics
 ~~~~~~~~

@@ -36,6 +36,7 @@ from PyQt6.QtWidgets import (
     QPushButton,
     QRadioButton,
     QSlider,
+    QSpinBox,
     QTextEdit,
 )
 
@@ -260,6 +261,7 @@ class Dashboard:
         # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
         v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
         v.brr_fname.setText(str(inst.brr_fname))
+        v.octave.setValue(inst.octave)
 
         v.select_adsr_mode.setChecked(inst.adsr_mode)
         v.select_gain_mode.setChecked(not inst.adsr_mode)
@@ -392,6 +394,7 @@ class Dashboard:
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),
+            (v.octave, m.on_octave_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),
             (v.gain_mode_direct, m.on_gain_direct_selected),
             (v.gain_mode_inclin, m.on_gain_inclin_selected),
@@ -471,7 +474,7 @@ class Dashboard:
                 widget.editingFinished.connect(proxy)
             elif isinstance(widget, QRadioButton):
                 widget.toggled.connect(slot)
-            elif isinstance(widget, QAbstractSlider):
+            elif isinstance(widget, (QAbstractSlider, QSpinBox)):
                 widget.valueChanged.connect(slot)
             elif isinstance(widget, QListWidget):
                 widget.currentRowChanged.connect(slot)

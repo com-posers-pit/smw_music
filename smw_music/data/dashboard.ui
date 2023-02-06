@@ -775,33 +775,6 @@
                   <string>Sample</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="6" column="1">
-                   <widget class="QPushButton" name="select_brr_fname">
-                    <property name="text">
-                     <string>brr</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_builtin_sample">
-                    <property name="text">
-                     <string>Builtin Sample</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_pack_sample">
-                    <property name="text">
-                     <string>Sample Pack Sample</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="2">
-                   <widget class="QLineEdit" name="brr_fname"/>
-                  </item>
                   <item row="2" column="1" colspan="2">
                    <widget class="QComboBox" name="builtin_sample">
                     <item>
@@ -963,6 +936,13 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="6" column="1">
+                   <widget class="QPushButton" name="select_brr_fname">
+                    <property name="text">
+                     <string>brr</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item row="4" column="1" colspan="2">
                    <widget class="QTreeView" name="sample_pack_list">
                     <property name="editTriggers">
@@ -970,6 +950,40 @@
                     </property>
                     <property name="headerHidden">
                      <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_pack_sample">
+                    <property name="text">
+                     <string>Sample Pack Sample</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_builtin_sample">
+                    <property name="text">
+                     <string>Builtin Sample</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="2">
+                   <widget class="QLineEdit" name="brr_fname"/>
+                  </item>
+                  <item row="7" column="1">
+                   <widget class="QLabel" name="label">
+                    <property name="text">
+                     <string>Octave</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="2">
+                   <widget class="QSpinBox" name="octave">
+                    <property name="maximum">
+                     <number>6</number>
                     </property>
                    </widget>
                   </item>
@@ -1306,32 +1320,11 @@
                       <string>Tuning</string>
                      </attribute>
                      <layout class="QGridLayout" name="gridLayout_10">
-                      <item row="0" column="1">
-                       <widget class="QLabel" name="subtune_label">
-                        <property name="text">
-                         <string>Subtune</string>
-                        </property>
-                       </widget>
+                      <item row="2" column="1">
+                       <widget class="QLineEdit" name="subtune_setting"/>
                       </item>
-                      <item row="3" column="0">
-                       <widget class="QLabel" name="tune_setting_label">
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="1">
-                       <widget class="QLabel" name="subtune_setting_label">
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="0">
-                       <widget class="QLineEdit" name="tune_setting"/>
-                      </item>
-                      <item row="1" column="0">
-                       <widget class="QSlider" name="tune_slider">
+                      <item row="1" column="1">
+                       <widget class="QSlider" name="subtune_slider">
                         <property name="maximum">
                          <number>255</number>
                         </property>
@@ -1343,9 +1336,6 @@
                         </property>
                        </widget>
                       </item>
-                      <item row="2" column="1">
-                       <widget class="QLineEdit" name="subtune_setting"/>
-                      </item>
                       <item row="0" column="0">
                        <widget class="QLabel" name="tune_label">
                         <property name="text">
@@ -1353,8 +1343,32 @@
                         </property>
                        </widget>
                       </item>
-                      <item row="1" column="1">
-                       <widget class="QSlider" name="subtune_slider">
+                      <item row="3" column="0">
+                       <widget class="QLabel" name="tune_setting_label">
+                        <property name="text">
+                         <string/>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="2" column="0">
+                       <widget class="QLineEdit" name="tune_setting"/>
+                      </item>
+                      <item row="0" column="1">
+                       <widget class="QLabel" name="subtune_label">
+                        <property name="text">
+                         <string>Subtune</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="3" column="1">
+                       <widget class="QLabel" name="subtune_setting_label">
+                        <property name="text">
+                         <string/>
+                        </property>
+                       </widget>
+                      </item>
+                      <item row="1" column="0">
+                       <widget class="QSlider" name="tune_slider">
                         <property name="maximum">
                          <number>255</number>
                         </property>

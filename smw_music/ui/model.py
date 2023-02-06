@@ -481,6 +481,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_octave_changed(self, octave: int) -> None:
+        self._update_inst_state(octave=octave)
+
+    ###########################################################################
+
     def on_pack_sample_changed(self, index: QModelIndex) -> None:
         if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
             self._load_sample_settings(index)
