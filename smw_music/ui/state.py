@@ -33,7 +33,9 @@ class State(yaml.YAMLObject):
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
-    global_instrument: InstrumentConfig = InstrumentConfig("")
+    global_instrument: InstrumentConfig = field(
+        default_factory=lambda: InstrumentConfig("")
+    )
     instruments: list[InstrumentConfig] = field(default_factory=lambda: [])
     instrument_idx: int | None = None
     global_volume: int = 128
