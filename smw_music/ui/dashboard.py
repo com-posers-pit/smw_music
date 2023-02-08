@@ -258,6 +258,9 @@ class Dashboard:
         v.select_pack_sample.setChecked(
             inst.sample_source == SampleSource.SAMPLEPACK
         )
+        v.sample_settings_box.setEnabled(
+            inst.sample_source != SampleSource.BUILTIN
+        )
         # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
         v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
         v.brr_fname.setText(str(inst.brr_fname))
