@@ -137,7 +137,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._history = [State()]
         self._undo_level = 0
 
-        self._load_prefs()
         self._project_path = None
         self._project_name = None
 
@@ -204,6 +203,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def reinforce_state(self) -> None:
         self._update_instruments()
         self.state_changed.emit(self.state)
+
+    ###########################################################################
+
+    def start(self) -> None:
+        self._load_prefs()
+        self.reinforce_state()
 
     ###########################################################################
     # API slot  definitions
@@ -658,9 +663,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         assert self._sample_packs is not None  # nosec 703
 
         for pack_name, pack in self._sample_packs.items():
-            _add_sample_pack_to_model(
-                self.sample_packs_model, pack_name, Path(pack["path"])
-            )
+            try:
+                _add_sample_pack_to_model(
+                    self.sample_packs_model, pack_name, Path(pack["path"])
+                )
+            except FileNotFoundError:
+                self.response_generated.emit(
+                    True,
+                    "Error loading sample pack",
+                    f"Could not open sample pack {pack_name} at {pack['path']}",
+                )
 
     ###########################################################################
 

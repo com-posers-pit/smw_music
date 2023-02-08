@@ -138,7 +138,7 @@ class Dashboard:
 
         self._view.show()
 
-        self._model.reinforce_state()
+        self._model.start()
 
     ###########################################################################
     # API signal definitions
