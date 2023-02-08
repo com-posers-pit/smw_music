@@ -47,6 +47,7 @@ from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
 from smw_music.music_xml.song import Song
+from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
@@ -105,7 +106,7 @@ class Dashboard:
     _extension = "prj"
     _model: Model
     _pref_dlg: Preferences
-    _view: QMainWindow
+    _view: DashboardView
     _dyn_widgets: dict[Dyn, _DynamicsWidgets]
     _artic_widgets: dict[Artic, _ArticWidgets]
 
@@ -612,18 +613,6 @@ class Dashboard:
             _set_lineedit_width(widget)
 
         _set_lineedit_width(v.brr_setting, " ".join(5 * hexb(0)))
-
-    ###########################################################################
-
-    def _generate_mml(self, fname: str, echo: EchoConfig | None) -> None:
-        if self._quicklook.isVisible() or fname:
-            self._model.generate_mml(fname, echo)
-        else:
-            self._view.log_response(
-                True,
-                "Generation Error",
-                "Select an MML file or open the Quicklook",
-            )
 
     ###########################################################################
 
