@@ -263,7 +263,11 @@ class Dashboard:
         )
         # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
         v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
-        v.brr_fname.setText(str(inst.brr_fname))
+        if inst.brr_fname.name:
+            brr_fname = str(inst.brr_fname)
+        else:
+            brr_fname = ""
+        v.brr_fname.setText(brr_fname)
         v.octave.setValue(inst.octave)
 
         v.select_adsr_mode.setChecked(inst.adsr_mode)
