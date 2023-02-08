@@ -329,8 +329,10 @@ class Song:
                     if inst not in inst_dyns:
                         inst_dyns[inst] = set()
                         transposes[inst] = token.transpose
-                if isinstance(token, (Crescendo, Dynamic)):
+                if isinstance(token, Dynamic):
                     inst_dyns[inst].add(Dynamics[token.level.upper()])
+                if isinstance(token, Crescendo):
+                    inst_dyns[inst].add(Dynamics[token.target.upper()])
 
         inst_names = sorted(inst_dyns)
 
