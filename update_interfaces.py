@@ -26,11 +26,15 @@ for ui_fname, py_fname, module in uis:
     root = tree.getroot()
     top = root[1]  # Gets the top-level widget
     widgets: dict[str, str] = {}
+    actions: list[str] = []
 
     for widget in top.findall(".//widget"):
         widget_name = cast(str, widget.get("name"))
         widget_class = cast(str, widget.get("class"))
         widgets[widget_name] = widget_class
+
+    for action in top.findall(".//addaction"):
+        actions.append(cast(str, action.get("name")))
 
     widget_set = set(widgets.values())
     widget_set.add(cast(str, top.get("class")))
@@ -40,6 +44,8 @@ for ui_fname, py_fname, module in uis:
         print("# Generated from a tool, do not manually update.", file=fobj)
         print("", file=fobj)
         print("# Library imports", file=fobj)
+        if actions:
+            print("from PyQt6.QtGui import QAction", file=fobj)
         print("from PyQt6.QtWidgets import (", file=fobj)
         for widget_class in sorted(widget_set):
             print(f"    {widget_class},", file=fobj)

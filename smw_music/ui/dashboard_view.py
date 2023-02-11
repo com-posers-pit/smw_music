@@ -6,6 +6,7 @@
 # Generated from a tool, do not manually update.
 
 # Library imports
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
