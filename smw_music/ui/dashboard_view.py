@@ -25,7 +25,7 @@ from PyQt6.QtWidgets import (
     QSplitter,
     QStatusBar,
     QTabWidget,
-    QTreeView,
+    QTreeWidget,
     QWidget,
 )
 
@@ -207,7 +207,7 @@ class DashboardView(QMainWindow):
     pppp_setting_label: QLabel
     pppp_slider: QSlider
     preview_envelope: QPushButton
-    sample_pack_list: QTreeView
+    sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox
     sample_settings_tabs: QTabWidget
     sample_settings_widget: QWidget

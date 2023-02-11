@@ -10,6 +10,8 @@ application.
    Not really sure why this isn't the default.
    ¯\\_(ツ)_/¯
 
+   Essentially the same thing is done in the ``sample_pack_list`` signal.
+
 .. note::
    The documentation must be manually updated any time they change, so anything
    that's out of date should be reported.
@@ -24,6 +26,7 @@ Dashboard
       model.instruments_changed --> dashboard.on_instruments_changed
       model.mml_generated --> dashboard.on_mml_generated
       model.response_generated --> dashboard.on_response_generated
+      model.sample_packs_changed --> dashboard.on_sample_packs_changed
 
 Menus
 -----
@@ -141,7 +144,7 @@ Sample
       view.select_builtin_sample.toggled --> model.on_builtin_sample_selected
       view.builtin_sample.currentIndexChanged --> model.on_builtin_sample_changed
       view.select_pack_sample.toggled --> model.on_pack_sample_selected
-      view.sample_pack_list.selectionModel().currentChanged --> model.on_pack_sample_changed
+      view.sample_pack_list.itemSelectionChanged --> model.on_pack_sample_changed
       view.select_brr_sample.toggled --> model.on_brr_sample_selected
       view.select_brr_fname.clicked --> dashboard.on_brr_clicked
       view.brr_fname.editingFinished --> model.on_brr_fname_changed

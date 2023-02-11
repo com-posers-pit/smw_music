@@ -20,7 +20,7 @@ from typing import NamedTuple
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import QSignalBlocker
+from PyQt6.QtCore import QSignalBlocker, Qt
 from PyQt6.QtWidgets import (
     QAbstractItemView,
     QAbstractSlider,
@@ -38,11 +38,12 @@ from PyQt6.QtWidgets import (
     QSlider,
     QSpinBox,
     QTextEdit,
+    QTreeWidgetItem,
 )
 
 # Package imports
 from smw_music import __version__
-from smw_music.music_xml.echo import EchoCh, EchoConfig
+from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
@@ -51,11 +52,19 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
+from smw_music.ui.sample import Sample
 from smw_music.ui.state import State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
 # Private function definitions
+###############################################################################
+
+
+def _mark_unselectable(item: QTreeWidgetItem) -> None:
+    item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
+
+
 ###############################################################################
 
 # h/t: https://stackoverflow.com/questions/47285303
@@ -109,6 +118,7 @@ class Dashboard:
     _view: DashboardView
     _dyn_widgets: dict[Dyn, _DynamicsWidgets]
     _artic_widgets: dict[Artic, _ArticWidgets]
+    _sample_pack_items: dict[tuple[str, ...], QTreeWidgetItem]
 
     ###########################################################################
     # Constructor definitions
@@ -122,6 +132,7 @@ class Dashboard:
         self._view = uic.loadUi(io.BytesIO(ui_contents))
         self._preferences = Preferences()
         self._model = Model()
+        self._sample_pack_items = {}
 
         self._quicklook_edit = QTextEdit()
         self._quicklook = QMainWindow(parent=self._view)
@@ -129,8 +140,6 @@ class Dashboard:
         self._quicklook.setCentralWidget(self._quicklook_edit)
 
         self._envelope_preview = EnvelopePreview(self._view)
-
-        self._view.sample_pack_list.setModel(self._model.sample_packs_model)
 
         self._setup_menus()
         self._fix_edit_widths()
@@ -193,6 +202,13 @@ class Dashboard:
 
     ###########################################################################
 
+    def on_pack_sample_changed(self) -> None:
+        items = self._view.sample_pack_list.selectedItems()
+        if items:
+            self._model.on_pack_sample_changed(items[0])
+
+    ###########################################################################
+
     def on_preview_envelope_clicked(self) -> None:
         self._envelope_preview.show()
 
@@ -205,6 +221,23 @@ class Dashboard:
             QMessageBox.critical(self._view, title, results)
         else:
             QMessageBox.information(self._view, title, results)
+
+    ###########################################################################
+
+    def on_sample_packs_changed(
+        self, sample_packs: dict[str, list[Sample]]
+    ) -> None:
+        self._sample_pack_items = {}
+        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+
+        tree.clear()
+
+        for pack, samples in sample_packs.items():
+            top = QTreeWidgetItem(tree, [pack])
+            _mark_unselectable(top)
+
+            self._add_sample_pack(top, pack, samples)
+            tree.addTopLevelItem(top)
 
     ###########################################################################
 
@@ -367,6 +400,29 @@ class Dashboard:
 
     ###########################################################################
 
+    def _add_sample_pack(
+        self, top: QTreeWidgetItem, pack: str, samples: list[Sample]
+    ):
+        parent = top
+        parent_items: dict[Path, QTreeWidgetItem] = {}
+
+        for sample in samples:
+            parent_paths = sample.path.parents
+
+            for path in reversed(parent_paths[:-1]):
+                try:
+                    parent = parent_items[path]
+                except KeyError:
+                    item = QTreeWidgetItem(parent, [path.name])
+                    _mark_unselectable(item)
+                    parent_items[path] = item
+                    parent = item
+
+            item = QTreeWidgetItem(parent, [sample.path.name])
+            self._sample_pack_items[(pack,) + sample.path.parts] = item
+
+    ###########################################################################
+
     def _attach_signals(self) -> None:  # pylint: disable=too-many-statements
         m = self._model  # pylint: disable=invalid-name
         v = self._view  # pylint: disable=invalid-name
@@ -398,7 +454,7 @@ class Dashboard:
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
             (v.select_pack_sample, m.on_pack_sample_selected),
-            (v.sample_pack_list, m.on_pack_sample_changed),
+            #            (v.sample_pack_list, m.on_pack_sample_changed),
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),
@@ -486,17 +542,20 @@ class Dashboard:
                 widget.valueChanged.connect(slot)
             elif isinstance(widget, QListWidget):
                 widget.currentRowChanged.connect(slot)
-            elif isinstance(widget, QAbstractItemView):
-                widget.selectionModel().currentChanged.connect(slot)
             else:
                 # This is basically a compile-time exception
                 raise Exception(f"Unhandled widget connection {widget}")
+
+        v.sample_pack_list.itemSelectionChanged.connect(
+            self.on_pack_sample_changed
+        )
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
         m.instruments_changed.connect(self.on_instruments_changed)
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
+        m.sample_packs_changed.connect(self.on_sample_packs_changed)
 
     ###########################################################################
 

@@ -39,54 +39,11 @@ from smw_music.music_xml.instrument import (
 )
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
-from smw_music.ui.sample import SampleParams, extract_sample_pack
+from smw_music.ui.sample import Sample, SampleParams, extract_sample_pack
 from smw_music.ui.state import State
 
 ###############################################################################
 # Private Function Definitions
-###############################################################################
-
-
-def _add_brr_to_model(
-    top_item: QStandardItem,
-    parents: dict[tuple[str, ...], QStandardItem],
-    fname: tuple[str, ...],
-    params: SampleParams,
-) -> None:
-    parent = top_item
-    for n, path_item in enumerate(fname):
-        partial_path = fname[: (n + 1)]
-        try:
-            parent = parents[partial_path]
-        except KeyError:
-            item = QStandardItem(path_item)
-            parents[partial_path] = item
-            parent.appendRow(item)
-            parent = item
-
-    # Set the data of the leaf to the sample parameters
-    item.setData(params, Qt.ItemDataRole.UserRole)
-
-
-###############################################################################
-
-
-def _add_sample_pack_to_model(
-    model: QStandardItemModel, pack: str, path: Path
-) -> None:
-
-    parents: dict[tuple[str, ...], QStandardItem] = {}
-
-    extracted_pack = extract_sample_pack(path)
-
-    # Add the pack as a top-level item
-    top_item = QStandardItem(pack)
-    model.appendRow(top_item)
-
-    for sample_name, params in extracted_pack.items():
-        _add_brr_to_model(top_item, parents, sample_name, params)
-
-
 ###############################################################################
 
 
@@ -110,6 +67,7 @@ def _parse_setting(val: int | str, maxval: int = 255) -> int:
 class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(State)
     instruments_changed = pyqtSignal(list)
+    sample_packs_changed = pyqtSignal(dict)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
@@ -411,9 +369,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_spc_clicked(self) -> None:
+        assert self._project_path is not None
+
+        samples_path = self._project_path / "samples"
         for inst in self.state.instruments:
             if inst.sample_source == SampleSource.BRR:
-                shutil.copy2(inst.brr_fname, self._project_path / "samples")
+                shutil.copy2(inst.brr_fname, samples_path)
+            if inst.sample_source == SampleSource.SAMPLEPACK:
+                pass
 
         # TODO: support OSX and windows
         msg = subprocess.check_output(  # nosec B603, B607
@@ -491,9 +454,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_pack_sample_changed(self, index: QModelIndex) -> None:
+    def on_pack_sample_changed(self, item) -> None:
         if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
-            self._load_sample_settings(index)
+            pass
+            # self._load_sample_settings(index)
 
     ###########################################################################
 
@@ -662,17 +626,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _load_sample_packs(self) -> None:
         assert self._sample_packs is not None  # nosec 703
 
+        packs = {}
+
         for pack_name, pack in self._sample_packs.items():
             try:
-                _add_sample_pack_to_model(
-                    self.sample_packs_model, pack_name, Path(pack["path"])
-                )
+                packs[pack_name] = extract_sample_pack(Path(pack["path"]))
+
             except FileNotFoundError:
                 self.response_generated.emit(
                     True,
                     "Error loading sample pack",
                     f"Could not open sample pack {pack_name} at {pack['path']}",
                 )
+
+        self.sample_packs_changed.emit(packs)
 
     ###########################################################################
 
@@ -689,7 +656,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 "gain_setting": params.gain,
                 "tune_setting": params.tuning,
                 "subtune_setting": params.subtuning,
+                "pack_sample_index": index.row(),
             }
+            print(index.row())
             self._update_inst_state(**new_state)
 
     ###########################################################################
