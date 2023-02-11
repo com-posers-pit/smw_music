@@ -51,18 +51,18 @@ Control Panel
 .. mermaid::
 
    flowchart LR
-      view.select_musicxml_fname.clicked --> dashboard.on_musicxml_fname_selected
+      view.select_musicxml_fname.released --> dashboard.on_musicxml_fname_selected
       view.musicxml_fname.editingFinished --> model.on_musicxml_changed
-      view.select_mml_fname.clicked --> dashboard.on_mml_fname_selected
+      view.select_mml_fname.released --> dashboard.on_mml_fname_selected
       view.mml_fname.editingFinished --> model.on_mml_fname_changed
       view.loop_analysis.stateChanged --> model.on_loop_analysis_changed
       view.superloop_analysis.stateChanged --> model.on_superloop_analysis_changed
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
-      view.open_quicklook.clicked --> dashboard.on_open_quicklook_clicked
-      view.generate_mml.clicked --> model.on_generate_mml_clicked
-      view.generate_spc.clicked --> model.on_generate_spc_clicked
-      view.play_spc.clicked --> model.on_play_spc_clicked
-      view.generate_and_play.clicked --> model.on_generate_and_play_clicked
+      view.open_quicklook.released --> dashboard.on_open_quicklook_clicked
+      view.generate_mml.released --> model.on_generate_mml_clicked
+      view.generate_spc.released --> model.on_generate_spc_clicked
+      view.play_spc.released --> model.on_play_spc_clicked
+      view.generate_and_play.released --> model.on_generate_and_play_clicked
 
 Instrument Settings
 -------------------
@@ -147,7 +147,7 @@ Sample
       view.select_pack_sample.toggled --> model.on_pack_sample_selected
       view.sample_pack_list.itemSelectionChanged --> model.on_pack_sample_changed
       view.select_brr_sample.toggled --> model.on_brr_sample_selected
-      view.select_brr_fname.clicked --> dashboard.on_brr_clicked
+      view.select_brr_fname.released --> dashboard.on_brr_clicked
       view.brr_fname.editingFinished --> model.on_brr_fname_changed
       view.select_adsr_mode.toggled --> model.on_select_adsr_mode_selected
       view.gain_mode_direct.toggled --> model.on_gain_direct_selected
@@ -170,7 +170,7 @@ Sample
       view.subtune_slider.valueChanged --> model.on_subtune_changed
       view.subtune_setting.editingFinished --> model.on_subtune_changed
       view.brr_setting.editingFinished --> model.on_brr_setting_changed
-      view.preview_envelope.clicked --> self.on_preview_envelope_clicked
+      view.preview_envelope.released --> self.on_preview_envelope_clicked
 
 
 Global Settings

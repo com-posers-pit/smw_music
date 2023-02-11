@@ -535,7 +535,7 @@ class Dashboard:
 
         for widget, slot in connections:
             if isinstance(widget, QPushButton):
-                widget.clicked.connect(slot)
+                widget.released.connect(slot)
             elif isinstance(widget, QComboBox):
                 widget.currentIndexChanged.connect(slot)
             elif isinstance(widget, QCheckBox):
