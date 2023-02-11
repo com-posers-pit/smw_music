@@ -10,7 +10,10 @@ import pathlib
 import xml.etree.ElementTree as ET
 from typing import cast
 
-uis = [("dashboard.ui", "dashboard_view.py", "DashboardView")]
+uis = [
+    ("dashboard.ui", "dashboard_view.py", "DashboardView"),
+    ("preferences.ui", "preferences_view.py", "PreverencesView"),
+]
 
 base_dir = pathlib.Path("smw_music")
 
