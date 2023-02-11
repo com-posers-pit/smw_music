@@ -8,6 +8,7 @@
 # Standard library imports
 import pathlib
 import xml.etree.ElementTree as ET
+from contextlib import redirect_stdout
 from typing import cast
 
 uis = [
@@ -40,21 +41,23 @@ for ui_fname, py_fname, module in uis:
         actions.append(cast(str, action.get("name")))
 
     widget_set = set(widgets.values())
-    widget_set.add(cast(str, top.get("class")))
+    top_class = cast(str, top.get("class"))
+    widget_set.add(top_class)
 
-    with open(base_dir / "ui" / py_fname, "w", encoding="utf8") as fobj:
-        print(lic, file=fobj)
-        print("# Generated from a tool, do not manually update.", file=fobj)
-        print("", file=fobj)
-        print("# Library imports", file=fobj)
+    fname = base_dir / "ui" / py_fname
+    with open(fname, "w", encoding="utf8") as fobj, redirect_stdout(fobj):
+        print(lic)
+        print("# Generated from a tool, do not manually update.")
+        print("")
+        print("# Library imports")
         if actions:
-            print("from PyQt6.QtGui import QAction", file=fobj)
-        print("from PyQt6.QtWidgets import (", file=fobj)
+            print("from PyQt6.QtGui import QAction")
+        print("from PyQt6.QtWidgets import (")
         for widget_class in sorted(widget_set):
-            print(f"    {widget_class},", file=fobj)
-        print(")", file=fobj)
-        print("", file=fobj)
-        print("", file=fobj)
-        print(f"class {module}(QMainWindow):", file=fobj)
+            print(f"    {widget_class},")
+        print(")")
+        print("")
+        print("")
+        print(f"class {module}({top_class}):")
         for widget_name in sorted(widgets):
-            print(f"    {widget_name}: {widgets[widget_name]}", file=fobj)
+            print(f"    {widget_name}: {widgets[widget_name]}")
