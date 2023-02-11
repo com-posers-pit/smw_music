@@ -62,6 +62,7 @@ Control Panel
       view.generate_mml.clicked --> model.on_generate_mml_clicked
       view.generate_spc.clicked --> model.on_generate_spc_clicked
       view.play_spc.clicked --> model.on_play_spc_clicked
+      view.generate_and_play.clicked --> model.on_generate_and_play_clicked
 
 Instrument Settings
 -------------------

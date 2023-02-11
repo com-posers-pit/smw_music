@@ -148,6 +148,7 @@ class DashboardView(QMainWindow):
     gain_setting: QLineEdit
     gain_setting_label: QLabel
     gain_slider: QSlider
+    generate_and_play: QPushButton
     generate_mml: QPushButton
     generate_spc: QPushButton
     global_legato: QCheckBox

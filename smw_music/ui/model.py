@@ -331,7 +331,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_generate_mml_clicked(self) -> None:
+    def on_generate_and_play_clicked(self) -> None:
+        self.on_generate_mml_clicked(False)
+        self.on_generate_spc_clicked(False)
+        self.on_play_spc_clicked()
+
+    ###########################################################################
+
+    def on_generate_mml_clicked(self, report=True) -> None:
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -362,11 +369,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             else:
                 error = False
                 msg = "Done"
-        self.response_generated.emit(error, title, msg)
+        if report:
+            self.response_generated.emit(error, title, msg)
 
     ###########################################################################
 
-    def on_generate_spc_clicked(self) -> None:
+    def on_generate_spc_clicked(self, report=True) -> None:
         assert self._project_path is not None
 
         samples_path = self._project_path / "samples"
@@ -389,7 +397,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         msg = subprocess.check_output(  # nosec B603, B607
             ["sh", "convert.sh"], cwd=self._project_path
         )
-        self.response_generated.emit(False, "SPC Generated", msg.decode())
+        if report:
+            self.response_generated.emit(False, "SPC Generated", msg.decode())
 
     ###########################################################################
 
