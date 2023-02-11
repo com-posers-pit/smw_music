@@ -39,7 +39,7 @@ from smw_music.music_xml.instrument import (
 )
 from smw_music.music_xml.song import Song
 from smw_music.ramfs import RamFs
-from smw_music.ui.sample import Sample, SampleParams, extract_sample_pack
+from smw_music.ui.sample import SamplePack, SampleParams
 from smw_music.ui.state import State
 
 ###############################################################################
@@ -79,7 +79,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _history: list[State]
     _undo_level: int
     _amk_path: Path | None
-    _sample_packs: dict[str, dict[str, str]] | None
+    _sample_packs: dict[str, SamplePack]
     _spcplay_path: Path | None
     _project_path: Path | None
     _project_name: str | None
@@ -454,16 +454,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_pack_sample_changed(self, item) -> None:
+    def on_pack_sample_changed(self, item_id: tuple[str, Path]) -> None:
+        self._update_inst_state(pack_sample=item_id)
         if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
-            pass
-            # self._load_sample_settings(index)
+            self._load_sample_settings(item_id)
 
     ###########################################################################
 
     def on_pack_sample_selected(self, state: bool) -> None:
         if state:
             self._update_inst_state(sample_source=SampleSource.SAMPLEPACK)
+            sample = self.state.inst.pack_sample
+            if sample[0]:
+                self._load_sample_settings(sample)
 
     ###########################################################################
 
@@ -615,51 +618,52 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             prefs = yaml.safe_load(fobj)
 
         self._amk_path = Path(prefs["amk"]["path"])
-        self._sample_packs = prefs["sample_packs"]
+        sample_packs = {
+            name: Path(pack["path"])
+            for name, pack in prefs["sample_packs"].items()
+        }
         self._spcplay_path = Path(prefs["spcplay"]["path"])
 
-        if self._sample_packs:
-            self._load_sample_packs()
+        if sample_packs:
+            self._load_sample_packs(sample_packs)
 
     ###########################################################################
 
-    def _load_sample_packs(self) -> None:
-        assert self._sample_packs is not None  # nosec 703
+    def _load_sample_packs(self, sample_packs: dict[str, Path]) -> None:
 
-        packs = {}
+        self._sample_packs = {}
 
-        for pack_name, pack in self._sample_packs.items():
+        for name, path in sample_packs.items():
             try:
-                packs[pack_name] = extract_sample_pack(Path(pack["path"]))
+                self._sample_packs[name] = SamplePack(path)
 
             except FileNotFoundError:
                 self.response_generated.emit(
                     True,
                     "Error loading sample pack",
-                    f"Could not open sample pack {pack_name} at {pack['path']}",
+                    f"Could not open sample pack {name} at {path}",
                 )
 
-        self.sample_packs_changed.emit(packs)
+        self.sample_packs_changed.emit(self._sample_packs)
 
     ###########################################################################
 
-    def _load_sample_settings(self, index: QModelIndex) -> None:
-        params: SampleParams | None = index.data(Qt.ItemDataRole.UserRole)
-        if params is not None:
-            new_state = {
-                "attack_setting": params.attack,
-                "decay_setting": params.decay,
-                "sus_level_setting": params.sustain_level,
-                "sus_rate_setting": params.sustain_rate,
-                "adsr_mode": params.adsr_mode,
-                "gain_mode": params.gain_mode,
-                "gain_setting": params.gain,
-                "tune_setting": params.tuning,
-                "subtune_setting": params.subtuning,
-                "pack_sample_index": index.row(),
-            }
-            print(index.row())
-            self._update_inst_state(**new_state)
+    def _load_sample_settings(self, item_id: tuple[str, Path]) -> None:
+        pack, sample_path = item_id
+        params = self._sample_packs[pack][sample_path].params
+
+        new_state = {
+            "attack_setting": params.attack,
+            "decay_setting": params.decay,
+            "sus_level_setting": params.sustain_level,
+            "sus_rate_setting": params.sustain_rate,
+            "adsr_mode": params.adsr_mode,
+            "gain_mode": params.gain_mode,
+            "gain_setting": params.gain,
+            "tune_setting": params.tuning,
+            "subtune_setting": params.subtuning,
+        }
+        self._update_inst_state(**new_state)
 
     ###########################################################################
 

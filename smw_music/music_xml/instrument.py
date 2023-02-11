@@ -132,7 +132,7 @@ class InstrumentConfig(yaml.YAMLObject):
     pan_setting: int = 10
     sample_source: SampleSource = SampleSource.BUILTIN
     builtin_sample_index: int = -1
-    pack_sample_index: int = 0
+    pack_sample: tuple[str, Path] = ("", Path())
     brr_fname: Path = field(default_factory=Path)
     # TODO: see if the following settings can be rolled into a Sample object
     adsr_mode: bool = True

@@ -52,7 +52,7 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.sample import Sample
+from smw_music.ui.sample import Sample, SamplePack
 from smw_music.ui.state import State
 from smw_music.utils import hexb, pct
 
@@ -118,7 +118,7 @@ class Dashboard:
     _view: DashboardView
     _dyn_widgets: dict[Dyn, _DynamicsWidgets]
     _artic_widgets: dict[Artic, _ArticWidgets]
-    _sample_pack_items: dict[tuple[str, ...], QTreeWidgetItem]
+    _sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem]
 
     ###########################################################################
     # Constructor definitions
@@ -205,7 +205,9 @@ class Dashboard:
     def on_pack_sample_changed(self) -> None:
         items = self._view.sample_pack_list.selectedItems()
         if items:
-            self._model.on_pack_sample_changed(items[0])
+            self._model.on_pack_sample_changed(
+                items[0].data(0, Qt.ItemDataRole.UserRole)
+            )
 
     ###########################################################################
 
@@ -225,18 +227,18 @@ class Dashboard:
     ###########################################################################
 
     def on_sample_packs_changed(
-        self, sample_packs: dict[str, list[Sample]]
+        self, sample_packs: dict[str, SamplePack]
     ) -> None:
         self._sample_pack_items = {}
         tree = self._view.sample_pack_list  # pylint: disable=invalid-name
 
         tree.clear()
 
-        for pack, samples in sample_packs.items():
-            top = QTreeWidgetItem(tree, [pack])
+        for name, pack in sample_packs.items():
+            top = QTreeWidgetItem(tree, [name])
             _mark_unselectable(top)
 
-            self._add_sample_pack(top, pack, samples)
+            self._add_sample_pack(top, name, pack)
             tree.addTopLevelItem(top)
 
     ###########################################################################
@@ -295,7 +297,13 @@ class Dashboard:
         v.sample_settings_box.setEnabled(
             inst.sample_source != SampleSource.BUILTIN
         )
-        # v.sample_pack_list.setCurrentIndex(state.pack_sample_index)
+        try:
+            v.sample_pack_list.setCurrentItem(
+                self._sample_pack_items[state.inst.pack_sample]
+            )
+        except KeyError:
+            pass
+
         v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
         if inst.brr_fname.name:
             brr_fname = str(inst.brr_fname)
@@ -401,12 +409,12 @@ class Dashboard:
     ###########################################################################
 
     def _add_sample_pack(
-        self, top: QTreeWidgetItem, pack: str, samples: list[Sample]
+        self, top: QTreeWidgetItem, name: str, pack: SamplePack
     ):
         parent = top
         parent_items: dict[Path, QTreeWidgetItem] = {}
 
-        for sample in samples:
+        for sample in pack.samples:
             parent_paths = sample.path.parents
 
             for path in reversed(parent_paths[:-1]):
@@ -419,7 +427,9 @@ class Dashboard:
                     parent = item
 
             item = QTreeWidgetItem(parent, [sample.path.name])
-            self._sample_pack_items[(pack,) + sample.path.parts] = item
+            item_id = (name, sample.path)
+            item.setData(0, Qt.ItemDataRole.UserRole, item_id)
+            self._sample_pack_items[item_id] = item
 
     ###########################################################################
 
@@ -454,7 +464,6 @@ class Dashboard:
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
             (v.select_pack_sample, m.on_pack_sample_selected),
-            #            (v.sample_pack_list, m.on_pack_sample_changed),
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),

@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from os import listdir
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -25,45 +25,6 @@ from smw_music.music_xml.instrument import GainMode
 ###############################################################################
 
 
-def extract_sample_pack(
-    pack_file: Path,
-) -> list["Sample"]:
-    # Initialize the return value
-    samples = []
-
-    # Unpack the pack zip file to a temporary directory
-    with TemporaryDirectory() as tdir, ZipFile(pack_file) as zobj:
-        zobj.extractall(tdir)
-
-        # Locate the pattern description files
-        names = [Path(x) for x in zobj.namelist()]
-        pat_files = [n for n in names if n.parts[-1] == "!patterns.txt"]
-
-        for pat_file in pat_files:
-            parent = pat_file.parents[0]
-            parent_dir = tdir / parent
-            sample_params = []
-            with open(Path(tdir) / pat_file, "r", encoding="utf8") as fobj:
-                sample_params = SampleParams.from_pattern_file(fobj)
-
-            # Stupid case insensitive file systems.  Build a map between the
-            # lower-case version of file name in the directory and its
-            brr_data = {}
-            for fname in listdir(parent_dir):
-                with open(parent_dir / fname, "rb") as fobj:
-                    brr_data[fname.lower()] = fobj.read()
-
-            for brr_fname, params in sample_params:
-                try:
-                    data = brr_data[brr_fname.lower()]
-                    samples.append(Sample(parent / brr_fname, params, data))
-                except KeyError:
-                    # If a file in the pattern file is missing, skip it
-                    continue
-
-    return samples
-
-
 ###############################################################################
 # API Class Definitions
 ###############################################################################
@@ -74,6 +35,66 @@ class Sample:
     path: Path
     params: "SampleParams"
     data: bytes
+
+
+###############################################################################
+
+
+@dataclass
+class SamplePack:
+    path: Path
+
+    ###########################################################################
+
+    @property
+    def samples(self) -> list[Sample]:
+        return list(self._samples.values())
+
+    ###########################################################################
+
+    def __getitem__(self, key: Path) -> Sample:
+        return self._samples[key]
+
+    ###########################################################################
+
+    def __post_init__(self) -> None:
+        # Initialize the return value
+        samples = {}
+
+        # Unpack the pack zip file to a temporary directory
+        with TemporaryDirectory() as tdir, ZipFile(self.path) as zobj:
+            zobj.extractall(tdir)
+
+            # Locate the pattern description files
+            names = [Path(x) for x in zobj.namelist()]
+            pat_files = [n for n in names if n.parts[-1] == "!patterns.txt"]
+
+            for pat_file in pat_files:
+                parent = pat_file.parents[0]
+                parent_dir = tdir / parent
+                sample_params = []
+                with open(Path(tdir) / pat_file, "r", encoding="utf8") as fobj:
+                    sample_params = SampleParams.from_pattern_file(fobj)
+
+                # Stupid case insensitive file systems.  Build a map between the
+                # lower-case version of file name in the directory and its
+                brr_data = {}
+                for fname in listdir(parent_dir):
+                    with open(parent_dir / fname, "rb") as fobj:
+                        brr_data[fname.lower()] = fobj.read()
+
+                for brr_fname, params in sample_params:
+                    try:
+                        data = brr_data[brr_fname.lower()]
+                        sample_file = parent / brr_fname
+                        samples[sample_file] = Sample(
+                            sample_file, params, data
+                        )
+                    except KeyError:
+                        # If a file in the pattern file is missing, skip it
+                        continue
+
+        self._samples = samples
 
 
 ###############################################################################
