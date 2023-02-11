@@ -13,6 +13,7 @@
 import copy
 import pkgutil
 from datetime import datetime
+from pathlib import Path
 
 # Library imports
 import music21
@@ -598,7 +599,12 @@ class Song:
         sample_id = 30
         for inst in instruments:
             if inst.sample_source == SampleSource.SAMPLEPACK:
-                pass
+                # TODO: This is pretty blah, song shouldn't rely on pathlib,
+                # see if this can be refactored
+                fname = str(Path(inst.pack_sample[0]) / inst.pack_sample[1])
+                samples.append((fname, inst.brr_str, sample_id))
+                inst.instrument_idx = sample_id
+                sample_id += 1
             if inst.sample_source == SampleSource.BRR:
                 fname = inst.brr_fname.name
                 samples.append((fname, inst.brr_str, sample_id))

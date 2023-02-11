@@ -75,7 +75,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     )  # arguments=["error", "title", "response"]
 
     song: Song | None
-    sample_packs_model: QStandardItemModel
     _history: list[State]
     _undo_level: int
     _amk_path: Path | None
@@ -91,7 +90,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.sample_packs_model = QStandardItemModel()
         self._history = [State()]
         self._undo_level = 0
 
@@ -376,7 +374,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if inst.sample_source == SampleSource.BRR:
                 shutil.copy2(inst.brr_fname, samples_path)
             if inst.sample_source == SampleSource.SAMPLEPACK:
-                pass
+                target = (
+                    samples_path / inst.pack_sample[0] / inst.pack_sample[1]
+                )
+                os.makedirs(target.parents[0], exist_ok=True)
+                with open(target, "wb") as fobj:
+                    fobj.write(
+                        self._sample_packs[inst.pack_sample[0]][
+                            inst.pack_sample[1]
+                        ].data
+                    )
 
         # TODO: support OSX and windows
         msg = subprocess.check_output(  # nosec B603, B607
