@@ -18,25 +18,6 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <widget class="QGroupBox" name="spcplay_groupbox">
-     <property name="title">
-      <string>SPC Player Location</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QPushButton" name="select_spcplay">
-        <property name="text">
-         <string>Select</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLineEdit" name="spcplay_fname"/>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item>
     <widget class="QGroupBox" name="amk_group_box">
      <property name="title">
       <string>AMK Zip File</string>
@@ -51,6 +32,25 @@
       </item>
       <item>
        <widget class="QLineEdit" name="amk_fname"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="spcplay_groupbox">
+     <property name="title">
+      <string>SPC Player Location</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPushButton" name="select_spcplay">
+        <property name="text">
+         <string>Select</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLineEdit" name="spcplay_fname"/>
       </item>
      </layout>
     </widget>
