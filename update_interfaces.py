@@ -13,7 +13,7 @@ from typing import cast
 
 uis = [
     ("dashboard.ui", "dashboard_view.py", "DashboardView"),
-    ("preferences.ui", "preferences_view.py", "PreverencesView"),
+    ("preferences.ui", "preferences_view.py", "PreferencesView"),
 ]
 
 base_dir = pathlib.Path("smw_music")
@@ -59,5 +59,7 @@ for ui_fname, py_fname, module in uis:
         print("")
         print("")
         print(f"class {module}({top_class}):")
+        for action in actions:
+            widgets[action] = "QAction"
         for widget_name in sorted(widgets):
             print(f"    {widget_name}: {widgets[widget_name]}")

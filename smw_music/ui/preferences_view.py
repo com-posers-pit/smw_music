@@ -17,7 +17,7 @@ from PyQt6.QtWidgets import (
 )
 
 
-class PreverencesView(QDialog):
+class PreferencesView(QDialog):
     add_sample_pack: QPushButton
     amk_fname: QLineEdit
     amk_group_box: QGroupBox

@@ -75,6 +75,7 @@ class DashboardView(QMainWindow):
     brr_setting_label: QLabel
     builtin_sample: QComboBox
     centralwidget: QWidget
+    close_project: QAction
     control_groupBox: QGroupBox
     decay_eu_label: QLabel
     decay_label: QLabel
@@ -119,6 +120,7 @@ class DashboardView(QMainWindow):
     echo_settings_box: QGroupBox
     echo_sliders_widget: QWidget
     envelope_tab: QWidget
+    exit_dashboard: QAction
     f_label: QLabel
     f_setting: QLineEdit
     f_setting_label: QLabel
@@ -172,9 +174,9 @@ class DashboardView(QMainWindow):
     label: QLabel
     loop_analysis: QCheckBox
     measure_numbers: QCheckBox
-    menuEdit: QMenu
-    menuFile: QMenu
-    menuHelp: QMenu
+    menuEdit: QAction
+    menuFile: QAction
+    menuHelp: QAction
     menubar: QMenuBar
     mf_label: QLabel
     mf_setting: QLineEdit
@@ -186,7 +188,10 @@ class DashboardView(QMainWindow):
     mp_setting_label: QLabel
     mp_slider: QSlider
     musicxml_fname: QLineEdit
+    new_project: QAction
     octave: QSpinBox
+    open_preferences: QAction
+    open_project: QAction
     open_quicklook: QPushButton
     p_label: QLabel
     p_setting: QLineEdit
@@ -209,10 +214,12 @@ class DashboardView(QMainWindow):
     pppp_setting_label: QLabel
     pppp_slider: QSlider
     preview_envelope: QPushButton
+    redo: QAction
     sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox
     sample_settings_tabs: QTabWidget
     sample_settings_widget: QWidget
+    save_project: QAction
     select_adsr_mode: QRadioButton
     select_brr_fname: QPushButton
     select_brr_sample: QRadioButton
@@ -221,7 +228,10 @@ class DashboardView(QMainWindow):
     select_mml_fname: QPushButton
     select_musicxml_fname: QPushButton
     select_pack_sample: QRadioButton
+    separator: QAction
     settings_tab_widget: QTabWidget
+    show_about: QAction
+    show_about_qt: QAction
     splitter: QSplitter
     splitter_2: QSplitter
     splitter_3: QSplitter
@@ -248,3 +258,4 @@ class DashboardView(QMainWindow):
     tune_setting_label: QLabel
     tune_slider: QSlider
     tuning_tab: QWidget
+    undo: QAction
