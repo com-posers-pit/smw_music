@@ -11,6 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
+from pathlib import Path
 
 # Library imports
 import yaml
@@ -21,6 +22,16 @@ from smw_music.music_xml.instrument import InstrumentConfig
 
 ###############################################################################
 # API class definitions
+###############################################################################
+
+
+@dataclass
+class PreferencesState:
+    amk_fname: Path
+    sample_packs: dict[str, Path]
+    spcplay_fname: Path
+
+
 ###############################################################################
 
 

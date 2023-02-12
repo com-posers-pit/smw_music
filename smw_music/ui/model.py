@@ -24,8 +24,7 @@ from pathlib import Path
 # Library imports
 import yaml
 from mako.template import Template  # type: ignore
-from PyQt6.QtCore import QModelIndex, QObject, Qt, pyqtSignal
-from PyQt6.QtGui import QStandardItem, QStandardItemModel
+from PyQt6.QtCore import QObject, pyqtSignal
 
 # Package imports
 from smw_music import SmwMusicException, __version__
@@ -38,9 +37,8 @@ from smw_music.music_xml.instrument import (
     SampleSource,
 )
 from smw_music.music_xml.song import Song
-from smw_music.ramfs import RamFs
-from smw_music.ui.sample import SamplePack, SampleParams
-from smw_music.ui.state import State
+from smw_music.ui.sample import SamplePack
+from smw_music.ui.state import PreferencesState, State
 
 ###############################################################################
 # Private Function Definitions
@@ -75,11 +73,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     )  # arguments=["error", "title", "response"]
 
     song: Song | None
+    preferences: PreferencesState
     _history: list[State]
     _undo_level: int
-    _amk_path: Path | None
     _sample_packs: dict[str, SamplePack]
-    _spcplay_path: Path | None
     _project_path: Path | None
     _project_name: str | None
 
@@ -90,6 +87,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
+        self.preferences = PreferencesState(Path(""), {}, Path(""))
         self._history = [State()]
         self._undo_level = 0
 
@@ -120,7 +118,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "samples",
         ]
 
-        with zipfile.ZipFile(str(self._amk_path), "r") as zobj:
+        with zipfile.ZipFile(str(self.preferences.amk_fname), "r") as zobj:
             # Extract all the files
             zobj.extractall(path=path)
 
@@ -162,12 +160,31 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def start(self) -> None:
+    def update_preferences(self, preferences: PreferencesState) -> None:
+        prefs_dict = {
+            "beer": __version__,
+            "amk": {"path": str(preferences.amk_fname)},
+            "spcplay": {"path": str(preferences.spcplay_fname)},
+            "sample_packs": {
+                name: {"path": str(path)}
+                for name, path in preferences.sample_packs.items()
+            },
+        }
+
+        with open(self.prefs_fname, "w", encoding="utf8") as fobj:
+            yaml.safe_dump(prefs_dict, fobj)
+
         self._load_prefs()
+
+    ###########################################################################
+
+    def start(self) -> None:
+        if self.prefs_fname.exists():
+            self._load_prefs()
         self.reinforce_state()
 
     ###########################################################################
-    # API slot  definitions
+    # API slot definitions
     ###########################################################################
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
@@ -507,7 +524,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             threading.Thread(
                 target=subprocess.call,
                 # TODO: Handle windows/OSX
-                args=(["wine", str(self._spcplay_path), spc_name],),
+                args=(
+                    ["wine", str(self.preferences.spcplay_fname), spc_name],
+                ),
             ).start()
 
     ###########################################################################
@@ -581,11 +600,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     # Private method definitions
     ###########################################################################
 
-    def _init_prefs(self) -> None:
-        pass
-
-    ###########################################################################
-
     def _interpolate(self, level: Dynamics, setting: int) -> None:
         inst = self.state.inst
         dyns = sorted(inst.dynamics_present)
@@ -627,29 +641,25 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _load_prefs(self) -> None:
-        if not self.prefs.exists():
-            self._init_prefs()
-
-        with open(self.prefs, "r", encoding="utf8") as fobj:
+        with open(self.prefs_fname, "r", encoding="utf8") as fobj:
             prefs = yaml.safe_load(fobj)
 
-        self._amk_path = Path(prefs["amk"]["path"])
-        sample_packs = {
+        self.preferences.amk_fname = Path(prefs["amk"]["path"])
+        self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
+        self.preferences.sample_packs = {
             name: Path(pack["path"])
             for name, pack in prefs["sample_packs"].items()
         }
-        self._spcplay_path = Path(prefs["spcplay"]["path"])
 
-        if sample_packs:
-            self._load_sample_packs(sample_packs)
+        self._load_sample_packs()
 
     ###########################################################################
 
-    def _load_sample_packs(self, sample_packs: dict[str, Path]) -> None:
+    def _load_sample_packs(self) -> None:
 
         self._sample_packs = {}
 
-        for name, path in sample_packs.items():
+        for name, path in self.preferences.sample_packs.items():
             try:
                 self._sample_packs[name] = SamplePack(path)
 
@@ -733,7 +743,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     @property
-    def prefs(self) -> Path:
+    def prefs_fname(self) -> Path:
         app = "xml2mml"
         prefs = "preferences.yaml"
 

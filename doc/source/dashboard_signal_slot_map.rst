@@ -203,3 +203,16 @@ Global Settings
      view.echo_feedback_surround.stateChanged --> model.on_echo_feedback_surround_changed
      view.echo_delay_slider.valueChanged --> model.on_echo_delay_changed
      view.echo_delay_setting.valueChanged --> model.on_echo_delay_changed
+
+
+Preferences Signal/Slot Map
+===========================
+
+.. mermaid::
+
+   flowchart LR
+     dialog.select_amk_fname.released --> self.on_amk_select_clicked
+     dialog.select_sample_pack_fname.released --> self.on_select_sample_pack_fname_clicked
+     dialog.select_spcplay.released --> self.on_select_spcplay_clicked
+     dialog.add_sample_pack.released --> self.on_add_sample_pack_clicked
+     dialog.remove_sample_pack.released --> self.on_remove_sample_pack_clicked

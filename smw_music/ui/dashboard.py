@@ -52,8 +52,8 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.sample import Sample, SamplePack
-from smw_music.ui.state import State
+from smw_music.ui.sample import SamplePack
+from smw_music.ui.state import PreferencesState, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -695,7 +695,9 @@ class Dashboard:
     ###########################################################################
 
     def _open_preferences(self) -> None:
-        self._preferences.exec()
+        preferences = self._preferences.exec(self._model.preferences)
+        if preferences:
+            self._model.update_preferences(preferences)
 
     ###########################################################################
 
