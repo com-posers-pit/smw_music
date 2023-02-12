@@ -147,6 +147,7 @@ _LYRICS = [
     "You fall to your knees and catch your breath",
     "You're finally safe from Shia LaBeouf",
 ]
+
 ###############################################################################
 # Private class definitions
 ###############################################################################

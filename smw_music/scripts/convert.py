@@ -8,16 +8,14 @@
 """Music XML -> AMK Converter."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 import argparse
 import sys
 
-###############################################################################
 # Package imports
-###############################################################################
-
 from smw_music import __version__
 from smw_music.music_xml import EchoConfig, Song
 
@@ -69,11 +67,6 @@ def main(arg_list: list[str] | None = None) -> None:
         default=None,
     )
     parser.add_argument(
-        "--custom_samples",
-        action="store_true",
-        help="Include boilerplate for custom samples",
-    )
-    parser.add_argument(
         "--optimize_percussion",
         action="store_true",
         help="Remove repeated percussion instrument directives",
@@ -89,7 +82,6 @@ def main(arg_list: list[str] | None = None) -> None:
         args.measure_numbers,
         args.enable_dt,
         args.echo,
-        args.custom_samples,
         args.optimize_percussion,
     )
 
