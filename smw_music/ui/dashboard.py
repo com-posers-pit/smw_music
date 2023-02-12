@@ -455,6 +455,7 @@ class Dashboard:
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
             (v.generate_and_play, m.on_generate_and_play_clicked),
+            (v.reload_musicxml, m.on_reload_musicxml_clicked),
             # Instrument settings
             (v.instrument_list, m.on_instrument_changed),
             (v.interpolate, m.on_interpolate_changed),

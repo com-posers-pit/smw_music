@@ -538,6 +538,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_reload_musicxml_clicked(self) -> None:
+        self.song = Song.from_music_xml(self.state.musicxml_fname)
+
+        instruments = {inst.name: inst for inst in self.state.instruments}
+
+        for n, instrument in enumerate(self.song.instruments):
+            if instrument.name in instruments:
+                self.song.instruments[n] = instruments[instrument.name]
+
+        self._update_instruments()
+
+    ###########################################################################
+
     def on_save(self) -> None:
         contents = {
             "version": __version__,
