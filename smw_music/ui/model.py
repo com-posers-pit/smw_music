@@ -355,7 +355,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_generate_mml_clicked(self, report=True) -> None:
+    def on_generate_mml_clicked(self, report: bool = True) -> None:
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -391,7 +391,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_generate_spc_clicked(self, report=True) -> None:
+    def on_generate_spc_clicked(self, report: bool = True) -> None:
         assert self._project_path is not None
 
         samples_path = self._project_path / "samples"

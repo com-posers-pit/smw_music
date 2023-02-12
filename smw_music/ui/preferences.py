@@ -37,7 +37,7 @@ class Preferences:
     # Constructor definitions
     ###########################################################################
 
-    def __init__(self):  # , model: QStandardItemModel):
+    def __init__(self) -> None:
         ui_contents = pkgutil.get_data("smw_music", "/data/preferences.ui")
         if ui_contents is None:
             raise Exception("Can't locate preferences")
