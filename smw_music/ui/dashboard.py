@@ -53,7 +53,7 @@ from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.sample import SamplePack
-from smw_music.ui.state import PreferencesState, State
+from smw_music.ui.state import State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -81,6 +81,72 @@ def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
     )
 
 
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+_LYRICS = [
+    "You're walking in the woods",
+    "There's no one around and your phone is dead",
+    "Out of the corner of your eye you spot him",
+    "Shia LaBeouf",
+    "He's following you, about 30 feet back",
+    "He gets down on all fours and breaks into a sprint",
+    "He's gaining on you",
+    "Shia LaBeouf",
+    "You're looking for you car but you're all turned around",
+    "He's almost upon you now",
+    "And you can see there's blood on his face",
+    "My God, there's blood everywhere!",
+    "Running for you life (from Shia LaBeouf)",
+    "He's brandishing a knife (it's Shia LaBeouf)",
+    "Lurking in the shadows",
+    "Hollywood superstar Shia LaBeouf",
+    "Living in the woods (Shia LaBeouf)",
+    "Killing for sport (Shia LaBeouf)",
+    "Eating all the bodies",
+    "Actual cannibal Shia LaBeouf",
+    "Now it's dark, and you seem to have lost him",
+    "But you're hopelessly lost yourself",
+    "Stranded with a murderer",
+    "You creep silently through the underbrush",
+    "Aha! In the distance",
+    "A small cottage with a light on",
+    "Hope! You move stealthily toward it",
+    "But your leg! Ah! It's caught in a bear trap!",
+    "Gnawing off your leg (quiet, quiet)",
+    "Limping to the cottage (quiet, quiet)",
+    "Now you're on the doorstep",
+    "Sitting inside",
+    "Shia LaBeouf",
+    "Sharpening an axe (Shia LaBeouf)",
+    "But he doesn't hear you enter (Shia LaBeouf)",
+    "You're sneaking up behind him",
+    "Strangling superstar",
+    "Shia LaBeouf",
+    "Fighting for your life with Shia LaBeouf",
+    "Wrestling a knife from Shia LaBeouf",
+    "Stab him in his kidney",
+    "Safe at last from Shia LaBeouf",
+    "You limp into the dark woods",
+    "Blood oozing from your stump leg",
+    "You've beaten Shia LaBeouf",
+    "Wait! He isn't dead (Shia surprise)",
+    "There's a gun to your head and death in his eyes",
+    "But you can do jiu-jitsu",
+    "Body slam superstar Shia LaBeouf",
+    "Legendary fight with Shia LaBeouf",
+    "Normal Tuesday night for Shia LaBeouf",
+    "You try to swing an axe at Shia LaBeouf",
+    "But blood is draining fast from your stump leg",
+    "He's dodging every swipe, he parries to the left",
+    "You counter to the right, you catch him in the neck",
+    "You're chopping his head now",
+    "You have just decapitated Shia LaBeouf",
+    "His head topples to the floor, expressionless",
+    "You fall to your knees and catch your breath",
+    "You're finally safe from Shia LaBeouf",
+]
 ###############################################################################
 # Private class definitions
 ###############################################################################
@@ -135,6 +201,7 @@ class Dashboard:
         self._sample_pack_items = {}
 
         self._quicklook_edit = QTextEdit()
+        self._quicklook_edit.setFontFamily("Monospace")
         self._quicklook = QMainWindow(parent=self._view)
         self._quicklook.setMinimumSize(800, 600)
         self._quicklook.setCentralWidget(self._quicklook_edit)
@@ -145,6 +212,7 @@ class Dashboard:
         self._fix_edit_widths()
         self._combine_widgets()
         self._attach_signals()
+        self._view.generate_and_play.setToolTip(_LYRICS[0])
 
         self._view.show()
 
@@ -455,6 +523,7 @@ class Dashboard:
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
             (v.generate_and_play, m.on_generate_and_play_clicked),
+            (v.generate_and_play, self._update_generate_and_play_tooltip),
             (v.reload_musicxml, m.on_reload_musicxml_clicked),
             # Instrument settings
             (v.instrument_list, m.on_instrument_changed),
@@ -758,3 +827,11 @@ class Dashboard:
             val = min(31, view.gain_slider.value())
             view.gain_slider.setValue(val)
             view.gain_slider.setMaximum(31)
+
+    ###########################################################################
+
+    def _update_generate_and_play_tooltip(self) -> None:
+        widget = self._view.generate_and_play
+        tooltip = widget.toolTip()
+        idx = (_LYRICS.index(tooltip) + 1) % len(_LYRICS)
+        widget.setToolTip(_LYRICS[idx])
