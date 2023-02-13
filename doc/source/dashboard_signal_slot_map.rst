@@ -76,6 +76,8 @@ Instruments
    flowchart LR
       view.instrument_list.currentRowChanged --> model.on_instrument_changed
       view.octave.valueChanged --> model.on_octave_changed
+      view.mute.stateChanged --> model.on_mute_changed
+      view.solo.stateChanged --> model.on_solo_changed
 
 Dynamics
 ~~~~~~~~

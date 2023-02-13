@@ -144,6 +144,8 @@ class InstrumentConfig(yaml.YAMLObject):
     gain_setting: int = 0
     tune_setting: int = 0
     subtune_setting: int = 0
+    mute: bool = False
+    solo: bool = False
 
     _instrument_idx: int = field(default=0, init=False)
 

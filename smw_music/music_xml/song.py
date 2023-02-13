@@ -597,19 +597,32 @@ class Song:
         instruments = self.instruments.copy()
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
+        solo = any(inst.solo for inst in instruments)
+
         for inst in instruments:
-            if inst.sample_source == SampleSource.SAMPLEPACK:
-                # TODO: This is pretty blah, song shouldn't rely on pathlib,
-                # see if this can be refactored
-                fname = str(Path(inst.pack_sample[0]) / inst.pack_sample[1])
-                samples.append((fname, inst.brr_str, sample_id))
+            if inst.mute:
+                samples.append(("EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
-            if inst.sample_source == SampleSource.BRR:
-                fname = inst.brr_fname.name
-                samples.append((fname, inst.brr_str, sample_id))
+            elif solo and not inst.solo:
+                samples.append(("EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
+            else:
+                if inst.sample_source == SampleSource.SAMPLEPACK:
+                    # TODO: This is pretty blah, song shouldn't rely on pathlib,
+                    # see if this can be refactored
+                    fname = str(
+                        Path(inst.pack_sample[0]) / inst.pack_sample[1]
+                    )
+                    samples.append((fname, inst.brr_str, sample_id))
+                    inst.instrument_idx = sample_id
+                    sample_id += 1
+                if inst.sample_source == SampleSource.BRR:
+                    fname = inst.brr_fname.name
+                    samples.append((fname, inst.brr_str, sample_id))
+                    inst.instrument_idx = sample_id
+                    sample_id += 1
 
         tmpl = Template(  # nosec B702
             pkgutil.get_data("smw_music", "data/mml.txt")

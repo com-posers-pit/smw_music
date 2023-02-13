@@ -380,6 +380,8 @@ class Dashboard:
             brr_fname = ""
         v.brr_fname.setText(brr_fname)
         v.octave.setValue(inst.octave)
+        v.solo.setChecked(inst.solo)
+        v.mute.setChecked(inst.mute)
 
         v.select_adsr_mode.setChecked(inst.adsr_mode)
         v.select_gain_mode.setChecked(not inst.adsr_mode)
@@ -540,6 +542,8 @@ class Dashboard:
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),
             (v.octave, m.on_octave_changed),
+            (v.mute, m.on_mute_changed),
+            (v.solo, m.on_solo_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),
             (v.gain_mode_direct, m.on_gain_direct_selected),
             (v.gain_mode_inclin, m.on_gain_inclin_selected),

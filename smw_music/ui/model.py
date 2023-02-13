@@ -482,6 +482,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_mute_changed(self, state: bool) -> None:
+        self._update_inst_state(mute=state)
+
+    ###########################################################################
+
     def on_octave_changed(self, octave: int) -> None:
         self._update_inst_state(octave=octave)
 
@@ -566,6 +571,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
         self._update_inst_state(adsr_mode=state)
+
+    ###########################################################################
+
+    def on_solo_changed(self, state: bool) -> None:
+        self._update_inst_state(solo=state)
 
     ###########################################################################
 

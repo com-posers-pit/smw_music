@@ -188,6 +188,7 @@ class DashboardView(QMainWindow):
     mp_setting_label: QLabel
     mp_slider: QSlider
     musicxml_fname: QLineEdit
+    mute: QCheckBox
     new_project: QAction
     octave: QSpinBox
     open_preferences: QAction
@@ -233,6 +234,7 @@ class DashboardView(QMainWindow):
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
+    solo: QCheckBox
     splitter: QSplitter
     splitter_2: QSplitter
     splitter_3: QSplitter
