@@ -253,16 +253,21 @@ class Dashboard:
             solo_box = QTableWidgetItem()
             solo_box.setCheckState(Qt.CheckState.Unchecked)
             solo_box.setData(Qt.ItemDataRole.UserRole, (_SoloMute.SOLO, row))
+            solo_box.setToolTip(f"Solo {name}")
             _mark_unselectable(solo_box)
 
             mute_box = QTableWidgetItem()
             mute_box.setCheckState(Qt.CheckState.Unchecked)
             mute_box.setData(Qt.ItemDataRole.UserRole, (_SoloMute.MUTE, row))
+            mute_box.setToolTip(f"Mute {name}")
             _mark_unselectable(mute_box)
+
+            name_box = QTableWidgetItem(name)
+            name_box.setFlags(name_box.flags() & ~Qt.ItemFlag.ItemIsEditable)
 
             widget.setItem(row, 0, solo_box)
             widget.setItem(row, 1, mute_box)
-            widget.setItem(row, 2, QTableWidgetItem(name))
+            widget.setItem(row, 2, name_box)
 
     ###########################################################################
 
@@ -823,8 +828,13 @@ class Dashboard:
 
     def _setup_instrument_table(self) -> None:
         widget = self._view.instrument_list
-        widget.setHorizontalHeaderItem(0, QTableWidgetItem("S"))
-        widget.setHorizontalHeaderItem(1, QTableWidgetItem("M"))
+        solo_item = QTableWidgetItem("S")
+        solo_item.setToolTip("Solo Instrument")
+        mute_item = QTableWidgetItem("M")
+        mute_item.setToolTip("Mute Instrument")
+
+        widget.setHorizontalHeaderItem(0, solo_item)
+        widget.setHorizontalHeaderItem(1, mute_item)
         widget.setHorizontalHeaderItem(2, QTableWidgetItem("Instrument"))
         widget.horizontalHeader().setSectionResizeMode(
             QHeaderView.ResizeMode.ResizeToContents
