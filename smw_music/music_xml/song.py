@@ -594,7 +594,7 @@ class Song:
 
         percussion = any(x.percussion for x in self._reduced_channels)
 
-        instruments = self.instruments.copy()
+        instruments = copy.deepcopy(self.instruments)
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
@@ -621,6 +621,7 @@ class Song:
 
             for inst in instruments:
                 if inst.mute or (solo and not inst.solo):
+                    inst.sample_source = SampleSource.OVERRIDE
                     inst.instrument_idx = sample_id
 
             # Not necessary, but we keep it for consistency's sake
@@ -638,7 +639,7 @@ class Song:
             datetime=build_dt,
             percussion=percussion,
             echo_config=echo_config,
-            instruments=self.instruments,
+            instruments=instruments,
             custom_samples=samples,
             dynamics=list(Dynamics),
         )

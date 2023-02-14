@@ -90,6 +90,7 @@ class SampleSource(IntEnum):
     BUILTIN = auto()
     SAMPLEPACK = auto()
     BRR = auto()
+    OVERRIDE = auto()
 
 
 ###############################################################################
