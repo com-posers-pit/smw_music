@@ -12,6 +12,7 @@
 ###############################################################################
 
 # Standard library imports
+import enum
 import io
 import pkgutil
 from functools import partial
@@ -22,21 +23,22 @@ from typing import NamedTuple
 from PyQt6 import uic
 from PyQt6.QtCore import QSignalBlocker, Qt
 from PyQt6.QtWidgets import (
-    QAbstractItemView,
     QAbstractSlider,
     QApplication,
     QCheckBox,
     QComboBox,
     QFileDialog,
+    QHeaderView,
     QLabel,
     QLineEdit,
-    QListWidget,
     QMainWindow,
     QMessageBox,
     QPushButton,
     QRadioButton,
     QSlider,
     QSpinBox,
+    QTableWidget,
+    QTableWidgetItem,
     QTextEdit,
     QTreeWidgetItem,
 )
@@ -61,7 +63,7 @@ from smw_music.utils import hexb, pct
 ###############################################################################
 
 
-def _mark_unselectable(item: QTreeWidgetItem) -> None:
+def _mark_unselectable(item: QTableWidgetItem | QTreeWidgetItem) -> None:
     item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
 
 
@@ -171,6 +173,14 @@ class _DynamicsWidgets(NamedTuple):
 
 
 ###############################################################################
+
+
+class _SoloMute(enum.IntEnum):
+    SOLO = enum.auto()
+    MUTE = enum.auto()
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -212,6 +222,7 @@ class Dashboard:
         self._setup_menus()
         self._fix_edit_widths()
         self._combine_widgets()
+        self._setup_instrument_table()
         self._attach_signals()
         self._view.generate_and_play.setToolTip(_LYRICS[0])
 
@@ -234,9 +245,23 @@ class Dashboard:
 
     def on_instruments_changed(self, names: list[str]) -> None:
         widget = self._view.instrument_list
-        widget.clear()
-        for name in names:
-            widget.addItem(name)
+        widget.clearContents()
+        widget.setRowCount(len(names))
+
+        for row, name in enumerate(names):
+            solo_box = QTableWidgetItem()
+            solo_box.setCheckState(Qt.CheckState.Unchecked)
+            solo_box.setData(Qt.ItemDataRole.UserRole, (_SoloMute.SOLO, row))
+            _mark_unselectable(solo_box)
+
+            mute_box = QTableWidgetItem()
+            mute_box.setCheckState(Qt.CheckState.Unchecked)
+            mute_box.setData(Qt.ItemDataRole.UserRole, (_SoloMute.MUTE, row))
+            _mark_unselectable(mute_box)
+
+            widget.setItem(row, 0, solo_box)
+            widget.setItem(row, 1, mute_box)
+            widget.setItem(row, 2, QTableWidgetItem(name))
 
     ###########################################################################
 
@@ -380,8 +405,6 @@ class Dashboard:
             brr_fname = ""
         v.brr_fname.setText(brr_fname)
         v.octave.setValue(inst.octave)
-        v.solo.setChecked(inst.solo)
-        v.mute.setChecked(inst.mute)
 
         v.select_adsr_mode.setChecked(inst.adsr_mode)
         v.select_gain_mode.setChecked(not inst.adsr_mode)
@@ -542,8 +565,6 @@ class Dashboard:
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),
             (v.octave, m.on_octave_changed),
-            (v.mute, m.on_mute_changed),
-            (v.solo, m.on_solo_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),
             (v.gain_mode_direct, m.on_gain_direct_selected),
             (v.gain_mode_inclin, m.on_gain_inclin_selected),
@@ -625,12 +646,15 @@ class Dashboard:
                 widget.toggled.connect(slot)
             elif isinstance(widget, (QAbstractSlider, QSpinBox)):
                 widget.valueChanged.connect(slot)
-            elif isinstance(widget, QListWidget):
-                widget.currentRowChanged.connect(slot)
+            elif isinstance(widget, QTableWidget):
+                pass
+                # widget.currentRowChanged.connect(slot)
             else:
                 # This is basically a compile-time exception
                 raise Exception(f"Unhandled widget connection {widget}")
 
+        v.instrument_list.itemChanged.connect(self._on_solomute_change)
+        v.instrument_list.itemSelectionChanged.connect(self._on_inst_change)
         v.sample_pack_list.itemSelectionChanged.connect(
             self.on_pack_sample_changed
         )
@@ -760,6 +784,26 @@ class Dashboard:
 
     ###########################################################################
 
+    def _on_inst_change(self) -> None:
+        widget = self._view.instrument_list
+        self._model.on_instrument_changed(widget.currentRow())
+
+    ###########################################################################
+
+    def _on_solomute_change(self, item: QTableWidgetItem) -> None:
+        role: tuple[_SoloMute, int] | None = item.data(
+            Qt.ItemDataRole.UserRole
+        )
+        if role:
+            row = role[1]
+            checked = item.checkState() == Qt.CheckState.Checked
+            if role[0] == _SoloMute.SOLO:
+                self._model.on_solo_changed(row, checked)
+            if role[0] == _SoloMute.MUTE:
+                self._model.on_mute_changed(row, checked)
+
+    ###########################################################################
+
     def _open_project(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view, "Project File", filter=f"*.{self._extension}"
@@ -773,6 +817,17 @@ class Dashboard:
         preferences = self._preferences.exec(self._model.preferences)
         if preferences:
             self._model.update_preferences(preferences)
+
+    ###########################################################################
+
+    def _setup_instrument_table(self) -> None:
+        widget = self._view.instrument_list
+        widget.setHorizontalHeaderItem(0, QTableWidgetItem("S"))
+        widget.setHorizontalHeaderItem(1, QTableWidgetItem("M"))
+        widget.setHorizontalHeaderItem(2, QTableWidgetItem("Instrument"))
+        widget.horizontalHeader().setSectionResizeMode(
+            QHeaderView.ResizeMode.ResizeToContents
+        )
 
     ###########################################################################
 

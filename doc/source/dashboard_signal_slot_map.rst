@@ -74,10 +74,9 @@ Instruments
 .. mermaid::
 
    flowchart LR
-      view.instrument_list.currentRowChanged --> model.on_instrument_changed
+      view.instrument_list.itemChanged --> dashboard._on_solomute_change --> model.on_mute_changed & on_solo_changed
+      view.instrument_list.selectionChanged --> dashboard._on_inst_change --> model.on_instrument_changed
       view.octave.valueChanged --> model.on_octave_changed
-      view.mute.stateChanged --> model.on_mute_changed
-      view.solo.stateChanged --> model.on_solo_changed
 
 Dynamics
 ~~~~~~~~

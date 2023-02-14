@@ -15,7 +15,6 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QLabel,
     QLineEdit,
-    QListWidget,
     QMainWindow,
     QMenu,
     QMenuBar,
@@ -25,6 +24,7 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QSplitter,
     QStatusBar,
+    QTableWidget,
     QTabWidget,
     QTreeWidget,
     QWidget,
@@ -164,7 +164,7 @@ class DashboardView(QMainWindow):
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
-    instrument_list: QListWidget
+    instrument_list: QTableWidget
     instrument_list_box: QGroupBox
     instrument_pan_tab: QWidget
     instrument_sample_group: QGroupBox
@@ -188,7 +188,6 @@ class DashboardView(QMainWindow):
     mp_setting_label: QLabel
     mp_slider: QSlider
     musicxml_fname: QLineEdit
-    mute: QCheckBox
     new_project: QAction
     octave: QSpinBox
     open_preferences: QAction
@@ -234,7 +233,6 @@ class DashboardView(QMainWindow):
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
-    solo: QCheckBox
     splitter: QSplitter
     splitter_2: QSplitter
     splitter_3: QSplitter

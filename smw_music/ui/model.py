@@ -66,6 +66,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(State)
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
+    project_loaded = pyqtSignal(str, str)  # arguments=['name', 'path']
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
@@ -451,6 +452,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.song = Song.from_music_xml(self.state.musicxml_fname)
         self.song.instruments[:] = self.state.instruments
 
+        self.project_loaded.emit(self._project_name, str(fname))
+
         self.reinforce_state()
 
     ###########################################################################
@@ -482,8 +485,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_mute_changed(self, state: bool) -> None:
-        self._update_inst_state(mute=state)
+    def on_mute_changed(self, idx: int, state: bool) -> None:
+        self._update_inst_state(idx=idx, mute=state)
 
     ###########################################################################
 
@@ -574,8 +577,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_solo_changed(self, state: bool) -> None:
-        self._update_inst_state(solo=state)
+    def on_solo_changed(self, idx: int, state: bool) -> None:
+        self._update_inst_state(idx=idx, solo=state)
 
     ###########################################################################
 
@@ -729,11 +732,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_inst_state(self, **kwargs) -> None:
+    def _update_inst_state(self, idx: int = -1, **kwargs) -> None:
+        old_inst = (
+            self.state.inst if idx == -1 else self.state.instruments[idx]
+        )
         try:
-            new_inst = replace(self.state.inst, **kwargs)
+            new_inst = replace(old_inst, **kwargs)
         except TypeError:
-            new_inst = replace(self.state.inst)
+            new_inst = replace(old_inst)
             for key, val in kwargs.items():
                 setattr(new_inst, key, val)
 
@@ -741,7 +747,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._rollback_undo()
 
             new_state = replace(self.state)
-            new_state.inst = new_inst
+            if idx == -1:
+                new_state.inst = new_inst
+            else:
+                new_state.instruments[idx] = new_inst
+
             self._history.append(new_state)
             self.state_changed.emit(new_state)
 
