@@ -213,6 +213,7 @@ class Dashboard:
 
         self._quicklook_edit = QTextEdit()
         self._quicklook_edit.setFontFamily("Monospace")
+        self._quicklook_edit.setReadOnly(True)
         self._quicklook = QMainWindow(parent=self._view)
         self._quicklook.setMinimumSize(800, 600)
         self._quicklook.setCentralWidget(self._quicklook_edit)
