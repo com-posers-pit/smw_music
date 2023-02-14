@@ -371,6 +371,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 # Applying this here means we can reload
                 self.song.instruments = self.state.instruments
 
+                self.song.volume = self.state.global_volume
+
                 mml = self.song.to_mml_file(
                     fname,
                     self.state.global_legato,
