@@ -26,7 +26,7 @@
 
 #instruments {
 %for sample, settings, idx in custom_samples:
-    "${sample}"          ${settings} ; @${idx}
+    "${sample}"${' '*(max(len(x[0]) for x in custom_samples) - len(sample))}          ${settings} ; @${idx}
 %endfor
 }
 %endif
