@@ -20,7 +20,7 @@ from typing import TypedDict
 import yaml
 
 # Package imports
-from smw_music import __version__
+from smw_music import SmwMusicException, __version__
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,
@@ -31,6 +31,12 @@ from smw_music.music_xml.instrument import (
     SampleSource,
 )
 from smw_music.ui.state import State
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+_CURRENT_SAVE_VERSION = 0
 
 ###############################################################################
 # Private type definitions
@@ -81,7 +87,8 @@ class _InstrumentDict(TypedDict):
 
 
 class _SaveDict(TypedDict):
-    version: str
+    tool_version: str
+    save_version: int
     song: str
     time: str
     state: "_StateDict"
@@ -212,6 +219,13 @@ def load(fname: Path) -> tuple[str, State]:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: _SaveDict = yaml.safe_load(fobj)
 
+    save_version = contents["save_version"]
+    if contents["save_version"] > _CURRENT_SAVE_VERSION:
+        raise SmwMusicException(
+            f"Save file version is {save_version}, tool version only "
+            + f"supports up to {_CURRENT_SAVE_VERSION}"
+        )
+
     project = contents["song"]
     sdict = contents["state"]
     state = State(
@@ -236,7 +250,8 @@ def save(fname: Path, project: str, state: State):
     with open(fname, "w", encoding="utf8") as fobj:
         yaml.safe_dump(
             {
-                "version": __version__,
+                "tool_version": __version__,
+                "save_version": _CURRENT_SAVE_VERSION,
                 "song": project,
                 "time": f"{datetime.datetime.utcnow()}",
                 "state": {

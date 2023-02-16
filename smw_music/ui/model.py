@@ -445,16 +445,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_load(self, fname: Path) -> None:
-        self._project_name, save_state = load(fname)
-        self._undo_level = 0
-        self._history = [replace(save_state)]
-        self._project_path = fname.parent
-        self.song = Song.from_music_xml(self.state.musicxml_fname)
-        self.song.instruments[:] = self.state.instruments
+        try:
+            self._project_name, save_state = load(fname)
+        except SmwMusicException as e:
+            self.response_generated.emit(True, "Invalid save version", str(e))
+        else:
+            self._undo_level = 0
+            self._history = [replace(save_state)]
+            self._project_path = fname.parent
+            self.song = Song.from_music_xml(self.state.musicxml_fname)
+            self.song.instruments[:] = self.state.instruments
 
-        self.project_loaded.emit(self._project_name, str(fname))
+            self.project_loaded.emit(self._project_name, str(fname))
 
-        self.reinforce_state()
+            self.reinforce_state()
 
     ###########################################################################
 
