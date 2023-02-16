@@ -13,9 +13,6 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
-# Library imports
-import yaml
-
 # Package imports
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig
@@ -36,9 +33,7 @@ class PreferencesState:
 
 
 @dataclass
-class State(yaml.YAMLObject):
-    yaml_tag = "!State"
-
+class State:
     musicxml_fname: str = ""
     mml_fname: str = ""
     loop_analysis: bool = False

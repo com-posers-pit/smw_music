@@ -13,9 +13,6 @@ from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from pathlib import Path
 
-# Library imports
-import yaml
-
 # Package imports
 from smw_music.utils import hexb
 
@@ -97,9 +94,7 @@ class SampleSource(IntEnum):
 
 
 @dataclass
-class InstrumentConfig(yaml.YAMLObject):
-    yaml_tag = "!InstrumentConfig"
-
+class InstrumentConfig:
     name: str
     octave: int = 3
     transpose: int = 0

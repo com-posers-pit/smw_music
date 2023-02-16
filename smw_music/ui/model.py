@@ -38,6 +38,7 @@ from smw_music.music_xml.instrument import (
 )
 from smw_music.music_xml.song import Song
 from smw_music.ui.sample import SamplePack
+from smw_music.ui.save import load, save
 from smw_music.ui.state import PreferencesState, State
 
 ###############################################################################
@@ -444,12 +445,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_load(self, fname: Path) -> None:
-        with open(fname, "r", encoding="utf8") as fobj:
-            contents = yaml.unsafe_load(fobj)
-
+        self._project_name, save_state = load(fname)
         self._undo_level = 0
-        self._history = [replace(contents["state"])]
-        self._project_name = contents["song"]
+        self._history = [replace(save_state)]
         self._project_path = fname.parent
         self.song = Song.from_music_xml(self.state.musicxml_fname)
         self.song.instruments[:] = self.state.instruments
@@ -562,15 +560,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_save(self) -> None:
-        contents = {
-            "version": __version__,
-            "song": self._project_name,
-            "state": self.state,
-        }
-
         fname = self._project_path / (self._project_name + ".prj")
-        with open(fname, "w", encoding="utf8") as fobj:
-            yaml.dump(contents, fobj)
+        save(fname, self._project_name, self.state)
 
     ###########################################################################
 
