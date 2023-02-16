@@ -84,6 +84,13 @@ def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
 
 
 ###############################################################################
+
+
+def _to_checked(checked: bool) -> Qt.CheckState:
+    return Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
+
+
+###############################################################################
 # Private constant definitions
 ###############################################################################
 
@@ -176,8 +183,8 @@ class _DynamicsWidgets(NamedTuple):
 
 
 class _SoloMute(enum.IntEnum):
-    SOLO = enum.auto()
-    MUTE = enum.auto()
+    SOLO = 0
+    MUTE = 1
 
 
 ###############################################################################
@@ -232,7 +239,7 @@ class Dashboard:
         self._model.start()
 
     ###########################################################################
-    # API signal definitions
+    # API slot definitions
     ###########################################################################
 
     def on_brr_clicked(self) -> None:
@@ -241,33 +248,6 @@ class Dashboard:
         )
         if fname:
             self._model.on_brr_fname_changed(fname)
-
-    ###########################################################################
-
-    def on_instruments_changed(self, names: list[str]) -> None:
-        widget = self._view.instrument_list
-        widget.clearContents()
-        widget.setRowCount(len(names))
-
-        for row, name in enumerate(names):
-            solo_box = QTableWidgetItem()
-            solo_box.setCheckState(Qt.CheckState.Unchecked)
-            solo_box.setData(Qt.ItemDataRole.UserRole, (_SoloMute.SOLO, row))
-            solo_box.setToolTip(f"Solo {name}")
-            _mark_unselectable(solo_box)
-
-            mute_box = QTableWidgetItem()
-            mute_box.setCheckState(Qt.CheckState.Unchecked)
-            mute_box.setData(Qt.ItemDataRole.UserRole, (_SoloMute.MUTE, row))
-            mute_box.setToolTip(f"Mute {name}")
-            _mark_unselectable(mute_box)
-
-            name_box = QTableWidgetItem(name)
-            name_box.setFlags(name_box.flags() & ~Qt.ItemFlag.ItemIsEditable)
-
-            widget.setItem(row, 0, solo_box)
-            widget.setItem(row, 1, mute_box)
-            widget.setItem(row, 2, name_box)
 
     ###########################################################################
 
@@ -343,7 +323,10 @@ class Dashboard:
 
     ###########################################################################
 
-    def on_state_changed(self, state: State) -> None:
+    def on_state_changed(self, state: State, update_instruments: bool) -> None:
+        if update_instruments:
+            self._update_instruments([inst.name for inst in state.instruments])
+
         v = self._view  # pylint: disable=invalid-name
         inst = state.inst
 
@@ -353,6 +336,14 @@ class Dashboard:
         v.loop_analysis.setChecked(state.loop_analysis)
         v.superloop_analysis.setChecked(state.superloop_analysis)
         v.measure_numbers.setChecked(state.measure_numbers)
+
+        # Solo/mute settings
+        inst_list = self._view.instrument_list
+        for row, inst_cfg in enumerate(state.instruments):
+            solo = _to_checked(inst_cfg.solo)
+            mute = _to_checked(inst_cfg.mute)
+            inst_list.item(row, _SoloMute.SOLO.value).setCheckState(solo)
+            inst_list.item(row, _SoloMute.MUTE.value).setCheckState(mute)
 
         # Instrument dynamics settings
         for dkey, dval in inst.dynamics.items():
@@ -487,12 +478,6 @@ class Dashboard:
             inst.gain_mode,
             inst.gain_setting,
         )
-
-    ###########################################################################
-
-    def update_song(self, song: Song) -> None:
-        pass
-        # self._volume.set_volume(song.volume)
 
     ###########################################################################
     # Private method definitions
@@ -667,7 +652,6 @@ class Dashboard:
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
-        m.instruments_changed.connect(self.on_instruments_changed)
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
         m.sample_packs_changed.connect(self.on_sample_packs_changed)
@@ -906,3 +890,40 @@ class Dashboard:
         tooltip = widget.toolTip()
         idx = (_LYRICS.index(tooltip) + 1) % len(_LYRICS)
         widget.setToolTip(_LYRICS[idx])
+
+    ###########################################################################
+
+    def _update_instruments(self, names: list[str]) -> None:
+        widget = self._view.instrument_list
+
+        with QSignalBlocker(widget):
+            widget.clearContents()
+            widget.setRowCount(len(names))
+
+            for row, name in enumerate(names):
+                solo_box = QTableWidgetItem()
+                solo_box.setCheckState(Qt.CheckState.Unchecked)
+                solo_box.setData(
+                    Qt.ItemDataRole.UserRole, (_SoloMute.SOLO, row)
+                )
+                solo_box.setToolTip(f"Solo {name}")
+                _mark_unselectable(solo_box)
+
+                mute_box = QTableWidgetItem()
+                mute_box.setCheckState(Qt.CheckState.Unchecked)
+                mute_box.setData(
+                    Qt.ItemDataRole.UserRole, (_SoloMute.MUTE, row)
+                )
+                mute_box.setToolTip(f"Mute {name}")
+                _mark_unselectable(mute_box)
+
+                name_box = QTableWidgetItem(name)
+                name_box.setFlags(
+                    name_box.flags() & ~Qt.ItemFlag.ItemIsEditable
+                )
+
+                widget.setItem(row, 0, solo_box)
+                widget.setItem(row, 1, mute_box)
+                widget.setItem(row, 2, name_box)
+
+    ###########################################################################

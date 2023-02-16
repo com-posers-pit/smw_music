@@ -64,7 +64,9 @@ def _parse_setting(val: int | str, maxval: int = 255) -> int:
 
 
 class Model(QObject):  # pylint: disable=too-many-public-methods
-    state_changed = pyqtSignal(State)
+    state_changed = pyqtSignal(
+        State, bool
+    )  # arguments=['state', 'update_instruments']
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
     project_loaded = pyqtSignal(str, str)  # arguments=['name', 'path']
@@ -157,8 +159,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def reinforce_state(self) -> None:
-        self._update_instruments()
-        self.state_changed.emit(self.state)
+        self.state_changed.emit(self.state, True)
 
     ###########################################################################
 
@@ -484,8 +485,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.response_generated.emit(True, "Song load", str(e))
         else:
             self.state.instruments = self.song.instruments
-            self._update_instruments()
-        self._update_state(musicxml_fname=fname)
+        self._update_state(True, musicxml_fname=fname)
 
     ###########################################################################
 
@@ -546,7 +546,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
-            self.state_changed.emit(self.state)
+            self.state_changed.emit(self.state, False)
 
     ###########################################################################
 
@@ -559,7 +559,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if instrument.name in instruments:
                 self.song.instruments[n] = instruments[instrument.name]
 
-        self._update_instruments()
+        self.reinforce_state()
 
     ###########################################################################
 
@@ -611,7 +611,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
-            self.state_changed.emit(self.state)
+            self.state_changed.emit(self.state, False)
 
     ###########################################################################
 
@@ -750,23 +750,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 new_state.instruments[idx] = new_inst
 
             self._history.append(new_state)
-            self.state_changed.emit(new_state)
+            self.state_changed.emit(new_state, False)
 
     ###########################################################################
 
-    def _update_instruments(self) -> None:
-        if song := self.song:
-            self.instruments_changed.emit([x.name for x in song.instruments])
-
-    ###########################################################################
-
-    def _update_state(self, **kwargs) -> None:
+    def _update_state(
+        self, update_instruments: bool = False, **kwargs
+    ) -> None:
         new_state = replace(self.state, **kwargs)
         if new_state != self.state:
             self._rollback_undo()
 
             self._history.append(new_state)
-            self.state_changed.emit(new_state)
+            self.state_changed.emit(new_state, update_instruments)
 
     ###########################################################################
     # API property definitions
