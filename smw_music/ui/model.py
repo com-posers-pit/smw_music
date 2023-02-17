@@ -454,8 +454,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._undo_level = 0
             self._history = [replace(save_state)]
             self._project_path = fname.parent
-            self.song = Song.from_music_xml(self.state.musicxml_fname)
-            self.song.instruments[:] = self.state.instruments
+            if self.state.musicxml_fname:
+                self.song = Song.from_music_xml(self.state.musicxml_fname)
+                self.song.instruments[:] = self.state.instruments
+            else:
+                self.song = None
 
             self.project_loaded.emit(self._project_name, str(fname))
 
