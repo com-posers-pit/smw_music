@@ -1904,10 +1904,19 @@
     <property name="title">
      <string>File</string>
     </property>
+    <widget class="QMenu" name="menuRecent_Projects">
+     <property name="title">
+      <string>Recent Projects</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="actionClearRecentProjects"/>
+    </widget>
     <addaction name="new_project"/>
     <addaction name="open_project"/>
     <addaction name="save_project"/>
     <addaction name="close_project"/>
+    <addaction name="separator"/>
+    <addaction name="menuRecent_Projects"/>
     <addaction name="separator"/>
     <addaction name="open_preferences"/>
     <addaction name="separator"/>
@@ -2001,6 +2010,11 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+Shift+Z</string>
+   </property>
+  </action>
+  <action name="actionClearRecentProjects">
+   <property name="text">
+    <string>Clear</string>
    </property>
   </action>
  </widget>

@@ -18,6 +18,7 @@ import stat
 import subprocess  # nosec 404
 import threading
 import zipfile
+from contextlib import suppress
 from dataclasses import replace
 from pathlib import Path
 
@@ -70,6 +71,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
     project_loaded = pyqtSignal(str, str)  # arguments=['name', 'path']
+    recent_projects_updated = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     response_generated = pyqtSignal(
@@ -184,6 +186,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def start(self) -> None:
         if self.prefs_fname.exists():
             self._load_prefs()
+
+        self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
 
     ###########################################################################
@@ -451,6 +455,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
         else:
+            self._append_recent_project(fname)
+
             self._undo_level = 0
             self._history = [replace(save_state)]
             self._project_path = fname.parent
@@ -546,6 +552,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_recent_projects_cleared(self) -> None:
+        self.recent_projects = []
+
+    ###########################################################################
+
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
@@ -617,13 +628,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.state_changed.emit(self.state, False)
 
     ###########################################################################
-
-    #    def save_as(self, fname: str) -> None:
-    #        self._project_file = Path(fname)
-    #        self.save()
-    #
-    ###########################################################################
     # Private method definitions
+    ###########################################################################
+
+    def _append_recent_project(self, fname: Path) -> None:
+        history_limit = 5
+        history = self.recent_projects
+        if fname in history:
+            history.remove(fname)
+        history.append(fname)
+        self.recent_projects = history[-history_limit:]
+
     ###########################################################################
 
     def _interpolate(self, level: Dynamics, setting: int) -> None:
@@ -676,7 +691,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             name: Path(pack["path"])
             for name, pack in prefs["sample_packs"].items()
         }
-
         self._load_sample_packs()
 
     ###########################################################################
@@ -772,9 +786,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     @property
-    def prefs_fname(self) -> Path:
+    def config_dir(self) -> Path:
         app = "xml2mml"
-        prefs = "preferences.yaml"
 
         match sys := platform.system():
             case "Linux":
@@ -787,7 +800,43 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             case _:
                 raise SmwMusicException(f"Unknown OS {sys}")
 
-        return conf_dir / app / prefs
+        return conf_dir / app
+
+    ###########################################################################
+
+    @property
+    def prefs_fname(self) -> Path:
+        return self.config_dir / "preferences.yaml"
+
+    ###########################################################################
+
+    @property
+    def recent_projects(self) -> list[Path]:
+        fname = self.recent_projects_fname
+        projects = None
+        with suppress(FileNotFoundError):
+            with open(fname, "r", encoding="utf8") as fobj:
+                projects = yaml.safe_load(fobj)
+
+        if projects is None:
+            projects = []
+
+        return [Path(project) for project in projects]
+
+    ###########################################################################
+
+    @recent_projects.setter
+    def recent_projects(self, projects: list[Path]) -> None:
+        with open(self.recent_projects_fname, "w", encoding="utf8") as fobj:
+            yaml.safe_dump([str(project) for project in projects], fobj)
+
+        self.recent_projects_updated.emit(projects)
+
+    ###########################################################################
+
+    @property
+    def recent_projects_fname(self) -> Path:
+        return self.config_dir / "projects.yaml"
 
     ###########################################################################
 

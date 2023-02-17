@@ -26,6 +26,12 @@ Dashboard
       model.mml_generated --> dashboard.on_mml_generated
       model.response_generated --> dashboard.on_response_generated
       model.sample_packs_changed --> dashboard.on_sample_packs_changed
+      model.recent_projects_updated --> dashboard.on_recent_projects_updated
+
+.. note::
+   The ``on_recent_projects_updated`` slot creates new actions, which are
+   connected back to ``model.on_load``
+
 
 Menus
 -----
@@ -36,6 +42,7 @@ Menus
       view.new_project.triggered --> dashboard._create_project
       view.open_project.triggered --> dashboard._open_project
       view.save_project.triggered --> model.on_save
+      view.actionClearRecentProjects.triggered --> model.on_recent_projects_cleared
       view.close_project.triggered --> TBD
       view.open_preferences.triggered --> dashboard._open_preferences
       view.exit_dashboard.triggered --> QApplication.quit
@@ -43,6 +50,7 @@ Menus
       view.redo.triggered --> model.on_redo_clicked
       view.show_about.triggered --> dashboard._about
       view.show_about_qt.triggered --> QApplication.aboutQt
+
 
 Control Panel
 -------------

@@ -17,11 +17,12 @@ import io
 import pkgutil
 from functools import partial
 from pathlib import Path
-from typing import NamedTuple
+from typing import NamedTuple, cast
 
 # Library imports
 from PyQt6 import uic
 from PyQt6.QtCore import QSignalBlocker, Qt
+from PyQt6.QtGui import QAction
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -32,6 +33,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QMainWindow,
+    QMenu,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -293,6 +295,23 @@ class Dashboard:
 
     def on_preview_envelope_clicked(self) -> None:
         self._envelope_preview.show()
+
+    ###########################################################################
+
+    def on_recent_projects_updated(self, projects: list[Path]) -> None:
+        menu = cast(QMenu, self._view.menuRecent_Projects)
+        clear = self._view.actionClearRecentProjects
+        menu.clear()
+
+        menu.addAction(clear)
+        last_action = menu.insertSeparator(clear)
+
+        for n, project in enumerate(projects):
+            action = QAction(parent=menu)
+            action.setText(f"{len(projects) - n} | {str(project)}")
+            action.triggered.connect(partial(self._model.on_load, project))
+            menu.insertAction(last_action, action)
+            last_action = action
 
     ###########################################################################
 
@@ -655,6 +674,10 @@ class Dashboard:
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
         m.sample_packs_changed.connect(self.on_sample_packs_changed)
+        m.recent_projects_updated.connect(self.on_recent_projects_updated)
+        v.actionClearRecentProjects.triggered.connect(
+            m.on_recent_projects_cleared
+        )
 
     ###########################################################################
 
