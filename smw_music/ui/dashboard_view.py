@@ -32,6 +32,7 @@ from PyQt6.QtWidgets import (
 
 
 class DashboardView(QMainWindow):
+    actionClearRecentProjects: QAction
     adsr_box: QFrame
     artic_acc_group: QGroupBox
     artic_acc_length_label: QLabel
@@ -171,12 +172,12 @@ class DashboardView(QMainWindow):
     instrument_sample_tab: QWidget
     instrument_settings_tab: QWidget
     interpolate: QCheckBox
-    label: QLabel
     loop_analysis: QCheckBox
     measure_numbers: QCheckBox
     menuEdit: QAction
     menuFile: QAction
     menuHelp: QAction
+    menuRecent_Projects: QAction
     menubar: QMenuBar
     mf_label: QLabel
     mf_setting: QLineEdit
@@ -187,9 +188,11 @@ class DashboardView(QMainWindow):
     mp_setting: QLineEdit
     mp_setting_label: QLabel
     mp_slider: QSlider
+    multisample_fname: QLineEdit
     musicxml_fname: QLineEdit
     new_project: QAction
     octave: QSpinBox
+    octave_label: QLabel
     open_preferences: QAction
     open_project: QAction
     open_quicklook: QPushButton
@@ -227,6 +230,8 @@ class DashboardView(QMainWindow):
     select_builtin_sample: QRadioButton
     select_gain_mode: QRadioButton
     select_mml_fname: QPushButton
+    select_multisample_fname: QPushButton
+    select_multisample_sample: QRadioButton
     select_musicxml_fname: QPushButton
     select_pack_sample: QRadioButton
     separator: QAction

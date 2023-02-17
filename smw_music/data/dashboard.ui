@@ -213,6 +213,76 @@
                   <string>Sample</string>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_5">
+                  <item row="6" column="2">
+                   <widget class="QLineEdit" name="brr_fname"/>
+                  </item>
+                  <item row="3" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_pack_sample">
+                    <property name="text">
+                     <string>Sample Pack Sample</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1" colspan="2">
+                   <widget class="QTreeWidget" name="sample_pack_list">
+                    <property name="editTriggers">
+                     <set>QAbstractItemView::NoEditTriggers</set>
+                    </property>
+                    <property name="headerHidden">
+                     <bool>true</bool>
+                    </property>
+                    <column>
+                     <property name="text">
+                      <string notr="true">1</string>
+                     </property>
+                    </column>
+                   </widget>
+                  </item>
+                  <item row="9" column="2">
+                   <widget class="QSpinBox" name="octave">
+                    <property name="maximum">
+                     <number>6</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="1">
+                   <widget class="QLabel" name="octave_label">
+                    <property name="text">
+                     <string>Octave</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_brr_sample">
+                    <property name="text">
+                     <string>Custom Sample</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_multisample_sample">
+                    <property name="text">
+                     <string>Multisample</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1" colspan="2">
+                   <widget class="QRadioButton" name="select_builtin_sample">
+                    <property name="text">
+                     <string>Builtin Sample</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1">
+                   <widget class="QPushButton" name="select_brr_fname">
+                    <property name="text">
+                     <string>brr</string>
+                    </property>
+                   </widget>
+                  </item>
                   <item row="2" column="1" colspan="2">
                    <widget class="QComboBox" name="builtin_sample">
                     <item>
@@ -367,68 +437,15 @@
                     </item>
                    </widget>
                   </item>
-                  <item row="5" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_brr_sample">
+                  <item row="8" column="1">
+                   <widget class="QPushButton" name="select_multisample_fname">
                     <property name="text">
-                     <string>Custom Sample</string>
+                     <string>brm</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_pack_sample">
-                    <property name="text">
-                     <string>Sample Pack Sample</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="1" colspan="2">
-                   <widget class="QTreeWidget" name="sample_pack_list">
-                    <property name="editTriggers">
-                     <set>QAbstractItemView::NoEditTriggers</set>
-                    </property>
-                    <property name="headerHidden">
-                     <bool>true</bool>
-                    </property>
-                    <column>
-                     <property name="text">
-                      <string notr="true">1</string>
-                     </property>
-                    </column>
-                   </widget>
-                  </item>
-                  <item row="1" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_builtin_sample">
-                    <property name="text">
-                     <string>Builtin Sample</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="2">
-                   <widget class="QLineEdit" name="brr_fname"/>
-                  </item>
-                  <item row="7" column="1">
-                   <widget class="QLabel" name="label">
-                    <property name="text">
-                     <string>Octave</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="2">
-                   <widget class="QSpinBox" name="octave">
-                    <property name="maximum">
-                     <number>6</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="1">
-                   <widget class="QPushButton" name="select_brr_fname">
-                    <property name="text">
-                     <string>brr</string>
-                    </property>
-                   </widget>
+                  <item row="8" column="2">
+                   <widget class="QLineEdit" name="multisample_fname"/>
                   </item>
                  </layout>
                 </widget>
