@@ -356,6 +356,7 @@ class Dashboard:
         v = self._view  # pylint: disable=invalid-name
         inst = state.inst
         self._unsaved = state.unsaved
+        self._project_name = state.project_name
 
         with ExitStack() as stack:
             for child in vars(v).values():
@@ -702,7 +703,7 @@ class Dashboard:
     ###########################################################################
 
     def _closeEvent(self, event):
-        if self._unsaved:
+        if self._unsaved and self._project_name is not None:
             quit_msg = "Save project before closing?"
             reply = QMessageBox.question(
                 self._view,
@@ -1004,5 +1005,3 @@ class Dashboard:
                 widget.setItem(row, 0, solo_box)
                 widget.setItem(row, 1, mute_box)
                 widget.setItem(row, 2, name_box)
-
-    ###########################################################################
