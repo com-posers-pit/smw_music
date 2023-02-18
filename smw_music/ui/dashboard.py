@@ -15,6 +15,7 @@
 import enum
 import io
 import pkgutil
+from contextlib import ExitStack
 from functools import partial
 from pathlib import Path
 from typing import NamedTuple, cast
@@ -43,6 +44,7 @@ from PyQt6.QtWidgets import (
     QTableWidgetItem,
     QTextEdit,
     QTreeWidgetItem,
+    QWidget,
 )
 
 # Package imports
@@ -355,161 +357,160 @@ class Dashboard:
         inst = state.inst
         self._unsaved = state.unsaved
 
-        # Control Panel
-        v.musicxml_fname.setText(state.musicxml_fname)
-        v.mml_fname.setText(state.mml_fname)
-        v.loop_analysis.setChecked(state.loop_analysis)
-        v.superloop_analysis.setChecked(state.superloop_analysis)
-        v.measure_numbers.setChecked(state.measure_numbers)
+        with ExitStack() as stack:
+            for child in vars(v).values():
+                if isinstance(child, QWidget):
+                    stack.enter_context(QSignalBlocker(child))
 
-        standalone_mode = state.project_name is None
-        v.generate_and_play.setEnabled(not standalone_mode)
-        v.generate_spc.setEnabled(not standalone_mode)
-        v.play_spc.setEnabled(not standalone_mode)
-        v.select_mml_fname.setEnabled(standalone_mode)
-        v.mml_fname.setEnabled(standalone_mode)
+            # Control Panel
+            v.musicxml_fname.setText(state.musicxml_fname)
+            v.mml_fname.setText(state.mml_fname)
+            v.loop_analysis.setChecked(state.loop_analysis)
+            v.superloop_analysis.setChecked(state.superloop_analysis)
+            v.measure_numbers.setChecked(state.measure_numbers)
 
-        # Solo/mute settings
-        inst_list = self._view.instrument_list
-        for row, inst_cfg in enumerate(state.instruments):
-            solo = _to_checked(inst_cfg.solo)
-            mute = _to_checked(inst_cfg.mute)
-            inst_list.item(row, _SoloMute.SOLO.value).setCheckState(solo)
-            inst_list.item(row, _SoloMute.MUTE.value).setCheckState(mute)
+            standalone_mode = state.project_name is None
+            v.generate_and_play.setEnabled(not standalone_mode)
+            v.generate_spc.setEnabled(not standalone_mode)
+            v.play_spc.setEnabled(not standalone_mode)
+            v.select_mml_fname.setEnabled(standalone_mode)
+            v.mml_fname.setEnabled(standalone_mode)
 
-        # Instrument dynamics settings
-        for dkey, dval in inst.dynamics.items():
-            dwidgets = self._dyn_widgets[dkey]
-            enable = dkey in inst.dynamics_present
+            # Solo/mute settings
+            inst_list = self._view.instrument_list
+            for row, inst_cfg in enumerate(state.instruments):
+                solo = _to_checked(inst_cfg.solo)
+                mute = _to_checked(inst_cfg.mute)
+                inst_list.item(row, _SoloMute.SOLO.value).setCheckState(solo)
+                inst_list.item(row, _SoloMute.MUTE.value).setCheckState(mute)
 
-            # These widgets can be modified indirectly when interpolation is
-            # enabled, which causes recursive loops.  Blocking signals works
-            # around this behavior.
-            with QSignalBlocker(dwidgets.slider):
+            # Instrument dynamics settings
+            for dkey, dval in inst.dynamics.items():
+                dwidgets = self._dyn_widgets[dkey]
+                enable = dkey in inst.dynamics_present
+
                 dwidgets.slider.setValue(dval)
                 dwidgets.slider.setEnabled(enable)
-            with QSignalBlocker(dwidgets.setting):
                 dwidgets.setting.setText(pct(dval))
                 dwidgets.setting.setEnabled(enable)
-            dwidgets.label.setText(hexb(dval))
-            dwidgets.label.setEnabled(enable)
+                dwidgets.label.setText(hexb(dval))
+                dwidgets.label.setEnabled(enable)
 
-        # Instrument articulation settings
-        for akey, aval in inst.artics.items():
-            awidgets = self._artic_widgets[akey]
-            awidgets.length_slider.setValue(aval.length)
-            awidgets.length_setting.setText(hexb(aval.length))
-            awidgets.volume_slider.setValue(aval.volume)
-            awidgets.volume_setting.setText(hexb(aval.volume))
-            awidgets.setting_label.setText(hexb(aval.setting))
+            # Instrument articulation settings
+            for akey, aval in inst.artics.items():
+                awidgets = self._artic_widgets[akey]
+                awidgets.length_slider.setValue(aval.length)
+                awidgets.length_setting.setText(hexb(aval.length))
+                awidgets.volume_slider.setValue(aval.volume)
+                awidgets.volume_setting.setText(hexb(aval.volume))
+                awidgets.setting_label.setText(hexb(aval.setting))
 
-        # Instrument pan settings
-        v.pan_enable.setChecked(inst.pan_enabled)
-        v.pan_setting.setEnabled(inst.pan_enabled)
-        v.pan_setting_label.setEnabled(inst.pan_enabled)
-        v.pan_setting.setValue(inst.pan_setting)
-        v.pan_setting_label.setText(inst.pan_description)
-        # Instrument sample
-        v.select_builtin_sample.setChecked(
-            inst.sample_source == SampleSource.BUILTIN
-        )
-        v.builtin_sample.setCurrentIndex(inst.builtin_sample_index)
-        v.select_pack_sample.setChecked(
-            inst.sample_source == SampleSource.SAMPLEPACK
-        )
-        v.sample_settings_box.setEnabled(
-            inst.sample_source != SampleSource.BUILTIN
-        )
-        try:
-            v.sample_pack_list.setCurrentItem(
-                self._sample_pack_items[state.inst.pack_sample]
+            # Instrument pan settings
+            v.pan_enable.setChecked(inst.pan_enabled)
+            v.pan_setting.setEnabled(inst.pan_enabled)
+            v.pan_setting_label.setEnabled(inst.pan_enabled)
+            v.pan_setting.setValue(inst.pan_setting)
+            v.pan_setting_label.setText(inst.pan_description)
+            # Instrument sample
+            v.select_builtin_sample.setChecked(
+                inst.sample_source == SampleSource.BUILTIN
             )
-        except KeyError:
-            pass
+            v.builtin_sample.setCurrentIndex(inst.builtin_sample_index)
+            v.select_pack_sample.setChecked(
+                inst.sample_source == SampleSource.SAMPLEPACK
+            )
+            v.sample_settings_box.setEnabled(
+                inst.sample_source != SampleSource.BUILTIN
+            )
+            try:
+                v.sample_pack_list.setCurrentItem(
+                    self._sample_pack_items[state.inst.pack_sample]
+                )
+            except KeyError:
+                pass
 
-        v.select_brr_sample.setChecked(inst.sample_source == SampleSource.BRR)
-        if inst.brr_fname.name:
-            brr_fname = str(inst.brr_fname)
-        else:
-            brr_fname = ""
-        v.brr_fname.setText(brr_fname)
-        v.octave.setValue(inst.octave)
+            v.select_brr_sample.setChecked(
+                inst.sample_source == SampleSource.BRR
+            )
+            fname = str(inst.brr_fname) if inst.brr_fname.name else ""
+            v.brr_fname.setText(fname)
+            v.octave.setValue(inst.octave)
 
-        v.select_adsr_mode.setChecked(inst.adsr_mode)
-        v.select_gain_mode.setChecked(not inst.adsr_mode)
-        v.gain_mode_direct.setChecked(inst.gain_mode == GainMode.DIRECT)
-        v.gain_mode_inclin.setChecked(inst.gain_mode == GainMode.INCLIN)
-        v.gain_mode_incbent.setChecked(inst.gain_mode == GainMode.INCBENT)
-        v.gain_mode_declin.setChecked(inst.gain_mode == GainMode.DECLIN)
-        v.gain_mode_decexp.setChecked(inst.gain_mode == GainMode.DECEXP)
-        v.gain_slider.setValue(inst.gain_setting)
-        v.gain_setting.setText(hexb(inst.gain_setting))
-        v.attack_slider.setValue(inst.attack_setting)
-        v.attack_setting.setText(hexb(inst.attack_setting))
-        v.decay_slider.setValue(inst.decay_setting)
-        v.decay_setting.setText(hexb(inst.decay_setting))
-        v.sus_level_slider.setValue(inst.sus_level_setting)
-        v.sus_level_setting.setText(hexb(inst.sus_level_setting))
-        v.sus_rate_slider.setValue(inst.sus_rate_setting)
-        v.sus_rate_setting.setText(hexb(inst.sus_rate_setting))
+            v.select_adsr_mode.setChecked(inst.adsr_mode)
+            v.select_gain_mode.setChecked(not inst.adsr_mode)
+            v.gain_mode_direct.setChecked(inst.gain_mode == GainMode.DIRECT)
+            v.gain_mode_inclin.setChecked(inst.gain_mode == GainMode.INCLIN)
+            v.gain_mode_incbent.setChecked(inst.gain_mode == GainMode.INCBENT)
+            v.gain_mode_declin.setChecked(inst.gain_mode == GainMode.DECLIN)
+            v.gain_mode_decexp.setChecked(inst.gain_mode == GainMode.DECEXP)
+            v.gain_slider.setValue(inst.gain_setting)
+            v.gain_setting.setText(hexb(inst.gain_setting))
+            v.attack_slider.setValue(inst.attack_setting)
+            v.attack_setting.setText(hexb(inst.attack_setting))
+            v.decay_slider.setValue(inst.decay_setting)
+            v.decay_setting.setText(hexb(inst.decay_setting))
+            v.sus_level_slider.setValue(inst.sus_level_setting)
+            v.sus_level_setting.setText(hexb(inst.sus_level_setting))
+            v.sus_rate_slider.setValue(inst.sus_rate_setting)
+            v.sus_rate_setting.setText(hexb(inst.sus_rate_setting))
 
-        v.tune_slider.setValue(inst.tune_setting)
-        v.tune_setting.setText(hexb(inst.tune_setting))
-        v.subtune_slider.setValue(inst.subtune_setting)
-        v.subtune_setting.setText(hexb(inst.subtune_setting))
+            v.tune_slider.setValue(inst.tune_setting)
+            v.tune_setting.setText(hexb(inst.tune_setting))
+            v.subtune_slider.setValue(inst.subtune_setting)
+            v.subtune_setting.setText(hexb(inst.subtune_setting))
 
-        v.brr_setting.setText(inst.brr_str)
+            v.brr_setting.setText(inst.brr_str)
 
-        # Global settings
-        v.global_volume_slider.setValue(state.global_volume)
-        v.global_volume_setting.setText(pct(state.global_volume))
-        v.global_volume_setting_label.setText(hexb(state.global_volume))
-        v.global_legato.setChecked(state.global_legato)
-        v.echo_enable.setChecked(EchoCh.GLOBAL in state.echo.enables)
-        v.echo_ch0.setChecked(EchoCh.CH0 in state.echo.enables)
-        v.echo_ch1.setChecked(EchoCh.CH1 in state.echo.enables)
-        v.echo_ch2.setChecked(EchoCh.CH2 in state.echo.enables)
-        v.echo_ch3.setChecked(EchoCh.CH3 in state.echo.enables)
-        v.echo_ch4.setChecked(EchoCh.CH4 in state.echo.enables)
-        v.echo_ch5.setChecked(EchoCh.CH5 in state.echo.enables)
-        v.echo_ch6.setChecked(EchoCh.CH6 in state.echo.enables)
-        v.echo_ch7.setChecked(EchoCh.CH7 in state.echo.enables)
-        v.echo_filter_0.setChecked(state.echo.fir_filt == 0)
-        v.echo_filter_1.setChecked(state.echo.fir_filt == 1)
+            # Global settings
+            v.global_volume_slider.setValue(state.global_volume)
+            v.global_volume_setting.setText(pct(state.global_volume))
+            v.global_volume_setting_label.setText(hexb(state.global_volume))
+            v.global_legato.setChecked(state.global_legato)
+            v.echo_enable.setChecked(EchoCh.GLOBAL in state.echo.enables)
+            v.echo_ch0.setChecked(EchoCh.CH0 in state.echo.enables)
+            v.echo_ch1.setChecked(EchoCh.CH1 in state.echo.enables)
+            v.echo_ch2.setChecked(EchoCh.CH2 in state.echo.enables)
+            v.echo_ch3.setChecked(EchoCh.CH3 in state.echo.enables)
+            v.echo_ch4.setChecked(EchoCh.CH4 in state.echo.enables)
+            v.echo_ch5.setChecked(EchoCh.CH5 in state.echo.enables)
+            v.echo_ch6.setChecked(EchoCh.CH6 in state.echo.enables)
+            v.echo_ch7.setChecked(EchoCh.CH7 in state.echo.enables)
+            v.echo_filter_0.setChecked(state.echo.fir_filt == 0)
+            v.echo_filter_1.setChecked(state.echo.fir_filt == 1)
 
-        v.echo_left_slider.setValue(
-            int(v.echo_left_slider.maximum() * state.echo.vol_mag[0])
-        )
-        v.echo_left_setting.setText(pct(state.echo.vol_mag[0], 1.0))
-        v.echo_left_surround.setChecked(state.echo.vol_inv[0])
-        v.echo_left_setting_label.setText(hexb(state.echo.left_vol_reg))
-        v.echo_right_slider.setValue(
-            int(v.echo_right_slider.maximum() * state.echo.vol_mag[1])
-        )
-        v.echo_right_setting.setText(pct(state.echo.vol_mag[1], 1.0))
-        v.echo_right_surround.setChecked(state.echo.vol_inv[1])
-        v.echo_right_setting_label.setText(hexb(state.echo.right_vol_reg))
-        v.echo_feedback_slider.setValue(
-            int(v.echo_feedback_slider.maximum() * state.echo.fb_mag)
-        )
-        v.echo_feedback_setting.setText(pct(state.echo.fb_mag, 1.0))
-        v.echo_feedback_surround.setChecked(state.echo.fb_inv)
-        v.echo_feedback_setting_label.setText(hexb(state.echo.fb_reg))
-        v.echo_delay_slider.setValue(state.echo.delay)
-        v.echo_delay_setting.setText(hexb(state.echo.delay))
-        v.echo_delay_setting_label.setText(f"{16*state.echo.delay}ms")
+            v.echo_left_slider.setValue(
+                int(v.echo_left_slider.maximum() * state.echo.vol_mag[0])
+            )
+            v.echo_left_setting.setText(pct(state.echo.vol_mag[0], 1.0))
+            v.echo_left_surround.setChecked(state.echo.vol_inv[0])
+            v.echo_left_setting_label.setText(hexb(state.echo.left_vol_reg))
+            v.echo_right_slider.setValue(
+                int(v.echo_right_slider.maximum() * state.echo.vol_mag[1])
+            )
+            v.echo_right_setting.setText(pct(state.echo.vol_mag[1], 1.0))
+            v.echo_right_surround.setChecked(state.echo.vol_inv[1])
+            v.echo_right_setting_label.setText(hexb(state.echo.right_vol_reg))
+            v.echo_feedback_slider.setValue(
+                int(v.echo_feedback_slider.maximum() * state.echo.fb_mag)
+            )
+            v.echo_feedback_setting.setText(pct(state.echo.fb_mag, 1.0))
+            v.echo_feedback_surround.setChecked(state.echo.fb_inv)
+            v.echo_feedback_setting_label.setText(hexb(state.echo.fb_reg))
+            v.echo_delay_slider.setValue(state.echo.delay)
+            v.echo_delay_setting.setText(hexb(state.echo.delay))
+            v.echo_delay_setting_label.setText(f"{16*state.echo.delay}ms")
 
-        # Apply the more interesting UI updates
-        self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)
-        self._update_envelope(
-            inst.adsr_mode,
-            inst.attack_setting,
-            inst.decay_setting,
-            inst.sus_level_setting,
-            inst.sus_rate_setting,
-            inst.gain_mode,
-            inst.gain_setting,
-        )
+            # Apply the more interesting UI updates
+            self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)
+            self._update_envelope(
+                inst.adsr_mode,
+                inst.attack_setting,
+                inst.decay_setting,
+                inst.sus_level_setting,
+                inst.sus_rate_setting,
+                inst.gain_mode,
+                inst.gain_setting,
+            )
 
     ###########################################################################
     # Private method definitions
