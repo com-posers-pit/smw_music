@@ -305,6 +305,16 @@ class Dashboard:
         self._unsaved = state.unsaved
         self._project_name = state.project_name
 
+        if self._project_name is None:
+            title = "[No project]"
+        else:
+            title = f"[{self._project_name}]"
+            if self._unsaved:
+                title += " +"
+
+        title += f" - beer v{__version__}"
+        v.setWindowTitle(title)
+
         with ExitStack() as stack:
             for child in vars(v).values():
                 if isinstance(child, QWidget):
