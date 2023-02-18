@@ -33,6 +33,7 @@ from PyQt6.QtWidgets import (
     QHeaderView,
     QLabel,
     QLineEdit,
+    QListWidget,
     QMainWindow,
     QMenu,
     QMessageBox,
@@ -57,6 +58,7 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
+from smw_music.ui.quotes import lyrics
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import State
 from smw_music.utils import hexb, pct
@@ -94,73 +96,6 @@ def _to_checked(checked: bool) -> Qt.CheckState:
 
 
 ###############################################################################
-# Private constant definitions
-###############################################################################
-
-_LYRICS = [
-    "You're walking in the woods",
-    "There's no one around and your phone is dead",
-    "Out of the corner of your eye you spot him",
-    "Shia LaBeouf",
-    "He's following you, about 30 feet back",
-    "He gets down on all fours and breaks into a sprint",
-    "He's gaining on you",
-    "Shia LaBeouf",
-    "You're looking for you car but you're all turned around",
-    "He's almost upon you now",
-    "And you can see there's blood on his face",
-    "My God, there's blood everywhere!",
-    "Running for you life (from Shia LaBeouf)",
-    "He's brandishing a knife (it's Shia LaBeouf)",
-    "Lurking in the shadows",
-    "Hollywood superstar Shia LaBeouf",
-    "Living in the woods (Shia LaBeouf)",
-    "Killing for sport (Shia LaBeouf)",
-    "Eating all the bodies",
-    "Actual cannibal Shia LaBeouf",
-    "Now it's dark, and you seem to have lost him",
-    "But you're hopelessly lost yourself",
-    "Stranded with a murderer",
-    "You creep silently through the underbrush",
-    "Aha! In the distance",
-    "A small cottage with a light on",
-    "Hope! You move stealthily toward it",
-    "But your leg! Ah! It's caught in a bear trap!",
-    "Gnawing off your leg (quiet, quiet)",
-    "Limping to the cottage (quiet, quiet)",
-    "Now you're on the doorstep",
-    "Sitting inside",
-    "Shia LaBeouf",
-    "Sharpening an axe (Shia LaBeouf)",
-    "But he doesn't hear you enter (Shia LaBeouf)",
-    "You're sneaking up behind him",
-    "Strangling superstar",
-    "Shia LaBeouf",
-    "Fighting for your life with Shia LaBeouf",
-    "Wrestling a knife from Shia LaBeouf",
-    "Stab him in his kidney",
-    "Safe at last from Shia LaBeouf",
-    "You limp into the dark woods",
-    "Blood oozing from your stump leg",
-    "You've beaten Shia LaBeouf",
-    "Wait! He isn't dead (Shia surprise)",
-    "There's a gun to your head and death in his eyes",
-    "But you can do jiu-jitsu",
-    "Body slam superstar Shia LaBeouf",
-    "Legendary fight with Shia LaBeouf",
-    "Normal Tuesday night for Shia LaBeouf",
-    "You try to swing an axe at Shia LaBeouf",
-    "But blood is draining fast from your stump leg",
-    "He's dodging every swipe, he parries to the left",
-    "You counter to the right, you catch him in the neck",
-    "You're chopping his head now",
-    "You have just decapitated Shia LaBeouf",
-    "His head topples to the floor, expressionless",
-    "You fall to your knees and catch your breath",
-    "You're finally safe from Shia LaBeouf",
-]
-
-###############################################################################
 # Private class definitions
 ###############################################################################
 
@@ -196,6 +131,8 @@ class _SoloMute(enum.IntEnum):
 
 
 class Dashboard:
+    _history: QMainWindow
+    _history_list: QListWidget
     _quicklook: QMainWindow
     _quicklook_edit: QTextEdit
     _envelope_preview: EnvelopePreview
@@ -234,6 +171,11 @@ class Dashboard:
         self._quicklook.setMinimumSize(800, 600)
         self._quicklook.setCentralWidget(self._quicklook_edit)
 
+        self._history_list = QListWidget()
+        self._history = QMainWindow(parent=self._view)
+        self._history.setMinimumSize(800, 600)
+        self._history.setCentralWidget(self._history_list)
+
         self._envelope_preview = EnvelopePreview(self._view)
 
         self._setup_menus()
@@ -241,7 +183,7 @@ class Dashboard:
         self._combine_widgets()
         self._setup_instrument_table()
         self._attach_signals()
-        self._view.generate_and_play.setToolTip(_LYRICS[0])
+        self._view.generate_and_play.setToolTip(lyrics[0])
 
         self._view.show()
 
@@ -283,6 +225,11 @@ class Dashboard:
         )
         if fname:
             self._model.on_musicxml_fname_changed(fname)
+
+    ###########################################################################
+
+    def on_open_history_clicked(self) -> None:
+        self._history.show()
 
     ###########################################################################
 
@@ -516,9 +463,12 @@ class Dashboard:
     ###########################################################################
 
     def on_status_updated(self, msg: str, init) -> None:
+        self._history_list.insertItem(0, msg)
         if not init:
             if self._project_name is not None:
-                project = f"Project: {self._project_name}"
+                project = self._project_name
+                if self._unsaved:
+                    project = project + "*"
             else:
                 project = "No project loaded"
             msg = f"{project} | {msg}"
@@ -581,6 +531,7 @@ class Dashboard:
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
+            (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
@@ -974,8 +925,8 @@ class Dashboard:
     def _update_generate_and_play_tooltip(self) -> None:
         widget = self._view.generate_and_play
         tooltip = widget.toolTip()
-        idx = (_LYRICS.index(tooltip) + 1) % len(_LYRICS)
-        widget.setToolTip(_LYRICS[idx])
+        idx = (lyrics.index(tooltip) + 1) % len(lyrics)
+        widget.setToolTip(lyrics[idx])
 
     ###########################################################################
 

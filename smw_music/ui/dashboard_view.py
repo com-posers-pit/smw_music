@@ -193,6 +193,7 @@ class DashboardView(QMainWindow):
     new_project: QAction
     octave: QSpinBox
     octave_label: QLabel
+    open_history: QPushButton
     open_preferences: QAction
     open_project: QAction
     open_quicklook: QPushButton

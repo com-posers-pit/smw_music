@@ -68,6 +68,7 @@ Control Panel
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
       view.reload_musicxml.released --> model.on_reload_musicxml_clicked
       view.open_quicklook.released --> dashboard.on_open_quicklook_clicked
+      view.open_history.released --> dashboard.on_open_history_clicked
       view.generate_mml.released --> model.on_generate_mml_clicked
       view.generate_spc.released --> model.on_generate_spc_clicked
       view.play_spc.released --> model.on_play_spc_clicked
