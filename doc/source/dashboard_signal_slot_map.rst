@@ -44,7 +44,7 @@ Menus
       view.open_project.triggered --> dashboard._open_project
       view.save_project.triggered --> model.on_save
       view.actionClearRecentProjects.triggered --> model.on_recent_projects_cleared
-      view.close_project.triggered --> TBD
+      view.close_project.triggered --> dashboard._on_close_project_clicked --> model.close_project
       view.open_preferences.triggered --> dashboard._open_preferences
       view.exit_dashboard.triggered --> QApplication.quit
       view.undo.triggered --> model.on_undo_clicked

@@ -171,8 +171,27 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def close_project(self) -> None:
+        self._project_path = None
+        self._update_state(project_name=None)
+        self._update_status("Project closed")
+
+    ###########################################################################
+
     def reinforce_state(self) -> None:
         self._signal_state_change(update_instruments=True, state_change=False)
+
+    ###########################################################################
+
+    def start(self) -> None:
+        if self.prefs_fname.exists():
+            self._load_prefs()
+
+        self.recent_projects_updated.emit(self.recent_projects)
+        self.reinforce_state()
+
+        quote: tuple[str, str] = choice(quotes)
+        self._update_status(f"{quote[1]}: {quote[0]}", True)
 
     ###########################################################################
 
@@ -191,18 +210,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             yaml.safe_dump(prefs_dict, fobj)
 
         self._load_prefs()
-
-    ###########################################################################
-
-    def start(self) -> None:
-        if self.prefs_fname.exists():
-            self._load_prefs()
-
-        self.recent_projects_updated.emit(self.recent_projects)
-        self.reinforce_state()
-
-        quote: tuple[str, str] = choice(quotes)
-        self._update_status(f'{quote[1]}: "{quote[0]}"', True)
 
     ###########################################################################
     # API slot definitions

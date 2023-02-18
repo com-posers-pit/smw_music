@@ -328,9 +328,13 @@ class Dashboard:
             v.measure_numbers.setChecked(state.measure_numbers)
 
             standalone_mode = state.project_name is None
-            v.generate_and_play.setEnabled(not standalone_mode)
-            v.generate_spc.setEnabled(not standalone_mode)
-            v.play_spc.setEnabled(not standalone_mode)
+            project_mode = not standalone_mode
+
+            v.generate_and_play.setEnabled(project_mode)
+            v.generate_spc.setEnabled(project_mode)
+            v.play_spc.setEnabled(project_mode)
+            v.save_project.setEnabled(project_mode)
+            v.close_project.setEnabled(project_mode)
             v.select_mml_fname.setEnabled(standalone_mode)
             v.mml_fname.setEnabled(standalone_mode)
 
@@ -474,14 +478,6 @@ class Dashboard:
 
     def on_status_updated(self, msg: str, init) -> None:
         self._history_list.insertItem(0, msg)
-        if not init:
-            if self._project_name is not None:
-                project = self._project_name
-                if self._unsaved:
-                    project = project + "*"
-            else:
-                project = "No project loaded"
-            msg = f"{project} | {msg}"
         self._view.statusBar().showMessage(msg)
 
     ###########################################################################
@@ -670,25 +666,9 @@ class Dashboard:
     ###########################################################################
 
     def _closeEvent(self, event):
-        if self._unsaved and self._project_name is not None:
-            quit_msg = "Save project before closing?"
-            reply = QMessageBox.question(
-                self._view,
-                "Save project",
-                quit_msg,
-                QMessageBox.StandardButton.Yes
-                | QMessageBox.StandardButton.No
-                | QMessageBox.StandardButton.Cancel,
-                QMessageBox.StandardButton.Cancel,
-            )
+        reply = self._prompt_to_save()
 
-            if reply == QMessageBox.StandardButton.Cancel:
-                event.ignore()
-            else:
-                if reply == QMessageBox.StandardButton.Yes:
-                    self._model.on_save()
-                event.accept()
-        else:
+        if reply is None:
             quit_msg = "Close program?"
             reply = QMessageBox.question(
                 self._view,
@@ -702,6 +682,11 @@ class Dashboard:
                 event.accept()
             else:
                 event.ignore()
+        else:
+            if reply == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+            else:
+                event.accept()
 
     ###########################################################################
 
@@ -821,6 +806,13 @@ class Dashboard:
 
     ###########################################################################
 
+    def _on_close_project_clicked(self) -> None:
+        close = self._prompt_to_save()
+        if close != QMessageBox.StandardButton.Cancel:
+            self._model.close_project()
+
+    ###########################################################################
+
     def _on_inst_change(self) -> None:
         widget = self._view.instrument_list
         self._model.on_instrument_changed(widget.currentRow())
@@ -857,6 +849,26 @@ class Dashboard:
 
     ###########################################################################
 
+    def _prompt_to_save(self) -> QMessageBox.StandardButton | None:
+        reply = None
+        if self._unsaved and self._project_name is not None:
+            quit_msg = "Save project before closing?"
+            reply = QMessageBox.question(
+                self._view,
+                "Save project",
+                quit_msg,
+                QMessageBox.StandardButton.Yes
+                | QMessageBox.StandardButton.No
+                | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Cancel,
+            )
+
+            if reply == QMessageBox.StandardButton.Yes:
+                self._model.on_save()
+        return reply
+
+    ###########################################################################
+
     def _setup_instrument_table(self) -> None:
         widget = self._view.instrument_list
         solo_item = QTableWidgetItem("S")
@@ -880,7 +892,7 @@ class Dashboard:
         view.new_project.triggered.connect(self._create_project)
         view.open_project.triggered.connect(self._open_project)
         view.save_project.triggered.connect(model.on_save)
-        view.close_project.triggered.connect(lambda _: None)
+        view.close_project.triggered.connect(self._on_close_project_clicked)
         view.open_preferences.triggered.connect(self._open_preferences)
         view.exit_dashboard.triggered.connect(QApplication.quit)
 
