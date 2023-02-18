@@ -21,6 +21,7 @@ import zipfile
 from contextlib import suppress
 from dataclasses import replace
 from pathlib import Path
+from random import choice
 
 # Library imports
 import yaml
@@ -38,6 +39,7 @@ from smw_music.music_xml.instrument import (
     SampleSource,
 )
 from smw_music.music_xml.song import Song
+from smw_music.ui.quotes import quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import PreferencesState, State
@@ -73,6 +75,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     recent_projects_updated = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
+    status_updated = pyqtSignal(str)  # arguments=['message']
     response_generated = pyqtSignal(
         bool, str, str
     )  # arguments=["error", "title", "response"]
@@ -156,6 +159,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         )
 
         self._append_recent_project(path)
+        self.status_updated.emit(f"Created project {project_name}")
         self.on_save()
 
     ###########################################################################
@@ -189,6 +193,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
+
+        quote: tuple[str, str] = choice(quotes)
+        self.status_updated.emit(f'{quote[1]}: "{quote[0]}"')
 
     ###########################################################################
     # API slot definitions
@@ -487,6 +494,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.song = None
 
             self._update_state(True, project_name=project_name)
+            self.status_updated.emit(f"Opened project {project_name}")
 
     ###########################################################################
 

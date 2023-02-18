@@ -513,6 +513,11 @@ class Dashboard:
             )
 
     ###########################################################################
+
+    def on_status_updated(self, msg: str) -> None:
+        self._view.statusBar().showMessage(msg)
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -692,6 +697,7 @@ class Dashboard:
         v.actionClearRecentProjects.triggered.connect(
             m.on_recent_projects_cleared
         )
+        m.status_updated.connect(self.on_status_updated)
 
     ###########################################################################
 
