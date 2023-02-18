@@ -320,13 +320,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_declin_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(gain_mode=GainMode.DECLIN)
+            self._update_inst_state(
+                gain_mode=GainMode.DECLIN,
+                gain_setting=min(31, self.state.inst.gain_setting),
+            )
 
     ###########################################################################
 
     def on_gain_decexp_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(gain_mode=GainMode.DECEXP)
+            self._update_inst_state(
+                gain_mode=GainMode.DECEXP,
+                gain_setting=min(31, self.state.inst.gain_setting),
+            )
 
     ###########################################################################
 
@@ -338,13 +344,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_incbent_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(gain_mode=GainMode.INCBENT)
+            self._update_inst_state(
+                gain_mode=GainMode.INCBENT,
+                gain_setting=min(31, self.state.inst.gain_setting),
+            )
 
     ###########################################################################
 
     def on_gain_inclin_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(gain_mode=GainMode.INCLIN)
+            self._update_inst_state(
+                gain_mode=GainMode.INCLIN,
+                gain_setting=min(31, self.state.inst.gain_setting),
+            )
 
     ###########################################################################
 
