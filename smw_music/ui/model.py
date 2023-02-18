@@ -472,9 +472,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._undo_level = 0
             self._history = [replace(save_state)]
             self._project_path = fname.parent
-            if self.state.musicxml_fname:
-                self.song = Song.from_music_xml(self.state.musicxml_fname)
-                self.song.instruments[:] = self.state.instruments
+            if musicxml := self.state.musicxml_fname:
+                try:
+                    self.song = Song.from_music_xml(musicxml)
+                    # TODO: Cleaner updates
+                    self.song.instruments[:] = self.state.instruments
+                except MusicXmlException as e:
+                    self.response_generated.emit(
+                        True,
+                        "Error loading score",
+                        f"Could not open score {musicxml}: {str(e)}",
+                    )
             else:
                 self.song = None
 
