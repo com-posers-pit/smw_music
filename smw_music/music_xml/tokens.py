@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
+# SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -15,6 +15,9 @@ from enum import Enum, auto
 
 # Library imports
 import music21
+
+# Package imports
+from smw_music.music_xml.shared import MusicXmlException
 
 ###############################################################################
 # Private variable/constant definitions
@@ -285,6 +288,26 @@ class Dynamic(Token):
         Confirm this heuristic is good enough, or parameterize
         """
         return cls(elem.value)
+
+    ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __post_init__(self) -> None:
+        dyn = self.level
+        if dyn.lower() not in [
+            "pppp",
+            "ppp",
+            "pp",
+            "p",
+            "mp",
+            "mf",
+            "f",
+            "ff",
+            "fff",
+            "ffff",
+        ]:
+            raise MusicXmlException(f"Invalid dynamic level {dyn}")
 
     ###########################################################################
     # API property definitions

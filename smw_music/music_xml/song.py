@@ -440,7 +440,11 @@ class Song:
                         triplets = False
 
                 if isinstance(subelem, music21.dynamics.Dynamic):
-                    channel_elem.append(Dynamic.from_music_xml(subelem))
+                    try:
+                        channel_elem.append(Dynamic.from_music_xml(subelem))
+                    except MusicXmlException as e:
+                        msg = f"{e} in measure {measure.number}"
+                        channel_elem.append(Error(msg))
                 if isinstance(
                     subelem, (music21.note.Note, music21.note.Unpitched)
                 ):

@@ -199,6 +199,14 @@ def test_conversion(src, dst, args, tmp_path):
             "ComplexNoteLength.mxl",
             r"Unsupported note #1 in Measure 7 in staff 1",
         ),
+        (
+            "Invalid_Dynamics.mxl",
+            r"Invalid dynamic level ppppp in measure 1 in staff 1",
+        ),
+        (
+            "Invalid_Dynamics.mxl",
+            r"Invalid dynamic level fffff in measure 2 in staff 1",
+        ),
         ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
         ("TooHigh.mxl", r"Unsupported note c7 #3 in measure 1 in staff 1"),
         ("TooLow.mxl", r"Unsupported note a0 #2 in measure 1 in staff 1"),
@@ -209,6 +217,8 @@ def test_conversion(src, dst, args, tmp_path):
         "Chord 1",
         "Chord 2",
         "Chord 3",
+        "Too quiet",
+        "Too loud",
         "Bad 5/4 whole rest",
         "Bad 5/8 whole rest",
         "Percussion Chord",
