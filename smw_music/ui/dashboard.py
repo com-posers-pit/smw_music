@@ -515,7 +515,13 @@ class Dashboard:
 
     ###########################################################################
 
-    def on_status_updated(self, msg: str) -> None:
+    def on_status_updated(self, msg: str, init) -> None:
+        if not init:
+            if self._project_name is not None:
+                project = f"Project: {self._project_name}"
+            else:
+                project = "No project loaded"
+            msg = f"{project} | {msg}"
         self._view.statusBar().showMessage(msg)
 
     ###########################################################################
