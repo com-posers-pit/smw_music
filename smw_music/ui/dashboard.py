@@ -362,6 +362,13 @@ class Dashboard:
         v.superloop_analysis.setChecked(state.superloop_analysis)
         v.measure_numbers.setChecked(state.measure_numbers)
 
+        standalone_mode = state.project_name is None
+        v.generate_and_play.setEnabled(not standalone_mode)
+        v.generate_spc.setEnabled(not standalone_mode)
+        v.play_spc.setEnabled(not standalone_mode)
+        v.select_mml_fname.setEnabled(standalone_mode)
+        v.mml_fname.setEnabled(standalone_mode)
+
         # Solo/mute settings
         inst_list = self._view.instrument_list
         for row, inst_cfg in enumerate(state.instruments):
