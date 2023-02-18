@@ -466,7 +466,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             else:
                 self.song = None
 
-            self._update_state(project_name=project_name)
+            self._update_state(True, project_name=project_name)
 
     ###########################################################################
 
@@ -534,10 +534,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_play_spc_clicked(self) -> None:
         path = self._project_path
-        spc_name = self.state.project_name
+        project = self.state.project_name
 
-        if path is not None and spc_name is not None:
-            spc_name = f"{spc_name}.spc"
+        if path is not None and project is not None:
+            spc_name = f"{project}.spc"
             spc_name = str(path / "SPCs" / spc_name)
             threading.Thread(
                 target=subprocess.call,
@@ -575,8 +575,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_save(self) -> None:
-        fname = self._project_path / (self.state.project_name + ".prj")
-        save(fname, self.state.project_name, self.state)
+        path = self._project_path
+        project = self.state.project_name
+
+        if path is not None and project is not None:
+            fname = path / (project + ".prj")
+            save(fname, project, self.state)
 
     ###########################################################################
 
