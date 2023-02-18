@@ -51,6 +51,8 @@ class State:
             set(), (0, 0), (False, False), 0, 0, False, 0
         )
     )
+    unsaved: bool = True
+    project_name: str | None = None
 
     ###########################################################################
     # Property definitions

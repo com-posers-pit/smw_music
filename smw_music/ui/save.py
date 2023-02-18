@@ -270,3 +270,4 @@ def save(fname: Path, project: str, state: State):
             },
             fobj,
         )
+    state.unsaved = False

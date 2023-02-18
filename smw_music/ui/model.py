@@ -70,7 +70,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     )  # arguments=['state', 'update_instruments']
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
-    project_loaded = pyqtSignal(str, str)  # arguments=['name', 'path']
     recent_projects_updated = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
@@ -84,7 +83,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _undo_level: int
     _sample_packs: dict[str, SamplePack]
     _project_path: Path | None
-    _project_name: str | None
 
     ###########################################################################
     # Constructor definitions
@@ -98,7 +96,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._undo_level = 0
 
         self._project_path = None
-        self._project_name = None
 
     ###########################################################################
     # API method definitions
@@ -108,7 +105,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, path: Path, project_name: str | None = None
     ) -> None:
         self._project_path = path
-        self._project_name = project_name or path.name
+        if project_name is None:
+            project_name = path.name
 
         members = [
             "1DF9",
@@ -142,7 +140,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             tmpl = Template(  # nosec B702
                 pkgutil.get_data("smw_music", f"data/{tmpl_name}")
             )
-            script = tmpl.render(project=self._project_name)
+            script = tmpl.render(project=project_name)
             target = path / tmpl_name
 
             with open(target, "w", encoding="utf8") as fobj:
@@ -151,17 +149,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
 
         self._update_state(
+            project_name=project_name,
             mml_fname=str(
-                self._project_path / "music" / f"{self._project_name}.txt"
-            )
+                self._project_path / "music" / f"{project_name}.txt"
+            ),
         )
 
+        self._append_recent_project(path)
         self.on_save()
 
     ###########################################################################
 
     def reinforce_state(self) -> None:
-        self.state_changed.emit(self.state, True)
+        self._signal_state_change(True)
 
     ###########################################################################
 
@@ -451,7 +451,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         try:
-            self._project_name, save_state = load(fname)
+            project_name, save_state = load(fname)
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
         else:
@@ -466,9 +466,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             else:
                 self.song = None
 
-            self.project_loaded.emit(self._project_name, str(fname))
-
-            self.reinforce_state()
+            self._update_state(project_name=project_name)
 
     ###########################################################################
 
@@ -536,10 +534,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_play_spc_clicked(self) -> None:
         path = self._project_path
+        spc_name = self.state.project_name
 
-        if path is not None:
-            spc_name = self._project_name
-
+        if path is not None and spc_name is not None:
             spc_name = f"{spc_name}.spc"
             spc_name = str(path / "SPCs" / spc_name)
             threading.Thread(
@@ -560,7 +557,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
-            self.state_changed.emit(self.state, False)
+            self._signal_state_change(False)
 
     ###########################################################################
 
@@ -578,8 +575,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_save(self) -> None:
-        fname = self._project_path / (self._project_name + ".prj")
-        save(fname, self._project_name, self.state)
+        fname = self._project_path / (self.state.project_name + ".prj")
+        save(fname, self.state.project_name, self.state)
 
     ###########################################################################
 
@@ -625,19 +622,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
-            self.state_changed.emit(self.state, False)
+            self._signal_state_change(False)
 
     ###########################################################################
     # Private method definitions
     ###########################################################################
 
     def _append_recent_project(self, fname: Path) -> None:
-        history_limit = 5
         history = self.recent_projects
         if fname in history:
             history.remove(fname)
         history.append(fname)
-        self.recent_projects = history[-history_limit:]
+        self.recent_projects = history
 
     ###########################################################################
 
@@ -740,6 +736,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _signal_state_change(self, update_instruments: bool) -> None:
+        self.state.unsaved = True
+        self.state_changed.emit(self.state, update_instruments)
+
+    ###########################################################################
+
     def _update_echo_state(self, **kwargs) -> None:
         new_echo = replace(self.state.echo, **kwargs)
         self._update_state(echo=new_echo)
@@ -767,7 +769,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 new_state.instruments[idx] = new_inst
 
             self._history.append(new_state)
-            self.state_changed.emit(new_state, False)
+            self._signal_state_change(False)
 
     ###########################################################################
 
@@ -779,7 +781,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._rollback_undo()
 
             self._history.append(new_state)
-            self.state_changed.emit(new_state, update_instruments)
+            self._signal_state_change(update_instruments)
 
     ###########################################################################
     # API property definitions
@@ -827,6 +829,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @recent_projects.setter
     def recent_projects(self, projects: list[Path]) -> None:
+        project_limit = 5
+        projects = projects[-project_limit:]
+
         with open(self.recent_projects_fname, "w", encoding="utf8") as fobj:
             yaml.safe_dump([str(project) for project in projects], fobj)
 

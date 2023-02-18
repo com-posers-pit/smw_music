@@ -51,7 +51,6 @@ from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
-from smw_music.music_xml.song import Song
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -205,6 +204,8 @@ class Dashboard:
     _dyn_widgets: dict[Dyn, _DynamicsWidgets]
     _artic_widgets: dict[Artic, _ArticWidgets]
     _sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem]
+    _unsaved: bool
+    _project_name: str | None
 
     ###########################################################################
     # Constructor definitions
@@ -216,8 +217,12 @@ class Dashboard:
             raise Exception("Can't locate dashboard")
 
         self._view = uic.loadUi(io.BytesIO(ui_contents))
+        self._view.__class__.closeEvent = self._closeEvent
+
         self._preferences = Preferences()
         self._model = Model()
+        self._unsaved = False
+        self._project_name = None
         self._sample_pack_items = {}
 
         self._quicklook_edit = QTextEdit()
@@ -348,6 +353,7 @@ class Dashboard:
 
         v = self._view  # pylint: disable=invalid-name
         inst = state.inst
+        self._unsaved = state.unsaved
 
         # Control Panel
         v.musicxml_fname.setText(state.musicxml_fname)
@@ -678,6 +684,42 @@ class Dashboard:
         v.actionClearRecentProjects.triggered.connect(
             m.on_recent_projects_cleared
         )
+
+    ###########################################################################
+
+    def _closeEvent(self, event):
+        if self._unsaved:
+            quit_msg = "Save project before closing?"
+            reply = QMessageBox.question(
+                self._view,
+                "Save project",
+                quit_msg,
+                QMessageBox.StandardButton.Yes
+                | QMessageBox.StandardButton.No
+                | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Cancel,
+            )
+
+            if reply == QMessageBox.StandardButton.Cancel:
+                event.ignore()
+            else:
+                if reply == QMessageBox.StandardButton.Yes:
+                    self._model.on_save()
+                event.accept()
+        else:
+            quit_msg = "Close program?"
+            reply = QMessageBox.question(
+                self._view,
+                "Close program",
+                quit_msg,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
+            )
+
+            if reply == QMessageBox.StandardButton.Yes:
+                event.accept()
+            else:
+                event.ignore()
 
     ###########################################################################
 
