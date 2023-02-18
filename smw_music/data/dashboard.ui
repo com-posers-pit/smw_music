@@ -718,6 +718,9 @@
                              </item>
                              <item>
                               <widget class="QRadioButton" name="gain_mode_declin">
+                               <property name="toolTip">
+                                <string>Not supported in sample definitions</string>
+                               </property>
                                <property name="text">
                                 <string>Decreasing Linear</string>
                                </property>
@@ -725,6 +728,9 @@
                              </item>
                              <item>
                               <widget class="QRadioButton" name="gain_mode_decexp">
+                               <property name="toolTip">
+                                <string>Not supported in sample definitions</string>
+                               </property>
                                <property name="text">
                                 <string>Decreasing Exponential</string>
                                </property>
@@ -1902,7 +1908,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <widget class="QMenu" name="menuRecent_Projects">
      <property name="title">
@@ -1924,14 +1930,14 @@
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
-     <string>Help</string>
+     <string>&amp;Help</string>
     </property>
     <addaction name="show_about"/>
     <addaction name="show_about_qt"/>
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>&amp;Edit</string>
     </property>
     <addaction name="undo"/>
     <addaction name="redo"/>
