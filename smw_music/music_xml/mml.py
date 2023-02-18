@@ -111,6 +111,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     optimize_percussion: bool = False
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
+    _in_loop: bool = field(default=False, init=False)
 
     ###########################################################################
 
@@ -165,9 +166,11 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             close_dir += str(token.repeats)
 
         self._append(open_dir)
+        self._in_loop = True
 
         self.generate(token.tokens)
 
+        self._in_loop = False
         self._append(close_dir)
 
     ###########################################################################
@@ -275,7 +278,9 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
                     token.name + str(token.octave + 1)
                 ]
                 if self.optimize_percussion:
-                    if directive == self.last_percussion:
+                    if (
+                        directive == self.last_percussion
+                    ) and not self._in_loop:
                         self.last_percussion = directive
                         directive += "n"
                     else:
@@ -307,6 +312,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             self.grace = False
 
         self._stop_legato()
+        self._in_loop = False
 
     ###########################################################################
 

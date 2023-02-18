@@ -29,6 +29,11 @@ from smw_music.scripts import convert
     "src, dst, args",
     [
         ("Articulations.mxl", "Articulations.txt", []),
+        (
+            "Broken_Percussion_Loop.mxl",
+            "Broken_Percussion_Loop.txt",
+            ["--optimize_percussion", "--loop_analysis"],
+        ),
         ("Crescendos.mxl", "Crescendos.txt", []),
         (
             "Crescendo_Triplet_Loops.mxl",
@@ -119,6 +124,7 @@ from smw_music.scripts import convert
     ],
     ids=[
         "Articulations",
+        "Broken Percussion Loop",
         "Crescendos",
         "Crescendo+Triplet+Loop",
         "Dots",
