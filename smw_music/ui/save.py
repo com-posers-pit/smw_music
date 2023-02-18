@@ -215,7 +215,7 @@ def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
 ###############################################################################
 
 
-def load(fname: Path) -> tuple[str, State]:
+def load(fname: Path) -> State:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: _SaveDict = yaml.safe_load(fobj)
 
@@ -238,21 +238,22 @@ def load(fname: Path) -> tuple[str, State]:
         global_legato=sdict["global_legato"],
         echo=_load_echo(sdict["echo"]),
         instruments=[_load_instrument(inst) for inst in sdict["instruments"]],
+        project_name=project,
     )
 
-    return (project, state)
+    return state
 
 
 ###############################################################################
 
 
-def save(fname: Path, project: str, state: State):
+def save(fname: Path, state: State):
     with open(fname, "w", encoding="utf8") as fobj:
         yaml.safe_dump(
             {
                 "tool_version": __version__,
                 "save_version": _CURRENT_SAVE_VERSION,
-                "song": project,
+                "song": state.project_name,
                 "time": f"{datetime.datetime.utcnow()}",
                 "state": {
                     "musicxml_fname": state.musicxml_fname,

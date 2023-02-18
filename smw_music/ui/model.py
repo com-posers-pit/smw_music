@@ -166,13 +166,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         )
 
         self._append_recent_project(path)
-        self.status_updated.emit(f"Created project {project_name}")
+        self._update_status(f"Created project {project_name}")
         self.on_save()
 
     ###########################################################################
 
     def reinforce_state(self) -> None:
-        self._signal_state_change(True)
+        self._signal_state_change(update_instruments=True, state_change=False)
 
     ###########################################################################
 
@@ -296,7 +296,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             enables.remove(chan)
         self._update_echo_state(enables=enables)
-        self._update_status(f"Echo {chan} {_endis(state)}")
+        self._update_status(f"Echo {str(chan)} {_endis(state)}")
 
     ###########################################################################
 
@@ -511,7 +511,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         try:
-            project_name, save_state = load(fname)
+            save_state = load(fname)
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
         else:
@@ -531,11 +531,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         "Error loading score",
                         f"Could not open score {musicxml}: {str(e)}",
                     )
+                else:
+                    self.reinforce_state()
+                    self._update_status(
+                        f"Opened project {self.state.project_name}"
+                    )
             else:
                 self.song = None
-
-            self._update_state(True, project_name=project_name)
-            self._update_status(f"Opened project {project_name}")
 
     ###########################################################################
 
@@ -638,7 +640,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
-            self._signal_state_change(False)
+            self._signal_state_change()
             self._update_status("Redo")
 
     ###########################################################################
@@ -663,7 +665,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if path is not None and project is not None:
             fname = path / (project + ".prj")
-            save(fname, project, self.state)
+            save(fname, self.state)
 
     ###########################################################################
 
@@ -718,7 +720,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
-            self._signal_state_change(False)
+            self._signal_state_change()
             self._update_status("Undo clicked")
 
     ###########################################################################
@@ -833,8 +835,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _signal_state_change(self, update_instruments: bool) -> None:
-        self.state.unsaved = True
+    def _signal_state_change(
+        self, update_instruments: bool = False, state_change: bool = True
+    ) -> None:
+        self.state.unsaved = state_change
         self.state_changed.emit(self.state, update_instruments)
 
     ###########################################################################
@@ -866,7 +870,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 new_state.instruments[idx] = new_inst
 
             self._history.append(new_state)
-            self._signal_state_change(False)
+            self._signal_state_change()
 
     ###########################################################################
 
