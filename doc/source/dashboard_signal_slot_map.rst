@@ -193,7 +193,7 @@ Global Settings
      view.global_volume_slider.valueChanged --> model.on_global_volume_changed
      view.global_volume_setting.textEdited --> model.on_global_volume_changed
      view.global_legato.stateChanged --> model.on_global_legato_changed
-     view.echo_enable.stateChanged --> model.on_echo_en_changed
+     view.echo_enable.stateChanged --> model.on_global_echo_en_changed
      view.echo_ch0.stateChanged --> model.on_echo_en_changed
      view.echo_ch1.stateChanged --> model.on_echo_en_changed
      view.echo_ch2.stateChanged --> model.on_echo_en_changed
