@@ -713,7 +713,11 @@ class Dashboard(QWidget):
             elif isinstance(widget, QComboBox):
                 widget.currentIndexChanged.connect(slot)
             elif isinstance(widget, QCheckBox):
-                widget.stateChanged.connect(slot)
+
+                def proxy(state: int, slot=slot) -> None:
+                    slot(bool(state))
+
+                widget.stateChanged.connect(proxy)
             elif isinstance(widget, QLineEdit):
 
                 def proxy(widget=widget, slot=slot):

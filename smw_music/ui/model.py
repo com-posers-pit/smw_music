@@ -483,11 +483,21 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     )
 
         # TODO: support OSX and windows
-        msg = subprocess.check_output(  # nosec B603, B607
-            ["sh", "convert.sh"], cwd=self._project_path
-        )
+        try:
+            error = False
+            msg = subprocess.check_output(  # nosec B603, B607
+                ["sh", "convert.sh"],
+                cwd=self._project_path,
+                stderr=subprocess.STDOUT,
+                timeout=5,
+            )
+        except subprocess.CalledProcessError as e:
+            error = True
+            report = True
+            msg = e.output
+
         if report:
-            self.response_generated.emit(False, "SPC Generated", msg.decode())
+            self.response_generated.emit(error, "SPC Generated", msg.decode())
             self._update_status("SPC generated")
 
     ###########################################################################

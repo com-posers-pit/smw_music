@@ -4,4 +4,4 @@
 ##
 ## SPDX-License-Identifier: AGPL-3.0-only
 
-wine ./AddmusicK.exe -c -norom "${project}.txt"
+wine ./AddmusicK.exe -c -norom "${project}.txt" < /dev/null
