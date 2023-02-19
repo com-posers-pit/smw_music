@@ -105,6 +105,7 @@ class _StateDict(TypedDict):
     instrument_idx: int
     global_volume: bool
     global_legato: bool
+    global_echo_enable: bool
     echo: _EchoDict
     instruments: list[_InstrumentDict]
 
@@ -236,6 +237,7 @@ def load(fname: Path) -> State:
         instrument_idx=sdict["instrument_idx"],
         global_volume=sdict["global_volume"],
         global_legato=sdict["global_legato"],
+        global_echo_enable=sdict["global_echo_enable"],
         echo=_load_echo(sdict["echo"]),
         instruments=[_load_instrument(inst) for inst in sdict["instruments"]],
         project_name=project,
@@ -263,6 +265,7 @@ def save(fname: Path, state: State):
                     "instrument_idx": state.instrument_idx,
                     "global_volume": state.global_volume,
                     "global_legato": state.global_legato,
+                    "global_echo_enable": state.global_echo_enable,
                     "echo": _save_echo(state.echo),
                     "instruments": [
                         _save_instrument(inst) for inst in state.instruments

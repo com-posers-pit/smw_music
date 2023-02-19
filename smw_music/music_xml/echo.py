@@ -39,7 +39,6 @@ def _truthy(arg: str) -> bool:
 
 
 class EchoCh(IntEnum):
-    GLOBAL = -1
     CH0 = 0
     CH1 = 1
     CH2 = 2

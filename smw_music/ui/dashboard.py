@@ -204,8 +204,6 @@ class Dashboard(QWidget):
 
         self._checkitout = QMainWindow(parent=self)
         label = QLabel(self)
-        label.setText("abcd")
-
         gif = pkgutil.get_data("smw_music", "data/ashtley.gif")
         self._ashman = QByteArray(gif)
         buffer = QBuffer(self._ashman, parent=self)
@@ -408,6 +406,8 @@ class Dashboard(QWidget):
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
 
+            v.reload_musicxml.setEnabled(bool(state.musicxml_fname))
+
             standalone_mode = state.project_name is None
             project_mode = not standalone_mode
 
@@ -509,7 +509,7 @@ class Dashboard(QWidget):
             v.global_volume_setting.setText(pct(state.global_volume))
             v.global_volume_setting_label.setText(hexb(state.global_volume))
             v.global_legato.setChecked(state.global_legato)
-            v.echo_enable.setChecked(EchoCh.GLOBAL in state.echo.enables)
+
             v.echo_ch0.setChecked(EchoCh.CH0 in state.echo.enables)
             v.echo_ch1.setChecked(EchoCh.CH1 in state.echo.enables)
             v.echo_ch2.setChecked(EchoCh.CH2 in state.echo.enables)
@@ -542,6 +542,9 @@ class Dashboard(QWidget):
             v.echo_delay_slider.setValue(state.echo.delay)
             v.echo_delay_setting.setText(hexb(state.echo.delay))
             v.echo_delay_setting_label.setText(f"{16*state.echo.delay}ms")
+
+            for widget in self._echo_widgets:
+                widget.setEnabled(state.global_echo_enable)
 
             # Apply the more interesting UI updates
             self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)
@@ -665,7 +668,7 @@ class Dashboard(QWidget):
             (v.global_volume_slider, m.on_global_volume_changed),
             (v.global_volume_setting, m.on_global_volume_changed),
             (v.global_legato, m.on_global_legato_changed),
-            (v.echo_enable, partial(m.on_echo_en_changed, EchoCh.GLOBAL)),
+            (v.echo_enable, m.on_global_echo_en_changed),
             (v.echo_ch0, partial(m.on_echo_en_changed, EchoCh.CH0)),
             (v.echo_ch1, partial(m.on_echo_en_changed, EchoCh.CH1)),
             (v.echo_ch2, partial(m.on_echo_en_changed, EchoCh.CH2)),
@@ -1040,3 +1043,38 @@ class Dashboard(QWidget):
                 widget.setItem(row, 0, solo_box)
                 widget.setItem(row, 1, mute_box)
                 widget.setItem(row, 2, name_box)
+
+    ###########################################################################
+    # Private property definitions
+    ###########################################################################
+
+    @property
+    def _echo_widgets(self) -> list[QWidget]:
+        v = self._view  # pylint: disable=invalid-name
+        return [
+            v.echo_ch0,
+            v.echo_ch1,
+            v.echo_ch2,
+            v.echo_ch3,
+            v.echo_ch4,
+            v.echo_ch5,
+            v.echo_ch6,
+            v.echo_ch7,
+            v.echo_filter_0,
+            v.echo_filter_1,
+            v.echo_left_slider,
+            v.echo_left_setting,
+            v.echo_left_surround,
+            v.echo_left_setting_label,
+            v.echo_right_slider,
+            v.echo_right_setting,
+            v.echo_right_surround,
+            v.echo_right_setting_label,
+            v.echo_feedback_slider,
+            v.echo_feedback_setting,
+            v.echo_feedback_surround,
+            v.echo_feedback_setting_label,
+            v.echo_delay_slider,
+            v.echo_delay_setting,
+            v.echo_delay_setting_label,
+        ]

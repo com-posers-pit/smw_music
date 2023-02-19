@@ -447,7 +447,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     self.state.superloop_analysis,
                     self.state.measure_numbers,
                     True,
-                    self.state.echo,
+                    self.state.echo if self.state.global_echo_enable else None,
                     True,
                 )
                 self.mml_generated.emit(mml)
@@ -491,16 +491,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_global_volume_changed(self, val: int | str) -> None:
-        setting = _parse_setting(val)
-        self._update_state(global_volume=setting)
-        self._update_status(f"Global volume set to {setting}")
+    def on_global_echo_en_changed(self, state: bool) -> None:
+        self._update_state(global_echo_enable=state)
+        self._update_status(f"Echo {_endis(state)}")
 
     ###########################################################################
 
     def on_global_legato_changed(self, state: bool) -> None:
         self._update_state(global_legato=state)
         self._update_status(f"Global legato {_endis(state)}")
+
+    ###########################################################################
+
+    def on_global_volume_changed(self, val: int | str) -> None:
+        setting = _parse_setting(val)
+        self._update_state(global_volume=setting)
+        self._update_status(f"Global volume set to {setting}")
 
     ###########################################################################
 
