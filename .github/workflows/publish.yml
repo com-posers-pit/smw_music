@@ -34,7 +34,7 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
-        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt;smw_music/data" --add-data "smw_music/data/dashboard.ui;smw_music/data" --add-data "smw_music/data/ashtley.gif;smw_music/data" --add-data "smw_music/data/convert.bat;smw_music/data" --add-data "smw_music/data/convert.sh;smw_music/data" --add-data "smw_music/data/preferences.ui;smw_music/data" --exclude scipy --exclude tk --exclude matplotlib --exclude PIL smw_music/scripts/dashboard.py
+        run: poetry run pyinstaller dashboard.spec
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -44,8 +44,14 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  mac:
-    runs-on: macos-latest
+  posix:
+    strategy:
+      matrix:
+        os:
+          - macos-12
+          - macos-11
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
@@ -59,12 +65,12 @@ jobs:
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
-        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt;smw_music/data" --add-data "smw_music/data/dashboard.ui;smw_music/data" --add-data "smw_music/data/ashtley.gif;smw_music/data" --add-data "smw_music/data/convert.bat;smw_music/data" --add-data "smw_music/data/convert.sh;smw_music/data" --add-data "smw_music/data/preferences.ui;smw_music/data" --exclude scipy --exclude tk --exclude matplotlib --exclude PIL smw_music/scripts/dashboard.py
+        run: poetry run pyinstaller dashboard.spec
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard
-          asset_name: beer-osx-$tag
+          asset_name: beer-${{ matrix.os }}-$tag
           tag: ${{ github.ref }}
           overwrite: true
