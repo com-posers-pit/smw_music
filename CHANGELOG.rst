@@ -11,9 +11,115 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
-`Differences from 0.2.3`_
+`Differences from 0.3.0`_
 
 --------------------------------------------------------------------------------
+
+Release 0.3.0 - 2023-02-19
+--------------------------
+
+`Release 0.3.0`_
+
+`Differences from 0.2.3`_
+
+Purpose
++++++++
+
+First big step towards making this tool a one-stop-shop for porting music.
+What a difference a year makes.
+
+
+Affected Issues
++++++++++++++++
+
+- `#87 Generate a backup mml`_
+
+- `#86 Add vibrato support`_
+
+- `#85 Non-concert pitch instruments`_
+
+- `#84 Dashboard loop analysis bug`_
+
+- `#82 Display generated text`_
+
+- `#122 Detect if AMK fails`_
+
+- `#121 Add close project functionality`_
+
+- `#119 Fix "would you like to save" when closing subwindows`_
+
+- `#118 Fix instrument updating logic`_
+
+- `#117 Autosave`_
+
+- `#116 Don't prompt to save on newly opened project`_
+
+- `#114 Spurious updates to BRR settings`_
+
+- `#111 Finish all-in-one windows compatibility`_
+
+- `#110 Echo values are broken in MML writes`_
+
+- `#105 Add solo/mute options to UI`_
+
+- `#101 Extraneous python deps`_
+
+- `#97 Dynamics limits`_
+
+- `#93 Incorrect KDn immediately following SNn commands`_
+
+- `#92 Explicit default q values`_
+
+- `#56 Include octave definitions in instrment macros?`_
+
+
+Changed
++++++++
+
+- Totally reworked UI to use qtdesigner
+
+  - Some reorganization of UI elements
+
+- Moved python package to beta
+
+Added
++++++
+
+- Project-based workflow
+
+- Generate and play SPC files directly from UI
+
+- Native support for BRR samples and sample packs
+
+- Instrument solo/mute functionality
+
+- Support for modifying instrument tuning and envelopes
+
+  - Can use both UI elements or raw BRR settings
+
+- Envelope viewer
+
+- History viewer
+
+- Undo/redo support
+
+
+Removed
++++++++
+
+- UI tests
+
+  - These were breaking hard; left them in place, just marked
+    as unused.  Can be recovered later.
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+
+--------------------------------------------------------------------------------
+
 
 Release 0.2.3 - 2022-02-27
 --------------------------
@@ -424,6 +530,22 @@ Affected Issues
 - `#1 Add support for AMK annotations`_
 
 
+.. _#122 Detect if AMK fails: https://github.com/com-posers-pit/smw_music/issues/122
+.. _#121 Add close project functionality: https://github.com/com-posers-pit/smw_music/issues/121
+.. _#119 Fix "would you like to save" when closing subwindows: https://github.com/com-posers-pit/smw_music/issues/119
+.. _#118 Fix instrument updating logic: https://github.com/com-posers-pit/smw_music/issues/118
+.. _#117 Autosave: https://github.com/com-posers-pit/smw_music/issues/117
+.. _#116 Don't prompt to save on newly opened project: https://github.com/com-posers-pit/smw_music/issues/116
+.. _#114 Spurious updates to BRR settings: https://github.com/com-posers-pit/smw_music/issues/114
+.. _#111 Finish all-in-one windows compatibility: https://github.com/com-posers-pit/smw_music/issues/111
+.. _#110 Echo values are broken in MML writes: https://github.com/com-posers-pit/smw_music/issues/110
+.. _#105 Add solo/mute options to UI: https://github.com/com-posers-pit/smw_music/issues/105
+.. _#101 Extraneous python deps: https://github.com/com-posers-pit/smw_music/issues/101
+.. _#97 Dynamics limits: https://github.com/com-posers-pit/smw_music/issues/97
+.. _#93 Incorrect KDn immediately following SNn commands: https://github.com/com-posers-pit/smw_music/issues/93
+.. _#92 Explicit default q values: https://github.com/com-posers-pit/smw_music/issues/92
+.. _#56 Include octave definitions in instrment macros?: https://github.com/com-posers-pit/smw_music/issues/56
+
 .. _#87 Generate a backup mml: https://github.com/com-posers-pit/smw_music/issues/87
 .. _#86 Add vibrato support: https://github.com/com-posers-pit/smw_music/issues/86
 .. _#85 Non-concert pitch instruments: https://github.com/com-posers-pit/smw_music/issues/85
@@ -487,6 +609,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.0
 .. _Release 0.2.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.3
 .. _Release 0.2.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.2
 .. _Release 0.2.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.1
@@ -495,7 +618,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.2.3: https://github.com/com-posers-pit/smw_music/compare/v0.2.3...HEAD
+.. _Differences from 0.3.0: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...HEAD
+.. _Differences from 0.2.3: https://github.com/com-posers-pit/smw_music/compare/v0.2.3...v0.3.0
 .. _Differences from 0.2.2: https://github.com/com-posers-pit/smw_music/compare/v0.2.2...v0.2.3
 .. _Differences from 0.2.1: https://github.com/com-posers-pit/smw_music/compare/v0.2.1...v0.2.2
 .. _Differences from 0.2.0: https://github.com/com-posers-pit/smw_music/compare/v0.2.0...v0.2.1
