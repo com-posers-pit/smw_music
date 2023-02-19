@@ -485,14 +485,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         ].data
                     )
 
-        # TODO: support OSX and windows
+        # TODO: support OSX
         try:
             error = False
             msg = subprocess.check_output(  # nosec B603, B607
-                ["sh", "convert.sh"],
+                self.convert,
                 cwd=self._project_path,
                 stderr=subprocess.STDOUT,
                 timeout=5,
+                shell=True,
             )
         except subprocess.CalledProcessError as e:
             error = True
@@ -646,12 +647,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if path is not None and project is not None:
             spc_name = f"{project}.spc"
             spc_name = str(path / "SPCs" / spc_name)
+
+            # TODO: Handle OSX
+            args = ["wine", str(self.preferences.spcplay_fname), spc_name]
+            if platform.system() == "Windows":
+                args = args[1:]
+
             threading.Thread(
                 target=subprocess.call,
-                # TODO: Handle windows/OSX
-                args=(
-                    ["wine", str(self.preferences.spcplay_fname), spc_name],
-                ),
+                args=(args,),
+                kwargs={'shell': True},
             ).start()
             self._update_status("SPC played")
 
@@ -951,6 +956,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 raise SmwMusicException(f"Unknown OS {sys}")
 
         return conf_dir / app
+
+    ###########################################################################
+
+    @property
+    def convert(self) -> list[str]:
+        match sys := platform.system():
+            case "Linux":
+                return ['sh', 'convert.sh']
+            case "Windows":
+                return ['convert.bat']
+            case _:
+                return []
+
 
     ###########################################################################
 
