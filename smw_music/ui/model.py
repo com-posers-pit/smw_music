@@ -107,6 +107,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self._project_path = None
 
+        os.makedirs(self.config_dir, exist_ok=True)
+
+
     ###########################################################################
     # API method definitions
     ###########################################################################
