@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
@@ -15,6 +13,7 @@
 import enum
 import io
 import pkgutil
+from collections import deque
 from contextlib import ExitStack
 from functools import partial
 from pathlib import Path
@@ -22,8 +21,16 @@ from typing import NamedTuple, cast
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import QSignalBlocker, Qt
-from PyQt6.QtGui import QAction
+from PyQt6.QtCore import (
+    QBuffer,
+    QByteArray,
+    QEvent,
+    QIODevice,
+    QObject,
+    QSignalBlocker,
+    Qt,
+)
+from PyQt6.QtGui import QAction, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -58,7 +65,7 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
-from smw_music.ui.quotes import lyrics
+from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import State
 from smw_music.utils import hexb, pct
@@ -96,6 +103,25 @@ def _to_checked(checked: bool) -> Qt.CheckState:
 
 
 ###############################################################################
+# Private constant definitions
+###############################################################################
+
+_KONAMI = deque(
+    [
+        Qt.Key.Key_Up,
+        Qt.Key.Key_Up,
+        Qt.Key.Key_Down,
+        Qt.Key.Key_Down,
+        Qt.Key.Key_Left,
+        Qt.Key.Key_Right,
+        Qt.Key.Key_Left,
+        Qt.Key.Key_Right,
+        Qt.Key.Key_B,
+        Qt.Key.Key_A,
+    ]
+)
+
+###############################################################################
 # Private class definitions
 ###############################################################################
 
@@ -130,11 +156,12 @@ class _SoloMute(enum.IntEnum):
 ###############################################################################
 
 
-class Dashboard:
+class Dashboard(QWidget):
     _history: QMainWindow
     _history_list: QListWidget
     _quicklook: QMainWindow
     _quicklook_edit: QTextEdit
+    _checkitout: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
@@ -145,18 +172,22 @@ class Dashboard:
     _sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem]
     _unsaved: bool
     _project_name: str | None
+    _keyhist: deque
+    _ashman: QByteArray
 
     ###########################################################################
     # Constructor definitions
     ###########################################################################
 
     def __init__(self):
+        super().__init__()
+        self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
         if ui_contents is None:
             raise Exception("Can't locate dashboard")
 
         self._view = uic.loadUi(io.BytesIO(ui_contents))
-        self._view.__class__.closeEvent = self._closeEvent
+        self._view.installEventFilter(self)
 
         self._preferences = Preferences()
         self._model = Model()
@@ -167,27 +198,77 @@ class Dashboard:
         self._quicklook_edit = QTextEdit()
         self._quicklook_edit.setFontFamily("Monospace")
         self._quicklook_edit.setReadOnly(True)
-        self._quicklook = QMainWindow(parent=self._view)
+        self._quicklook = QMainWindow(parent=self)
         self._quicklook.setMinimumSize(800, 600)
         self._quicklook.setCentralWidget(self._quicklook_edit)
 
+        self._checkitout = QMainWindow(parent=self)
+        label = QLabel(self)
+        label.setText("abcd")
+
+        gif = pkgutil.get_data("smw_music", "data/ashtley.gif")
+        self._ashman = QByteArray(gif)
+        buffer = QBuffer(self._ashman, parent=self)
+        movie = QMovie(parent=self)
+        movie.setDevice(buffer)
+        label.setMovie(movie)
+        movie.start()
+        self._checkitout.setCentralWidget(label)
+
         self._history_list = QListWidget()
-        self._history = QMainWindow(parent=self._view)
+        self._history = QMainWindow(parent=self)
         self._history.setMinimumSize(800, 600)
         self._history.setCentralWidget(self._history_list)
 
-        self._envelope_preview = EnvelopePreview(self._view)
+        self._envelope_preview = EnvelopePreview(self)
 
         self._setup_menus()
         self._fix_edit_widths()
         self._combine_widgets()
         self._setup_instrument_table()
         self._attach_signals()
-        self._view.generate_and_play.setToolTip(lyrics[0])
+        self._view.generate_and_play.setToolTip(labeouf[0])
 
         self._view.show()
 
         self._model.start()
+
+    ###########################################################################
+    # API slot definitions
+    ###########################################################################
+
+    def eventFilter(self, obj: QObject, event: QEvent) -> bool:
+        match event.type():
+            case QEvent.Type.Close:
+                reply = self._prompt_to_save()
+
+                if reply is None:
+                    quit_msg = "Close program?"
+                    reply = QMessageBox.question(
+                        self._view,
+                        "Close program",
+                        quit_msg,
+                        QMessageBox.StandardButton.Yes
+                        | QMessageBox.StandardButton.No,
+                        QMessageBox.StandardButton.No,
+                    )
+
+                    if reply == QMessageBox.StandardButton.Yes:
+                        event.accept()
+                    else:
+                        event.ignore()
+                else:
+                    if reply == QMessageBox.StandardButton.Cancel:
+                        event.ignore()
+                    else:
+                        event.accept()
+                return True
+            case QEvent.Type.KeyRelease:
+                self._keyhist.append(cast(QKeyEvent, event).key())
+                if self._keyhist == _KONAMI:
+                    self._checkitout.show()
+
+        return super().eventFilter(obj, event)
 
     ###########################################################################
     # API slot definitions
@@ -665,31 +746,6 @@ class Dashboard:
 
     ###########################################################################
 
-    def _closeEvent(self, event):
-        reply = self._prompt_to_save()
-
-        if reply is None:
-            quit_msg = "Close program?"
-            reply = QMessageBox.question(
-                self._view,
-                "Close program",
-                quit_msg,
-                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-                QMessageBox.StandardButton.No,
-            )
-
-            if reply == QMessageBox.StandardButton.Yes:
-                event.accept()
-            else:
-                event.ignore()
-        else:
-            if reply == QMessageBox.StandardButton.Cancel:
-                event.ignore()
-            else:
-                event.accept()
-
-    ###########################################################################
-
     def _combine_widgets(self) -> None:
         v = self._view  # pylint: disable=invalid-name
         self._dyn_widgets = {}
@@ -947,8 +1003,8 @@ class Dashboard:
     def _update_generate_and_play_tooltip(self) -> None:
         widget = self._view.generate_and_play
         tooltip = widget.toolTip()
-        idx = (lyrics.index(tooltip) + 1) % len(lyrics)
-        widget.setToolTip(lyrics[idx])
+        idx = (labeouf.index(tooltip) + 1) % len(labeouf)
+        widget.setToolTip(labeouf[idx])
 
     ###########################################################################
 
