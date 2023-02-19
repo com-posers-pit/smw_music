@@ -684,7 +684,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_save(self) -> None:
-        # TODO: This shouldn't be necessary
         self._save_backup()
 
         path = self._project_path
@@ -693,6 +692,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if path is not None and project is not None:
             fname = path / (project + ".prj")
             save(fname, self.state)
+            self.reinforce_state()
+            self._update_status("Project saved")
 
     ###########################################################################
 
