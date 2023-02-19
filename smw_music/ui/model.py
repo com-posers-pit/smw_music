@@ -165,7 +165,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             ),
         )
 
-        self._append_recent_project(path)
+        # TODO: Unify this project path with what's used in on_save
+        self._append_recent_project(path / (project_name + ".prj"))
         self._update_status(f"Created project {project_name}")
         self.on_save()
 
@@ -536,7 +537,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if musicxml := self.state.musicxml_fname:
                 try:
                     self.song = Song.from_music_xml(musicxml)
-                    # TODO: Cleaner updates
                     self.song.instruments[:] = self.state.instruments
                 except MusicXmlException as e:
                     self.response_generated.emit(
@@ -673,6 +673,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_save(self) -> None:
+        # TODO: This shouldn't be necessary
+        self._save_backup()
+
         path = self._project_path
         project = self.state.project_name
 
@@ -734,7 +737,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
             self._signal_state_change()
-            self._update_status("Undo clicked")
+            self._update_status("Undo")
 
     ###########################################################################
     # Private method definitions
@@ -848,6 +851,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _save_backup(self) -> None:
+        path = self._project_path
+        project = self.state.project_name
+
+        if path is not None and project is not None:
+            fname = path / (project + ".prj.bak")
+            save(fname, self.state)
+
+    ###########################################################################
+
     def _signal_state_change(
         self, update_instruments: bool = False, state_change: bool = True
     ) -> None:
@@ -894,6 +907,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if new_state != self.state:
             self._rollback_undo()
 
+            self._save_backup()
             self._history.append(new_state)
             self._signal_state_change(update_instruments)
 

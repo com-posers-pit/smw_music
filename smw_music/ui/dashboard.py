@@ -510,6 +510,7 @@ class Dashboard(QWidget):
             v.global_volume_setting_label.setText(hexb(state.global_volume))
             v.global_legato.setChecked(state.global_legato)
 
+            v.echo_enable.setChecked(state.global_echo_enable)
             v.echo_ch0.setChecked(EchoCh.CH0 in state.echo.enables)
             v.echo_ch1.setChecked(EchoCh.CH1 in state.echo.enables)
             v.echo_ch2.setChecked(EchoCh.CH2 in state.echo.enables)

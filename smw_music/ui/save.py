@@ -167,7 +167,7 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
 
 def _save_echo(echo: EchoConfig) -> _EchoDict:
     return {
-        "enables": list(echo.enables),
+        "enables": list(x.value for x in echo.enables),
         "vol_mag": list(echo.vol_mag),
         "vol_inv": list(echo.vol_inv),
         "delay": echo.delay,
