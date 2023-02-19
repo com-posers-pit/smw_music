@@ -949,7 +949,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 default = Path(os.environ["HOME"]) / ".config"
                 conf_dir = Path(os.environ.get("XDG_CONFIG_HOME", default))
             case "Windows":
-                conf_dir = Path(os.environ["APP_DATA"])
+                conf_dir = Path(os.environ["APPDATA"])
             case "Darwin":
                 conf_dir = Path(os.environ["HOME"]) / "Library"
             case _:
