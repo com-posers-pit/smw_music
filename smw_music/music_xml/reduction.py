@@ -6,10 +6,14 @@
 """Song reduction logic."""
 
 ###############################################################################
-# Project imports
+# Imports
 ###############################################################################
 
-from .tokens import (
+# Standard library imports
+from typing import Callable
+
+# Package imports
+from smw_music.music_xml.tokens import (
     Annotation,
     Comment,
     CrescDelim,
@@ -226,7 +230,7 @@ def _deduplicate_measures(tokens: list[Token]) -> list[Token]:
 def _filter_annotations(tokens: list[Token]) -> list[Token]:
     rv = []
 
-    filters = [
+    filters: list[tuple[Callable[[str], bool], Callable[[str], Token]]] = [
         (
             lambda x: x.startswith("To "),
             lambda x: Instrument(

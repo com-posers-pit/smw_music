@@ -6,20 +6,17 @@
 """Logic for generating MML files."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from dataclasses import dataclass, field
-from enum import auto, Enum
+from enum import Enum, auto
 from functools import singledispatchmethod
 
-
-###############################################################################
-# Project imports
-###############################################################################
-
-from .shared import CRLF, notelen_str
-from .tokens import (
+# Package imports
+from smw_music.music_xml.shared import CRLF, notelen_str
+from smw_music.music_xml.tokens import (
     Annotation,
     Artic,
     CrescDelim,
@@ -77,6 +74,8 @@ class Exporter:
     def _append(self, directive: str) -> None:
         self.directives.append(directive)
 
+    # This needs to be included to keep mypy from complaining in subclasses
+    @singledispatchmethod
     def _emit(self, token: Token) -> None:
         raise NotImplementedError
 
@@ -112,6 +111,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     optimize_percussion: bool = False
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
+    _in_loop: bool = field(default=False, init=False)
 
     ###########################################################################
 
@@ -166,9 +166,11 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             close_dir += str(token.repeats)
 
         self._append(open_dir)
+        self._in_loop = True
 
         self.generate(token.tokens)
 
+        self._in_loop = False
         self._append(close_dir)
 
     ###########################################################################
@@ -276,7 +278,9 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
                     token.name + str(token.octave + 1)
                 ]
                 if self.optimize_percussion:
-                    if directive == self.last_percussion:
+                    if (
+                        directive == self.last_percussion
+                    ) and not self._in_loop:
                         self.last_percussion = directive
                         directive += "n"
                     else:
@@ -308,6 +312,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             self.grace = False
 
         self._stop_legato()
+        self._in_loop = False
 
     ###########################################################################
 
@@ -336,7 +341,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if self.slur == SlurState.SLUR_END:
             self.slur = SlurState.SLUR_IDLE
             duration = 192 // token.duration
-            duration = int(duration * (2 - 0.5 ** token.dots))
+            duration = int(duration * (2 - 0.5**token.dots))
             self.legato = False
             note_length = f"=1 LEGATO_OFF ^={duration - 1}"
         else:
@@ -349,7 +354,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
                     note_length = f"={grace_length}"
                 else:
                     duration = 192 // token.duration
-                    duration = int(duration * (2 - 0.5 ** token.dots))
+                    duration = int(duration * (2 - 0.5**token.dots))
                     note_length = f"={duration - grace_length}"
 
         return note_length

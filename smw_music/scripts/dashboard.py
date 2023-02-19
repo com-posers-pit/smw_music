@@ -11,21 +11,18 @@
 # Standard library imports
 ###############################################################################
 
+# Standard library imports
 import argparse
+import io
 import logging
+import pkgutil
 
-###############################################################################
 # Library imports
-###############################################################################
+from PyQt6 import uic
+from PyQt6.QtWidgets import QApplication
 
-from PyQt6.QtWidgets import QApplication  # type: ignore
-
-###############################################################################
-# Project imports
-###############################################################################
-
+# Package imports
 from smw_music.ui.dashboard import Dashboard
-
 
 ###############################################################################
 # API function definitions
@@ -51,7 +48,6 @@ def main() -> None:
     app = QApplication([])
     app.setApplicationName("MusicXML -> MML")
     dashboard = Dashboard()
-    dashboard.show()
     app.exec()
 
 

@@ -8,16 +8,14 @@
 """Music XML -> AMK Converter."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 import argparse
 import sys
 
-###############################################################################
 # Package imports
-###############################################################################
-
 from smw_music import __version__
 from smw_music.music_xml import EchoConfig, Song
 
@@ -26,10 +24,10 @@ from smw_music.music_xml import EchoConfig, Song
 ###############################################################################
 
 
-def main(args=None):
+def main(arg_list: list[str] | None = None) -> None:
     """Entrypoint for Music XML -> AMK Converter."""
-    if args is None:
-        args = sys.argv[1:]
+    if arg_list is None:
+        arg_list = sys.argv[1:]
     parser = argparse.ArgumentParser(
         description=f"Music XML -> AMK Converter v{__version__}"
     )
@@ -69,17 +67,12 @@ def main(args=None):
         default=None,
     )
     parser.add_argument(
-        "--custom_samples",
-        action="store_true",
-        help="Include boilerplate for custom samples",
-    )
-    parser.add_argument(
         "--optimize_percussion",
         action="store_true",
         help="Remove repeated percussion instrument directives",
     )
 
-    args = parser.parse_args(args)
+    args = parser.parse_args(arg_list)
 
     Song.from_music_xml(args.music_xml).to_mml_file(
         args.amk,
@@ -89,7 +82,6 @@ def main(args=None):
         args.measure_numbers,
         args.enable_dt,
         args.echo,
-        args.custom_samples,
         args.optimize_percussion,
     )
 

@@ -14,6 +14,7 @@ Welcome to SMW Music's documentation!
    changelog
    examples
    modules
+   dashboard_signal_slot_map
    authors
 
 

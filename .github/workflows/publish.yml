@@ -13,7 +13,7 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Build and publish to pypi
         uses: JRubics/poetry-publish@v1.10
         with:
@@ -23,36 +23,24 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10.1'
+        uses: actions/checkout@v3
       - name: Install Poetry
-        uses: snok/install-poetry@v1
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-windows-py3.10.1-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+          python-version: '3.11.0'
+          cache: 'poetry'
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
-        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt;smw_music/data" smw_music/scripts/dashboard.py
+        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt;smw_music/data" --add-data "smw_music/data/dashboard.ui;smw_music/data" --add-data "smw_music/data/ashtley.gif;smw_music/data" --add-data "smw_music/data/convert.bat;smw_music/data" --add-data "smw_music/data/convert.sh;smw_music/data" --add-data "smw_music/data/preferences.ui;smw_music/data" smw_music/scripts/dashboard.py
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard.exe
-          asset_name: smw_music_xml_dashboard-windows-$tag.exe
+          asset_name: beer-windows-$tag.exe
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -60,35 +48,23 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v2
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10.1'
+        uses: actions/checkout@v3
       - name: Install Poetry
-        uses: snok/install-poetry@v1
+        run: pipx install poetry
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-          installer-parallel: true
-      - name: Load cached venv
-        id: cached-poetry-dependencies
-        uses: actions/cache@v2
-        with:
-          path: .venv
-          key: venv-macosx-py3.10.1-${{ hashFiles('**/poetry.lock') }}
-      - name: Install dependencies
-        if: steps.cached-poetry-dependencies.outputs.cache-hit != 'true'
-        run: poetry install --no-interaction --no-root
+          python-version: '3.11.0'
+          cache: 'poetry'
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
-        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt:smw_music/data" smw_music/scripts/dashboard.py
+        run: poetry run pyinstaller -F --hidden-import music21.alpha --hidden-import music21.audioSearch --hidden-import music21.configure --add-data "smw_music/data/mml.txt:smw_music/data" --add-data "smw_music/data/dashboard.ui;smw_music/data" --add-data "smw_music/data/ashtley.gif;smw_music/data" --add-data "smw_music/data/convert.bat;smw_music/data" --add-data "smw_music/data/convert.sh;smw_music/data" --add-data "smw_music/data/preferences.ui;smw_music/data" smw_music/scripts/dashboard.py
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard
-          asset_name: smw_music_xml_dashboard-osx-$tag
+          asset_name: beer-osx-$tag
           tag: ${{ github.ref }}
           overwrite: true

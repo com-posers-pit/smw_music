@@ -1,6 +1,6 @@
 #amk 2
 
-; MusicXML->AMK v0.2.3
+; beer v0.3.0
 
 #spc {
     #author  "COMPOSER HERE"

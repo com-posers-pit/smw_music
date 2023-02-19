@@ -6,26 +6,19 @@
 """SMW Music Module Tests."""
 
 ###############################################################################
-# Standard library imports
+# Import
 ###############################################################################
 
-import tempfile
+# Standard library imports
 import pathlib
 
-###############################################################################
 # Library imports
-###############################################################################
-
 import pytest
 
-###############################################################################
-# Project imports
-###############################################################################
-
+# Package imports
 from smw_music import __version__
 from smw_music.music_xml import MusicXmlException
 from smw_music.scripts import convert
-
 
 ###############################################################################
 # Test definitions
@@ -36,6 +29,11 @@ from smw_music.scripts import convert
     "src, dst, args",
     [
         ("Articulations.mxl", "Articulations.txt", []),
+        (
+            "Broken_Percussion_Loop.mxl",
+            "Broken_Percussion_Loop.txt",
+            ["--optimize_percussion", "--loop_analysis"],
+        ),
         ("Crescendos.mxl", "Crescendos.txt", []),
         (
             "Crescendo_Triplet_Loops.mxl",
@@ -123,14 +121,10 @@ from smw_music.scripts import convert
                 "2,3,4,0.109,Y,0.189,N,11,0.323,N,1",
             ],
         ),
-        (
-            "SMB_Castle_Theme.musicxml",
-            "SMB_Castle_Theme_custom_samples.txt",
-            ["--custom_samples"],
-        ),
     ],
     ids=[
         "Articulations",
+        "Broken Percussion Loop",
         "Crescendos",
         "Crescendo+Triplet+Loop",
         "Dots",
@@ -162,7 +156,6 @@ from smw_music.scripts import convert
         "SMB Castle Theme (kitchen sink)",
         "SMB Castle Theme (measure #s)",
         "SMB Castle Theme (echo enabled)",
-        "SMB Castle Theme (custom samples)",
     ],
 )
 def test_conversion(src, dst, args, tmp_path):
@@ -206,6 +199,14 @@ def test_conversion(src, dst, args, tmp_path):
             "ComplexNoteLength.mxl",
             r"Unsupported note #1 in Measure 7 in staff 1",
         ),
+        (
+            "Invalid_Dynamics.mxl",
+            r"Invalid dynamic level ppppp in measure 1 in staff 1",
+        ),
+        (
+            "Invalid_Dynamics.mxl",
+            r"Invalid dynamic level fffff in measure 2 in staff 1",
+        ),
         ("Percussion_Chords.mxl", r"Chord found, #3 in measure 2 in staff 1"),
         ("TooHigh.mxl", r"Unsupported note c7 #3 in measure 1 in staff 1"),
         ("TooLow.mxl", r"Unsupported note a0 #2 in measure 1 in staff 1"),
@@ -216,6 +217,8 @@ def test_conversion(src, dst, args, tmp_path):
         "Chord 1",
         "Chord 2",
         "Chord 3",
+        "Too quiet",
+        "Too loud",
         "Bad 5/4 whole rest",
         "Bad 5/8 whole rest",
         "Percussion Chord",
@@ -273,4 +276,4 @@ def test_multiple_invalid(text, tmp_path):
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.2.3"
+    assert __version__ == "0.3.0"

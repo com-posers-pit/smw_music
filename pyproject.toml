@@ -9,16 +9,27 @@ exclude_dirs = ["tests"]
 [tool.black]
 line-length = 79
 
+[tool.isort]
+import_heading_stdlib = "Standard library imports"
+import_heading_thirdparty = "Library imports"
+import_heading_firstparty = "Package imports"
+line_length = 79
+profile = "black"
+filter_files = true
+known_first_party = ["smw_music"]
+known_third_party = ["music21"]
+skip_glob = ["smw_music/doc/"]
+
 [tool.poetry]
 name = "smw_music"
-version = "0.2.3"
+version = "0.3.0"
 description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"
 readme = "README.rst"
 repository = "http://github.com/com-posers-pit/smw_music"
 classifiers = [
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
     "Intended Audience :: End Users/Desktop",
@@ -29,29 +40,37 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.9,<3.11"
-music21 = "^7.1.0"
+python = "^3.10,<3.12"
+music21 = "^8.1.0"
 Mako = "^1.1.6"
 Flask = {version = "^2.0.2", optional = true}
 PyQt6 = "^6.2.3"
+scipy = "^1.8.0"
+pyyaml = "^6.0"
+types-pyyaml = "^6.0.12.2"
+pyqtgraph = "^0.13.1"
 
 [tool.poetry.dev-dependencies]
-Sphinx = "^4.3.2"
+Sphinx = "^5.0.0"
 sphinx-rtd-theme = "^1.0.0"
-tox = "^3.24.4"
+tox = "^4.0.0"
 pre-commit = "^2.16.0"
-pyinstaller = "^4.9"
+pyinstaller = "^5.7.0"
 pyqt6-stubs = {git = "https://github.com/TilmanK/PyQt6-stubs", rev = "ab869638f92b7c5264d7d169093233f15716f1cc"}
 
 [tool.poetry.extras]
 webserver = ["flask"]
 
 [tool.poetry.scripts]
+smw_music_filttool = "smw_music.scripts.filttool:main"
 smw_music_xml_to_mml = "smw_music.scripts.convert:main"
-smw_music_xml_dashboard = "smw_music.scripts.dashboard:main"
+beer = "smw_music.scripts.dashboard:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"
+
+[tool.poetry.group.dev.dependencies]
+sphinxcontrib-mermaid = "^0.7.1"
 
 [tool.pydocstyle]
 convention = "numpy"
@@ -67,5 +86,5 @@ extension-pkg-allow-list = "PyQt6"
 ignore-imports = "yes"
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
+requires = ["poetry-core>=1.3.2"]
 build-backend = "poetry.core.masonry.api"

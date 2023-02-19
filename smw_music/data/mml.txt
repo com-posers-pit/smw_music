@@ -4,7 +4,7 @@
 ## SPDX-License-Identifier: AGPL-3.0-only
 #amk 2
 
-; MusicXML->AMK v${version}
+; beer v${version}
 %if datetime:
 ; Built: ${datetime}
 %endif
@@ -17,18 +17,17 @@
 }
 %if custom_samples:
 
-; PORTER: UPDATE SAMPLES AND INSTRUMENTS HERE
-#path "folder name"
-
 #samples {
     #optimized ;Don't touch/delete this line, just replace the sample brr files below
-    "Sample1.brr"
-    "Sample2.brr"
+%for sample in set(x[0] for x in custom_samples):
+    "${sample}"
+%endfor
 }
 
 #instruments {
-    "Sample1.brr"        $00$00 $00 $00$00 ;@30
-    "Sample2.brr"        $00$00 $00 $00$00 ;@31
+%for sample, settings, idx in custom_samples:
+    "${sample}"${' '*(max(len(x[0]) for x in custom_samples) - len(sample))}          ${settings} ; @${idx}
+%endfor
 }
 %endif
 
@@ -61,12 +60,12 @@ w${song.volume}
 
     def artic_str(inst):
         rv = []
-        for artic, val in inst.quant.items():
-            rv.append(f'\\"q{artic}=q{val:02X}\\"')
+        for artic, val in inst.artics.items():
+            rv.append(f'\\"q{artic}=q{val.setting:02X}\\"')
         return ' '.join(rv)
 
     def pan_str(inst):
-        return '' if inst.pan is None else f'y{inst.pan}'
+        return f'y{inst.pan_setting}' if inst.pan_enabled else ''
 
     def transpose(inst):
         return f' h{inst.transpose}' if do_transpose else ''
@@ -74,7 +73,7 @@ w${song.volume}
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
 %for inst in instruments:
-"${f'{voice(inst):{voice_sz}}'} = ${f'{inst.instrument:3} o{inst.octave}'}"
+"${f'{voice(inst):{voice_sz}}'} = ${f'{inst.instrument_idx:3} o{inst.octave}'}"
 %endfor
 
 ; Instrument dynamics definitions
@@ -136,7 +135,7 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 ; values because that's how volume fades work.  Update the corresponding
 ; dynamics marks in each instrument.
 %for dyn in dynamics:
-${f'"v{dyn: <4} = $E7$_{dyn}"'}
+${f'"v{str(dyn): <4} = $E7$_{dyn}"'}
 %endfor
 
 ; Magic hex values are no fun, we'll give them nicer names

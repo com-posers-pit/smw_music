@@ -1,10 +1,10 @@
 #amk 2
 
-; MusicXML->AMK v0.2.3
+; beer v0.3.0
 
 #spc {
     #author  "COMPOSER HERE"
-    #title   "No_Metadata.mxl"
+    #title   "TITLE HERE"
     #game    "GAME NAME HERE"
     #comment "Ported by: PORTER NAME HERE"
 }

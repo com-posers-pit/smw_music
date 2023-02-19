@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2021 The SMW Music Python Project Authors
+# SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -6,18 +6,18 @@
 """Token classes extracted from MusicXML files."""
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
+# Standard library imports
 from dataclasses import dataclass
-from enum import auto, Enum
-from typing import Union
+from enum import Enum, auto
 
-###############################################################################
 # Library imports
-###############################################################################
+import music21
 
-import music21  # type: ignore
+# Package imports
+from smw_music.music_xml.shared import MusicXmlException
 
 ###############################################################################
 # Private variable/constant definitions
@@ -34,6 +34,21 @@ _MUSIC_XML_DURATION = {
     9: 32,
     10: 64,
 }
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _get_duration(elem: music21.note.GeneralNote) -> int:
+    duration = elem.duration.ordinal
+    if isinstance(duration, int):
+        rv = _MUSIC_XML_DURATION.get(duration, 0)
+    else:
+        rv = 0
+
+    return rv
+
 
 ###############################################################################
 # API constant definitions
@@ -275,6 +290,26 @@ class Dynamic(Token):
         return cls(elem.value)
 
     ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __post_init__(self) -> None:
+        dyn = self.level
+        if dyn.lower() not in [
+            "pppp",
+            "ppp",
+            "pp",
+            "p",
+            "mp",
+            "mf",
+            "f",
+            "ff",
+            "fff",
+            "ffff",
+        ]:
+            raise MusicXmlException(f"Invalid dynamic level {dyn}")
+
+    ###########################################################################
     # API property definitions
     ###########################################################################
 
@@ -394,7 +429,7 @@ class Measure(Token, Comment):
         The measure number
     """
 
-    number: Union[list[int], int] = 0
+    number: list[int] | int = 0
 
     ###########################################################################
     # API property definitions
@@ -412,7 +447,7 @@ class Measure(Token, Comment):
     # API method definitions
     ###########################################################################
 
-    def left_join(self, prev: "Measure"):
+    def left_join(self, prev: "Measure") -> None:
         self.number = [prev.range[0], self.range[-1]]
 
 
@@ -484,7 +519,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
     @classmethod
     def from_music_xml(
-        cls, elem: Union[music21.note.Note, music21.note.Unpitched]
+        cls, elem: music21.note.Note | music21.note.Unpitched
     ) -> "Note":
         """
         Convert a MusicXML note to a Note object.
@@ -517,7 +552,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
         return cls(
             name.lower().replace("#", "+"),
-            _MUSIC_XML_DURATION.get(elem.duration.ordinal, 0),
+            _get_duration(elem),
             octave - 1,
             elem.notehead,
             elem.duration.dots,
@@ -687,7 +722,7 @@ class Rest(Token, Playable):
             A new Rest object with its attributes defined by `elem`
         """
         return cls(
-            _MUSIC_XML_DURATION.get(elem.duration.ordinal, 0),
+            _get_duration(elem),
             elem.duration.dots,
         )
 
@@ -727,7 +762,8 @@ class Tempo(Token):
 
     @classmethod
     def from_music_xml(cls, elem: music21.tempo.MetronomeMark) -> "Tempo":
-        return cls(elem.getQuarterBPM())
+        bpm = int(elem.getQuarterBPM())  # type: ignore
+        return cls(bpm)
 
 
 ###############################################################################

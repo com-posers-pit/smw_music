@@ -6,6 +6,7 @@
 
 # -- Path setup --------------------------------------------------------------
 
+# Standard library imports
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -14,13 +15,13 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath("../../"))
+# Package imports
 from smw_music import __version__
-
 
 # -- Project information -----------------------------------------------------
 
 project = "SMW Music"
-copyright = "2021, The SMW Music Python Project Authors"
+copyright = "2023, The SMW Music Python Project Authors"
 author = "Thomas A. Werne"
 
 # The full version, including alpha/beta/rc tags
@@ -36,6 +37,7 @@ extensions = [
     "sphinx.ext.autodoc",  # Include documentation from docstrings
     "sphinx.ext.napoleon",  # Support for NumPy and Google style docstrings
     "sphinx.ext.todo",  # Support for todos
+    "sphinxcontrib.mermaid",  # Support for mermaid.js diagramming
 ]
 
 # Add any paths that contain templates here, relative to this directory.
