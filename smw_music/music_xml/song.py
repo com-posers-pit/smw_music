@@ -13,7 +13,7 @@
 import copy
 import pkgutil
 from datetime import datetime
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 # Library imports
 import music21
@@ -606,7 +606,7 @@ class Song:
             if inst.sample_source == SampleSource.SAMPLEPACK:
                 # TODO: This is pretty blah, song shouldn't rely on pathlib,
                 # see if this can be refactored
-                fname = str(Path(inst.pack_sample[0]) / inst.pack_sample[1])
+                fname = str(PurePosixPath(inst.pack_sample[0]) / inst.pack_sample[1])
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1

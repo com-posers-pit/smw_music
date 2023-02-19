@@ -614,7 +614,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_inst_state(pack_sample=item_id)
         if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
             self._load_sample_settings(item_id)
-            self._update_status(f"Sample pack {item_id} selected")
+            self._update_status(f"Sample pack {item_id[0]}:{str(item_id[1])} selected")
 
     ###########################################################################
 
