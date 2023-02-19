@@ -677,6 +677,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if instrument.name in instruments:
                 self.song.instruments[n] = instruments[instrument.name]
 
+        self.state.instruments[:] = self.song.instruments
         self.reinforce_state()
         self._update_status("MusicXML reloaded")
 
