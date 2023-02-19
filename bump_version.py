@@ -11,11 +11,11 @@
 # Standard Library imports
 ###############################################################################
 
+# Standard library imports
 import argparse
 import glob
 import re
 import sys
-
 from itertools import chain
 
 ###############################################################################
@@ -36,7 +36,7 @@ def _bump_version(version):
     key = "  version: "
     _overwrite("misc/mml.qml", key, f'{key}"{version}"{chr(13)}')
 
-    key = "; MusicXML->AMK v"
+    key = "; beer v"
     repl = f"{key}{version}\r"
     for fname in chain(
         glob.iglob("tests/dst/*.txt"), glob.iglob("tests/dst/ui/*.mml")
