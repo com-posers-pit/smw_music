@@ -32,16 +32,6 @@ What a difference a year makes.
 Affected Issues
 +++++++++++++++
 
-- `#87 Generate a backup mml`_
-
-- `#86 Add vibrato support`_
-
-- `#85 Non-concert pitch instruments`_
-
-- `#84 Dashboard loop analysis bug`_
-
-- `#82 Display generated text`_
-
 - `#122 Detect if AMK fails`_
 
 - `#121 Add close project functionality`_
@@ -70,7 +60,7 @@ Affected Issues
 
 - `#92 Explicit default q values`_
 
-- `#56 Include octave definitions in instrment macros?`_
+- `#56 Include octave definitions in instrument macros?`_
 
 
 Changed
@@ -544,8 +534,6 @@ Affected Issues
 .. _#97 Dynamics limits: https://github.com/com-posers-pit/smw_music/issues/97
 .. _#93 Incorrect KDn immediately following SNn commands: https://github.com/com-posers-pit/smw_music/issues/93
 .. _#92 Explicit default q values: https://github.com/com-posers-pit/smw_music/issues/92
-.. _#56 Include octave definitions in instrment macros?: https://github.com/com-posers-pit/smw_music/issues/56
-
 .. _#87 Generate a backup mml: https://github.com/com-posers-pit/smw_music/issues/87
 .. _#86 Add vibrato support: https://github.com/com-posers-pit/smw_music/issues/86
 .. _#85 Non-concert pitch instruments: https://github.com/com-posers-pit/smw_music/issues/85
