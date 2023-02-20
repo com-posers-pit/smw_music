@@ -1003,7 +1003,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             case "Darwin" | "Linux":
                 return ["sh", "convert.sh"]
             case "Windows":
-                return ["convert.bat"]
+                return [str(self._project_path / "convert.bat")]
             case _:
                 return []
 
