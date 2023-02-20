@@ -70,6 +70,9 @@
           <property name="text">
            <string>Just DO It</string>
           </property>
+          <property name="shortcut">
+           <string>Space</string>
+          </property>
          </widget>
         </item>
         <item row="12" column="0" colspan="2">

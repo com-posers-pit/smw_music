@@ -419,10 +419,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_and_play_clicked(self) -> None:
+        self._update_status("SPC generated and played")
         self.on_generate_mml_clicked(False)
         self.on_generate_spc_clicked(False)
         self.on_play_spc_clicked()
-        self._update_status("SPC generated and played")
 
     ###########################################################################
 
