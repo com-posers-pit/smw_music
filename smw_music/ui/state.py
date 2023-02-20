@@ -25,8 +25,8 @@ from smw_music.music_xml.instrument import InstrumentConfig
 @dataclass
 class PreferencesState:
     amk_fname: Path
-    sample_packs: dict[str, Path]
     spcplay_fname: Path
+    sample_pack_dname: Path
 
 
 ###############################################################################

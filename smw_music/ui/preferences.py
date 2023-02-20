@@ -46,12 +46,10 @@ class Preferences:
         connections = [
             (dialog.select_amk_fname, self.on_amk_select_clicked),
             (
-                dialog.select_sample_pack_fname,
+                dialog.select_sample_pack_dirname,
                 self.on_select_sample_pack_clicked,
             ),
             (dialog.select_spcplay, self.on_select_spcplay_clicked),
-            (dialog.add_sample_pack, self.on_add_sample_pack_clicked),
-            (dialog.remove_sample_pack, self.on_remove_sample_pack_clicked),
         ]
 
         for button, slot in connections:
@@ -59,16 +57,6 @@ class Preferences:
 
     ###########################################################################
     # Slot definitions
-    ###########################################################################
-
-    def on_add_sample_pack_clicked(self) -> None:
-        d = self._dialog  # pylint: disable=invalid-name
-        name = d.sample_pack_name.text()
-        path = d.sample_pack_fname.text()
-
-        if name and path:
-            self._add_sample_pack(name, Path(path))
-
     ###########################################################################
 
     def on_amk_select_clicked(self) -> None:
@@ -80,20 +68,13 @@ class Preferences:
 
     ###########################################################################
 
-    def on_remove_sample_pack_clicked(self) -> None:
-        packs = self._dialog.sample_pack_list
-        for item in packs.selectedItems():
-            packs.takeItem(packs.row(item))
-            del item
-
-    ###########################################################################
-
     def on_select_sample_pack_clicked(self) -> None:
-        fname, _ = QFileDialog.getOpenFileName(
-            self._dialog, caption="Sample Pack", filter="Zip Files (*.zip)"
+        fname = QFileDialog.getExistingDirectory(
+            self._dialog,
+            caption="Sample Pack Directory",
         )
         if fname:
-            self._dialog.sample_pack_fname.setText(fname)
+            self._dialog.sample_pack_dirname.setText(fname)
 
     ###########################################################################
 
@@ -121,31 +102,13 @@ class Preferences:
         text = str(fname) if fname.parts else ""
         d.spcplay_fname.setText(text)
 
-        d.sample_pack_name.setText("")
-        d.sample_pack_fname.setText("")
-        d.sample_pack_list.clear()
-
-        for name, pack in preferences.sample_packs.items():
-            self._add_sample_pack(name, pack)
+        d.sample_pack_dirname.setText("")
 
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
             spcplay_fname = Path(d.spcplay_fname.text())
+            pack_dir = Path(d.sample_pack_dirname.text())
 
-            packs = {}
-            widget = d.sample_pack_list
-            for row in range(widget.count()):
-                item = widget.item(row)
-                item_text = item.text().split(":")
-                packs[item_text[0]] = Path(":".join(item_text[1:]))
-
-            return PreferencesState(amk_fname, packs, spcplay_fname)
+            return PreferencesState(amk_fname, spcplay_fname, pack_dir)
 
         return None
-
-    ###########################################################################
-    # Private function definitions
-    ###########################################################################
-
-    def _add_sample_pack(self, name: str, path: Path) -> None:
-        self._dialog.sample_pack_list.addItem(f"{name}:{str(path)}")

@@ -20,6 +20,7 @@ import threading
 import zipfile
 from contextlib import suppress
 from dataclasses import replace
+from glob import glob
 from pathlib import Path
 from random import choice
 
@@ -205,10 +206,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "beer": __version__,
             "amk": {"path": str(preferences.amk_fname)},
             "spcplay": {"path": str(preferences.spcplay_fname)},
-            "sample_packs": {
-                name: {"path": str(path)}
-                for name, path in preferences.sample_packs.items()
-            },
+            "sample_packs": {"path": str(preferences.sample_pack_dname)},
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -822,10 +820,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self.preferences.amk_fname = Path(prefs["amk"]["path"])
         self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
-        self.preferences.sample_packs = {
-            name: Path(pack["path"])
-            for name, pack in prefs["sample_packs"].items()
-        }
+        self.preferences.sample_pack_dname = Path(
+            prefs["sample_packs"]["path"]
+        )
         self._load_sample_packs()
 
     ###########################################################################
@@ -834,7 +831,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self._sample_packs = {}
 
-        for name, path in self.preferences.sample_packs.items():
+        packs = {}
+        root_dir = self.preferences.sample_pack_dname
+        for fname in glob("*.zip", root_dir=root_dir):
+            pack = Path(fname)
+            packs[pack.stem] = root_dir / pack
+
+        for name, path in packs.items():
             try:
                 self._sample_packs[name] = SamplePack(path)
 

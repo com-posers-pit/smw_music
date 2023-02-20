@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
@@ -60,43 +66,16 @@
      <property name="title">
       <string>Sample Packs</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="4" column="0">
-       <widget class="QPushButton" name="remove_sample_pack">
-        <property name="text">
-         <string>Remove</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QLineEdit" name="sample_pack_fname"/>
-      </item>
-      <item row="3" column="0">
-       <widget class="QPushButton" name="add_sample_pack">
-        <property name="text">
-         <string>Add</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QPushButton" name="select_sample_pack_fname">
+     <layout class="QHBoxLayout" name="horizontalLayout_3">
+      <item>
+       <widget class="QPushButton" name="select_sample_pack_dirname">
         <property name="text">
          <string>Select</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="sample_pack_name_lbl">
-        <property name="text">
-         <string>Pack Name:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="sample_pack_name"/>
-      </item>
-      <item row="3" column="1" rowspan="3" colspan="2">
-       <widget class="QListWidget" name="sample_pack_list"/>
+      <item>
+       <widget class="QLineEdit" name="sample_pack_dirname"/>
       </item>
      </layout>
     </widget>
