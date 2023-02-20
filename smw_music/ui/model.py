@@ -104,10 +104,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.preferences = PreferencesState(Path(""), {}, Path(""))
+        self.preferences = PreferencesState(Path(""), Path(""), Path(""))
         self._history = [State()]
         self._undo_level = 0
-
+        self._sample_packs = {}
         self._project_path = None
 
         os.makedirs(self.config_dir, exist_ok=True)
@@ -468,40 +468,41 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_generate_spc_clicked(self, report: bool = True) -> None:
         assert self._project_path is not None  # nosec: B101
 
+        error = False
+        msg = ""
         samples_path = self._project_path / "samples"
         for inst in self.state.instruments:
             if inst.sample_source == SampleSource.BRR:
                 shutil.copy2(inst.brr_fname, samples_path)
             if inst.sample_source == SampleSource.SAMPLEPACK:
-                target = (
-                    samples_path / inst.pack_sample[0] / inst.pack_sample[1]
-                )
+                pack_name, pack_path = inst.pack_sample
+                target = samples_path / pack_name / pack_path
                 os.makedirs(target.parents[0], exist_ok=True)
                 with open(target, "wb") as fobj:
-                    fobj.write(
-                        self._sample_packs[inst.pack_sample[0]][
-                            inst.pack_sample[1]
-                        ].data
-                    )
+                    try:
+                        fobj.write(
+                            self._sample_packs[pack_name][pack_path].data
+                        )
+                    except KeyError:
+                        error = True
+                        msg += f"Could not find sample pack {pack_name}\n"
 
-        try:
-            error = False
-            msg = subprocess.check_output(  # nosec B602
-                self.convert,
-                cwd=self._project_path,
-                stderr=subprocess.STDOUT,
-                timeout=5,
-            ).decode()
-        except subprocess.CalledProcessError as e:
-            error = True
-            report = True
-            msg = e.output
-        except subprocess.TimeoutExpired:
-            error = True
-            report = True
-            msg = "Conversion timed out"
+        if not error:
+            try:
+                msg = subprocess.check_output(  # nosec B602
+                    self.convert,
+                    cwd=self._project_path,
+                    stderr=subprocess.STDOUT,
+                    timeout=5,
+                ).decode()
+            except subprocess.CalledProcessError as e:
+                error = True
+                msg = e.output
+            except subprocess.TimeoutExpired:
+                error = True
+                msg = "Conversion timed out"
 
-        if report:
+        if report or error:
             self.response_generated.emit(error, "SPC Generated", msg)
             self._update_status("SPC generated")
 
