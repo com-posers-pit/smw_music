@@ -5,7 +5,9 @@
 #
 # Copyright only applies to this source code file, not the original quotes
 
+"""Lists of music-related quotes, printed at startup."""
 
+# pylint: disable=line-too-long
 # fmt: off
 
 # From: https://parade.com/1239349/michelle-parkerton/music-quotes/

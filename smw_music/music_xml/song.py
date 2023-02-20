@@ -13,7 +13,7 @@
 import copy
 import pkgutil
 from datetime import datetime
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 
 # Library imports
 import music21

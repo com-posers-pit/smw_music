@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from os import listdir
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -19,11 +19,6 @@ from zipfile import ZipFile
 
 # Package imports
 from smw_music.music_xml.instrument import GainMode
-
-###############################################################################
-# API Function Definitions
-###############################################################################
-
 
 ###############################################################################
 # API Class Definitions
@@ -76,8 +71,8 @@ class SamplePack:
                 with open(Path(tdir) / pat_file, "r", encoding="utf8") as fobj:
                     sample_params = SampleParams.from_pattern_file(fobj)
 
-                # Stupid case insensitive file systems.  Build a map between the
-                # lower-case version of file name in the directory and its
+                # Stupid case insensitive file systems.  Build a map between
+                # the lower-case version of file name in the directory and its
                 brr_data = {}
                 for fname in listdir(parent_dir):
                     with open(parent_dir / fname, "rb") as fobj:
