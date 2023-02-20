@@ -493,7 +493,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 cwd=self._project_path,
                 stderr=subprocess.STDOUT,
                 timeout=5,
-                shell=True,
             ).decode()
         except subprocess.CalledProcessError as e:
             error = True
@@ -662,7 +661,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             threading.Thread(
                 target=subprocess.call,
                 args=(args,),
-                kwargs={"shell": True},
             ).start()
             self._update_status("SPC played")
 
@@ -998,7 +996,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @property
     def convert(self) -> list[str]:
         match platform.system():
-            case ["Darwin", "Linux"]:
+            case "Darwin" | "Linux":
                 return ["sh", "convert.sh"]
             case "Windows":
                 return ["convert.bat"]
