@@ -489,7 +489,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if not error:
             try:
-                msg = subprocess.check_output(  # nosec B602
+                msg = subprocess.check_output(  # nosec B603
                     self.convert,
                     cwd=self._project_path,
                     stderr=subprocess.STDOUT,
