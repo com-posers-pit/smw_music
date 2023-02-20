@@ -15,8 +15,8 @@ from enum import IntEnum, auto
 # Library imports
 import numpy as np
 import numpy.typing as npt
-import pyqtgraph as pg
-from PyQt6.QtWidgets import QGraphicsScene, QMainWindow, QWidget
+import pyqtgraph as pg  # type: ignore
+from PyQt6.QtWidgets import QMainWindow, QWidget
 
 ###############################################################################
 # Private constant definition
@@ -26,9 +26,17 @@ from PyQt6.QtWidgets import QGraphicsScene, QMainWindow, QWidget
 _LIMIT = 2**11 - 1
 _MAX_COUNT = 0x77ff
 _MAX_SECS = 38
-_OFFSETS = [0, 0, 1040, 536, 0, 1040, 536, 0, 1040, 536, 0, 1040, 536, 0, 1040,
-            536, 0, 1040, 536, 0, 1040, 536, 0, 1040, 536, 0, 1040, 536, 0,
-            1040, 0, 0]
+_OFFSETS = [0,   0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            536, 0, 1040,
+            0,   0]
 _RATES = [2**32,   # "infinity"
           2048, 1536, 1280, 1024, 768, 640, 512, 384, 320, 256, 192, 160,
           128, 96, 80, 64, 48, 40, 32, 24, 20, 16, 12, 10, 8, 6, 5, 4, 3, 2, 1]
@@ -56,7 +64,7 @@ class EnvelopePreview(QMainWindow):
     _window: QMainWindow
     _graph: pg.PlotWidget
     _plot_data: pg.graphicsItems.PlotDataItem.PlotDataItem
-    _counts: npt.NDArray
+    _counts: npt.NDArray[np.int64]
 
     ###########################################################################
     # Constructor definitions

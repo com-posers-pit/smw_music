@@ -17,19 +17,11 @@ from collections import deque
 from contextlib import ExitStack
 from functools import partial
 from pathlib import Path
-from typing import NamedTuple, cast
+from typing import Callable, NamedTuple, cast
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import (
-    QBuffer,
-    QByteArray,
-    QEvent,
-    QIODevice,
-    QObject,
-    QSignalBlocker,
-    Qt,
-)
+from PyQt6.QtCore import QBuffer, QEvent, QObject, QSignalBlocker, Qt
 from PyQt6.QtGui import QAction, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
@@ -72,6 +64,20 @@ from smw_music.utils import hexb, pct
 
 ###############################################################################
 # Private function definitions
+###############################################################################
+
+
+def _cb_proxy(slot: Callable[[bool], None], state: Qt.CheckState) -> None:
+    slot(bool(state))
+
+
+###############################################################################
+
+
+def _le_proxy(slot: Callable[[str], None], widget: QLineEdit) -> None:
+    slot(widget.text())
+
+
 ###############################################################################
 
 
@@ -172,21 +178,20 @@ class Dashboard(QWidget):
     _sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem]
     _unsaved: bool
     _project_name: str | None
-    _keyhist: deque
-    _ashman: QByteArray
+    _keyhist: deque[int]
 
     ###########################################################################
     # Constructor definitions
     ###########################################################################
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
         self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
         if ui_contents is None:
             raise Exception("Can't locate dashboard")
 
-        self._view = uic.loadUi(io.BytesIO(ui_contents))
+        self._view: DashboardView = uic.loadUi(io.BytesIO(ui_contents))
         self._view.installEventFilter(self)
 
         self._preferences = Preferences()
@@ -204,9 +209,12 @@ class Dashboard(QWidget):
 
         self._checkitout = QMainWindow(parent=self)
         label = QLabel(self)
-        gif = pkgutil.get_data("smw_music", "data/ashtley.gif")
-        self._ashman = QByteArray(gif)
-        buffer = QBuffer(self._ashman, parent=self)
+        gif = cast(bytes, pkgutil.get_data("smw_music", "data/ashtley.gif"))
+        buffer = QBuffer(parent=self)
+        buffer.open(QBuffer.OpenModeFlag.ReadWrite)
+        buffer.writeData(gif)
+        buffer.seek(0)
+
         movie = QMovie(parent=self)
         movie.setDevice(buffer)
         label.setMovie(movie)
@@ -561,7 +569,7 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_status_updated(self, msg: str, init) -> None:
+    def on_status_updated(self, msg: str) -> None:
         self._history_list.insertItem(0, msg)
         self._view.statusBar().showMessage(msg)
 
@@ -581,7 +589,7 @@ class Dashboard(QWidget):
 
     def _add_sample_pack(
         self, top: QTreeWidgetItem, name: str, pack: SamplePack
-    ):
+    ) -> None:
         parent = top
         parent_items: dict[Path, QTreeWidgetItem] = {}
 
@@ -612,7 +620,7 @@ class Dashboard(QWidget):
         alen = m.on_artic_length_changed
         avol = m.on_artic_volume_changed
 
-        connections = [
+        connections: list[tuple[QWidget, Callable[..., None]]] = [
             # Control Panel
             (v.select_musicxml_fname, self.on_musicxml_fname_clicked),
             (v.musicxml_fname, m.on_musicxml_fname_changed),
@@ -713,17 +721,11 @@ class Dashboard(QWidget):
             elif isinstance(widget, QComboBox):
                 widget.currentIndexChanged.connect(slot)
             elif isinstance(widget, QCheckBox):
-
-                def proxy(state: int, slot=slot) -> None:
-                    slot(bool(state))
-
-                widget.stateChanged.connect(proxy)
+                widget.stateChanged.connect(partial(_cb_proxy, slot))
             elif isinstance(widget, QLineEdit):
-
-                def proxy(widget=widget, slot=slot):
-                    slot(widget.text())
-
-                widget.editingFinished.connect(proxy)
+                widget.editingFinished.connect(
+                    partial(_le_proxy, slot, widget)
+                )
             elif isinstance(widget, QRadioButton):
                 widget.toggled.connect(slot)
             elif isinstance(widget, (QAbstractSlider, QSpinBox)):

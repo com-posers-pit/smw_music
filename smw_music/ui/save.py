@@ -249,7 +249,7 @@ def load(fname: Path) -> State:
 ###############################################################################
 
 
-def save(fname: Path, state: State):
+def save(fname: Path, state: State) -> None:
     with open(fname, "w", encoding="utf8") as fobj:
         yaml.safe_dump(
             {

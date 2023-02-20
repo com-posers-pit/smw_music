@@ -18,7 +18,6 @@ from pathlib import Path
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtGui import QStandardItem, QStandardItemModel
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
@@ -41,7 +40,7 @@ class Preferences:
         ui_contents = pkgutil.get_data("smw_music", "/data/preferences.ui")
         if ui_contents is None:
             raise Exception("Can't locate preferences")
-        dialog = uic.loadUi(io.BytesIO(ui_contents))
+        dialog: PreferencesView = uic.loadUi(io.BytesIO(ui_contents))
         self._dialog = dialog
 
         connections = [

@@ -31,11 +31,13 @@ from PyQt6.QtCore import QObject, pyqtSignal
 # Package imports
 from smw_music import SmwMusicException, __version__
 from smw_music.music_xml import MusicXmlException
-from smw_music.music_xml.echo import EchoCh
+from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,
+    ArticSetting,
     Dynamics,
     GainMode,
+    InstrumentConfig,
     SampleSource,
 )
 from smw_music.music_xml.song import Song
@@ -82,7 +84,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     recent_projects_updated = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
-    status_updated = pyqtSignal(str, bool)  # arguments=['message', 'init']
+    status_updated = pyqtSignal(str)  # arguments=['message']
     response_generated = pyqtSignal(
         bool, str, str
     )  # arguments=["error", "title", "response"]
@@ -108,7 +110,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._project_path = None
 
         os.makedirs(self.config_dir, exist_ok=True)
-
 
     ###########################################################################
     # API method definitions
@@ -195,7 +196,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.reinforce_state()
 
         quote: tuple[str, str] = choice(quotes)
-        self._update_status(f"{quote[1]}: {quote[0]}", True)
+        self._update_status(f"{quote[1]}: {quote[0]}")
 
     ###########################################################################
 
@@ -614,7 +615,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_inst_state(pack_sample=item_id)
         if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
             self._load_sample_settings(item_id)
-            self._update_status(f"Sample pack {item_id[0]}:{str(item_id[1])} selected")
+            self._update_status(
+                f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
+            )
 
     ###########################################################################
 
@@ -656,7 +659,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             threading.Thread(
                 target=subprocess.call,
                 args=(args,),
-                kwargs={'shell': True},
+                kwargs={"shell": True},
             ).start()
             self._update_status("SPC played")
 
@@ -889,13 +892,34 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_echo_state(self, **kwargs) -> None:
+    def _update_echo_state(
+        self,
+        **kwargs: set[EchoCh]
+        | tuple[float, float]
+        | tuple[bool, bool]
+        | int
+        | float
+        | bool,
+    ) -> None:
         new_echo = replace(self.state.echo, **kwargs)
         self._update_state(echo=new_echo)
 
     ###########################################################################
 
-    def _update_inst_state(self, idx: int = -1, **kwargs) -> None:
+    def _update_inst_state(
+        self,
+        idx: int = -1,
+        **kwargs: str
+        | int
+        | dict[Dynamics, int]
+        | dict[Artic, ArticSetting]
+        | set[Dynamics]
+        | bool
+        | SampleSource
+        | tuple[str, Path]
+        | Path
+        | GainMode,
+    ) -> None:
         old_inst = (
             self.state.inst if idx == -1 else self.state.instruments[idx]
         )
@@ -921,7 +945,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_state(
-        self, update_instruments: bool = False, **kwargs
+        self,
+        update_instruments: bool = False,
+        **kwargs: str
+        | bool
+        | InstrumentConfig
+        | list[InstrumentConfig]
+        | None
+        | EchoConfig
+        | int,
     ) -> None:
         new_state = replace(self.state, **kwargs)
         if new_state != self.state:
@@ -933,8 +965,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_status(self, msg: str, init: bool = False) -> None:
-        self.status_updated.emit(msg, init)
+    def _update_status(self, msg: str) -> None:
+        self.status_updated.emit(msg)
 
     ###########################################################################
     # API property definitions
@@ -944,7 +976,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def config_dir(self) -> Path:
         app = "xml2mml"
 
-        match sys := platform.system():
+        sys = platform.system()
+        match sys:
             case "Linux":
                 default = Path(os.environ["HOME"]) / ".config"
                 conf_dir = Path(os.environ.get("XDG_CONFIG_HOME", default))
@@ -963,12 +996,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def convert(self) -> list[str]:
         match sys := platform.system():
             case "Linux":
-                return ['sh', 'convert.sh']
+                return ["sh", "convert.sh"]
             case "Windows":
-                return ['convert.bat']
+                return ["convert.bat"]
             case _:
                 return []
-
 
     ###########################################################################
 
