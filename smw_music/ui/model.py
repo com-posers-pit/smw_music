@@ -195,7 +195,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
 
-        quote: tuple[str, str] = choice(quotes)
+        quote: tuple[str, str] = choice(quotes)  # nosec: B311
         self._update_status(f"{quote[1]}: {quote[0]}")
 
     ###########################################################################
@@ -468,7 +468,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_spc_clicked(self, report: bool = True) -> None:
-        assert self._project_path is not None
+        assert self._project_path is not None  # nosec: B101
 
         samples_path = self._project_path / "samples"
         for inst in self.state.instruments:
@@ -489,7 +489,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # TODO: support OSX
         try:
             error = False
-            msg = subprocess.check_output(  # nosec B603, B607
+            msg = subprocess.check_output(  # nosec B602
                 self.convert,
                 cwd=self._project_path,
                 stderr=subprocess.STDOUT,
