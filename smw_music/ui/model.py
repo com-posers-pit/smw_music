@@ -494,14 +494,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 stderr=subprocess.STDOUT,
                 timeout=5,
                 shell=True,
-            )
+            ).decode()
         except subprocess.CalledProcessError as e:
             error = True
             report = True
             msg = e.output
+        except subprocess.TimeoutExpired:
+            error = True
+            report = True
+            msg = "Conversion timed out"
 
         if report:
-            self.response_generated.emit(error, "SPC Generated", msg.decode())
+            self.response_generated.emit(error, "SPC Generated", msg)
             self._update_status("SPC generated")
 
     ###########################################################################
