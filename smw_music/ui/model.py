@@ -486,7 +486,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         ].data
                     )
 
-        # TODO: support OSX
         try:
             error = False
             msg = subprocess.check_output(  # nosec B602
@@ -651,7 +650,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             spc_name = f"{project}.spc"
             spc_name = str(path / "SPCs" / spc_name)
 
-            # TODO: Handle OSX
+            # Handles linux and OSX, windows is covered on the next line
             args = ["wine", str(self.preferences.spcplay_fname), spc_name]
             if platform.system() == "Windows":
                 args = args[1:]
@@ -994,8 +993,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @property
     def convert(self) -> list[str]:
-        match sys := platform.system():
-            case "Linux":
+        match platform.system():
+            case ["Darwin", "Linux"]:
                 return ["sh", "convert.sh"]
             case "Windows":
                 return ["convert.bat"]
