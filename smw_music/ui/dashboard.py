@@ -164,7 +164,6 @@ class _SoloMute(enum.IntEnum):
 
 class Dashboard(QWidget):
     _history: QMainWindow
-    _history_list: QListWidget
     _quicklook: QMainWindow
     _quicklook_edit: QTextEdit
     _checkitout: QMainWindow
@@ -221,10 +220,9 @@ class Dashboard(QWidget):
         movie.start()
         self._checkitout.setCentralWidget(label)
 
-        self._history_list = QListWidget()
         self._history = QMainWindow(parent=self)
         self._history.setMinimumSize(800, 600)
-        self._history.setCentralWidget(self._history_list)
+        self._history.setCentralWidget(QListWidget())
 
         self._envelope_preview = EnvelopePreview(self)
 
@@ -570,7 +568,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
-        self._history_list.insertItem(0, msg)
+        cast(QListWidget, self._history.centralWidget()).insertItem(0, msg)
         self._view.statusBar().showMessage(msg)
 
     ###########################################################################
