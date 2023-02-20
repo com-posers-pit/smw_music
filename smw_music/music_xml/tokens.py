@@ -577,9 +577,9 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         else:
             octave = self.octave
             name = self.name
-            bad = octave < 1
+            bad = octave < 0
             bad |= octave > 6
-            bad |= octave == 0 and name in ["a+", "b-", "b"]
+            bad |= octave == 6 and name in ["a+", "b-", "b"]
             if bad:
                 msg = f"Unsupported note {name}{octave} #{note} in "
                 msg += f"measure {measure}"

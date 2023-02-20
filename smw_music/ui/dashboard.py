@@ -304,6 +304,17 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_multisample_clicked(self) -> None:
+        fname, _ = QFileDialog.getOpenFileName(
+            self._view,
+            caption="Multisample Sample File",
+            filter="YAML Files (*.yaml)",
+        )
+        if fname:
+            self._model.on_multisample_fname_changed(fname)
+
+    ###########################################################################
+
     def on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view,
@@ -485,6 +496,16 @@ class Dashboard(QWidget):
             )
             fname = str(inst.brr_fname) if inst.brr_fname.name else ""
             v.brr_fname.setText(fname)
+            v.select_multisample_sample.setChecked(
+                inst.sample_source == SampleSource.MULTISAMPLE
+            )
+            fname = (
+                str(inst.multisample_fname)
+                if inst.multisample_fname.name
+                else ""
+            )
+            v.multisample_fname.setText(fname)
+
             v.octave.setValue(inst.octave)
 
             v.select_adsr_mode.setChecked(inst.adsr_mode)
@@ -650,6 +671,9 @@ class Dashboard(QWidget):
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.brr_fname, m.on_brr_fname_changed),
+            (v.select_multisample_sample, m.on_multisample_sample_selected),
+            (v.select_multisample_fname, self.on_multisample_clicked),
+            (v.multisample_fname, m.on_multisample_fname_changed),
             (v.octave, m.on_octave_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),
             (v.gain_mode_direct, m.on_gain_direct_selected),

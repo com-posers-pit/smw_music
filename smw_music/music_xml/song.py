@@ -17,6 +17,7 @@ from pathlib import PurePosixPath
 
 # Library imports
 import music21
+import yaml
 from mako.template import Template  # type: ignore
 
 # Package imports
@@ -617,6 +618,20 @@ class Song:
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
+            if inst.sample_source == SampleSource.MULTISAMPLE:
+                pass
+        #         with open(
+        #             inst.multisample_fname, "r", encoding="utf8"
+        #         ) as fobj:
+        #             multisample = yaml.safe_load(fobj)
+        #
+        #             inst.instrument_idx = []
+        #             for sample in multisample["sample"]:
+        #             samples.append(
+        #                 (sample["file"].name, sample["brr_str"], sample_id)
+        #             )
+        #             inst.instrument_idx.append(sample_id)
+        #             sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
         solo = any(inst.solo for inst in instruments)

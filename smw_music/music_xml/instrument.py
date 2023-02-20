@@ -87,6 +87,7 @@ class SampleSource(IntEnum):
     BUILTIN = auto()
     SAMPLEPACK = auto()
     BRR = auto()
+    MULTISAMPLE = auto()
     OVERRIDE = auto()
 
 
@@ -130,6 +131,7 @@ class InstrumentConfig:
     builtin_sample_index: int = -1
     pack_sample: tuple[str, Path] = ("", Path())
     brr_fname: Path = field(default_factory=Path)
+    multisample_fname: Path = field(default_factory=Path)
     # TODO: see if the following settings can be rolled into a Sample object
     adsr_mode: bool = True
     attack_setting: int = 0

@@ -487,6 +487,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         error = True
                         msg += f"Could not find sample pack {pack_name}\n"
 
+            if inst.sample_source == SampleSource.MULTISAMPLE:
+                with open(
+                    inst.multisample_fname, "r", encoding="utf8"
+                ) as fobj:
+                    multisample = yaml.safe_load(fobj)
+                for sample in multisample["sample"]:
+                    shutil.copy2(sample["file"], samples_path)
+
         if not error:
             try:
                 msg = subprocess.check_output(  # nosec B603
@@ -585,6 +593,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_mml_fname_changed(self, fname: str) -> None:
         self._update_state(mml_fname=fname)
         self._update_status(f"MML name set to {fname}")
+
+    ###########################################################################
+
+    def on_multisample_fname_changed(self, fname: str) -> None:
+        self._update_inst_state(multisample_fname=Path(fname))
+
+    ###########################################################################
+
+    def on_multisample_sample_selected(self, state: bool) -> None:
+        if state:
+            self._update_inst_state(sample_source=SampleSource.MULTISAMPLE)
 
     ###########################################################################
 
