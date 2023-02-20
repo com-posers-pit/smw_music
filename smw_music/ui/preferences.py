@@ -102,7 +102,9 @@ class Preferences:
         text = str(fname) if fname.parts else ""
         d.spcplay_fname.setText(text)
 
-        d.sample_pack_dirname.setText("")
+        fname = preferences.sample_pack_dname
+        text = str(fname) if fname.parts else ""
+        d.sample_pack_dirname.setText(text)
 
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
