@@ -11,7 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass
-from os import listdir
+from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TextIO
@@ -74,7 +74,7 @@ class SamplePack:
                 # Stupid case insensitive file systems.  Build a map between
                 # the lower-case version of file name in the directory and its
                 brr_data = {}
-                for fname in listdir(parent_dir):
+                for fname in glob("*.brr", root_dir=parent_dir):
                     with open(parent_dir / fname, "rb") as fobj:
                         brr_data[fname.lower()] = fobj.read()
 
