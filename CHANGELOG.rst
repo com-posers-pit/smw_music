@@ -11,7 +11,79 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.1`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.1 - 2023-02-20
+--------------------------
+
+`Release 0.3.1`_
+
 `Differences from 0.3.0`_
+
+Purpose
++++++++
+
+Cleanup a few warts in v0.3.0
+
+
+Affected Issues
++++++++++++++++
+
+- `#129 Add porter and game name to UI`_
+
+- `#128 Put custom samples in a specific subdir`_
+
+- `#126 Select an instrument after loading`_
+
+- `#125 Replace discrete sample packs with a sample pack directory`_
+
+- `#124 Sample file parsing error`_
+
+- `#113 Display human readable interpretations of ADSR and gain settings`_
+
+- `#112 Improve envelope display performance`_
+
+
+Changed
++++++++
+
+- Fixed quicklook using non-monospace font on windows
+
+- Fixed broken undo/redo while working in a project
+
+- BRR files are placed in a subdirectory of ``samples``
+
+- Streamlined envelope calculations
+
+- On project load, first instrument is selected automatically
+
+- Sample packs now come from a user-provided directory rather than being
+  registered one-by-one
+
+Added
++++++
+
+- Space is a shortcut for "convert and play"
+
+- Porter and game name entries in the UI
+
+  - These can be pulled in from the score; if used in the UI, those
+    values are overridden
+
+- Human-readable ADSR/gain values
+
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
 
 --------------------------------------------------------------------------------
 
@@ -520,6 +592,11 @@ Affected Issues
 - `#1 Add support for AMK annotations`_
 
 
+.. _#129 Add porter and game name to UI: https://github.com/com-posers-pit/smw_music/issues/129
+.. _#128 Put custom samples in a specific subdir: https://github.com/com-posers-pit/smw_music/issues/128
+.. _#126 Select an instrument after loading: https://github.com/com-posers-pit/smw_music/issues/126
+.. _#125 Replace discrete sample packs with a sample pack directory: https://github.com/com-posers-pit/smw_music/issues/125
+.. _#124 Sample file parsing error: https://github.com/com-posers-pit/smw_music/issues/124
 .. _#122 Detect if AMK fails: https://github.com/com-posers-pit/smw_music/issues/122
 .. _#121 Add close project functionality: https://github.com/com-posers-pit/smw_music/issues/121
 .. _#119 Fix "would you like to save" when closing subwindows: https://github.com/com-posers-pit/smw_music/issues/119
@@ -527,6 +604,8 @@ Affected Issues
 .. _#117 Autosave: https://github.com/com-posers-pit/smw_music/issues/117
 .. _#116 Don't prompt to save on newly opened project: https://github.com/com-posers-pit/smw_music/issues/116
 .. _#114 Spurious updates to BRR settings: https://github.com/com-posers-pit/smw_music/issues/114
+.. _#113 Display human readable interpretations of ADSR and gain settings: https://github.com/com-posers-pit/smw_music/issues/113
+.. _#112 Improve envelope display performance: https://github.com/com-posers-pit/smw_music/issues/112
 .. _#111 Finish all-in-one windows compatibility: https://github.com/com-posers-pit/smw_music/issues/111
 .. _#110 Echo values are broken in MML writes: https://github.com/com-posers-pit/smw_music/issues/110
 .. _#105 Add solo/mute options to UI: https://github.com/com-posers-pit/smw_music/issues/105
@@ -597,6 +676,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.1
 .. _Release 0.3.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.0
 .. _Release 0.2.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.3
 .. _Release 0.2.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.2
@@ -606,7 +686,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.0: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...HEAD
+.. _Differences from 0.3.1: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...HEAD
+.. _Differences from 0.3.0: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...v0.3.1
 .. _Differences from 0.2.3: https://github.com/com-posers-pit/smw_music/compare/v0.2.3...v0.3.0
 .. _Differences from 0.2.2: https://github.com/com-posers-pit/smw_music/compare/v0.2.2...v0.2.3
 .. _Differences from 0.2.1: https://github.com/com-posers-pit/smw_music/compare/v0.2.1...v0.2.2
