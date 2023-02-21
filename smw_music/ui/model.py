@@ -470,7 +470,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         error = False
         msg = ""
-        samples_path = self._project_path / "samples"
+        samples_path = self._project_path / "samples" / "custom"
+        shutil.rmtree(samples_path, ignore_errors=True)
+
         for inst in self.state.instruments:
             if inst.sample_source == SampleSource.BRR:
                 shutil.copy2(inst.brr_fname, samples_path)
