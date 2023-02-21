@@ -1000,6 +1000,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @property
     def convert(self) -> list[str]:
+        # TODO: Put better protections in place for this
+        assert self._project_path is not None  # nosec: B101
+
         match platform.system():
             case "Darwin" | "Linux":
                 return ["sh", "convert.sh"]
