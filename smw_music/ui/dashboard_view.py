@@ -150,6 +150,8 @@ class DashboardView(QMainWindow):
     gain_setting: QLineEdit
     gain_setting_label: QLabel
     gain_slider: QSlider
+    game_name: QLineEdit
+    game_name_label: QLabel
     generate_and_play: QPushButton
     generate_mml: QPushButton
     generate_spc: QPushButton
@@ -203,6 +205,8 @@ class DashboardView(QMainWindow):
     pan_setting: QDial
     pan_setting_label: QLabel
     play_spc: QPushButton
+    porter_name: QLineEdit
+    porter_name_label: QLabel
     pp_label: QLabel
     pp_setting: QLineEdit
     pp_setting_label: QLabel

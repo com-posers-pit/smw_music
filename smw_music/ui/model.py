@@ -419,6 +419,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_game_name_changed(self, val: str) -> None:
+        self._update_state(game=val)
+        self._update_status(f"Game name set to {val}")
+
+    ###########################################################################
+
     def on_generate_and_play_clicked(self) -> None:
         self._update_status("SPC generated and played")
         self.on_generate_mml_clicked(False)
@@ -444,6 +450,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.song.instruments = self.state.instruments
 
                 self.song.volume = self.state.global_volume
+                if self.state.porter:
+                    self.song.porter = self.state.porter
+                if self.state.game:
+                    self.song.game = self.state.game
 
                 mml = self.song.to_mml_file(
                     fname,
@@ -666,6 +676,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 args=(args,),
             ).start()
             self._update_status("SPC played")
+
+    ###########################################################################
+
+    def on_porter_name_changed(self, val: str) -> None:
+        self._update_state(porter=val)
+        self._update_status(f"Porter name set to {val}")
 
     ###########################################################################
 

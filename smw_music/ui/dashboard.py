@@ -421,6 +421,8 @@ class Dashboard(QWidget):
             # Control Panel
             v.musicxml_fname.setText(state.musicxml_fname)
             v.mml_fname.setText(state.mml_fname)
+            v.porter_name.setText(state.porter)
+            v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
@@ -641,6 +643,8 @@ class Dashboard(QWidget):
             (v.musicxml_fname, m.on_musicxml_fname_changed),
             (v.select_mml_fname, self.on_mml_fname_clicked),
             (v.mml_fname, m.on_mml_fname_changed),
+            (v.porter_name, m.on_porter_name_changed),
+            (v.game_name, m.on_game_name_changed),
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
