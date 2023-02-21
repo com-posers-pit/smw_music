@@ -43,7 +43,7 @@ from smw_music.music_xml.instrument import (
     SampleSource,
 )
 from smw_music.music_xml.song import Song
-from smw_music.ui.quotes import quotes
+from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import PreferencesState, State
@@ -433,6 +433,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         fname = self.state.mml_fname
         if self.song is None:
             msg = "Song not loaded"
+            self.mml_generated.emit("\n".join(ashtley))
         else:
             try:
                 if os.path.exists(fname):

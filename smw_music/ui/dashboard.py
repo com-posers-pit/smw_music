@@ -22,7 +22,7 @@ from typing import Callable, NamedTuple, cast
 # Library imports
 from PyQt6 import uic
 from PyQt6.QtCore import QBuffer, QEvent, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import QAction, QKeyEvent, QMovie
+from PyQt6.QtGui import QAction, QFont, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -166,7 +166,6 @@ class _TblCol(enum.IntEnum):
 class Dashboard(QWidget):
     _history: QMainWindow
     _quicklook: QMainWindow
-    _quicklook_edit: QTextEdit
     _checkitout: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
@@ -200,14 +199,21 @@ class Dashboard(QWidget):
         self._project_name = None
         self._sample_pack_items = {}
 
-        self._quicklook_edit = QTextEdit()
-        self._quicklook_edit.setFontFamily("Monospace")
-        self._quicklook_edit.setReadOnly(True)
+        # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
+        font = QFont("_")
+        font.setStyleHint(QFont.StyleHint.Monospace)
+        quicklook_edit = QTextEdit()
+        quicklook_edit.setFont(font)
+        quicklook_edit.setReadOnly(True)
         self._quicklook = QMainWindow(parent=self)
+        self._quicklook.setWindowTitle("Quicklook")
         self._quicklook.setMinimumSize(800, 600)
-        self._quicklook.setCentralWidget(self._quicklook_edit)
+        self._quicklook.setCentralWidget(quicklook_edit)
 
         self._checkitout = QMainWindow(parent=self)
+        self._checkitout.setWindowTitle(
+            "Never gonna run around and desert you"
+        )
         label = QLabel(self)
         gif = cast(bytes, pkgutil.get_data("smw_music", "data/ashtley.gif"))
         buffer = QBuffer(parent=self)
@@ -222,10 +228,12 @@ class Dashboard(QWidget):
         self._checkitout.setCentralWidget(label)
 
         self._history = QMainWindow(parent=self)
+        self._history.setWindowTitle("Action history")
         self._history.setMinimumSize(800, 600)
         self._history.setCentralWidget(QListWidget())
 
         self._envelope_preview = EnvelopePreview(self)
+        self._history.setWindowTitle("Envelope")
 
         self._setup_menus()
         self._fix_edit_widths()
@@ -299,7 +307,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_mml_generated(self, mml: str) -> None:
-        self._quicklook_edit.setText(mml)
+        cast(QTextEdit, self._quicklook.centralWidget()).setText(mml)
 
     ###########################################################################
 
