@@ -178,6 +178,7 @@ class Dashboard(QWidget):
     _unsaved: bool
     _project_name: str | None
     _keyhist: deque[int]
+    _window_title: str
 
     ###########################################################################
     # Constructor definitions
@@ -185,6 +186,8 @@ class Dashboard(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+        self._window_title = f"beer v{__version__}"
+
         self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
         if ui_contents is None:
@@ -192,6 +195,7 @@ class Dashboard(QWidget):
 
         self._view: DashboardView = uic.loadUi(io.BytesIO(ui_contents))
         self._view.installEventFilter(self)
+        self._view.setWindowTitle(self._window_title)
 
         self._preferences = Preferences()
         self._model = Model()
@@ -406,7 +410,7 @@ class Dashboard(QWidget):
             if self._unsaved:
                 title += " +"
 
-        title += f" - beer v{__version__}"
+        title += f" - {self._window_title}"
         v.setWindowTitle(title)
 
         with ExitStack() as stack:
