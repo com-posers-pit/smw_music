@@ -491,27 +491,20 @@
                         </property>
                         <widget class="QFrame" name="adsr_box">
                          <layout class="QGridLayout" name="gridLayout_6">
-                          <item row="4" column="0">
-                           <widget class="QLabel" name="attack_setting_label">
+                          <item row="4" column="1">
+                           <widget class="QLabel" name="decay_eu_label">
                             <property name="text">
                              <string/>
                             </property>
                            </widget>
                           </item>
-                          <item row="5" column="2">
-                           <widget class="QLabel" name="sus_level_eu_label">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
+                          <item row="3" column="3">
+                           <widget class="QLineEdit" name="sus_rate_setting"/>
                           </item>
-                          <item row="3" column="0">
-                           <widget class="QLineEdit" name="attack_setting"/>
-                          </item>
-                          <item row="4" column="2">
-                           <widget class="QLabel" name="sus_level_setting_label">
+                          <item row="1" column="1">
+                           <widget class="QLabel" name="decay_label">
                             <property name="text">
-                             <string/>
+                             <string>Decay</string>
                             </property>
                            </widget>
                           </item>
@@ -525,22 +518,44 @@
                             </property>
                            </widget>
                           </item>
-                          <item row="5" column="0">
-                           <widget class="QLabel" name="attack_eu_label">
-                            <property name="text">
-                             <string/>
+                          <item row="2" column="1">
+                           <widget class="QSlider" name="decay_slider">
+                            <property name="maximum">
+                             <number>7</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
                             </property>
                            </widget>
                           </item>
-                          <item row="4" column="3">
-                           <widget class="QLabel" name="sus_rate_setting_label">
-                            <property name="text">
-                             <string/>
+                          <item row="3" column="0">
+                           <widget class="QLineEdit" name="attack_setting"/>
+                          </item>
+                          <item row="2" column="3">
+                           <widget class="QSlider" name="sus_rate_slider">
+                            <property name="maximum">
+                             <number>31</number>
+                            </property>
+                            <property name="orientation">
+                             <enum>Qt::Vertical</enum>
                             </property>
                            </widget>
                           </item>
                           <item row="3" column="2">
                            <widget class="QLineEdit" name="sus_level_setting"/>
+                          </item>
+                          <item row="1" column="2">
+                           <widget class="QLabel" name="sus_level_label">
+                            <property name="toolTip">
+                             <string>Sustain level</string>
+                            </property>
+                            <property name="text">
+                             <string>Sustain</string>
+                            </property>
+                           </widget>
+                          </item>
+                          <item row="3" column="1">
+                           <widget class="QLineEdit" name="decay_setting"/>
                           </item>
                           <item row="2" column="0">
                            <widget class="QSlider" name="attack_slider">
@@ -559,51 +574,17 @@
                             </property>
                            </widget>
                           </item>
-                          <item row="5" column="3">
-                           <widget class="QLabel" name="sus_rate_eu_label">
+                          <item row="0" column="0" colspan="2">
+                           <widget class="QRadioButton" name="select_adsr_mode">
                             <property name="text">
-                             <string/>
+                             <string>Use ADSR</string>
                             </property>
-                           </widget>
-                          </item>
-                          <item row="2" column="1">
-                           <widget class="QSlider" name="decay_slider">
-                            <property name="maximum">
-                             <number>7</number>
+                            <property name="checked">
+                             <bool>true</bool>
                             </property>
-                            <property name="orientation">
-                             <enum>Qt::Vertical</enum>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="1">
-                           <widget class="QLineEdit" name="decay_setting"/>
-                          </item>
-                          <item row="1" column="1">
-                           <widget class="QLabel" name="decay_label">
-                            <property name="text">
-                             <string>Decay</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="4" column="1">
-                           <widget class="QLabel" name="decay_setting_label">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="3">
-                           <widget class="QLineEdit" name="sus_rate_setting"/>
-                          </item>
-                          <item row="1" column="2">
-                           <widget class="QLabel" name="sus_level_label">
-                            <property name="toolTip">
-                             <string>Sustain level</string>
-                            </property>
-                            <property name="text">
-                             <string>Sustain</string>
-                            </property>
+                            <attribute name="buttonGroup">
+                             <string notr="true">envelope_mode_button_group</string>
+                            </attribute>
                            </widget>
                           </item>
                           <item row="2" column="2">
@@ -616,34 +597,25 @@
                             </property>
                            </widget>
                           </item>
-                          <item row="2" column="3">
-                           <widget class="QSlider" name="sus_rate_slider">
-                            <property name="maximum">
-                             <number>31</number>
-                            </property>
-                            <property name="orientation">
-                             <enum>Qt::Vertical</enum>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="5" column="1">
-                           <widget class="QLabel" name="decay_eu_label">
+                          <item row="4" column="2">
+                           <widget class="QLabel" name="sus_level_eu_label">
                             <property name="text">
                              <string/>
                             </property>
                            </widget>
                           </item>
-                          <item row="0" column="0" colspan="2">
-                           <widget class="QRadioButton" name="select_adsr_mode">
+                          <item row="4" column="3">
+                           <widget class="QLabel" name="sus_rate_eu_label">
                             <property name="text">
-                             <string>Use ADSR</string>
+                             <string/>
                             </property>
-                            <property name="checked">
-                             <bool>true</bool>
+                           </widget>
+                          </item>
+                          <item row="4" column="0">
+                           <widget class="QLabel" name="attack_eu_label">
+                            <property name="text">
+                             <string/>
                             </property>
-                            <attribute name="buttonGroup">
-                             <string notr="true">envelope_mode_button_group</string>
-                            </attribute>
                            </widget>
                           </item>
                          </layout>

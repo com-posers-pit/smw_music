@@ -982,21 +982,31 @@ class Dashboard(QWidget):
         gain_reg: int,
     ) -> None:
         env = self._envelope_preview
+        view = self._view
 
         if adsr_mode:
-            env.plot_adsr(attack_reg, decay_reg, sus_level_reg, sus_rate_reg)
+            labels = env.plot_adsr(
+                attack_reg, decay_reg, sus_level_reg, sus_rate_reg
+            )
+            view.attack_eu_label.setText(labels[0])
+            view.decay_eu_label.setText(labels[1])
+            view.sus_level_eu_label.setText(labels[2])
+            view.sus_rate_eu_label.setText(labels[3])
         else:  # gain mode
             match gain_mode:
                 case GainMode.DIRECT:
-                    env.plot_direct_gain(gain_reg)
+                    label = env.plot_direct_gain(gain_reg)
                 case GainMode.INCLIN:
-                    env.plot_inclin(gain_reg)
+                    label = env.plot_inclin(gain_reg)
                 case GainMode.INCBENT:
-                    env.plot_incbent(gain_reg)
+                    label = env.plot_incbent(gain_reg)
                 case GainMode.DECLIN:
-                    env.plot_declin(gain_reg)
+                    label = env.plot_declin(gain_reg)
                 case GainMode.DECEXP:
-                    env.plot_decexp(gain_reg)
+                    label = env.plot_decexp(gain_reg)
+                case _:
+                    label = ""
+            view.gain_eu_label.setText(label)
 
     ###########################################################################
 

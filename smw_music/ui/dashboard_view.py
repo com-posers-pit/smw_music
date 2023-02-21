@@ -69,7 +69,6 @@ class DashboardView(QMainWindow):
     attack_eu_label: QLabel
     attack_label: QLabel
     attack_setting: QLineEdit
-    attack_setting_label: QLabel
     attack_slider: QSlider
     brr_fname: QLineEdit
     brr_setting: QLineEdit
@@ -81,7 +80,6 @@ class DashboardView(QMainWindow):
     decay_eu_label: QLabel
     decay_label: QLabel
     decay_setting: QLineEdit
-    decay_setting_label: QLabel
     decay_slider: QSlider
     dynamics_spacer: QWidget
     dynamics_widget: QWidget
@@ -253,12 +251,10 @@ class DashboardView(QMainWindow):
     sus_level_eu_label: QLabel
     sus_level_label: QLabel
     sus_level_setting: QLineEdit
-    sus_level_setting_label: QLabel
     sus_level_slider: QSlider
     sus_rate_eu_label: QLabel
     sus_rate_label: QLabel
     sus_rate_setting: QLineEdit
-    sus_rate_setting_label: QLabel
     sus_rate_slider: QSlider
     tune_label: QLabel
     tune_setting: QLineEdit
