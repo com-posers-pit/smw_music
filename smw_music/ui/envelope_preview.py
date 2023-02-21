@@ -13,8 +13,6 @@
 from enum import IntEnum, auto
 
 # Library imports
-import numpy as np
-import numpy.typing as npt
 import pyqtgraph as pg  # type: ignore
 from PyQt6.QtWidgets import QMainWindow, QWidget
 
@@ -64,7 +62,6 @@ class EnvelopePreview(QMainWindow):
     _window: QMainWindow
     _graph: pg.PlotWidget
     _plot_data: pg.graphicsItems.PlotDataItem.PlotDataItem
-    _counts: npt.NDArray[np.int64]
 
     ###########################################################################
     # Constructor definitions
@@ -76,7 +73,6 @@ class EnvelopePreview(QMainWindow):
         self._graph = pg.PlotWidget()
         self.setCentralWidget(self._graph)
         self._graph.setBackground("w")
-        self._counts = np.tile(np.arange(_MAX_COUNT, -1, -1), _MAX_SECS)
 
         # plot data: x, y values
         self._plot_data = self._graph.plot(
@@ -99,49 +95,38 @@ class EnvelopePreview(QMainWindow):
         slevel_reg: int,
         srate_reg: int,
     ) -> None:
-        attack_period = _RATES[2 * attack_reg + 1]
-        attack_offset = _OFFSETS[2 * attack_reg + 1]
-        decay_period = _RATES[2 * decay_reg + 16]
-        decay_offset = _OFFSETS[2 * decay_reg + 16]
-        sustain_period = _RATES[srate_reg]
-        sustain_offset = _OFFSETS[srate_reg]
+        times = [0.0, 0.0]
+        envelope = [0.0, 1.0]
 
-        times = [0.0]
-        envelope = [0.0]
+        # Attack
+        attack = 2 * attack_reg + 1
+        slope = 32 if attack_reg != 0xF else 1024
+        times[1] = self._propagate(attack, (0, 0), 1, slope)
 
-        envx = 0
-        state = _AdsrState.ATTACK
-        for n, count in enumerate(self._counts):
-            match state:
-                case _AdsrState.ATTACK:
-                    if (count + attack_offset) % attack_period == 0:
-                        envx += 32 if attack_reg != 0xF else 1024
-                        if envx >= _LIMIT:
-                            envx = _LIMIT
-                            times.append(n / _SAMPLE_FREQ)
-                            envelope.append(1.0)
-                            state = _AdsrState.DECAY
-                case _AdsrState.DECAY:
-                    if (count + decay_offset) % decay_period == 0:
-                        envx -= ((envx - 1) >> 8) + 1
-                        times.append(n / _SAMPLE_FREQ)
-                        envelope.append(envx / _LIMIT)
-                        if envx >> 8 == slevel_reg:
-                            if srate_reg:
-                                state = _AdsrState.SUSTAIN
-                            else:
-                                break
-                case _AdsrState.SUSTAIN:
-                    if (count + sustain_offset) % sustain_period == 0:
-                        envx -= ((envx - 1) >> 8) + 1
-                        envx = max(envx, 0)
+        # Decay
+        decay = 2 * decay_reg + 16
+        slevel = 2 * (slevel_reg + 1)
+        if slevel:
+            for n in range(16 - slevel):
+                top = envelope[-1]
+                left = times[-1]
+                bottom = (15 - n) / 16
+                slope = -(16 - n)
+                right = self._propagate(decay, (left, top), bottom, slope)
+                times.append(right)
+                envelope.append(bottom)
 
-                        times.append(n / _SAMPLE_FREQ)
-                        envelope.append(envx / _LIMIT)
-                        if envx == 0:
-                            break
-                case _AdsrState.RELEASE:
-                    pass
+        # "Sustain"
+        srate = srate_reg
+        if srate:
+            for n in range(16 - slevel, 16):
+                top = envelope[-1]
+                left = times[-1]
+                bottom = (15 - n) / 16
+                slope = -(16 - n)
+                right = self._propagate(srate, (left, top), bottom, slope)
+                times.append(right)
+                envelope.append(bottom)
 
         times.append(100)
         envelope.append(envelope[-1])
@@ -151,19 +136,17 @@ class EnvelopePreview(QMainWindow):
     ###########################################################################
 
     def plot_decexp(self, gain_reg: int) -> None:
-        period = _RATES[gain_reg]
-        offset = _OFFSETS[gain_reg]
         times = [0.0]
         envelope = [1.0]
-        envx = _LIMIT
-        for n, count in enumerate(self._counts):
-            if (count + offset) % period == 0:
-                envx -= ((envx - 1) >> 8) + 1
-                times.append(n / _SAMPLE_FREQ)
-                envelope.append(envx / _LIMIT)
 
-                if envx <= 0:
-                    break
+        for n in range(16):
+            top = envelope[-1]
+            left = times[-1]
+            bottom = (15 - n) / 16
+            slope = -(16 - n)
+            right = self._propagate(gain_reg, (left, top), bottom, slope)
+            times.append(right)
+            envelope.append(bottom)
 
         times.append(100)
         envelope.append(0)
@@ -172,17 +155,12 @@ class EnvelopePreview(QMainWindow):
     ###########################################################################
 
     def plot_declin(self, gain_reg: int) -> None:
-        period = _RATES[gain_reg]
-        offset = _OFFSETS[gain_reg]
         times = [0.0, 0.0, 100]
         envelope = [1, 0, 0]
-        envx = _LIMIT
-        for n, count in enumerate(self._counts):
-            if (count + offset) % period == 0:
-                envx -= 32
-                if envx <= 0:
-                    times[1] = n / _SAMPLE_FREQ
-                    break
+
+        times[1] = self._propagate(gain_reg, (0, 1), 0, -32)
+        if gain_reg == 0:
+            times[1] = 100
 
         self._plot_data.setData(times, envelope)
 
@@ -194,39 +172,42 @@ class EnvelopePreview(QMainWindow):
 
     ###########################################################################
 
-    def plot_incbent(self, gain_reg: int) -> None:
+    def _propagate(
+        self,
+        gain_reg: int,
+        start: tuple[float, float],
+        target: float,
+        slope: int,
+    ) -> float:
         period = _RATES[gain_reg]
         offset = _OFFSETS[gain_reg]
+
+        nstep = ((target - start[1]) * (_LIMIT + 1)) // slope
+        return start[0] + (nstep * period - (offset % period)) / _SAMPLE_FREQ
+
+    ###########################################################################
+
+    def plot_incbent(self, gain_reg: int) -> None:
         times = [0.0, 0.0, 0.0, 100]
         envelope = [0, 0.75, 1, 1]
-        envx = 0
-        for n, count in enumerate(self._counts):
-            if (count + offset) % period == 0:
-                if envx < 0x600:
-                    envx += 32
-                    if envx >= 0x600:
-                        times[1] = n / _SAMPLE_FREQ
-                else:
-                    envx += 8
-                    if envx >= _LIMIT:
-                        times[2] = n / _SAMPLE_FREQ
-                        break
+
+        times[1] = self._propagate(gain_reg, (0, 0), 0.75, 32)
+        times[2] = self._propagate(gain_reg, (times[1], 0.75), 1, 8)
+
+        if gain_reg == 0:
+            times[1] = 100
+            times[2] = 100
 
         self._plot_data.setData(times, envelope)
 
     ###########################################################################
 
     def plot_inclin(self, gain_reg: int) -> None:
-        period = _RATES[gain_reg]
-        offset = _OFFSETS[gain_reg]
         times = [0.0, 0.0, 100]
         envelope = [0, 1, 1]
-        envx = 0
-        for n, count in enumerate(self._counts):
-            if (count + offset) % period == 0:
-                envx += 32
-                if envx >= _LIMIT:
-                    times[1] = n / _SAMPLE_FREQ
-                    break
+
+        times[1] = self._propagate(gain_reg, (0, 0), 1, 32)
+        if gain_reg == 0:
+            times[1] = 100
 
         self._plot_data.setData(times, envelope)
