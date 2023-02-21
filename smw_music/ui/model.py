@@ -19,6 +19,7 @@ import subprocess  # nosec 404
 import threading
 import zipfile
 from contextlib import suppress
+from copy import deepcopy
 from dataclasses import replace
 from glob import glob
 from pathlib import Path
@@ -555,7 +556,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if musicxml := self.state.musicxml_fname:
                 try:
                     self.song = Song.from_music_xml(musicxml)
-                    self.song.instruments[:] = self.state.instruments
                 except MusicXmlException as e:
                     self.response_generated.emit(
                         True,
@@ -941,7 +941,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if new_inst != self.state.inst:
             self._rollback_undo()
 
-            new_state = replace(self.state)
+            new_state = deepcopy(self.state)
             if idx == -1:
                 new_state.inst = new_inst
             else:
