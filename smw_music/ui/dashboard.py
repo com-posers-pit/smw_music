@@ -152,9 +152,10 @@ class _DynamicsWidgets(NamedTuple):
 ###############################################################################
 
 
-class _SoloMute(enum.IntEnum):
+class _TblCol(enum.IntEnum):
     SOLO = 0
     MUTE = 1
+    NAME = 2
 
 
 ###############################################################################
@@ -427,11 +428,15 @@ class Dashboard(QWidget):
 
             # Solo/mute settings
             inst_list = self._view.instrument_list
+            inst_idx = state.instrument_idx
+            if inst_idx is not None:
+                inst_list.setCurrentCell(inst_idx, _TblCol.NAME)
+
             for row, inst_cfg in enumerate(state.instruments):
                 solo = _to_checked(inst_cfg.solo)
                 mute = _to_checked(inst_cfg.mute)
-                inst_list.item(row, _SoloMute.SOLO.value).setCheckState(solo)
-                inst_list.item(row, _SoloMute.MUTE.value).setCheckState(mute)
+                inst_list.item(row, _TblCol.SOLO.value).setCheckState(solo)
+                inst_list.item(row, _TblCol.MUTE.value).setCheckState(mute)
 
             # Instrument dynamics settings
             for dkey, dval in inst.dynamics.items():
@@ -884,15 +889,13 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_solomute_change(self, item: QTableWidgetItem) -> None:
-        role: tuple[_SoloMute, int] | None = item.data(
-            Qt.ItemDataRole.UserRole
-        )
+        role: tuple[_TblCol, int] | None = item.data(Qt.ItemDataRole.UserRole)
         if role:
             row = role[1]
             checked = item.checkState() == Qt.CheckState.Checked
-            if role[0] == _SoloMute.SOLO:
+            if role[0] == _TblCol.SOLO:
                 self._model.on_solo_changed(row, checked)
-            if role[0] == _SoloMute.MUTE:
+            if role[0] == _TblCol.MUTE:
                 self._model.on_mute_changed(row, checked)
 
     ###########################################################################
@@ -1026,17 +1029,13 @@ class Dashboard(QWidget):
             for row, name in enumerate(names):
                 solo_box = QTableWidgetItem()
                 solo_box.setCheckState(Qt.CheckState.Unchecked)
-                solo_box.setData(
-                    Qt.ItemDataRole.UserRole, (_SoloMute.SOLO, row)
-                )
+                solo_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.SOLO, row))
                 solo_box.setToolTip(f"Solo {name}")
                 _mark_unselectable(solo_box)
 
                 mute_box = QTableWidgetItem()
                 mute_box.setCheckState(Qt.CheckState.Unchecked)
-                mute_box.setData(
-                    Qt.ItemDataRole.UserRole, (_SoloMute.MUTE, row)
-                )
+                mute_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.MUTE, row))
                 mute_box.setToolTip(f"Mute {name}")
                 _mark_unselectable(mute_box)
 
