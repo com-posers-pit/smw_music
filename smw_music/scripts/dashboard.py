@@ -13,12 +13,9 @@
 
 # Standard library imports
 import argparse
-import io
 import logging
-import pkgutil
 
 # Library imports
-from PyQt6 import uic
 from PyQt6.QtWidgets import QApplication
 
 # Package imports
@@ -47,7 +44,7 @@ def main() -> None:
 
     app = QApplication([])
     app.setApplicationName("MusicXML -> MML")
-    dashboard = Dashboard()
+    _ = Dashboard()
     app.exec()
 
 

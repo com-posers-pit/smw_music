@@ -108,6 +108,8 @@ class _StateDict(TypedDict):
     global_echo_enable: bool
     echo: _EchoDict
     instruments: list[_InstrumentDict]
+    porter: str
+    game: str
 
 
 ###############################################################################
@@ -241,6 +243,8 @@ def load(fname: Path) -> State:
         echo=_load_echo(sdict["echo"]),
         instruments=[_load_instrument(inst) for inst in sdict["instruments"]],
         project_name=project,
+        porter=sdict["porter"],
+        game=sdict["game"],
     )
 
     return state
@@ -249,7 +253,7 @@ def load(fname: Path) -> State:
 ###############################################################################
 
 
-def save(fname: Path, state: State):
+def save(fname: Path, state: State) -> None:
     with open(fname, "w", encoding="utf8") as fobj:
         yaml.safe_dump(
             {
@@ -270,6 +274,8 @@ def save(fname: Path, state: State):
                     "instruments": [
                         _save_instrument(inst) for inst in state.instruments
                     ],
+                    "porter": state.porter,
+                    "game": state.game,
                 },
             },
             fobj,

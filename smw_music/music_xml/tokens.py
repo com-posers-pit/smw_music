@@ -762,7 +762,7 @@ class Tempo(Token):
 
     @classmethod
     def from_music_xml(cls, elem: music21.tempo.MetronomeMark) -> "Tempo":
-        bpm = int(elem.getQuarterBPM())  # type: ignore
+        bpm = int(elem.getQuarterBPM())
         return cls(bpm)
 
 

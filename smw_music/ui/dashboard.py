@@ -17,20 +17,12 @@ from collections import deque
 from contextlib import ExitStack
 from functools import partial
 from pathlib import Path
-from typing import NamedTuple, cast
+from typing import Callable, NamedTuple, cast
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import (
-    QBuffer,
-    QByteArray,
-    QEvent,
-    QIODevice,
-    QObject,
-    QSignalBlocker,
-    Qt,
-)
-from PyQt6.QtGui import QAction, QKeyEvent, QMovie
+from PyQt6.QtCore import QBuffer, QEvent, QObject, QSignalBlocker, Qt
+from PyQt6.QtGui import QAction, QFont, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -72,6 +64,20 @@ from smw_music.utils import hexb, pct
 
 ###############################################################################
 # Private function definitions
+###############################################################################
+
+
+def _cb_proxy(slot: Callable[[bool], None], state: Qt.CheckState) -> None:
+    slot(bool(state))
+
+
+###############################################################################
+
+
+def _le_proxy(slot: Callable[[str], None], widget: QLineEdit) -> None:
+    slot(widget.text())
+
+
 ###############################################################################
 
 
@@ -146,9 +152,10 @@ class _DynamicsWidgets(NamedTuple):
 ###############################################################################
 
 
-class _SoloMute(enum.IntEnum):
+class _TblCol(enum.IntEnum):
     SOLO = 0
     MUTE = 1
+    NAME = 2
 
 
 ###############################################################################
@@ -158,9 +165,7 @@ class _SoloMute(enum.IntEnum):
 
 class Dashboard(QWidget):
     _history: QMainWindow
-    _history_list: QListWidget
     _quicklook: QMainWindow
-    _quicklook_edit: QTextEdit
     _checkitout: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
@@ -172,22 +177,25 @@ class Dashboard(QWidget):
     _sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem]
     _unsaved: bool
     _project_name: str | None
-    _keyhist: deque
-    _ashman: QByteArray
+    _keyhist: deque[int]
+    _window_title: str
 
     ###########################################################################
     # Constructor definitions
     ###########################################################################
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
+        self._window_title = f"beer v{__version__}"
+
         self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
         if ui_contents is None:
             raise Exception("Can't locate dashboard")
 
-        self._view = uic.loadUi(io.BytesIO(ui_contents))
+        self._view: DashboardView = uic.loadUi(io.BytesIO(ui_contents))
         self._view.installEventFilter(self)
+        self._view.setWindowTitle(self._window_title)
 
         self._preferences = Preferences()
         self._model = Model()
@@ -195,30 +203,41 @@ class Dashboard(QWidget):
         self._project_name = None
         self._sample_pack_items = {}
 
-        self._quicklook_edit = QTextEdit()
-        self._quicklook_edit.setFontFamily("Monospace")
-        self._quicklook_edit.setReadOnly(True)
+        # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
+        font = QFont("_")
+        font.setStyleHint(QFont.StyleHint.Monospace)
+        quicklook_edit = QTextEdit()
+        quicklook_edit.setFont(font)
+        quicklook_edit.setReadOnly(True)
         self._quicklook = QMainWindow(parent=self)
+        self._quicklook.setWindowTitle("Quicklook")
         self._quicklook.setMinimumSize(800, 600)
-        self._quicklook.setCentralWidget(self._quicklook_edit)
+        self._quicklook.setCentralWidget(quicklook_edit)
 
         self._checkitout = QMainWindow(parent=self)
+        self._checkitout.setWindowTitle(
+            "Never gonna run around and desert you"
+        )
         label = QLabel(self)
-        gif = pkgutil.get_data("smw_music", "data/ashtley.gif")
-        self._ashman = QByteArray(gif)
-        buffer = QBuffer(self._ashman, parent=self)
+        gif = cast(bytes, pkgutil.get_data("smw_music", "data/ashtley.gif"))
+        buffer = QBuffer(parent=self)
+        buffer.open(QBuffer.OpenModeFlag.ReadWrite)
+        buffer.writeData(gif)
+        buffer.seek(0)
+
         movie = QMovie(parent=self)
         movie.setDevice(buffer)
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
 
-        self._history_list = QListWidget()
         self._history = QMainWindow(parent=self)
+        self._history.setWindowTitle("Action history")
         self._history.setMinimumSize(800, 600)
-        self._history.setCentralWidget(self._history_list)
+        self._history.setCentralWidget(QListWidget())
 
         self._envelope_preview = EnvelopePreview(self)
+        self._history.setWindowTitle("Envelope")
 
         self._setup_menus()
         self._fix_edit_widths()
@@ -292,7 +311,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_mml_generated(self, mml: str) -> None:
-        self._quicklook_edit.setText(mml)
+        cast(QTextEdit, self._quicklook.centralWidget()).setText(mml)
 
     ###########################################################################
 
@@ -391,7 +410,7 @@ class Dashboard(QWidget):
             if self._unsaved:
                 title += " +"
 
-        title += f" - beer v{__version__}"
+        title += f" - {self._window_title}"
         v.setWindowTitle(title)
 
         with ExitStack() as stack:
@@ -402,6 +421,8 @@ class Dashboard(QWidget):
             # Control Panel
             v.musicxml_fname.setText(state.musicxml_fname)
             v.mml_fname.setText(state.mml_fname)
+            v.porter_name.setText(state.porter)
+            v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
@@ -421,11 +442,15 @@ class Dashboard(QWidget):
 
             # Solo/mute settings
             inst_list = self._view.instrument_list
+            inst_idx = state.instrument_idx
+            if inst_idx is not None:
+                inst_list.setCurrentCell(inst_idx, _TblCol.NAME)
+
             for row, inst_cfg in enumerate(state.instruments):
                 solo = _to_checked(inst_cfg.solo)
                 mute = _to_checked(inst_cfg.mute)
-                inst_list.item(row, _SoloMute.SOLO.value).setCheckState(solo)
-                inst_list.item(row, _SoloMute.MUTE.value).setCheckState(mute)
+                inst_list.item(row, _TblCol.SOLO.value).setCheckState(solo)
+                inst_list.item(row, _TblCol.MUTE.value).setCheckState(mute)
 
             # Instrument dynamics settings
             for dkey, dval in inst.dynamics.items():
@@ -561,8 +586,8 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_status_updated(self, msg: str, init) -> None:
-        self._history_list.insertItem(0, msg)
+    def on_status_updated(self, msg: str) -> None:
+        cast(QListWidget, self._history.centralWidget()).insertItem(0, msg)
         self._view.statusBar().showMessage(msg)
 
     ###########################################################################
@@ -581,7 +606,7 @@ class Dashboard(QWidget):
 
     def _add_sample_pack(
         self, top: QTreeWidgetItem, name: str, pack: SamplePack
-    ):
+    ) -> None:
         parent = top
         parent_items: dict[Path, QTreeWidgetItem] = {}
 
@@ -612,12 +637,14 @@ class Dashboard(QWidget):
         alen = m.on_artic_length_changed
         avol = m.on_artic_volume_changed
 
-        connections = [
+        connections: list[tuple[QWidget, Callable[..., None]]] = [
             # Control Panel
             (v.select_musicxml_fname, self.on_musicxml_fname_clicked),
             (v.musicxml_fname, m.on_musicxml_fname_changed),
             (v.select_mml_fname, self.on_mml_fname_clicked),
             (v.mml_fname, m.on_mml_fname_changed),
+            (v.porter_name, m.on_porter_name_changed),
+            (v.game_name, m.on_game_name_changed),
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
@@ -713,17 +740,11 @@ class Dashboard(QWidget):
             elif isinstance(widget, QComboBox):
                 widget.currentIndexChanged.connect(slot)
             elif isinstance(widget, QCheckBox):
-
-                def proxy(state: int, slot=slot) -> None:
-                    slot(bool(state))
-
-                widget.stateChanged.connect(proxy)
+                widget.stateChanged.connect(partial(_cb_proxy, slot))
             elif isinstance(widget, QLineEdit):
-
-                def proxy(widget=widget, slot=slot):
-                    slot(widget.text())
-
-                widget.editingFinished.connect(proxy)
+                widget.editingFinished.connect(
+                    partial(_le_proxy, slot, widget)
+                )
             elif isinstance(widget, QRadioButton):
                 widget.toggled.connect(slot)
             elif isinstance(widget, (QAbstractSlider, QSpinBox)):
@@ -884,15 +905,13 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_solomute_change(self, item: QTableWidgetItem) -> None:
-        role: tuple[_SoloMute, int] | None = item.data(
-            Qt.ItemDataRole.UserRole
-        )
+        role: tuple[_TblCol, int] | None = item.data(Qt.ItemDataRole.UserRole)
         if role:
             row = role[1]
             checked = item.checkState() == Qt.CheckState.Checked
-            if role[0] == _SoloMute.SOLO:
+            if role[0] == _TblCol.SOLO:
                 self._model.on_solo_changed(row, checked)
-            if role[0] == _SoloMute.MUTE:
+            if role[0] == _TblCol.MUTE:
                 self._model.on_mute_changed(row, checked)
 
     ###########################################################################
@@ -979,21 +998,31 @@ class Dashboard(QWidget):
         gain_reg: int,
     ) -> None:
         env = self._envelope_preview
+        view = self._view
 
         if adsr_mode:
-            env.plot_adsr(attack_reg, decay_reg, sus_level_reg, sus_rate_reg)
+            labels = env.plot_adsr(
+                attack_reg, decay_reg, sus_level_reg, sus_rate_reg
+            )
+            view.attack_eu_label.setText(labels[0])
+            view.decay_eu_label.setText(labels[1])
+            view.sus_level_eu_label.setText(labels[2])
+            view.sus_rate_eu_label.setText(labels[3])
         else:  # gain mode
             match gain_mode:
                 case GainMode.DIRECT:
-                    env.plot_direct_gain(gain_reg)
+                    label = env.plot_direct_gain(gain_reg)
                 case GainMode.INCLIN:
-                    env.plot_inclin(gain_reg)
+                    label = env.plot_inclin(gain_reg)
                 case GainMode.INCBENT:
-                    env.plot_incbent(gain_reg)
+                    label = env.plot_incbent(gain_reg)
                 case GainMode.DECLIN:
-                    env.plot_declin(gain_reg)
+                    label = env.plot_declin(gain_reg)
                 case GainMode.DECEXP:
-                    env.plot_decexp(gain_reg)
+                    label = env.plot_decexp(gain_reg)
+                case _:
+                    label = ""
+            view.gain_eu_label.setText(label)
 
     ###########################################################################
 
@@ -1026,17 +1055,13 @@ class Dashboard(QWidget):
             for row, name in enumerate(names):
                 solo_box = QTableWidgetItem()
                 solo_box.setCheckState(Qt.CheckState.Unchecked)
-                solo_box.setData(
-                    Qt.ItemDataRole.UserRole, (_SoloMute.SOLO, row)
-                )
+                solo_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.SOLO, row))
                 solo_box.setToolTip(f"Solo {name}")
                 _mark_unselectable(solo_box)
 
                 mute_box = QTableWidgetItem()
                 mute_box.setCheckState(Qt.CheckState.Unchecked)
-                mute_box.setData(
-                    Qt.ItemDataRole.UserRole, (_SoloMute.MUTE, row)
-                )
+                mute_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.MUTE, row))
                 mute_box.setToolTip(f"Mute {name}")
                 _mark_unselectable(mute_box)
 

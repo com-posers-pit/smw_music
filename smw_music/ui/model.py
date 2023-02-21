@@ -19,7 +19,9 @@ import subprocess  # nosec 404
 import threading
 import zipfile
 from contextlib import suppress
+from copy import deepcopy
 from dataclasses import replace
+from glob import glob
 from pathlib import Path
 from random import choice
 
@@ -31,15 +33,17 @@ from PyQt6.QtCore import QObject, pyqtSignal
 # Package imports
 from smw_music import SmwMusicException, __version__
 from smw_music.music_xml import MusicXmlException
-from smw_music.music_xml.echo import EchoCh
+from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,
+    ArticSetting,
     Dynamics,
     GainMode,
+    InstrumentConfig,
     SampleSource,
 )
 from smw_music.music_xml.song import Song
-from smw_music.ui.quotes import quotes
+from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import PreferencesState, State
@@ -82,7 +86,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     recent_projects_updated = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
-    status_updated = pyqtSignal(str, bool)  # arguments=['message', 'init']
+    status_updated = pyqtSignal(str)  # arguments=['message']
     response_generated = pyqtSignal(
         bool, str, str
     )  # arguments=["error", "title", "response"]
@@ -101,14 +105,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.preferences = PreferencesState(Path(""), {}, Path(""))
+        self.preferences = PreferencesState(Path(""), Path(""), Path(""))
         self._history = [State()]
         self._undo_level = 0
-
+        self._sample_packs = {}
         self._project_path = None
 
         os.makedirs(self.config_dir, exist_ok=True)
-
 
     ###########################################################################
     # API method definitions
@@ -194,8 +197,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
 
-        quote: tuple[str, str] = choice(quotes)
-        self._update_status(f"{quote[1]}: {quote[0]}", True)
+        quote: tuple[str, str] = choice(quotes)  # nosec: B311
+        self._update_status(f"{quote[1]}: {quote[0]}")
 
     ###########################################################################
 
@@ -204,10 +207,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "beer": __version__,
             "amk": {"path": str(preferences.amk_fname)},
             "spcplay": {"path": str(preferences.spcplay_fname)},
-            "sample_packs": {
-                name: {"path": str(path)}
-                for name, path in preferences.sample_packs.items()
-            },
+            "sample_packs": {"path": str(preferences.sample_pack_dname)},
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -419,11 +419,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_game_name_changed(self, val: str) -> None:
+        self._update_state(game=val)
+        self._update_status(f"Game name set to {val}")
+
+    ###########################################################################
+
     def on_generate_and_play_clicked(self) -> None:
+        self._update_status("SPC generated and played")
         self.on_generate_mml_clicked(False)
         self.on_generate_spc_clicked(False)
         self.on_play_spc_clicked()
-        self._update_status("SPC generated and played")
 
     ###########################################################################
 
@@ -433,6 +439,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         fname = self.state.mml_fname
         if self.song is None:
             msg = "Song not loaded"
+            self.mml_generated.emit("\n".join(ashtley))
         else:
             try:
                 if os.path.exists(fname):
@@ -443,6 +450,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.song.instruments = self.state.instruments
 
                 self.song.volume = self.state.global_volume
+                if self.state.porter:
+                    self.song.porter = self.state.porter
+                if self.state.game:
+                    self.song.game = self.state.game
 
                 mml = self.song.to_mml_file(
                     fname,
@@ -467,41 +478,46 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_spc_clicked(self, report: bool = True) -> None:
-        assert self._project_path is not None
+        assert self._project_path is not None  # nosec: B101
 
-        samples_path = self._project_path / "samples"
+        error = False
+        msg = ""
+        samples_path = self._project_path / "samples" / "custom"
+        shutil.rmtree(samples_path, ignore_errors=True)
+
         for inst in self.state.instruments:
             if inst.sample_source == SampleSource.BRR:
                 shutil.copy2(inst.brr_fname, samples_path)
             if inst.sample_source == SampleSource.SAMPLEPACK:
-                target = (
-                    samples_path / inst.pack_sample[0] / inst.pack_sample[1]
-                )
+                pack_name, pack_path = inst.pack_sample
+                target = samples_path / pack_name / pack_path
                 os.makedirs(target.parents[0], exist_ok=True)
                 with open(target, "wb") as fobj:
-                    fobj.write(
-                        self._sample_packs[inst.pack_sample[0]][
-                            inst.pack_sample[1]
-                        ].data
-                    )
+                    try:
+                        fobj.write(
+                            self._sample_packs[pack_name][pack_path].data
+                        )
+                    except KeyError:
+                        error = True
+                        msg += f"Could not find sample pack {pack_name}\n"
 
-        # TODO: support OSX
-        try:
-            error = False
-            msg = subprocess.check_output(  # nosec B603, B607
-                self.convert,
-                cwd=self._project_path,
-                stderr=subprocess.STDOUT,
-                timeout=5,
-                shell=True,
-            )
-        except subprocess.CalledProcessError as e:
-            error = True
-            report = True
-            msg = e.output
+        if not error:
+            try:
+                msg = subprocess.check_output(  # nosec B603
+                    self.convert,
+                    cwd=self._project_path,
+                    stderr=subprocess.STDOUT,
+                    timeout=5,
+                ).decode()
+            except subprocess.CalledProcessError as e:
+                error = True
+                msg = e.output
+            except subprocess.TimeoutExpired:
+                error = True
+                msg = "Conversion timed out"
 
-        if report:
-            self.response_generated.emit(error, "SPC Generated", msg.decode())
+        if report or error:
+            self.response_generated.emit(error, "SPC Generated", msg)
             self._update_status("SPC generated")
 
     ###########################################################################
@@ -546,12 +562,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._append_recent_project(fname)
 
             self._undo_level = 0
-            self._history = [replace(save_state)]
+            self._history = [replace(save_state, instrument_idx=0)]
             self._project_path = fname.parent
             if musicxml := self.state.musicxml_fname:
                 try:
                     self.song = Song.from_music_xml(musicxml)
-                    self.song.instruments[:] = self.state.instruments
                 except MusicXmlException as e:
                     self.response_generated.emit(
                         True,
@@ -593,7 +608,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.response_generated.emit(True, "Song load", str(e))
         else:
             self.state.instruments = self.song.instruments
-        self._update_state(True, musicxml_fname=fname)
+        inst_idx = 0 if len(self.state.instruments) else None
+        self._update_state(True, musicxml_fname=fname, instrument_idx=inst_idx)
         self._update_status(f"MusicXML name set to {fname}")
 
     ###########################################################################
@@ -614,7 +630,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_inst_state(pack_sample=item_id)
         if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
             self._load_sample_settings(item_id)
-            self._update_status(f"Sample pack {item_id[0]}:{str(item_id[1])} selected")
+            self._update_status(
+                f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
+            )
 
     ###########################################################################
 
@@ -648,7 +666,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             spc_name = f"{project}.spc"
             spc_name = str(path / "SPCs" / spc_name)
 
-            # TODO: Handle OSX
+            # Handles linux and OSX, windows is covered on the next line
             args = ["wine", str(self.preferences.spcplay_fname), spc_name]
             if platform.system() == "Windows":
                 args = args[1:]
@@ -656,9 +674,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             threading.Thread(
                 target=subprocess.call,
                 args=(args,),
-                kwargs={'shell': True},
             ).start()
             self._update_status("SPC played")
+
+    ###########################################################################
+
+    def on_porter_name_changed(self, val: str) -> None:
+        self._update_state(porter=val)
+        self._update_status(f"Porter name set to {val}")
 
     ###########################################################################
 
@@ -818,10 +841,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self.preferences.amk_fname = Path(prefs["amk"]["path"])
         self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
-        self.preferences.sample_packs = {
-            name: Path(pack["path"])
-            for name, pack in prefs["sample_packs"].items()
-        }
+        self.preferences.sample_pack_dname = Path(
+            prefs["sample_packs"]["path"]
+        )
         self._load_sample_packs()
 
     ###########################################################################
@@ -830,7 +852,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self._sample_packs = {}
 
-        for name, path in self.preferences.sample_packs.items():
+        packs = {}
+        root_dir = self.preferences.sample_pack_dname
+        for fname in glob("*.zip", root_dir=root_dir):
+            pack = Path(fname)
+            packs[pack.stem] = root_dir / pack
+
+        for name, path in packs.items():
             try:
                 self._sample_packs[name] = SamplePack(path)
 
@@ -889,13 +917,34 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_echo_state(self, **kwargs) -> None:
+    def _update_echo_state(
+        self,
+        **kwargs: set[EchoCh]
+        | tuple[float, float]
+        | tuple[bool, bool]
+        | int
+        | float
+        | bool,
+    ) -> None:
         new_echo = replace(self.state.echo, **kwargs)
         self._update_state(echo=new_echo)
 
     ###########################################################################
 
-    def _update_inst_state(self, idx: int = -1, **kwargs) -> None:
+    def _update_inst_state(
+        self,
+        idx: int = -1,
+        **kwargs: str
+        | int
+        | dict[Dynamics, int]
+        | dict[Artic, ArticSetting]
+        | set[Dynamics]
+        | bool
+        | SampleSource
+        | tuple[str, Path]
+        | Path
+        | GainMode,
+    ) -> None:
         old_inst = (
             self.state.inst if idx == -1 else self.state.instruments[idx]
         )
@@ -909,7 +958,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if new_inst != self.state.inst:
             self._rollback_undo()
 
-            new_state = replace(self.state)
+            new_state = deepcopy(self.state)
             if idx == -1:
                 new_state.inst = new_inst
             else:
@@ -921,7 +970,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_state(
-        self, update_instruments: bool = False, **kwargs
+        self,
+        update_instruments: bool = False,
+        **kwargs: str
+        | bool
+        | InstrumentConfig
+        | list[InstrumentConfig]
+        | None
+        | EchoConfig
+        | int,
     ) -> None:
         new_state = replace(self.state, **kwargs)
         if new_state != self.state:
@@ -933,8 +990,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_status(self, msg: str, init: bool = False) -> None:
-        self.status_updated.emit(msg, init)
+    def _update_status(self, msg: str) -> None:
+        self.status_updated.emit(msg)
 
     ###########################################################################
     # API property definitions
@@ -944,7 +1001,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def config_dir(self) -> Path:
         app = "xml2mml"
 
-        match sys := platform.system():
+        sys = platform.system()
+        match sys:
             case "Linux":
                 default = Path(os.environ["HOME"]) / ".config"
                 conf_dir = Path(os.environ.get("XDG_CONFIG_HOME", default))
@@ -961,14 +1019,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @property
     def convert(self) -> list[str]:
-        match sys := platform.system():
-            case "Linux":
-                return ['sh', 'convert.sh']
+        # TODO: Put better protections in place for this
+        assert self._project_path is not None  # nosec: B101
+
+        match platform.system():
+            case "Darwin" | "Linux":
+                return ["sh", "convert.sh"]
             case "Windows":
-                return ['convert.bat']
+                return [str(self._project_path / "convert.bat")]
             case _:
                 return []
-
 
     ###########################################################################
 

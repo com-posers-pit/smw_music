@@ -13,7 +13,7 @@
 import copy
 import pkgutil
 from datetime import datetime
-from pathlib import Path, PurePosixPath
+from pathlib import PurePosixPath
 
 # Library imports
 import music21
@@ -602,16 +602,21 @@ class Song:
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
+        # TODO: Really shouldn't have this hardcoded here...
+        custom_path = PurePosixPath("custom")
+
         for inst in instruments:
             if inst.sample_source == SampleSource.SAMPLEPACK:
                 # TODO: This is pretty blah, song shouldn't rely on pathlib,
                 # see if this can be refactored
-                fname = str(PurePosixPath(inst.pack_sample[0]) / inst.pack_sample[1])
+                fname = str(
+                    custom_path / inst.pack_sample[0] / inst.pack_sample[1]
+                )
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
             if inst.sample_source == SampleSource.BRR:
-                fname = inst.brr_fname.name
+                fname = str(custom_path / inst.brr_fname.name)
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
