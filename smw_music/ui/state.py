@@ -54,6 +54,8 @@ class State:
     )
     unsaved: bool = True
     project_name: str | None = None
+    porter: str = ""
+    game: str = ""
 
     ###########################################################################
     # Property definitions

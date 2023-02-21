@@ -19,6 +19,7 @@ import subprocess  # nosec 404
 import threading
 import zipfile
 from contextlib import suppress
+from copy import deepcopy
 from dataclasses import replace
 from glob import glob
 from pathlib import Path
@@ -42,7 +43,7 @@ from smw_music.music_xml.instrument import (
     SampleSource,
 )
 from smw_music.music_xml.song import Song
-from smw_music.ui.quotes import quotes
+from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import PreferencesState, State
@@ -418,6 +419,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_game_name_changed(self, val: str) -> None:
+        self._update_state(game=val)
+        self._update_status(f"Game name set to {val}")
+
+    ###########################################################################
+
     def on_generate_and_play_clicked(self) -> None:
         self._update_status("SPC generated and played")
         self.on_generate_mml_clicked(False)
@@ -432,6 +439,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         fname = self.state.mml_fname
         if self.song is None:
             msg = "Song not loaded"
+            self.mml_generated.emit("\n".join(ashtley))
         else:
             try:
                 if os.path.exists(fname):
@@ -442,6 +450,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.song.instruments = self.state.instruments
 
                 self.song.volume = self.state.global_volume
+                if self.state.porter:
+                    self.song.porter = self.state.porter
+                if self.state.game:
+                    self.song.game = self.state.game
 
                 mml = self.song.to_mml_file(
                     fname,
@@ -470,7 +482,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         error = False
         msg = ""
-        samples_path = self._project_path / "samples"
+        samples_path = self._project_path / "samples" / "custom"
+        shutil.rmtree(samples_path, ignore_errors=True)
+
         for inst in self.state.instruments:
             if inst.sample_source == SampleSource.BRR:
                 shutil.copy2(inst.brr_fname, samples_path)
@@ -553,7 +567,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if musicxml := self.state.musicxml_fname:
                 try:
                     self.song = Song.from_music_xml(musicxml)
-                    self.song.instruments[:] = self.state.instruments
                 except MusicXmlException as e:
                     self.response_generated.emit(
                         True,
@@ -663,6 +676,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 args=(args,),
             ).start()
             self._update_status("SPC played")
+
+    ###########################################################################
+
+    def on_porter_name_changed(self, val: str) -> None:
+        self._update_state(porter=val)
+        self._update_status(f"Porter name set to {val}")
 
     ###########################################################################
 
@@ -939,7 +958,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if new_inst != self.state.inst:
             self._rollback_undo()
 
-            new_state = replace(self.state)
+            new_state = deepcopy(self.state)
             if idx == -1:
                 new_state.inst = new_inst
             else:

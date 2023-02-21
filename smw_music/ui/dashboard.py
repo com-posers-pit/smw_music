@@ -22,7 +22,7 @@ from typing import Callable, NamedTuple, cast
 # Library imports
 from PyQt6 import uic
 from PyQt6.QtCore import QBuffer, QEvent, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import QAction, QKeyEvent, QMovie
+from PyQt6.QtGui import QAction, QFont, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -166,7 +166,6 @@ class _TblCol(enum.IntEnum):
 class Dashboard(QWidget):
     _history: QMainWindow
     _quicklook: QMainWindow
-    _quicklook_edit: QTextEdit
     _checkitout: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
@@ -179,6 +178,7 @@ class Dashboard(QWidget):
     _unsaved: bool
     _project_name: str | None
     _keyhist: deque[int]
+    _window_title: str
 
     ###########################################################################
     # Constructor definitions
@@ -186,6 +186,8 @@ class Dashboard(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+        self._window_title = f"beer v{__version__}"
+
         self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
         if ui_contents is None:
@@ -193,6 +195,7 @@ class Dashboard(QWidget):
 
         self._view: DashboardView = uic.loadUi(io.BytesIO(ui_contents))
         self._view.installEventFilter(self)
+        self._view.setWindowTitle(self._window_title)
 
         self._preferences = Preferences()
         self._model = Model()
@@ -200,14 +203,21 @@ class Dashboard(QWidget):
         self._project_name = None
         self._sample_pack_items = {}
 
-        self._quicklook_edit = QTextEdit()
-        self._quicklook_edit.setFontFamily("Monospace")
-        self._quicklook_edit.setReadOnly(True)
+        # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
+        font = QFont("_")
+        font.setStyleHint(QFont.StyleHint.Monospace)
+        quicklook_edit = QTextEdit()
+        quicklook_edit.setFont(font)
+        quicklook_edit.setReadOnly(True)
         self._quicklook = QMainWindow(parent=self)
+        self._quicklook.setWindowTitle("Quicklook")
         self._quicklook.setMinimumSize(800, 600)
-        self._quicklook.setCentralWidget(self._quicklook_edit)
+        self._quicklook.setCentralWidget(quicklook_edit)
 
         self._checkitout = QMainWindow(parent=self)
+        self._checkitout.setWindowTitle(
+            "Never gonna run around and desert you"
+        )
         label = QLabel(self)
         gif = cast(bytes, pkgutil.get_data("smw_music", "data/ashtley.gif"))
         buffer = QBuffer(parent=self)
@@ -222,10 +232,12 @@ class Dashboard(QWidget):
         self._checkitout.setCentralWidget(label)
 
         self._history = QMainWindow(parent=self)
+        self._history.setWindowTitle("Action history")
         self._history.setMinimumSize(800, 600)
         self._history.setCentralWidget(QListWidget())
 
         self._envelope_preview = EnvelopePreview(self)
+        self._history.setWindowTitle("Envelope")
 
         self._setup_menus()
         self._fix_edit_widths()
@@ -299,7 +311,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_mml_generated(self, mml: str) -> None:
-        self._quicklook_edit.setText(mml)
+        cast(QTextEdit, self._quicklook.centralWidget()).setText(mml)
 
     ###########################################################################
 
@@ -398,7 +410,7 @@ class Dashboard(QWidget):
             if self._unsaved:
                 title += " +"
 
-        title += f" - beer v{__version__}"
+        title += f" - {self._window_title}"
         v.setWindowTitle(title)
 
         with ExitStack() as stack:
@@ -409,6 +421,8 @@ class Dashboard(QWidget):
             # Control Panel
             v.musicxml_fname.setText(state.musicxml_fname)
             v.mml_fname.setText(state.mml_fname)
+            v.porter_name.setText(state.porter)
+            v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
@@ -629,6 +643,8 @@ class Dashboard(QWidget):
             (v.musicxml_fname, m.on_musicxml_fname_changed),
             (v.select_mml_fname, self.on_mml_fname_clicked),
             (v.mml_fname, m.on_mml_fname_changed),
+            (v.porter_name, m.on_porter_name_changed),
+            (v.game_name, m.on_game_name_changed),
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),

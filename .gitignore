@@ -8,6 +8,7 @@
 __pycache__
 /report.html
 /tmp/
+/build/
 /dist/
 /doc/build/
 /coverage.xml

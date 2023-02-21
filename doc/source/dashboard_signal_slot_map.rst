@@ -63,6 +63,8 @@ Control Panel
       view.musicxml_fname.editingFinished --> model.on_musicxml_changed
       view.select_mml_fname.released --> dashboard.on_mml_fname_selected
       view.mml_fname.editingFinished --> model.on_mml_fname_changed
+      view.porter_name.editingFinished --> model.on_porter_name_changed
+      view.game_name.editingFinished --> model.on_game_name_changed
       view.loop_analysis.stateChanged --> model.on_loop_analysis_changed
       view.superloop_analysis.stateChanged --> model.on_superloop_analysis_changed
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
