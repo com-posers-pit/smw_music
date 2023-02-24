@@ -49,6 +49,8 @@ scipy = "^1.8.0"
 pyyaml = "^6.0"
 types-pyyaml = "^6.0.12.2"
 pyqtgraph = "^0.13.1"
+mido = "^1.2.10"
+python-rtmidi = {git = "https://github.com/SpotlightKid/python-rtmidi.git", rev = "eb16ab3268b29b94cd2baa6bfc777f5cf5f908ba"}
 
 [tool.poetry.dev-dependencies]
 Sphinx = "^5.0.0"
