@@ -516,7 +516,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 ).decode()
             except subprocess.CalledProcessError as e:
                 error = True
-                msg = e.output
+                msg = e.output.decode("utf8")
             except subprocess.TimeoutExpired:
                 error = True
                 msg = "Conversion timed out"
