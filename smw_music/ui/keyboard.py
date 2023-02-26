@@ -15,13 +15,15 @@ import threading
 from contextlib import suppress
 
 # Library imports
-import mido
+import mido  # type: ignore
 from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QBrush, QKeyEvent, QPen
 from PyQt6.QtWidgets import (
     QApplication,
     QGraphicsRectItem,
     QGraphicsScene,
+    QGraphicsSceneDragDropEvent,
+    QGraphicsSceneMouseEvent,
     QGraphicsView,
 )
 
@@ -29,44 +31,46 @@ from PyQt6.QtWidgets import (
 
 
 class Key(QGraphicsRectItem):
-    def __init__(self, x0, y0, x1, y1, white):
+    def __init__(
+        self, x0: int, y0: int, x1: int, y1: int, white: bool
+    ) -> None:
         super().__init__(x0, y0, x1, y1)
         self.white = white
-        self.brush = QBrush(self.color)
+        self._brush = QBrush(self.color)
         self.pressed = QBrush(Qt.GlobalColor.magenta)
-        self.setBrush(self.brush)
+        self.setBrush(self._brush)
         self.setAcceptDrops(True)
 
-    def dragEnterEvent(self, evt):
+    def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
         print(f"{self} drag enter")
         self.activate()
 
-    def dragLeaveEvent(self, evt):
+    def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
         print(f"{self} drag leave")
         self.deactivate()
 
-    def dragMoveEvent(self, evt):
+    def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
         print(f"{self} drag move")
         self.deactivate()
 
-    def mousePressEvent(self, evt):
+    def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
         print(f"{self} mouse press")
         self.activate()
 
-    def mouseReleaseEvent(self, evt):
+    def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
         print(f"{self} mouse release")
         self.deactivate()
 
-    def activate(self):
+    def activate(self) -> None:
         self.setBrush(self.pressed)
         self.update()
 
-    def deactivate(self):
-        self.setBrush(self.brush)
+    def deactivate(self) -> None:
+        self.setBrush(self._brush)
         self.update()
 
     @property
-    def color(self):
+    def color(self) -> Qt.GlobalColor:
         return Qt.GlobalColor.white if self.white else Qt.GlobalColor.black
 
 
@@ -126,7 +130,7 @@ class Keyboard(QGraphicsView):
 
     ###########################################################################
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
         self._setup_graphics()
@@ -136,21 +140,21 @@ class Keyboard(QGraphicsView):
 
     ###########################################################################
 
-    def _setup_graphics(self):
+    def _setup_graphics(self) -> None:
         scene = QGraphicsScene(0, 0, 1500, 200)
         self.setScene(scene)
 
         self.pen = QPen(Qt.GlobalColor.black)
         self.pen.setWidth(1)
 
-        dx = 16
+        key_width = 16
 
         self.keys = {}
         letter = "c"
         octave = 0
         for n in range(75):
-            key = Key(0, 0, dx, 50, True)
-            key.setPos(n * dx, 0)
+            key = Key(0, 0, key_width, 50, True)
+            key.setPos(n * key_width, 0)
             key.setPen(self.pen)
 
             scene.addItem(key)
@@ -165,10 +169,10 @@ class Keyboard(QGraphicsView):
         letter = "c"
         octave = 0
         for n in range(74):
-            offset += dx
+            offset += key_width
 
             if (n % 7) not in [2, 6]:
-                key = Key(-dx / 4, 0, dx / 2, 30, False)
+                key = Key(-key_width // 4, 0, key_width // 2, 30, False)
                 key.setPos(offset, 0)
                 key.setPen(self.pen)
 
@@ -211,7 +215,7 @@ class Keyboard(QGraphicsView):
 
     ###########################################################################
 
-    def press_key(self, letter: str, octave: int, offset: int = 0):
+    def press_key(self, letter: str, octave: int, offset: int = 0) -> None:
         octave = max(min(octave + offset, 10), 0)
 
         with suppress(KeyError):
@@ -219,7 +223,7 @@ class Keyboard(QGraphicsView):
 
     ###########################################################################
 
-    def release_key(self, letter: str, octave: int, offset: int = 0):
+    def release_key(self, letter: str, octave: int, offset: int = 0) -> None:
         octave = max(min(octave + offset, 10), 0)
 
         with suppress(KeyError):
@@ -256,7 +260,7 @@ app = QApplication(sys.argv)
 keyboard = Keyboard()
 
 
-def convert(ival: int) -> (str, int):
+def convert(ival: int) -> tuple[str, int]:
     octave, key = divmod(ival, 12)
     keyname = [
         "c",
