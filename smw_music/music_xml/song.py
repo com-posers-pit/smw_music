@@ -561,6 +561,7 @@ class Song:
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
+        sample_path: PurePosixPath | None = None,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -582,6 +583,8 @@ class Song:
         optimize_percussion: bool
             True iff repeated percussion notes should not repeat their
             instrument
+        sample_path: PurePosicPath
+            Base path where custom BRR samples are stored
         """
 
         self._reduce(loop_analysis, superloop_analysis)
@@ -602,21 +605,22 @@ class Song:
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
-        # TODO: Really shouldn't have this hardcoded here...
-        custom_path = PurePosixPath("custom")
-
         for inst in instruments:
             if inst.sample_source == SampleSource.SAMPLEPACK:
+                assert sample_path is not None  # nosec: B101
+
                 # TODO: This is pretty blah, song shouldn't rely on pathlib,
                 # see if this can be refactored
                 fname = str(
-                    custom_path / inst.pack_sample[0] / inst.pack_sample[1]
+                    sample_path / inst.pack_sample[0] / inst.pack_sample[1]
                 )
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
             if inst.sample_source == SampleSource.BRR:
-                fname = str(custom_path / inst.brr_fname.name)
+                assert sample_path is not None  # nosec: B101
+
+                fname = str(sample_path / inst.brr_fname.name)
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
@@ -673,6 +677,7 @@ class Song:
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
+        sample_path: PurePosixPath | None = None,
     ) -> str:
         """
         Output the MML representation of this Song to a file.
@@ -696,6 +701,8 @@ class Song:
         optimize_percussion: bool
             True iff repeated percussion notes should not repeat their
             instrument
+        sample_path: PurePosicPath
+            Base path where custom BRR samples are stored
         """
         mml = self.generate_mml(
             global_legato,
@@ -705,6 +712,7 @@ class Song:
             include_dt,
             echo_config,
             optimize_percussion,
+            sample_path,
         )
 
         if fname:

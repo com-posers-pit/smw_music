@@ -22,7 +22,7 @@ from contextlib import suppress
 from copy import deepcopy
 from dataclasses import replace
 from glob import glob
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from random import choice
 
 # Library imports
@@ -434,6 +434,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_mml_clicked(self, report: bool = True) -> None:
+        assert self.state.project_name is not None  # nosec: B101
+
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -464,6 +466,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     True,
                     self.state.echo if self.state.global_echo_enable else None,
                     True,
+                    PurePosixPath(self.state.project_name),
                 )
                 self.mml_generated.emit(mml)
                 self._update_status("MML generated")
@@ -479,10 +482,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_generate_spc_clicked(self, report: bool = True) -> None:
         assert self._project_path is not None  # nosec: B101
+        assert self.state.project_name is not None  # nosec: B101
 
         error = False
         msg = ""
-        samples_path = self._project_path / "samples" / "custom"
+        samples_path = self._project_path / "samples" / self.state.project_name
+
         shutil.rmtree(samples_path, ignore_errors=True)
 
         for inst in self.state.instruments:
