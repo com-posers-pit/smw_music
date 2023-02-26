@@ -1630,14 +1630,14 @@
                 </widget>
                </item>
                <item row="5" column="1">
-                <widget class="QCheckBox" name="echo_ch4">
+                <widget class="QCheckBox" name="echo_ch6">
                  <property name="text">
                   <string>6</string>
                  </property>
                 </widget>
                </item>
                <item row="3" column="2">
-                <widget class="QCheckBox" name="echo_ch5">
+                <widget class="QCheckBox" name="echo_ch3">
                  <property name="text">
                   <string>3</string>
                  </property>
@@ -1661,14 +1661,14 @@
                 </widget>
                </item>
                <item row="4" column="1">
-                <widget class="QCheckBox" name="echo_ch3">
+                <widget class="QCheckBox" name="echo_ch4">
                  <property name="text">
                   <string>4</string>
                  </property>
                 </widget>
                </item>
                <item row="4" column="2">
-                <widget class="QCheckBox" name="echo_ch6">
+                <widget class="QCheckBox" name="echo_ch5">
                  <property name="text">
                   <string>5</string>
                  </property>
@@ -2143,10 +2143,10 @@
   <tabstop>echo_ch0</tabstop>
   <tabstop>echo_ch1</tabstop>
   <tabstop>echo_ch2</tabstop>
-  <tabstop>echo_ch5</tabstop>
   <tabstop>echo_ch3</tabstop>
-  <tabstop>echo_ch6</tabstop>
   <tabstop>echo_ch4</tabstop>
+  <tabstop>echo_ch5</tabstop>
+  <tabstop>echo_ch6</tabstop>
   <tabstop>echo_ch7</tabstop>
   <tabstop>echo_filter_0</tabstop>
   <tabstop>echo_filter_1</tabstop>
