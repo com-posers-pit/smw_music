@@ -735,7 +735,7 @@ python-dateutil = ">=2.7"
 name = "mido"
 version = "1.2.10"
 description = "MIDI Objects for Python"
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 files = [
@@ -1199,7 +1199,7 @@ six = ">=1.5"
 name = "python-rtmidi"
 version = "1.4.9.dev0"
 description = "A Python binding for the RtMidi C++ library implemented using Cython."
-category = "main"
+category = "dev"
 optional = false
 python-versions = "*"
 files = []
@@ -1674,4 +1674,4 @@ webserver = ["Flask"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.12"
-content-hash = "409620bff3b6287e51671f67121977903d9e5f1f6f74ef51f6cbc82e18e0c313"
+content-hash = "cdf970e7a2ac556eaaf4aeadecb8659d786a4ca77cf49be04e2cfe0712c6a878"
