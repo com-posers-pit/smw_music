@@ -56,6 +56,8 @@ class State:
     project_name: str | None = None
     porter: str = ""
     game: str = ""
+    mute_percussion: bool = False
+    solo_percussion: bool = False
 
     ###########################################################################
     # Property definitions

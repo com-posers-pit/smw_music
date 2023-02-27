@@ -562,6 +562,8 @@ class Song:
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
+        solo_percussion: bool = False,
+        mute_percussion: bool = False,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -626,8 +628,24 @@ class Song:
                 sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
-        solo = any(inst.solo for inst in instruments)
-        mute = any(inst.mute for inst in instruments)
+        solo = any(inst.solo for inst in instruments) or solo_percussion
+        mute = any(inst.mute for inst in instruments) or mute_percussion
+
+        # TODO: Remove this hack
+        percussion_voices = {
+            "CR3": 22,
+            "CR2": 22,
+            "CR": 22,
+            "CH": 22,
+            "OH": 22,
+            "RD": 22,
+            "RD2": 22,
+            "HT": 24,
+            "MT": 23,
+            "SN": 10,
+            "LT": 21,
+            "KD": 21,
+        }
 
         if solo or mute:
             samples.append(("EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
@@ -636,6 +654,9 @@ class Song:
                 if inst.mute or (solo and not inst.solo):
                     inst.sample_source = SampleSource.OVERRIDE
                     inst.instrument_idx = sample_id
+
+            if mute_percussion or (solo and not solo_percussion):
+                percussion_voices = {k: sample_id for k in percussion_voices}
 
             # Not necessary, but we keep it for consistency's sake
             sample_id += 1
@@ -655,6 +676,7 @@ class Song:
             instruments=instruments,
             custom_samples=samples,
             dynamics=list(Dynamics),
+            percussion_voices=percussion_voices,
         )
 
         rv = rv.replace(" ^", "^")
@@ -678,6 +700,8 @@ class Song:
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
+        solo_percussion: bool = False,
+        mute_percussion: bool = False,
     ) -> str:
         """
         Output the MML representation of this Song to a file.
@@ -713,6 +737,8 @@ class Song:
             echo_config,
             optimize_percussion,
             sample_path,
+            solo_percussion,
+            mute_percussion,
         )
 
         if fname:

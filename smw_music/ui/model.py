@@ -467,6 +467,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     self.state.echo if self.state.global_echo_enable else None,
                     True,
                     PurePosixPath(self.state.project_name),
+                    self.state.solo_percussion,
+                    self.state.mute_percussion,
                 )
                 self.mml_generated.emit(mml)
                 self._update_status("MML generated")
@@ -633,6 +635,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_mute_percussion_changed(self, state: bool) -> None:
+        self._update_state(mute_percussion=state)
+        self._update_status(f"Percussion mute {_endis(state)}")
+
+    ###########################################################################
+
     def on_octave_changed(self, octave: int) -> None:
         self._update_inst_state(octave=octave)
         self._update_status(f"Octave set to {octave}")
@@ -774,6 +782,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_solo_changed(self, idx: int, state: bool) -> None:
         self._update_inst_state(idx=idx, solo=state)
         self._update_status(f"Instrument {idx} solo {_endis(state)}")
+
+    ###########################################################################
+
+    def on_solo_percussion_changed(self, state: bool) -> None:
+        self._update_state(solo_percussion=state)
+        self._update_status(f"Percussion solo {_endis(state)}")
 
     ###########################################################################
 
