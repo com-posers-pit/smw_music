@@ -1999,7 +1999,7 @@
     <string>&amp;Preferences</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+P</string>
+    <string>Ctrl+,</string>
    </property>
   </action>
   <action name="exit_dashboard">
