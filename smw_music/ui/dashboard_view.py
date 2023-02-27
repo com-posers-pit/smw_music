@@ -167,7 +167,6 @@ class DashboardView(QMainWindow):
     instrument_dynamics_tab: QWidget
     instrument_list: QTableWidget
     instrument_list_box: QGroupBox
-    instrument_pan_tab: QWidget
     instrument_sample_group: QGroupBox
     instrument_sample_tab: QWidget
     instrument_settings_tab: QWidget
@@ -202,6 +201,10 @@ class DashboardView(QMainWindow):
     p_setting_label: QLabel
     p_slider: QSlider
     pan_enable: QCheckBox
+    pan_group: QGroupBox
+    pan_invert_label: QLabel
+    pan_l_invert: QCheckBox
+    pan_r_invert: QCheckBox
     pan_setting: QDial
     pan_setting_label: QLabel
     play_spc: QPushButton

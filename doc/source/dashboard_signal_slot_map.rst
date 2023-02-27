@@ -139,15 +139,10 @@ Articulations
       view.artic_accstac_length_setting.valueChanged --> model.on_artic_length_changed
       view.artic_accstac_volume_slider.valueChanged --> model.on_artic_volume_changed
       view.artic_accstac_volume_setting.valueChanged --> model.on_artic_volume_changed
-
-Pan
-~~~
-
-.. mermaid::
-
-   flowchart LR
       view.pan_enable.valueChanged --> model.on_pan_enable_changed
       view.pan_setting.valueChanged --> model.on_pan_setting_changed
+      view.pan_l_invert.stateChanged --> model.on_pan_invert_changed
+      view.pan_r_invert.stateChanged --> model.on_pan_invert_changed
 
 Sample
 ~~~~~~

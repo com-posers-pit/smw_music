@@ -477,8 +477,14 @@ class Dashboard(QWidget):
             v.pan_enable.setChecked(inst.pan_enabled)
             v.pan_setting.setEnabled(inst.pan_enabled)
             v.pan_setting_label.setEnabled(inst.pan_enabled)
+            v.pan_l_invert.setEnabled(inst.pan_enabled)
+            v.pan_r_invert.setEnabled(inst.pan_enabled)
+            v.pan_invert_label.setEnabled(inst.pan_enabled)
             v.pan_setting.setValue(inst.pan_setting)
             v.pan_setting_label.setText(inst.pan_description)
+            v.pan_l_invert.setChecked(inst.pan_invert[0])
+            v.pan_r_invert.setChecked(inst.pan_invert[1])
+
             # Instrument sample
             v.select_builtin_sample.setChecked(
                 inst.sample_source == SampleSource.BUILTIN
@@ -662,6 +668,8 @@ class Dashboard(QWidget):
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),
+            (v.pan_l_invert, partial(m.on_pan_invert_changed, True)),
+            (v.pan_r_invert, partial(m.on_pan_invert_changed, False)),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),

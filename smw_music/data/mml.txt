@@ -65,7 +65,7 @@ w${song.volume}
         return ' '.join(rv)
 
     def pan_str(inst):
-        return f'y{inst.pan_setting}' if inst.pan_enabled else ''
+        return inst.pan_str if inst.pan_enabled else ''
 
     def transpose(inst):
         return f' h{inst.transpose}' if do_transpose else ''

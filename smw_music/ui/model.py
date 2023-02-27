@@ -665,6 +665,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_pan_invert_changed(self, left: bool, state: bool) -> None:
+        pan_setting = list(self.state.inst.pan_invert)
+        pan_setting[0 if left else 1] = state
+
+        self._update_inst_state(pan_invert=(pan_setting[0], pan_setting[1]))
+        self._update_status(
+            f'Pan {"left" if left else "right"} inversion {_endis(state)}'
+        )
+
+    ###########################################################################
+
     def on_pan_setting_changed(self, val: int) -> None:
         self._update_inst_state(pan_setting=val)
         self._update_status(f"Pan changed to {val}")
@@ -966,6 +977,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | bool
         | SampleSource
         | tuple[str, Path]
+        | tuple[bool, bool]
         | Path
         | GainMode,
     ) -> None:
