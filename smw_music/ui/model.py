@@ -475,7 +475,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             else:
                 error = False
                 msg = "Done"
-        if report:
+
+        if report or error:
             self.response_generated.emit(error, title, msg)
 
     ###########################################################################
@@ -486,40 +487,47 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         error = False
         msg = ""
-        samples_path = self._project_path / "samples" / self.state.project_name
 
-        shutil.rmtree(samples_path, ignore_errors=True)
+        if not os.path.exists(self.state.mml_fname):
+            error = True
+            msg = "MML not generated"
+        else:
+            samples_path = (
+                self._project_path / "samples" / self.state.project_name
+            )
 
-        for inst in self.state.instruments:
-            if inst.sample_source == SampleSource.BRR:
-                shutil.copy2(inst.brr_fname, samples_path)
-            if inst.sample_source == SampleSource.SAMPLEPACK:
-                pack_name, pack_path = inst.pack_sample
-                target = samples_path / pack_name / pack_path
-                os.makedirs(target.parents[0], exist_ok=True)
-                with open(target, "wb") as fobj:
-                    try:
-                        fobj.write(
-                            self._sample_packs[pack_name][pack_path].data
-                        )
-                    except KeyError:
-                        error = True
-                        msg += f"Could not find sample pack {pack_name}\n"
+            shutil.rmtree(samples_path, ignore_errors=True)
 
-        if not error:
-            try:
-                msg = subprocess.check_output(  # nosec B603
-                    self.convert,
-                    cwd=self._project_path,
-                    stderr=subprocess.STDOUT,
-                    timeout=5,
-                ).decode()
-            except subprocess.CalledProcessError as e:
-                error = True
-                msg = e.output.decode("utf8")
-            except subprocess.TimeoutExpired:
-                error = True
-                msg = "Conversion timed out"
+            for inst in self.state.instruments:
+                if inst.sample_source == SampleSource.BRR:
+                    shutil.copy2(inst.brr_fname, samples_path)
+                if inst.sample_source == SampleSource.SAMPLEPACK:
+                    pack_name, pack_path = inst.pack_sample
+                    target = samples_path / pack_name / pack_path
+                    os.makedirs(target.parents[0], exist_ok=True)
+                    with open(target, "wb") as fobj:
+                        try:
+                            fobj.write(
+                                self._sample_packs[pack_name][pack_path].data
+                            )
+                        except KeyError:
+                            error = True
+                            msg += f"Could not find sample pack {pack_name}\n"
+
+            if not error:
+                try:
+                    msg = subprocess.check_output(  # nosec B603
+                        self.convert,
+                        cwd=self._project_path,
+                        stderr=subprocess.STDOUT,
+                        timeout=5,
+                    ).decode()
+                except subprocess.CalledProcessError as e:
+                    error = True
+                    msg = e.output.decode("utf8")
+                except subprocess.TimeoutExpired:
+                    error = True
+                    msg = "Conversion timed out"
 
         if report or error:
             self.response_generated.emit(error, "SPC Generated", msg)
@@ -667,7 +675,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         path = self._project_path
         project = self.state.project_name
 
-        if path is not None and project is not None:
+        assert path is not None  # nosec: B101
+        assert project is not None  # nosec: B101
+
+        spc_name = f"{project}.spc"
+        spc_name = str(path / "SPCs" / spc_name)
+
+        if not os.path.exists(spc_name):
+            self.response_generated.emit(
+                True, "SPC Play", "SPC file doesn't exist"
+            )
+        else:
             spc_name = f"{project}.spc"
             spc_name = str(path / "SPCs" / spc_name)
 
@@ -680,7 +698,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 target=subprocess.call,
                 args=(args,),
             ).start()
-            self._update_status("SPC played")
+
+        self._update_status("SPC played")
 
     ###########################################################################
 
