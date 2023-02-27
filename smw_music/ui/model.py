@@ -556,9 +556,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_instrument_changed(self, index: int) -> None:
-        self._update_state(instrument_idx=index)
-        self._update_status(f"Instrument #{index} selected")
+    def on_instrument_changed(self, idx: int) -> None:
+        self._update_state(instrument_idx=idx)
+        inst = self.state.instruments[idx].name
+        self._update_status(f"{inst} selected")
 
     ###########################################################################
 
@@ -631,7 +632,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_mute_changed(self, idx: int, state: bool) -> None:
         self._update_inst_state(idx=idx, mute=state)
-        self._update_status(f"Instrument {idx} mute {_endis(state)}")
+        inst = self.state.instruments[idx].name
+        self._update_status(f"{inst} mute {_endis(state)}")
 
     ###########################################################################
 
@@ -781,7 +783,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_solo_changed(self, idx: int, state: bool) -> None:
         self._update_inst_state(idx=idx, solo=state)
-        self._update_status(f"Instrument {idx} solo {_endis(state)}")
+        inst = self.state.instruments[idx].name
+        self._update_status(f"{inst} solo {_endis(state)}")
 
     ###########################################################################
 
