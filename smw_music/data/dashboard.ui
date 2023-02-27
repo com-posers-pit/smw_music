@@ -942,7 +942,7 @@ This is a hack and will be going away soon</string>
                      <item>
                       <widget class="QPushButton" name="preview_envelope">
                        <property name="text">
-                        <string>Preview</string>
+                        <string>Preview Envelope</string>
                        </property>
                       </widget>
                      </item>
@@ -1830,7 +1830,7 @@ This is a hack and will be going away soon</string>
                <item row="3" column="2">
                 <widget class="QCheckBox" name="echo_feedback_surround">
                  <property name="text">
-                  <string>Surround</string>
+                  <string>Invert</string>
                  </property>
                 </widget>
                </item>
@@ -1877,15 +1877,21 @@ This is a hack and will be going away soon</string>
                </item>
                <item row="3" column="1">
                 <widget class="QCheckBox" name="echo_right_surround">
+                 <property name="toolTip">
+                  <string>Select either left or right, but not both, to enable &quot;surround&quot;</string>
+                 </property>
                  <property name="text">
-                  <string>Surround</string>
+                  <string>Invert</string>
                  </property>
                 </widget>
                </item>
                <item row="3" column="0">
                 <widget class="QCheckBox" name="echo_left_surround">
+                 <property name="toolTip">
+                  <string>Select either left or right, but not both, to enable &quot;surround&quot;</string>
+                 </property>
                  <property name="text">
-                  <string>Surround</string>
+                  <string>Invert</string>
                  </property>
                 </widget>
                </item>
