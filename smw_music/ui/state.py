@@ -24,9 +24,10 @@ from smw_music.music_xml.instrument import InstrumentConfig
 
 @dataclass
 class PreferencesState:
-    amk_fname: Path
-    spcplay_fname: Path
-    sample_pack_dname: Path
+    amk_fname: Path = Path("")
+    spcplay_fname: Path = Path("")
+    sample_pack_dname: Path = Path("")
+    advanced_mode: bool = False
 
 
 ###############################################################################

@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
+# SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -81,6 +81,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(
         State, bool
     )  # arguments=['state', 'update_instruments']
+    advanced_mode_changed = pyqtSignal(bool)  # arguments = ['enabled']
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
     recent_projects_updated = pyqtSignal(list)
@@ -105,7 +106,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.preferences = PreferencesState(Path(""), Path(""), Path(""))
+        self.preferences = PreferencesState()
         self._history = [State()]
         self._undo_level = 0
         self._sample_packs = {}
@@ -208,6 +209,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "amk": {"path": str(preferences.amk_fname)},
             "spcplay": {"path": str(preferences.spcplay_fname)},
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
+            "advanced": preferences.advanced_mode,
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -896,7 +898,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.preferences.sample_pack_dname = Path(
             prefs["sample_packs"]["path"]
         )
+        self.preferences.advanced_mode = prefs.get("advanced", False)
         self._load_sample_packs()
+        self.advanced_mode_changed.emit(self.preferences.advanced_mode)
 
     ###########################################################################
 

@@ -291,6 +291,15 @@ class Dashboard(QWidget):
     # API slot definitions
     ###########################################################################
 
+    def on_advanced_mode_changed(self, enabled: bool) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        v.generate_mml.setVisible(enabled)
+        v.generate_spc.setVisible(enabled)
+        v.play_spc.setVisible(enabled)
+
+    ###########################################################################
+
     def on_brr_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
@@ -785,6 +794,7 @@ class Dashboard(QWidget):
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
+        m.advanced_mode_changed.connect(self.on_advanced_mode_changed)
 
     ###########################################################################
 

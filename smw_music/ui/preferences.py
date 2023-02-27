@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
@@ -18,6 +16,7 @@ from pathlib import Path
 
 # Library imports
 from PyQt6 import uic
+from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
@@ -106,11 +105,18 @@ class Preferences:
         text = str(fname) if fname.parts else ""
         d.sample_pack_dirname.setText(text)
 
+        d.advanced_mode.setChecked(preferences.advanced_mode)
+
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
             spcplay_fname = Path(d.spcplay_fname.text())
             pack_dir = Path(d.sample_pack_dirname.text())
+            advanced_mode = (
+                d.advanced_mode.checkState() == Qt.CheckState.Checked
+            )
 
-            return PreferencesState(amk_fname, spcplay_fname, pack_dir)
+            return PreferencesState(
+                amk_fname, spcplay_fname, pack_dir, advanced_mode
+            )
 
         return None

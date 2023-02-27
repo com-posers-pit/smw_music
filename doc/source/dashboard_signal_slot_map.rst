@@ -28,6 +28,7 @@ Dashboard
       model.sample_packs_changed --> dashboard.on_sample_packs_changed
       model.recent_projects_updated --> dashboard.on_recent_projects_updated
       model.status_updated --> dashboard.on_status_updated
+      model.advanced_mode_changed --> dashboard.on_advanced_mode_changed
 
 .. note::
    The ``on_recent_projects_updated`` slot creates new actions, which are
