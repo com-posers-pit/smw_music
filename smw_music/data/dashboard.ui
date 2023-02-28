@@ -67,6 +67,9 @@
         </item>
         <item row="5" column="0" colspan="3">
          <widget class="QCheckBox" name="superloop_analysis">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Superloop Analysis</string>
           </property>
