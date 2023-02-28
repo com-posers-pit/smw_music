@@ -11,10 +11,100 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
-`Differences from 0.3.1`_
+`Differences from 0.3.2`_
 
 --------------------------------------------------------------------------------
 
+Release 0.3.2 - 2023-02-27
+--------------------------
+
+`Release 0.3.2`_
+
+`Differences from 0.3.1`_
+
+Purpose
++++++++
+
+Incorporate feedback on the v0.3.2 release, mostly feature additions.
+
+
+Affected Issues
++++++++++++++++
+
+- `#140 Hide global legato behind advanced`_
+
+- `#138 Some ability to start from measure #X`_
+
+- `#137 Update mermaid.js deps`_
+
+- `#135 Surround support for panning`_
+
+- `#134 Solo and mute are broken for percussion channels`_
+
+- `#133 Make custom samples directory match the project name`_
+
+- `#132 Echo channel mapping error`_
+
+- `#131 SPC conversion error w/o MML generation`_
+
+
+Changed
++++++++
+
+- Preferences hotkey changed to control+,
+
+- Changed custom samples subdirectory to match the project name
+
+- Fixed incorrect echo channel ordering
+
+- Instrument name reported in UI status updates
+
+- ``Superloop Analysis`` checkbox grayed out for the time being
+
+- ``Preview`` window button renamed ``Envelope Preview`` to clear up
+  confusion about its purpose
+
+
+Added
++++++
+
+- Percussion solo/mute functionality
+
+  - Current implementation is stopgap
+
+- Pan surround support
+
+- Option to start outputting music after measure 1
+
+  - This implicitly disables loop detection
+
+  - Might behave strangely if there are crescendos that cross the
+    starting measure, or if you start after the initial repeat point and
+    listen across the repeat
+
+- Advanced mode in preferences
+
+  - When disabled (default), global echo, generate MML, generate SPC,
+    and play SPC UI elements are hidden
+
+  - Defaults to "off", with global echo defaulted to "on"
+
+- Explicit warnings when trying to convert a non-existent MML file, or
+  play a non-existent SPC file
+
+- Tooltips for echo inversion checkboxes
+
+Removed
++++++++
+
+- Webserver deployment github action
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+--------------------------------------------------------------------------------
 Release 0.3.1 - 2023-02-20
 --------------------------
 
@@ -591,6 +681,14 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#140 Hide global legato behind advanced: https://github.com/com-posers-pit/smw_music/issues/140
+.. _#138 Some ability to start from measure #X: https://github.com/com-posers-pit/smw_music/issues/138
+.. _#137 Update mermaid.js deps: https://github.com/com-posers-pit/smw_music/issues/137
+.. _#135 Surround support for panning: https://github.com/com-posers-pit/smw_music/issues/135
+.. _#134 Solo and mute are broken for percussion channels: https://github.com/com-posers-pit/smw_music/issues/134
+.. _#133 Make custom samples directory match the project name: https://github.com/com-posers-pit/smw_music/issues/133
+.. _#132 Echo channel mapping error: https://github.com/com-posers-pit/smw_music/issues/132
+.. _#131 SPC conversion error w/o MML generation: https://github.com/com-posers-pit/smw_music/issues/131
 
 .. _#129 Add porter and game name to UI: https://github.com/com-posers-pit/smw_music/issues/129
 .. _#128 Put custom samples in a specific subdir: https://github.com/com-posers-pit/smw_music/issues/128
@@ -676,6 +774,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.2
 .. _Release 0.3.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.1
 .. _Release 0.3.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.0
 .. _Release 0.2.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.2.3
@@ -686,7 +785,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.1: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...HEAD
+.. _Differences from 0.3.2: https://github.com/com-posers-pit/smw_music/compare/v0.3.2...HEAD
+.. _Differences from 0.3.1: https://github.com/com-posers-pit/smw_music/compare/v0.3.1...v0.3.2
 .. _Differences from 0.3.0: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...v0.3.1
 .. _Differences from 0.2.3: https://github.com/com-posers-pit/smw_music/compare/v0.2.3...v0.3.0
 .. _Differences from 0.2.2: https://github.com/com-posers-pit/smw_music/compare/v0.2.2...v0.2.3
