@@ -31,6 +31,9 @@ jobs:
         with:
           python-version: '3.11.0'
           cache: 'poetry'
+      - name: Work around poetry dep issue
+        continue-on-error: true
+        run: poetry config installer.modern-installation false
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
@@ -62,6 +65,9 @@ jobs:
         with:
           python-version: '3.11.0'
           cache: 'poetry'
+      - name: Work around poetry dep issue
+        continue-on-error: true
+        run: poetry config installer.modern-installation false
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller

@@ -34,6 +34,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
+      - name: Work around poetry dep issue
+        continue-on-error: true
+        run: poetry config installer.modern-installation false
       - name: Install library
         run: poetry install --no-interaction --with=dev
       - name: Test with tox
@@ -60,6 +63,9 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
+      - name: Work around poetry dep issue
+        continue-on-error: true
+        run: poetry config installer.modern-installation false
       - name: Make environment
         run: poetry env use ${{ steps.install_py.outputs.python-path }}
       - name: Verify version
