@@ -3,4 +3,4 @@ REM <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 REM
 REM SPDX-License-Identifier: AGPL-3.0-only
 
-AddmusicK.exe -c -norom "${project}.txt"
+echo | AddmusicK.exe -c -norom "${project}.txt"

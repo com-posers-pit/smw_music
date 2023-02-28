@@ -66,6 +66,8 @@ class _InstrumentDict(TypedDict):
     articulations: dict[int, list[int]]
     pan_enabled: bool
     pan_setting: int
+    pan_l_invert: bool
+    pan_r_invert: bool
     sample_source: int
     builtin_sample_index: int
     pack_sample: list[str]
@@ -110,6 +112,7 @@ class _StateDict(TypedDict):
     instruments: list[_InstrumentDict]
     porter: str
     game: str
+    start_measure: int
 
 
 ###############################################################################
@@ -146,6 +149,10 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
         },
         pan_enabled=inst["pan_enabled"],
         pan_setting=inst["pan_setting"],
+        pan_invert=(
+            inst.get("pan_l_invert", False),
+            inst.get("pan_r_invert", False),
+        ),
         sample_source=SampleSource(inst["sample_source"]),
         builtin_sample_index=inst["builtin_sample_index"],
         pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
@@ -195,6 +202,8 @@ def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
         },
         "pan_enabled": inst.pan_enabled,
         "pan_setting": inst.pan_setting,
+        "pan_l_invert": inst.pan_invert[0],
+        "pan_r_invert": inst.pan_invert[1],
         "sample_source": inst.sample_source.value,
         "builtin_sample_index": inst.builtin_sample_index,
         "pack_sample": [inst.pack_sample[0], str(inst.pack_sample[1])],
@@ -245,6 +254,7 @@ def load(fname: Path) -> State:
         project_name=project,
         porter=sdict["porter"],
         game=sdict["game"],
+        start_measure=sdict.get("start_measure", 1),
     )
 
     return state
@@ -276,6 +286,7 @@ def save(fname: Path, state: State) -> None:
                     ],
                     "porter": state.porter,
                     "game": state.game,
+                    "start_measure": state.start_measure,
                 },
             },
             fobj,

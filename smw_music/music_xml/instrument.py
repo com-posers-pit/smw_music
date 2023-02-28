@@ -126,6 +126,7 @@ class InstrumentConfig:
     )
     pan_enabled: bool = False
     pan_setting: int = 10
+    pan_invert: tuple[bool, bool] = (False, False)
     sample_source: SampleSource = SampleSource.BUILTIN
     builtin_sample_index: int = -1
     pack_sample: tuple[str, Path] = ("", Path())
@@ -263,3 +264,13 @@ class InstrumentConfig:
             text = f"{10*(pan - 10)}% L"
 
         return text
+
+    ###########################################################################
+
+    @property
+    def pan_str(self) -> str:
+        inv = self.pan_invert
+        rv = f"y{self.pan_setting}"
+        if any(inv):
+            rv += f",{int(inv[0])},{int(inv[1])}"
+        return rv

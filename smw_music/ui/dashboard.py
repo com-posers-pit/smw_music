@@ -291,6 +291,16 @@ class Dashboard(QWidget):
     # API slot definitions
     ###########################################################################
 
+    def on_advanced_mode_changed(self, enabled: bool) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        v.generate_mml.setVisible(enabled)
+        v.generate_spc.setVisible(enabled)
+        v.play_spc.setVisible(enabled)
+        v.other_settings_box.setVisible(enabled)
+
+    ###########################################################################
+
     def on_brr_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
@@ -426,6 +436,7 @@ class Dashboard(QWidget):
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
+            v.start_measure.setValue(state.start_measure)
 
             v.reload_musicxml.setEnabled(bool(state.musicxml_fname))
 
@@ -445,6 +456,9 @@ class Dashboard(QWidget):
             inst_idx = state.instrument_idx
             if inst_idx is not None:
                 inst_list.setCurrentCell(inst_idx, _TblCol.NAME)
+
+            v.mute_percussion.setChecked(state.mute_percussion)
+            v.solo_percussion.setChecked(state.solo_percussion)
 
             for row, inst_cfg in enumerate(state.instruments):
                 solo = _to_checked(inst_cfg.solo)
@@ -477,8 +491,14 @@ class Dashboard(QWidget):
             v.pan_enable.setChecked(inst.pan_enabled)
             v.pan_setting.setEnabled(inst.pan_enabled)
             v.pan_setting_label.setEnabled(inst.pan_enabled)
+            v.pan_l_invert.setEnabled(inst.pan_enabled)
+            v.pan_r_invert.setEnabled(inst.pan_enabled)
+            v.pan_invert_label.setEnabled(inst.pan_enabled)
             v.pan_setting.setValue(inst.pan_setting)
             v.pan_setting_label.setText(inst.pan_description)
+            v.pan_l_invert.setChecked(inst.pan_invert[0])
+            v.pan_r_invert.setChecked(inst.pan_invert[1])
+
             # Instrument sample
             v.select_builtin_sample.setChecked(
                 inst.sample_source == SampleSource.BUILTIN
@@ -648,6 +668,7 @@ class Dashboard(QWidget):
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
+            (v.start_measure, m.on_start_measure_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
             (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
@@ -659,9 +680,13 @@ class Dashboard(QWidget):
             # Instrument settings
             (v.instrument_list, m.on_instrument_changed),
             (v.interpolate, m.on_interpolate_changed),
+            (v.mute_percussion, m.on_mute_percussion_changed),
+            (v.solo_percussion, m.on_solo_percussion_changed),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),
+            (v.pan_l_invert, partial(m.on_pan_invert_changed, True)),
+            (v.pan_r_invert, partial(m.on_pan_invert_changed, False)),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
@@ -772,6 +797,7 @@ class Dashboard(QWidget):
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
+        m.advanced_mode_changed.connect(self.on_advanced_mode_changed)
 
     ###########################################################################
 

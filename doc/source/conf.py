@@ -65,3 +65,8 @@ modindex_common_prefix = ["smw_music."]
 napoleon_preprocess_types = True
 
 todo_include_todos = True
+
+# -- Options for HTML output -------------------------------------------------
+
+# TODO: this is a workaround for a change to the mermaid CDN
+mermaid_version = "9.4.0"

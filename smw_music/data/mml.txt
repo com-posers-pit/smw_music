@@ -65,7 +65,7 @@ w${song.volume}
         return ' '.join(rv)
 
     def pan_str(inst):
-        return f'y{inst.pan_setting}' if inst.pan_enabled else ''
+        return inst.pan_str if inst.pan_enabled else ''
 
     def transpose(inst):
         return f' h{inst.transpose}' if do_transpose else ''
@@ -100,18 +100,18 @@ w${song.volume}
 %endif
 %if percussion:
 ; Percussion definitions
-"CR3_ = @22 CR3_n" "CR3_n = o6 c"
-"CR2_ = @22 CR2_n" "CR2_n = o5 b"
-"CR   = @22 CRn"   "CRn   = o5 a"
-"CH   = @22 CHn"   "CHn   = o5 g"
-"OH   = @22 OHn"   "OHn   = o5 f"
-"RD   = @22 RDn"   "RDn   = o5 e"
-"RD2_ = @22 RD2_n" "RD2_n = o5 d"
-"HT   = @24 HTn"   "HTn   = o5 e"
-"MT   = @23 MTn"   "MTn   = o5 d"
-"SN   = @10 SNn"   "SNn   = o5 c"
-"LT   = @21 LTn"   "LTn   = o4 a"
-"KD   = @21 KDn"   "KDn   = o4 f"
+"CR3_ = @${percussion_voices['CR3']} CR3_n" "CR3_n = o6 c"
+"CR2_ = @${percussion_voices['CR2']} CR2_n" "CR2_n = o5 b"
+"CR   = @${percussion_voices['CR']} CRn"   "CRn   = o5 a"
+"CH   = @${percussion_voices['CH']} CHn"   "CHn   = o5 g"
+"OH   = @${percussion_voices['OH']} OHn"   "OHn   = o5 f"
+"RD   = @${percussion_voices['RD']} RDn"   "RDn   = o5 e"
+"RD2_ = @${percussion_voices['RD2']} RD2_n" "RD2_n = o5 d"
+"HT   = @${percussion_voices['HT']} HTn"   "HTn   = o5 e"
+"MT   = @${percussion_voices['MT']} MTn"   "MTn   = o5 d"
+"SN   = @${percussion_voices['SN']} SNn"   "SNn   = o5 c"
+"LT   = @${percussion_voices['LT']} LTn"   "LTn   = o4 a"
+"KD   = @${percussion_voices['KD']} KDn"   "KDn   = o4 f"
 
 %endif
 %if echo_config:

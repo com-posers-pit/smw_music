@@ -1,4 +1,4 @@
-# SPDX-FileCopyrightText: 2022 The SMW Music Python Project Authors
+# SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
 # SPDX-License-Identifier: AGPL-3.0-only
@@ -22,7 +22,7 @@ from contextlib import suppress
 from copy import deepcopy
 from dataclasses import replace
 from glob import glob
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from random import choice
 
 # Library imports
@@ -81,6 +81,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(
         State, bool
     )  # arguments=['state', 'update_instruments']
+    advanced_mode_changed = pyqtSignal(bool)  # arguments = ['enabled']
     instruments_changed = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
     recent_projects_updated = pyqtSignal(list)
@@ -105,7 +106,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.preferences = PreferencesState(Path(""), Path(""), Path(""))
+        self.preferences = PreferencesState()
         self._history = [State()]
         self._undo_level = 0
         self._sample_packs = {}
@@ -208,6 +209,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "amk": {"path": str(preferences.amk_fname)},
             "spcplay": {"path": str(preferences.spcplay_fname)},
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
+            "advanced": preferences.advanced_mode,
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -434,6 +436,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_mml_clicked(self, report: bool = True) -> None:
+        assert self.state.project_name is not None  # nosec: B101
+
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -464,6 +468,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     True,
                     self.state.echo if self.state.global_echo_enable else None,
                     True,
+                    PurePosixPath(self.state.project_name),
+                    self.state.solo_percussion,
+                    self.state.mute_percussion,
+                    self.state.start_measure,
                 )
                 self.mml_generated.emit(mml)
                 self._update_status("MML generated")
@@ -472,49 +480,59 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             else:
                 error = False
                 msg = "Done"
-        if report:
+
+        if report or error:
             self.response_generated.emit(error, title, msg)
 
     ###########################################################################
 
     def on_generate_spc_clicked(self, report: bool = True) -> None:
         assert self._project_path is not None  # nosec: B101
+        assert self.state.project_name is not None  # nosec: B101
 
         error = False
         msg = ""
-        samples_path = self._project_path / "samples" / "custom"
-        shutil.rmtree(samples_path, ignore_errors=True)
 
-        for inst in self.state.instruments:
-            if inst.sample_source == SampleSource.BRR:
-                shutil.copy2(inst.brr_fname, samples_path)
-            if inst.sample_source == SampleSource.SAMPLEPACK:
-                pack_name, pack_path = inst.pack_sample
-                target = samples_path / pack_name / pack_path
-                os.makedirs(target.parents[0], exist_ok=True)
-                with open(target, "wb") as fobj:
-                    try:
-                        fobj.write(
-                            self._sample_packs[pack_name][pack_path].data
-                        )
-                    except KeyError:
-                        error = True
-                        msg += f"Could not find sample pack {pack_name}\n"
+        if not os.path.exists(self.state.mml_fname):
+            error = True
+            msg = "MML not generated"
+        else:
+            samples_path = (
+                self._project_path / "samples" / self.state.project_name
+            )
 
-        if not error:
-            try:
-                msg = subprocess.check_output(  # nosec B603
-                    self.convert,
-                    cwd=self._project_path,
-                    stderr=subprocess.STDOUT,
-                    timeout=5,
-                ).decode()
-            except subprocess.CalledProcessError as e:
-                error = True
-                msg = e.output
-            except subprocess.TimeoutExpired:
-                error = True
-                msg = "Conversion timed out"
+            shutil.rmtree(samples_path, ignore_errors=True)
+
+            for inst in self.state.instruments:
+                if inst.sample_source == SampleSource.BRR:
+                    shutil.copy2(inst.brr_fname, samples_path)
+                if inst.sample_source == SampleSource.SAMPLEPACK:
+                    pack_name, pack_path = inst.pack_sample
+                    target = samples_path / pack_name / pack_path
+                    os.makedirs(target.parents[0], exist_ok=True)
+                    with open(target, "wb") as fobj:
+                        try:
+                            fobj.write(
+                                self._sample_packs[pack_name][pack_path].data
+                            )
+                        except KeyError:
+                            error = True
+                            msg += f"Could not find sample pack {pack_name}\n"
+
+            if not error:
+                try:
+                    msg = subprocess.check_output(  # nosec B603
+                        self.convert,
+                        cwd=self._project_path,
+                        stderr=subprocess.STDOUT,
+                        timeout=5,
+                    ).decode()
+                except subprocess.CalledProcessError as e:
+                    error = True
+                    msg = e.output.decode("utf8")
+                except subprocess.TimeoutExpired:
+                    error = True
+                    msg = "Conversion timed out"
 
         if report or error:
             self.response_generated.emit(error, "SPC Generated", msg)
@@ -541,9 +559,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_instrument_changed(self, index: int) -> None:
-        self._update_state(instrument_idx=index)
-        self._update_status(f"Instrument #{index} selected")
+    def on_instrument_changed(self, idx: int) -> None:
+        self._update_state(instrument_idx=idx)
+        inst = self.state.instruments[idx].name
+        self._update_status(f"{inst} selected")
 
     ###########################################################################
 
@@ -616,7 +635,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_mute_changed(self, idx: int, state: bool) -> None:
         self._update_inst_state(idx=idx, mute=state)
-        self._update_status(f"Instrument {idx} mute {_endis(state)}")
+        inst = self.state.instruments[idx].name
+        self._update_status(f"{inst} mute {_endis(state)}")
+
+    ###########################################################################
+
+    def on_mute_percussion_changed(self, state: bool) -> None:
+        self._update_state(mute_percussion=state)
+        self._update_status(f"Percussion mute {_endis(state)}")
 
     ###########################################################################
 
@@ -652,6 +678,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_pan_invert_changed(self, left: bool, state: bool) -> None:
+        pan_setting = list(self.state.inst.pan_invert)
+        pan_setting[0 if left else 1] = state
+
+        self._update_inst_state(pan_invert=(pan_setting[0], pan_setting[1]))
+        self._update_status(
+            f'Pan {"left" if left else "right"} inversion {_endis(state)}'
+        )
+
+    ###########################################################################
+
     def on_pan_setting_changed(self, val: int) -> None:
         self._update_inst_state(pan_setting=val)
         self._update_status(f"Pan changed to {val}")
@@ -662,7 +699,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         path = self._project_path
         project = self.state.project_name
 
-        if path is not None and project is not None:
+        assert path is not None  # nosec: B101
+        assert project is not None  # nosec: B101
+
+        spc_name = f"{project}.spc"
+        spc_name = str(path / "SPCs" / spc_name)
+
+        if not os.path.exists(spc_name):
+            self.response_generated.emit(
+                True, "SPC Play", "SPC file doesn't exist"
+            )
+        else:
             spc_name = f"{project}.spc"
             spc_name = str(path / "SPCs" / spc_name)
 
@@ -675,7 +722,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 target=subprocess.call,
                 args=(args,),
             ).start()
-            self._update_status("SPC played")
+
+        self._update_status("SPC played")
 
     ###########################################################################
 
@@ -738,7 +786,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_solo_changed(self, idx: int, state: bool) -> None:
         self._update_inst_state(idx=idx, solo=state)
-        self._update_status(f"Instrument {idx} solo {_endis(state)}")
+        inst = self.state.instruments[idx].name
+        self._update_status(f"{inst} solo {_endis(state)}")
+
+    ###########################################################################
+
+    def on_solo_percussion_changed(self, state: bool) -> None:
+        self._update_state(solo_percussion=state)
+        self._update_status(f"Percussion solo {_endis(state)}")
+
+    ###########################################################################
+
+    def on_start_measure_changed(self, value: int) -> None:
+        self._update_state(start_measure=value)
+        self._update_status(f"Start measure set to {value}")
 
     ###########################################################################
 
@@ -844,7 +905,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.preferences.sample_pack_dname = Path(
             prefs["sample_packs"]["path"]
         )
+        self.preferences.advanced_mode = prefs.get("advanced", False)
         self._load_sample_packs()
+        self.advanced_mode_changed.emit(self.preferences.advanced_mode)
 
     ###########################################################################
 
@@ -942,6 +1005,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | bool
         | SampleSource
         | tuple[str, Path]
+        | tuple[bool, bool]
         | Path
         | GainMode,
     ) -> None:

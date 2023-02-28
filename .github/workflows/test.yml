@@ -35,11 +35,11 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'poetry'
       - name: Install library
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --with=dev
       - name: Test with tox
         run: poetry run tox -e py
       - name: Upload coverage
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v3
         with:
           verbose: true
 

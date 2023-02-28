@@ -561,6 +561,10 @@ class Song:
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
+        sample_path: PurePosixPath | None = None,
+        solo_percussion: bool = False,
+        mute_percussion: bool = False,
+        start_measure: int = 1,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -582,9 +586,36 @@ class Song:
         optimize_percussion: bool
             True iff repeated percussion notes should not repeat their
             instrument
+        sample_path: PurePosicPath
+            Base path where custom BRR samples are stored
+        start_measure: int
+            First measure of music to output
         """
 
+        # If starting after the first measure, disable loop analysis because
+        # things might be badly broken
+        if start_measure != 1:
+            loop_analysis = False
+            superloop_analysis = False
+
         self._reduce(loop_analysis, superloop_analysis)
+
+        # TODO: A bit of a hack to allow starting at a later measure
+        if start_measure != 1:
+            for channel in self._reduced_channels:
+                to_drop = start_measure - 1
+                tokens: list[Token] = []
+                for n, token in enumerate(channel.tokens):
+                    if isinstance(
+                        token, (Dynamic, Instrument, Measure, Tempo, Repeat)
+                    ):
+                        tokens.append(token)
+                        if isinstance(token, Measure):
+                            to_drop -= 1
+                    if to_drop == 0:
+                        tokens.extend(channel.tokens[n + 1 :])
+                        break
+                channel.tokens = tokens
 
         self._validate()
         channels = [
@@ -602,28 +633,45 @@ class Song:
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
-        # TODO: Really shouldn't have this hardcoded here...
-        custom_path = PurePosixPath("custom")
-
         for inst in instruments:
             if inst.sample_source == SampleSource.SAMPLEPACK:
+                assert sample_path is not None  # nosec: B101
+
                 # TODO: This is pretty blah, song shouldn't rely on pathlib,
                 # see if this can be refactored
                 fname = str(
-                    custom_path / inst.pack_sample[0] / inst.pack_sample[1]
+                    sample_path / inst.pack_sample[0] / inst.pack_sample[1]
                 )
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
             if inst.sample_source == SampleSource.BRR:
-                fname = str(custom_path / inst.brr_fname.name)
+                assert sample_path is not None  # nosec: B101
+
+                fname = str(sample_path / inst.brr_fname.name)
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
-        solo = any(inst.solo for inst in instruments)
-        mute = any(inst.mute for inst in instruments)
+        solo = any(inst.solo for inst in instruments) or solo_percussion
+        mute = any(inst.mute for inst in instruments) or mute_percussion
+
+        # TODO: Remove this hack
+        percussion_voices = {
+            "CR3": 22,
+            "CR2": 22,
+            "CR": 22,
+            "CH": 22,
+            "OH": 22,
+            "RD": 22,
+            "RD2": 22,
+            "HT": 24,
+            "MT": 23,
+            "SN": 10,
+            "LT": 21,
+            "KD": 21,
+        }
 
         if solo or mute:
             samples.append(("EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
@@ -632,6 +680,9 @@ class Song:
                 if inst.mute or (solo and not inst.solo):
                     inst.sample_source = SampleSource.OVERRIDE
                     inst.instrument_idx = sample_id
+
+            if mute_percussion or (solo and not solo_percussion):
+                percussion_voices = {k: sample_id for k in percussion_voices}
 
             # Not necessary, but we keep it for consistency's sake
             sample_id += 1
@@ -651,6 +702,7 @@ class Song:
             instruments=instruments,
             custom_samples=samples,
             dynamics=list(Dynamics),
+            percussion_voices=percussion_voices,
         )
 
         rv = rv.replace(" ^", "^")
@@ -673,6 +725,10 @@ class Song:
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
+        sample_path: PurePosixPath | None = None,
+        solo_percussion: bool = False,
+        mute_percussion: bool = False,
+        start_measure: int = 1,
     ) -> str:
         """
         Output the MML representation of this Song to a file.
@@ -696,6 +752,10 @@ class Song:
         optimize_percussion: bool
             True iff repeated percussion notes should not repeat their
             instrument
+        sample_path: PurePosicPath
+            Base path where custom BRR samples are stored
+        start_measure: int
+            First measure of music to output
         """
         mml = self.generate_mml(
             global_legato,
@@ -705,6 +765,10 @@ class Song:
             include_dt,
             echo_config,
             optimize_percussion,
+            sample_path,
+            solo_percussion,
+            mute_percussion,
+            start_measure,
         )
 
         if fname:
