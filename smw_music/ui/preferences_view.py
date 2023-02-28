@@ -7,6 +7,7 @@
 
 # Library imports
 from PyQt6.QtWidgets import (
+    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QGroupBox,
@@ -16,6 +17,7 @@ from PyQt6.QtWidgets import (
 
 
 class PreferencesView(QDialog):
+    advanced_mode: QCheckBox
     amk_fname: QLineEdit
     amk_group_box: QGroupBox
     buttonBox: QDialogButtonBox

@@ -81,6 +81,13 @@
     </widget>
    </item>
    <item>
+    <widget class="QCheckBox" name="advanced_mode">
+     <property name="text">
+      <string>Advanced</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

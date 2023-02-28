@@ -161,7 +161,6 @@ class DashboardView(QMainWindow):
     global_volume_setting: QLineEdit
     global_volume_setting_label: QLabel
     global_volume_slider: QSlider
-    groupBox: QGroupBox
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
@@ -197,6 +196,7 @@ class DashboardView(QMainWindow):
     open_preferences: QAction
     open_project: QAction
     open_quicklook: QPushButton
+    other_settings_box: QGroupBox
     p_label: QLabel
     p_setting: QLineEdit
     p_setting_label: QLabel
@@ -252,6 +252,8 @@ class DashboardView(QMainWindow):
     splitter_3: QSplitter
     splitter_4: QSplitter
     splitter_5: QSplitter
+    start_measure: QSpinBox
+    start_measure_label: QLabel
     statusbar: QStatusBar
     subtune_label: QLabel
     subtune_setting: QLineEdit

@@ -24,9 +24,10 @@ from smw_music.music_xml.instrument import InstrumentConfig
 
 @dataclass
 class PreferencesState:
-    amk_fname: Path
-    spcplay_fname: Path
-    sample_pack_dname: Path
+    amk_fname: Path = Path("")
+    spcplay_fname: Path = Path("")
+    sample_pack_dname: Path = Path("")
+    advanced_mode: bool = False
 
 
 ###############################################################################
@@ -46,7 +47,7 @@ class State:
     instrument_idx: int | None = None
     global_volume: int = 128
     global_legato: bool = True
-    global_echo_enable: bool = False
+    global_echo_enable: bool = True
     echo: EchoConfig = field(
         default_factory=lambda: EchoConfig(
             set(), (0, 0), (False, False), 0, 0, False, 0
@@ -56,6 +57,7 @@ class State:
     project_name: str | None = None
     porter: str = ""
     game: str = ""
+    start_measure: int = 1
     mute_percussion: bool = False
     solo_percussion: bool = False
 

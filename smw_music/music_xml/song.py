@@ -564,6 +564,7 @@ class Song:
         sample_path: PurePosixPath | None = None,
         solo_percussion: bool = False,
         mute_percussion: bool = False,
+        start_measure: int = 1,
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -587,9 +588,34 @@ class Song:
             instrument
         sample_path: PurePosicPath
             Base path where custom BRR samples are stored
+        start_measure: int
+            First measure of music to output
         """
 
+        # If starting after the first measure, disable loop analysis because
+        # things might be badly broken
+        if start_measure != 1:
+            loop_analysis = False
+            superloop_analysis = False
+
         self._reduce(loop_analysis, superloop_analysis)
+
+        # TODO: A bit of a hack to allow starting at a later measure
+        if start_measure != 1:
+            for channel in self._reduced_channels:
+                to_drop = start_measure - 1
+                tokens: list[Token] = []
+                for n, token in enumerate(channel.tokens):
+                    if isinstance(
+                        token, (Dynamic, Instrument, Measure, Tempo, Repeat)
+                    ):
+                        tokens.append(token)
+                        if isinstance(token, Measure):
+                            to_drop -= 1
+                    if to_drop == 0:
+                        tokens.extend(channel.tokens[n + 1 :])
+                        break
+                channel.tokens = tokens
 
         self._validate()
         channels = [
@@ -702,6 +728,7 @@ class Song:
         sample_path: PurePosixPath | None = None,
         solo_percussion: bool = False,
         mute_percussion: bool = False,
+        start_measure: int = 1,
     ) -> str:
         """
         Output the MML representation of this Song to a file.
@@ -727,6 +754,8 @@ class Song:
             instrument
         sample_path: PurePosicPath
             Base path where custom BRR samples are stored
+        start_measure: int
+            First measure of music to output
         """
         mml = self.generate_mml(
             global_legato,
@@ -739,6 +768,7 @@ class Song:
             sample_path,
             solo_percussion,
             mute_percussion,
+            start_measure,
         )
 
         if fname:

@@ -291,6 +291,16 @@ class Dashboard(QWidget):
     # API slot definitions
     ###########################################################################
 
+    def on_advanced_mode_changed(self, enabled: bool) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        v.generate_mml.setVisible(enabled)
+        v.generate_spc.setVisible(enabled)
+        v.play_spc.setVisible(enabled)
+        v.other_settings_box.setVisible(enabled)
+
+    ###########################################################################
+
     def on_brr_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
@@ -426,6 +436,7 @@ class Dashboard(QWidget):
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
+            v.start_measure.setValue(state.start_measure)
 
             v.reload_musicxml.setEnabled(bool(state.musicxml_fname))
 
@@ -657,6 +668,7 @@ class Dashboard(QWidget):
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
+            (v.start_measure, m.on_start_measure_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
             (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
@@ -785,6 +797,7 @@ class Dashboard(QWidget):
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
+        m.advanced_mode_changed.connect(self.on_advanced_mode_changed)
 
     ###########################################################################
 

@@ -112,6 +112,7 @@ class _StateDict(TypedDict):
     instruments: list[_InstrumentDict]
     porter: str
     game: str
+    start_measure: int
 
 
 ###############################################################################
@@ -253,6 +254,7 @@ def load(fname: Path) -> State:
         project_name=project,
         porter=sdict["porter"],
         game=sdict["game"],
+        start_measure=sdict.get("start_measure", 1),
     )
 
     return state
@@ -284,6 +286,7 @@ def save(fname: Path, state: State) -> None:
                     ],
                     "porter": state.porter,
                     "game": state.game,
+                    "start_measure": state.start_measure,
                 },
             },
             fobj,
