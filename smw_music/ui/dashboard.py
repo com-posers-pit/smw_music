@@ -297,6 +297,7 @@ class Dashboard(QWidget):
         v.generate_mml.setVisible(enabled)
         v.generate_spc.setVisible(enabled)
         v.play_spc.setVisible(enabled)
+        v.other_settings_box.setVisible(enabled)
 
     ###########################################################################
 

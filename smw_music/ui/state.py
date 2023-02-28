@@ -47,7 +47,7 @@ class State:
     instrument_idx: int | None = None
     global_volume: int = 128
     global_legato: bool = True
-    global_echo_enable: bool = False
+    global_echo_enable: bool = True
     echo: EchoConfig = field(
         default_factory=lambda: EchoConfig(
             set(), (0, 0), (False, False), 0, 0, False, 0
