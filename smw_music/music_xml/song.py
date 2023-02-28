@@ -607,7 +607,7 @@ class Song:
                 tokens: list[Token] = []
                 for n, token in enumerate(channel.tokens):
                     if isinstance(
-                        token, (Dynamic, Instrument, Measure, Tempo)
+                        token, (Dynamic, Instrument, Measure, Tempo, Repeat)
                     ):
                         tokens.append(token)
                         if isinstance(token, Measure):
