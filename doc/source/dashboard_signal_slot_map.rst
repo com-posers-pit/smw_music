@@ -69,6 +69,7 @@ Control Panel
       view.loop_analysis.stateChanged --> model.on_loop_analysis_changed
       view.superloop_analysis.stateChanged --> model.on_superloop_analysis_changed
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
+      view.start_measure.valueChanged --> model.on_start_measure_changed
       view.reload_musicxml.released --> model.on_reload_musicxml_clicked
       view.open_quicklook.released --> dashboard.on_open_quicklook_clicked
       view.open_history.released --> dashboard.on_open_history_clicked

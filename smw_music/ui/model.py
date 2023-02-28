@@ -471,6 +471,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     PurePosixPath(self.state.project_name),
                     self.state.solo_percussion,
                     self.state.mute_percussion,
+                    self.state.start_measure,
                 )
                 self.mml_generated.emit(mml)
                 self._update_status("MML generated")
@@ -793,6 +794,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_solo_percussion_changed(self, state: bool) -> None:
         self._update_state(solo_percussion=state)
         self._update_status(f"Percussion solo {_endis(state)}")
+
+    ###########################################################################
+
+    def on_start_measure_changed(self, value: int) -> None:
+        self._update_state(start_measure=value)
+        self._update_status(f"Start measure set to {value}")
 
     ###########################################################################
 

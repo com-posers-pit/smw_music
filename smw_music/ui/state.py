@@ -57,6 +57,7 @@ class State:
     project_name: str | None = None
     porter: str = ""
     game: str = ""
+    start_measure: int = 1
     mute_percussion: bool = False
     solo_percussion: bool = False
 

@@ -252,6 +252,8 @@ class DashboardView(QMainWindow):
     splitter_3: QSplitter
     splitter_4: QSplitter
     splitter_5: QSplitter
+    start_measure: QSpinBox
+    start_measure_label: QLabel
     statusbar: QStatusBar
     subtune_label: QLabel
     subtune_setting: QLineEdit

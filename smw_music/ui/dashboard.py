@@ -436,6 +436,7 @@ class Dashboard(QWidget):
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
+            v.start_measure.setValue(state.start_measure)
 
             v.reload_musicxml.setEnabled(bool(state.musicxml_fname))
 
@@ -667,6 +668,7 @@ class Dashboard(QWidget):
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
+            (v.start_measure, m.on_start_measure_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
             (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
