@@ -96,6 +96,7 @@ class EnvelopePreview(QMainWindow):
         self._graph.setYRange(0, 1)
         self._graph.setXRange(0, 0.1)
         self._graph.setMouseEnabled(y=False)
+        self.setWindowTitle("Envelope Preview")
 
     ###########################################################################
     # API method definitions
