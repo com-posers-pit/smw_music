@@ -65,6 +65,6 @@ jobs:
       - name: Verify version
         run: poetry run python -V
       - name: Install library
-        run: poetry install --no-interaction
+        run: poetry install --no-interaction --with=dev
       - name: Test with tox
         run: poetry run tox -e py
