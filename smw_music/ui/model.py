@@ -436,8 +436,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_mml_clicked(self, report: bool = True) -> None:
-        assert self.state.project_name is not None  # nosec: B101
-
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -445,6 +443,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             msg = "Song not loaded"
             self.mml_generated.emit("\n".join(ashtley))
         else:
+            assert self.state.project_name is not None  # nosec: B101
+
             try:
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
