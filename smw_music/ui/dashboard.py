@@ -15,7 +15,7 @@ import io
 import pkgutil
 from collections import deque
 from contextlib import ExitStack
-from functools import partial
+from functools import cached_property, partial
 from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
@@ -179,6 +179,7 @@ class Dashboard(QWidget):
     _project_name: str | None
     _keyhist: deque[int]
     _window_title: str
+    _default_tooltips: dict[QWidget, str]
 
     ###########################################################################
     # Constructor definitions
@@ -245,6 +246,10 @@ class Dashboard(QWidget):
         self._setup_instrument_table()
         self._attach_signals()
         self._view.generate_and_play.setToolTip(labeouf[0])
+
+        self._default_tooltips = {
+            widget: widget.toolTip() for widget in self._view_widgets
+        }
 
         self._view.show()
 
@@ -367,7 +372,18 @@ class Dashboard(QWidget):
             v.save_project,
             v.menuRecent_Projects,
         ]:
-            action.setEnabled(amk_valid and spcplayer_valid)
+            enable = amk_valid and spcplayer_valid
+
+            tooltip = (
+                "Define AMK zip file and spcplayer executable in "
+                "preferences to enable this"
+            )
+
+            if enable:
+                tooltip = self._default_tooltips[action]
+
+            action.setToolTip(tooltip)
+            action.setEnabled(enable)
 
         # sample_packs handling
         self._sample_pack_items = {}
@@ -381,8 +397,6 @@ class Dashboard(QWidget):
 
             self._add_sample_pack(top, name, pack)
             tree.addTopLevelItem(top)
-
-    ###########################################################################
 
     ###########################################################################
 
@@ -438,9 +452,8 @@ class Dashboard(QWidget):
         v.setWindowTitle(title)
 
         with ExitStack() as stack:
-            for child in vars(v).values():
-                if isinstance(child, QWidget):
-                    stack.enter_context(QSignalBlocker(child))
+            for child in self._view_widgets:
+                stack.enter_context(QSignalBlocker(child))
 
             # Control Panel
             v.musicxml_fname.setText(state.musicxml_fname)
@@ -1146,4 +1159,13 @@ class Dashboard(QWidget):
             v.echo_delay_slider,
             v.echo_delay_setting,
             v.echo_delay_setting_label,
+        ]
+
+    ###########################################################################
+
+    @cached_property
+    def _view_widgets(self) -> list[QWidget | QAction]:
+        widgets = vars(self._view).values()
+        return [
+            child for child in widgets if isinstance(child, (QWidget, QAction))
         ]
