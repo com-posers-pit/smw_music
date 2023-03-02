@@ -3,6 +3,8 @@
 # Created by: The Resource Compiler for Qt version 5.15.8
 # WARNING! All changes made in this file will be lost!
 
+# type: ignore
+
 # Library imports
 from PyQt6 import QtCore
 
