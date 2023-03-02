@@ -21,8 +21,8 @@ from typing import Callable, NamedTuple, cast
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import QBuffer, QEvent, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import QAction, QFont, QKeyEvent, QMovie
+from PyQt6.QtCore import QEvent, QObject, QSignalBlocker, Qt
+from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -53,6 +53,7 @@ from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
+from smw_music.ui import resources  # pylint: disable=unused-import
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -220,14 +221,8 @@ class Dashboard(QWidget):
             "Never gonna run around and desert you"
         )
         label = QLabel(self)
-        gif = cast(bytes, pkgutil.get_data("smw_music", "data/ashtley.gif"))
-        buffer = QBuffer(parent=self)
-        buffer.open(QBuffer.OpenModeFlag.ReadWrite)
-        buffer.writeData(gif)
-        buffer.seek(0)
-
         movie = QMovie(parent=self)
-        movie.setDevice(buffer)
+        movie.setFileName(":/gifs/ashtley.gif")
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
@@ -250,6 +245,15 @@ class Dashboard(QWidget):
         self._default_tooltips = {
             widget: widget.toolTip() for widget in self._view_widgets
         }
+
+        for widget in [
+            self._view,
+            self._history,
+            self._quicklook,
+            self._checkitout,
+            self._envelope_preview,
+        ]:
+            widget.setWindowIcon(QIcon(":/icons/maestro.svg"))
 
         self._view.show()
 
