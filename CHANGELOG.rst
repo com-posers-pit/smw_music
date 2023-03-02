@@ -11,7 +11,70 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.3`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.3 - 2023-03-02
+--------------------------
+
+`Release 0.3.3`_
+
 `Differences from 0.3.2`_
+
+Purpose
++++++++
+
+Incorporate feedback on the v0.3.2 release, mostly feature additions.
+
+
+Affected Issues
++++++++++++++++
+
+- `#147 Slurs in triplets are broken`_
+
+- `#146 Emit error messages if AMK zip and SPC player are not set`_
+
+- `#144 MML generation asserts when not used in project mode`_
+
+- `#143 Windows poetry build failures`_
+
+- `#100 Slur starting/ending on the same note`_
+
+- `#95 Triplet bug`_
+
+
+Changed
++++++++
+
+- Ties/slurs in triplets no longer broken
+
+- Juxtaposed slurs/ties no longer broken
+
+- Fixed "assert on MML generation in non-project mode"
+
+- Switched to using a Qt resource file for data artifacts
+
+- Poetry version pinned
+
+Added
++++++
+
+- Project mode UI elements are disabled if AMK and spcplayer aren't set
+
+  - Tooltips on those elements describe how to set those preferences
+
+- Icons
+
+Removed
++++++++
+
+- All webserver components and dependencies
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
 
 --------------------------------------------------------------------------------
 
@@ -25,7 +88,7 @@ Release 0.3.2 - 2023-02-27
 Purpose
 +++++++
 
-Incorporate feedback on the v0.3.2 release, mostly feature additions.
+Incorporate feedback on the v0.3.1 release, mostly feature additions.
 
 
 Affected Issues
@@ -105,6 +168,7 @@ Idiosyncrasies
 - Lightly tested on windows, watch out for problems on that OS
 
 --------------------------------------------------------------------------------
+
 Release 0.3.1 - 2023-02-20
 --------------------------
 
@@ -681,6 +745,10 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#147 Slurs in triplets are broken: https://github.com/com-posers-pit/smw_music/issues/147
+.. _#146 Emit error messages if AMK zip and SPC player are not set: https://github.com/com-posers-pit/smw_music/issues/146
+.. _#144 MML generation asserts when not used in project mode: https://github.com/com-posers-pit/smw_music/issues/144
+.. _#143 Windows poetry build failures: https://github.com/com-posers-pit/smw_music/issues/143
 .. _#140 Hide global legato behind advanced: https://github.com/com-posers-pit/smw_music/issues/140
 .. _#138 Some ability to start from measure #X: https://github.com/com-posers-pit/smw_music/issues/138
 .. _#137 Update mermaid.js deps: https://github.com/com-posers-pit/smw_music/issues/137
@@ -689,7 +757,6 @@ Affected Issues
 .. _#133 Make custom samples directory match the project name: https://github.com/com-posers-pit/smw_music/issues/133
 .. _#132 Echo channel mapping error: https://github.com/com-posers-pit/smw_music/issues/132
 .. _#131 SPC conversion error w/o MML generation: https://github.com/com-posers-pit/smw_music/issues/131
-
 .. _#129 Add porter and game name to UI: https://github.com/com-posers-pit/smw_music/issues/129
 .. _#128 Put custom samples in a specific subdir: https://github.com/com-posers-pit/smw_music/issues/128
 .. _#126 Select an instrument after loading: https://github.com/com-posers-pit/smw_music/issues/126
@@ -708,7 +775,9 @@ Affected Issues
 .. _#110 Echo values are broken in MML writes: https://github.com/com-posers-pit/smw_music/issues/110
 .. _#105 Add solo/mute options to UI: https://github.com/com-posers-pit/smw_music/issues/105
 .. _#101 Extraneous python deps: https://github.com/com-posers-pit/smw_music/issues/101
+.. _#100 Slur starting/ending on the same note: https://github.com/com-posers-pit/smw_music/issues/100
 .. _#97 Dynamics limits: https://github.com/com-posers-pit/smw_music/issues/97
+.. _#95 Triplet bug: https://github.com/com-posers-pit/smw_music/issues/95
 .. _#93 Incorrect KDn immediately following SNn commands: https://github.com/com-posers-pit/smw_music/issues/93
 .. _#92 Explicit default q values: https://github.com/com-posers-pit/smw_music/issues/92
 .. _#87 Generate a backup mml: https://github.com/com-posers-pit/smw_music/issues/87
@@ -774,6 +843,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.3
 .. _Release 0.3.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.2
 .. _Release 0.3.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.1
 .. _Release 0.3.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.0
@@ -785,7 +855,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.2: https://github.com/com-posers-pit/smw_music/compare/v0.3.2...HEAD
+.. _Differences from 0.3.3: https://github.com/com-posers-pit/smw_music/compare/v0.3.3...HEAD
+.. _Differences from 0.3.2: https://github.com/com-posers-pit/smw_music/compare/v0.3.2...v0.3.3
 .. _Differences from 0.3.1: https://github.com/com-posers-pit/smw_music/compare/v0.3.1...v0.3.2
 .. _Differences from 0.3.0: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...v0.3.1
 .. _Differences from 0.2.3: https://github.com/com-posers-pit/smw_music/compare/v0.2.3...v0.3.0

@@ -3,8 +3,8 @@
 ; beer v0.3.3
 
 #spc {
-    #author  "COMPOSER HERE"
-    #title   "Crescendos"
+    #author  "Composer"
+    #title   "Title"
     #game    "GAME NAME HERE"
     #comment "Ported by: PORTER NAME HERE"
 }
@@ -75,55 +75,6 @@ w180
 #0 GLOBAL_LEGATO /
 
 l4
-@Piano a b > c d
-CRESC$C0$_F < a b > c d
-< a b > c d
-DIM$90$_MP < a b > c d
-< a b > c d
-< a b > c d
-{ CRESC$40$_F < a8 b8 > c8 < b16 > e16 r16 } r8 c d
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Staff 2
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-#1 /
-
-l4
-@Piano f vP CRESC$90$_FF g g+ a+
-f g g+ a+
-f g g+ a+
-DIM$FF$_MP f g g+ a+
-f g g+ a+
-f g g+ a+
-f g g+ a+
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Staff 3
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-#2 /
-
-l4
-@Piano < a b > c d
-< a b > c d
-CRESC$90$_F < a2 > c d
-< a b > c d
-< a b > c d
-< a b > c d
-< a b > c d
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Staff 4
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-#3 /
-
-l4
-@Piano vMF CRESC$C0$_F a b > c d
-vMF < a b > c vP CRESC$90$_MP d
-< a b > c d
-vF DIM$90$_MF < a b > c vF d
-< a b > c d
-vFFF DIM$90$_FF < a b > c r
-vP d < b > c d
+@Piano > c c c c
+LEGATO_ON c d d=1 LEGATO_OFF^=95
+d d d d

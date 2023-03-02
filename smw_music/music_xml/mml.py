@@ -112,6 +112,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
     _in_loop: bool = field(default=False, init=False)
+    _in_triplet: bool = False
 
     ###########################################################################
 
@@ -250,6 +251,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @_emit.register
     def _(self, token: Triplet) -> None:
+        self._in_triplet = token.start
         self._append("{" if token.start else "}")
 
     ###########################################################################
@@ -343,7 +345,10 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             duration = 192 // token.duration
             duration = int(duration * (2 - 0.5**token.dots))
             self.legato = False
-            note_length = f"=1 LEGATO_OFF ^={duration - 1}"
+            if not self._in_triplet:
+                note_length = f"=1 LEGATO_OFF ^={duration - 1}"
+            else:
+                note_length = f"=1 LEGATO_OFF ^={duration*2//3 - 1}"
         else:
             if not self.grace and not token.grace:
                 if token.duration != self.default_note_len:
@@ -351,7 +356,8 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
                 note_length += token.dots * "."
             else:
                 if token.grace:
-                    note_length = f"={grace_length}"
+                    if not self._in_triplet:
+                        note_length = f"={grace_length}"
                 else:
                     duration = 192 // token.duration
                     duration = int(duration * (2 - 0.5**token.dots))

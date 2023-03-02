@@ -109,6 +109,33 @@ def _adjust_triplets(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
+def _combine_ties(tokens: list[Token]) -> list[Token]:
+    rv: list[Token] = []
+
+    if len(tokens) > 1:
+        skip = False
+        for n, token in enumerate(tokens[:-1]):
+            if skip:
+                skip = False
+                continue
+
+            if isinstance(token, Slur) and token.start:
+                next_token = tokens[n + 1]
+                if isinstance(next_token, Slur) and not next_token.start:
+                    skip = True
+
+            if not skip:
+                rv.append(token)
+
+        if not skip:
+            rv.append(tokens[-1])
+
+    return rv
+
+
+###############################################################################
+
+
 def _crescendoify(tokens: list[Token]) -> list[Token]:
     rv: list[Token] = []
 
@@ -527,6 +554,7 @@ def reduce(
             tokens = _superloopify(tokens)
         tokens = _repeat_analysis(tokens)
     tokens = _deduplicate(tokens)
+    tokens = _combine_ties(tokens)
     return tokens
 
 
