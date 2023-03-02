@@ -5,7 +5,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
-SRC="smw_music/data/resources.qrc"
+SRC="resources/resources.qrc"
 DST="smw_music/ui/resources.py"
 
 rcc ${SRC} -g python -o ${DST}
