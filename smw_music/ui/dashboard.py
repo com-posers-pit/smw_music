@@ -179,7 +179,7 @@ class Dashboard(QWidget):
     _project_name: str | None
     _keyhist: deque[int]
     _window_title: str
-    _default_tooltips: dict[QWidget, str]
+    _default_tooltips: dict[QWidget | QAction, str]
 
     ###########################################################################
     # Constructor definitions
