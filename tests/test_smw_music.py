@@ -82,7 +82,9 @@ from smw_music.scripts import convert
                 "--loop_analysis",
             ],
         ),
+        ("Slur_Tie.mxl", "Slur_Tie.txt", []),
         ("Slurs.mxl", "Slurs.txt", []),
+        ("Slurred_Triplets.mxl", "Slurred_Triplets.txt", []),
         ("SMB_Castle_Theme.mxl", "SMB_Castle_Theme.txt", []),
         ("SwapRepeatAnnotation.mxl", "SwapRepeatAnnotation.txt", []),
         ("Tempos.mxl", "Tempos.txt", []),
@@ -143,7 +145,9 @@ from smw_music.scripts import convert
         "Percussion (optimized)",
         "Pickup Measure",
         "Repeats",
+        "Slur into a Tie",
         "Slurs",
+        "Slurs in triplets",
         "SMB Castle Theme (compressed)",
         "Swap Repeat & Annotation",
         "Tempos",
@@ -276,4 +280,4 @@ def test_multiple_invalid(text, tmp_path):
 
 def test_version():
     """Verify correct version number."""
-    assert __version__ == "0.3.1"
+    assert __version__ == "0.3.3"

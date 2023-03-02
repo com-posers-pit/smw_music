@@ -121,7 +121,6 @@ parade_quotes = [
     ("People haven’t always been there for me, but music always has.", "Taylor Swift"),
     ("Music should be your escape.", "Missy Elliot"),
     ("Without music to decorate it, time is just a bunch of boring production deadlines or dates by which bills must be paid.", "Frank Zappa"),
-    ("My music isn’t just music—it’s medicine.", "Kanye West"),
     ("People ask me how I make music. I tell them I just step into it. It’s like stepping into a river and joining the flow. Every moment in the river has its song.", "Michael Jackson"),
     ("Music in the soul can be heard by the universe.", "Lao Tzu"),
     ("Without music, life would be a mistake.", "Friedrich Nietzsche, Twilight of the Idols"),

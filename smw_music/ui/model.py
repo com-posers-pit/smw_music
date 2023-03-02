@@ -81,9 +81,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(
         State, bool
     )  # arguments=['state', 'update_instruments']
-    advanced_mode_changed = pyqtSignal(bool)  # arguments = ['enabled']
+    preferences_changed = pyqtSignal(
+        bool, bool, bool, dict
+    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'sample_packs']
     instruments_changed = pyqtSignal(list)
-    sample_packs_changed = pyqtSignal(dict)
     recent_projects_updated = pyqtSignal(list)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
@@ -192,8 +193,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def start(self) -> None:
-        if self.prefs_fname.exists():
-            self._load_prefs()
+        self._load_prefs()
 
         self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
@@ -436,8 +436,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_generate_mml_clicked(self, report: bool = True) -> None:
-        assert self.state.project_name is not None  # nosec: B101
-
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -445,6 +443,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             msg = "Song not loaded"
             self.mml_generated.emit("\n".join(ashtley))
         else:
+            assert self.state.project_name is not None  # nosec: B101
+
             try:
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
@@ -897,17 +897,24 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _load_prefs(self) -> None:
-        with open(self.prefs_fname, "r", encoding="utf8") as fobj:
-            prefs = yaml.safe_load(fobj)
+        if self.prefs_fname.exists():
+            with open(self.prefs_fname, "r", encoding="utf8") as fobj:
+                prefs = yaml.safe_load(fobj)
 
-        self.preferences.amk_fname = Path(prefs["amk"]["path"])
-        self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
-        self.preferences.sample_pack_dname = Path(
-            prefs["sample_packs"]["path"]
+            self.preferences.amk_fname = Path(prefs["amk"]["path"])
+            self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
+            self.preferences.sample_pack_dname = Path(
+                prefs["sample_packs"]["path"]
+            )
+            self.preferences.advanced_mode = prefs.get("advanced", False)
+            self._load_sample_packs()
+
+        self.preferences_changed.emit(
+            self.preferences.advanced_mode,
+            bool(self.preferences.amk_fname.name),
+            bool(self.preferences.spcplay_fname.name),
+            self._sample_packs,
         )
-        self.preferences.advanced_mode = prefs.get("advanced", False)
-        self._load_sample_packs()
-        self.advanced_mode_changed.emit(self.preferences.advanced_mode)
 
     ###########################################################################
 
@@ -931,8 +938,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     "Error loading sample pack",
                     f"Could not open sample pack {name} at {path}",
                 )
-
-        self.sample_packs_changed.emit(self._sample_packs)
 
     ###########################################################################
 

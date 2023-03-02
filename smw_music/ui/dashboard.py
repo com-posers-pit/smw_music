@@ -15,14 +15,14 @@ import io
 import pkgutil
 from collections import deque
 from contextlib import ExitStack
-from functools import partial
+from functools import cached_property, partial
 from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import QBuffer, QEvent, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import QAction, QFont, QKeyEvent, QMovie
+from PyQt6.QtCore import QEvent, QObject, QSignalBlocker, Qt
+from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -53,6 +53,7 @@ from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
+from smw_music.ui import resources  # pylint: disable=unused-import
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -179,6 +180,7 @@ class Dashboard(QWidget):
     _project_name: str | None
     _keyhist: deque[int]
     _window_title: str
+    _default_tooltips: dict[QWidget | QAction, str]
 
     ###########################################################################
     # Constructor definitions
@@ -219,14 +221,8 @@ class Dashboard(QWidget):
             "Never gonna run around and desert you"
         )
         label = QLabel(self)
-        gif = cast(bytes, pkgutil.get_data("smw_music", "data/ashtley.gif"))
-        buffer = QBuffer(parent=self)
-        buffer.open(QBuffer.OpenModeFlag.ReadWrite)
-        buffer.writeData(gif)
-        buffer.seek(0)
-
         movie = QMovie(parent=self)
-        movie.setDevice(buffer)
+        movie.setFileName(":/gifs/ashtley.gif")
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
@@ -245,6 +241,19 @@ class Dashboard(QWidget):
         self._setup_instrument_table()
         self._attach_signals()
         self._view.generate_and_play.setToolTip(labeouf[0])
+
+        self._default_tooltips = {
+            widget: widget.toolTip() for widget in self._view_widgets
+        }
+
+        for widget in [
+            self._view,
+            self._history,
+            self._quicklook,
+            self._checkitout,
+            self._envelope_preview,
+        ]:
+            widget.setWindowIcon(QIcon(":/icons/maestro.svg"))
 
         self._view.show()
 
@@ -289,16 +298,6 @@ class Dashboard(QWidget):
 
     ###########################################################################
     # API slot definitions
-    ###########################################################################
-
-    def on_advanced_mode_changed(self, enabled: bool) -> None:
-        v = self._view  # pylint: disable=invalid-name
-
-        v.generate_mml.setVisible(enabled)
-        v.generate_spc.setVisible(enabled)
-        v.play_spc.setVisible(enabled)
-        v.other_settings_box.setVisible(enabled)
-
     ###########################################################################
 
     def on_brr_clicked(self) -> None:
@@ -355,6 +354,56 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_preferences_changed(
+        self,
+        advanced_enabled: bool,
+        amk_valid: bool,
+        spcplayer_valid: bool,
+        sample_packs: dict[str, SamplePack],
+    ) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        # advance_enabled handling
+        v.generate_mml.setVisible(advanced_enabled)
+        v.generate_spc.setVisible(advanced_enabled)
+        v.play_spc.setVisible(advanced_enabled)
+        v.other_settings_box.setVisible(advanced_enabled)
+
+        # amk_valid handling
+        for action in [
+            v.new_project,
+            v.open_project,
+            v.save_project,
+            v.menuRecent_Projects,
+        ]:
+            enable = amk_valid and spcplayer_valid
+
+            tooltip = (
+                "Define AMK zip file and spcplayer executable in "
+                "preferences to enable this"
+            )
+
+            if enable:
+                tooltip = self._default_tooltips[action]
+
+            action.setToolTip(tooltip)
+            action.setEnabled(enable)
+
+        # sample_packs handling
+        self._sample_pack_items = {}
+        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+
+        tree.clear()
+
+        for name, pack in sample_packs.items():
+            top = QTreeWidgetItem(tree, [name])
+            _mark_unselectable(top)
+
+            self._add_sample_pack(top, name, pack)
+            tree.addTopLevelItem(top)
+
+    ###########################################################################
+
     def on_preview_envelope_clicked(self) -> None:
         self._envelope_preview.show()
 
@@ -387,23 +436,6 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_sample_packs_changed(
-        self, sample_packs: dict[str, SamplePack]
-    ) -> None:
-        self._sample_pack_items = {}
-        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
-
-        tree.clear()
-
-        for name, pack in sample_packs.items():
-            top = QTreeWidgetItem(tree, [name])
-            _mark_unselectable(top)
-
-            self._add_sample_pack(top, name, pack)
-            tree.addTopLevelItem(top)
-
-    ###########################################################################
-
     def on_state_changed(self, state: State, update_instruments: bool) -> None:
         if update_instruments:
             self._update_instruments([inst.name for inst in state.instruments])
@@ -424,9 +456,8 @@ class Dashboard(QWidget):
         v.setWindowTitle(title)
 
         with ExitStack() as stack:
-            for child in vars(v).values():
-                if isinstance(child, QWidget):
-                    stack.enter_context(QSignalBlocker(child))
+            for child in self._view_widgets:
+                stack.enter_context(QSignalBlocker(child))
 
             # Control Panel
             v.musicxml_fname.setText(state.musicxml_fname)
@@ -791,13 +822,12 @@ class Dashboard(QWidget):
         m.state_changed.connect(self.on_state_changed)
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
-        m.sample_packs_changed.connect(self.on_sample_packs_changed)
+        m.preferences_changed.connect(self.on_preferences_changed)
         m.recent_projects_updated.connect(self.on_recent_projects_updated)
         v.actionClearRecentProjects.triggered.connect(
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
-        m.advanced_mode_changed.connect(self.on_advanced_mode_changed)
 
     ###########################################################################
 
@@ -1133,4 +1163,13 @@ class Dashboard(QWidget):
             v.echo_delay_slider,
             v.echo_delay_setting,
             v.echo_delay_setting_label,
+        ]
+
+    ###########################################################################
+
+    @cached_property
+    def _view_widgets(self) -> list[QWidget | QAction]:
+        widgets = vars(self._view).values()
+        return [
+            child for child in widgets if isinstance(child, (QWidget, QAction))
         ]
