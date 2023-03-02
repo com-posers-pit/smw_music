@@ -291,16 +291,6 @@ class Dashboard(QWidget):
     # API slot definitions
     ###########################################################################
 
-    def on_advanced_mode_changed(self, enabled: bool) -> None:
-        v = self._view  # pylint: disable=invalid-name
-
-        v.generate_mml.setVisible(enabled)
-        v.generate_spc.setVisible(enabled)
-        v.play_spc.setVisible(enabled)
-        v.other_settings_box.setVisible(enabled)
-
-    ###########################################################################
-
     def on_brr_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view, caption="BRR Sample File", filter="BRR Files (*.brr)"
@@ -355,6 +345,47 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_preferences_changed(
+        self,
+        advanced_enabled: bool,
+        amk_valid: bool,
+        spcplayer_valid: bool,
+        sample_packs: dict[str, SamplePack],
+    ) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        # advance_enabled handling
+        v.generate_mml.setVisible(advanced_enabled)
+        v.generate_spc.setVisible(advanced_enabled)
+        v.play_spc.setVisible(advanced_enabled)
+        v.other_settings_box.setVisible(advanced_enabled)
+
+        # amk_valid handling
+        for action in [
+            v.new_project,
+            v.open_project,
+            v.save_project,
+            v.menuRecent_Projects,
+        ]:
+            action.setEnabled(amk_valid and spcplayer_valid)
+
+        # sample_packs handling
+        self._sample_pack_items = {}
+        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+
+        tree.clear()
+
+        for name, pack in sample_packs.items():
+            top = QTreeWidgetItem(tree, [name])
+            _mark_unselectable(top)
+
+            self._add_sample_pack(top, name, pack)
+            tree.addTopLevelItem(top)
+
+    ###########################################################################
+
+    ###########################################################################
+
     def on_preview_envelope_clicked(self) -> None:
         self._envelope_preview.show()
 
@@ -384,23 +415,6 @@ class Dashboard(QWidget):
             QMessageBox.critical(self._view, title, results)
         else:
             QMessageBox.information(self._view, title, results)
-
-    ###########################################################################
-
-    def on_sample_packs_changed(
-        self, sample_packs: dict[str, SamplePack]
-    ) -> None:
-        self._sample_pack_items = {}
-        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
-
-        tree.clear()
-
-        for name, pack in sample_packs.items():
-            top = QTreeWidgetItem(tree, [name])
-            _mark_unselectable(top)
-
-            self._add_sample_pack(top, name, pack)
-            tree.addTopLevelItem(top)
 
     ###########################################################################
 
@@ -791,13 +805,12 @@ class Dashboard(QWidget):
         m.state_changed.connect(self.on_state_changed)
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
-        m.sample_packs_changed.connect(self.on_sample_packs_changed)
+        m.preferences_changed.connect(self.on_preferences_changed)
         m.recent_projects_updated.connect(self.on_recent_projects_updated)
         v.actionClearRecentProjects.triggered.connect(
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
-        m.advanced_mode_changed.connect(self.on_advanced_mode_changed)
 
     ###########################################################################
 
