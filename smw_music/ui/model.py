@@ -503,6 +503,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             )
 
             shutil.rmtree(samples_path, ignore_errors=True)
+            os.makedirs(samples_path, exist_ok=True)
 
             for inst in self.state.instruments:
                 if inst.sample_source == SampleSource.BRR:
