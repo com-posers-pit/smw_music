@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>300</height>
+    <height>321</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -78,6 +78,13 @@
        <widget class="QLineEdit" name="sample_pack_dirname"/>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="dark_mode">
+     <property name="text">
+      <string>Dark Mode</string>
+     </property>
     </widget>
    </item>
    <item>

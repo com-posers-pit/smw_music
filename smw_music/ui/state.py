@@ -28,6 +28,7 @@ class PreferencesState:
     spcplay_fname: Path = Path("")
     sample_pack_dname: Path = Path("")
     advanced_mode: bool = False
+    dark_mode: bool = False
 
 
 ###############################################################################

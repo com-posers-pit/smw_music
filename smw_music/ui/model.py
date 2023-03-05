@@ -82,8 +82,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         State, bool
     )  # arguments=['state', 'update_instruments']
     preferences_changed = pyqtSignal(
-        bool, bool, bool, dict
-    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'sample_packs']
+        bool, bool, bool, bool, dict
+    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode', 'sample_packs']
     instruments_changed = pyqtSignal(list)
     recent_projects_updated = pyqtSignal(list)
 
@@ -210,6 +210,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "spcplay": {"path": str(preferences.spcplay_fname)},
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
             "advanced": preferences.advanced_mode,
+            "dark_mode": preferences.dark_mode,
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -907,12 +908,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 prefs["sample_packs"]["path"]
             )
             self.preferences.advanced_mode = prefs.get("advanced", False)
+            self.preferences.dark_mode = prefs.get("dark_mode", False)
+
             self._load_sample_packs()
 
         self.preferences_changed.emit(
             self.preferences.advanced_mode,
             bool(self.preferences.amk_fname.name),
             bool(self.preferences.spcplay_fname.name),
+            self.preferences.dark_mode,
             self._sample_packs,
         )
 

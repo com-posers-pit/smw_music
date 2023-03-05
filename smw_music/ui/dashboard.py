@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
 # Library imports
+import qdarkstyle  # type: ignore
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QObject, QSignalBlocker, Qt
 from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
@@ -359,9 +360,15 @@ class Dashboard(QWidget):
         advanced_enabled: bool,
         amk_valid: bool,
         spcplayer_valid: bool,
+        dark_mode: bool,
         sample_packs: dict[str, SamplePack],
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
+
+        sheet = qdarkstyle.load_stylesheet(qt_api="pyqt6") if dark_mode else ""
+        cast(QApplication, QApplication.instance()).setStyleSheet(sheet)
+
+        v.instrument_list.resizeColumnsToContents()
 
         # advance_enabled handling
         v.generate_mml.setVisible(advanced_enabled)
