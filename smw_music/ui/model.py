@@ -764,6 +764,47 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_render_zip_clicked(self) -> None:
+        self._update_status("Zip file generated")
+
+        path = self._project_path
+        project = self.state.project_name
+
+        assert path is not None  # nosec: B101
+        assert project is not None  # nosec: B101
+
+        # Turn off the preview features
+        self.state.start_measure = 1
+        self.state.mute_percussion = False
+        self.state.solo_percussion = False
+        for inst in self.state.instruments:
+            inst.mute = False
+            inst.solo = False
+        self.reinforce_state()
+
+        self.on_generate_mml_clicked(False)
+        self.on_generate_spc_clicked(False)
+
+        proj = Path(project)
+        mml_fname = path / "music" / proj.with_suffix(".txt")
+        spc_fname = path / "SPCs" / proj.with_suffix(".spc")
+        sample_path = path / "samples" / project
+
+        zname = str(path / (project + ".zip"))
+        with zipfile.ZipFile(zname, "w") as zobj:
+            zobj.write(mml_fname, mml_fname.name)
+            zobj.write(spc_fname, spc_fname.name)
+            for sample in glob(
+                "**/*.brr", root_dir=sample_path, recursive=True
+            ):
+                zobj.write(sample_path / sample, arcname=str(proj / sample))
+
+        self.response_generated.emit(
+            False, "Zip Render", f"Zip file {zname} rendered"
+        )
+
+    ###########################################################################
+
     def on_save(self) -> None:
         self._save_backup()
 

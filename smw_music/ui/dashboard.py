@@ -482,6 +482,7 @@ class Dashboard(QWidget):
             project_mode = not standalone_mode
 
             v.generate_and_play.setEnabled(project_mode)
+            v.render_zip.setEnabled(project_mode)
             v.generate_spc.setEnabled(project_mode)
             v.play_spc.setEnabled(project_mode)
             v.save_project.setEnabled(project_mode)
@@ -715,6 +716,7 @@ class Dashboard(QWidget):
             (v.generate_and_play, m.on_generate_and_play_clicked),
             (v.generate_and_play, self._update_generate_and_play_tooltip),
             (v.reload_musicxml, m.on_reload_musicxml_clicked),
+            (v.render_zip, m.on_render_zip_clicked),
             # Instrument settings
             (v.instrument_list, m.on_instrument_changed),
             (v.interpolate, m.on_interpolate_changed),

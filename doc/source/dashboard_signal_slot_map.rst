@@ -76,6 +76,7 @@ Control Panel
       view.generate_spc.released --> model.on_generate_spc_clicked
       view.play_spc.released --> model.on_play_spc_clicked
       view.generate_and_play.released --> model.on_generate_and_play_clicked
+      view.render_zip.released --> model.on_render_zip_clicked
 
 Instrument Settings
 -------------------

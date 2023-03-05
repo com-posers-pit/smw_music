@@ -227,6 +227,7 @@ class DashboardView(QMainWindow):
     preview_envelope: QPushButton
     redo: QAction
     reload_musicxml: QPushButton
+    render_zip: QPushButton
     sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox
     sample_settings_tabs: QTabWidget
