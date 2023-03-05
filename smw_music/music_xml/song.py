@@ -635,20 +635,14 @@ class Song:
 
         for inst in instruments:
             if inst.sample_source == SampleSource.SAMPLEPACK:
-                assert sample_path is not None  # nosec: B101
-
-                # TODO: This is pretty blah, song shouldn't rely on pathlib,
-                # see if this can be refactored
                 fname = str(
-                    sample_path / inst.pack_sample[0] / inst.pack_sample[1]
+                    PurePosixPath(inst.pack_sample[0]) / inst.pack_sample[1]
                 )
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
             if inst.sample_source == SampleSource.BRR:
-                assert sample_path is not None  # nosec: B101
-
-                fname = str(sample_path / inst.brr_fname.name)
+                fname = inst.brr_fname.name
                 samples.append((fname, inst.brr_str, sample_id))
                 inst.instrument_idx = sample_id
                 sample_id += 1
@@ -674,7 +668,7 @@ class Song:
         }
 
         if solo or mute:
-            samples.append(("EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
+            samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
 
             for inst in instruments:
                 if inst.mute or (solo and not inst.solo):
@@ -703,6 +697,7 @@ class Song:
             custom_samples=samples,
             dynamics=list(Dynamics),
             percussion_voices=percussion_voices,
+            sample_path=str(sample_path),
         )
 
         rv = rv.replace(" ^", "^")

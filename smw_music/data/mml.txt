@@ -17,6 +17,8 @@
 }
 %if custom_samples:
 
+#path "${sample_path}"
+
 #samples {
     #optimized ;Don't touch/delete this line, just replace the sample brr files below
 %for sample in set(x[0] for x in custom_samples):
