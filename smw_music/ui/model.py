@@ -182,7 +182,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def close_project(self) -> None:
         self._project_path = None
-        self._update_state(project_name=None)
+        self._update_state(update_instruments=True)
         self._update_status("Project closed")
 
     ###########################################################################
@@ -1095,7 +1095,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | EchoConfig
         | int,
     ) -> None:
-        new_state = replace(self.state, **kwargs)
+        if kwargs:
+            new_state = replace(self.state, **kwargs)
+        else:
+            new_state = State()
+
         if new_state != self.state:
             self._rollback_undo()
 
