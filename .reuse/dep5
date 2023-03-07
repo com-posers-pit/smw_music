@@ -7,10 +7,10 @@ Files: *.rst doc poetry.lock smw_music/data/*.ui resources/resources.qrc smw_mus
 Copyright: The SMW Music Python Project Authors <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 License: CC0-1.0
 
-Files: resources/ashtley.gif
+Files: smw_music/data/ashtley.gif
 Copyright: com_poser
 License: LicenseRef-Proprietary
 
-Files: resources/maestro.svg
+Files: smw_music/data/maestro.svg
 Copyright: Blackngold29
 License: CC0-1.0

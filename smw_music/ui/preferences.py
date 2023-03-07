@@ -10,8 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-import io
-import pkgutil
+from importlib import resources
 from pathlib import Path
 
 # Library imports
@@ -36,10 +35,10 @@ class Preferences:
     ###########################################################################
 
     def __init__(self) -> None:
-        ui_contents = pkgutil.get_data("smw_music", "/data/preferences.ui")
-        if ui_contents is None:
-            raise Exception("Can't locate preferences")
-        dialog: PreferencesView = uic.loadUi(io.BytesIO(ui_contents))
+
+        data_lib = resources.files("smw_music.data")
+        ui_contents = data_lib / "preferences.ui"
+        dialog: PreferencesView = uic.loadUi(ui_contents)
         self._dialog = dialog
 
         connections = [

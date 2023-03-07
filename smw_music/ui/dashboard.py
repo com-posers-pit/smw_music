@@ -11,11 +11,10 @@
 
 # Standard library imports
 import enum
-import io
-import pkgutil
 from collections import deque
 from contextlib import ExitStack
 from functools import cached_property, partial
+from importlib import resources
 from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
@@ -54,7 +53,6 @@ from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
-from smw_music.ui import resources  # pylint: disable=unused-import
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -189,14 +187,14 @@ class Dashboard(QWidget):
 
     def __init__(self) -> None:
         super().__init__()
+        data_lib = resources.files("smw_music.data")
+
         self._window_title = f"beer v{__version__}"
 
         self._keyhist = deque(maxlen=len(_KONAMI))
-        ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
-        if ui_contents is None:
-            raise Exception("Can't locate dashboard")
+        ui_contents = data_lib / "dashboard.ui"
 
-        self._view: DashboardView = uic.loadUi(io.BytesIO(ui_contents))
+        self._view: DashboardView = uic.loadUi(ui_contents)
         self._view.installEventFilter(self)
         self._view.setWindowTitle(self._window_title)
 
@@ -223,7 +221,7 @@ class Dashboard(QWidget):
         )
         label = QLabel(self)
         movie = QMovie(parent=self)
-        movie.setFileName(":/gifs/ashtley.gif")
+        movie.setFileName(str(data_lib / "ashtley.gif"))
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
@@ -254,7 +252,7 @@ class Dashboard(QWidget):
             self._checkitout,
             self._envelope_preview,
         ]:
-            widget.setWindowIcon(QIcon(":/icons/maestro.svg"))
+            widget.setWindowIcon(QIcon(str(data_lib / "maestro.svg")))
 
         self._view.show()
 
