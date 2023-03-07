@@ -173,4 +173,10 @@ class SampleParams:
         cls, fobj: TextIO
     ) -> list[tuple[str, "SampleParams"]]:
         lines = fobj.readlines()
-        return [cls.from_pattern(line) for line in lines if line.strip()]
+        patterns = []
+        for line in lines:
+            line = line.split(";")[0].strip()
+            if line:
+                patterns.append(cls.from_pattern(line))
+
+        return patterns
