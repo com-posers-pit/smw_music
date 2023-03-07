@@ -1044,6 +1044,7 @@ class Dashboard(QWidget):
 
         view.undo.triggered.connect(model.on_undo_clicked)
         view.redo.triggered.connect(model.on_redo_clicked)
+        view.view_history.triggered.connect(self.on_open_history_clicked)
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)

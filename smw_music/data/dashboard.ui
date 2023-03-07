@@ -2090,6 +2090,7 @@ This is a hack and will be going away soon</string>
     </property>
     <addaction name="undo"/>
     <addaction name="redo"/>
+    <addaction name="view_history"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -2170,6 +2171,11 @@ This is a hack and will be going away soon</string>
   <action name="actionClearRecentProjects">
    <property name="text">
     <string>Clear</string>
+   </property>
+  </action>
+  <action name="view_history">
+   <property name="text">
+    <string>View &amp;History</string>
    </property>
   </action>
  </widget>

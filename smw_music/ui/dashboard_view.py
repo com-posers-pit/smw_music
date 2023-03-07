@@ -275,3 +275,4 @@ class DashboardView(QMainWindow):
     tune_slider: QSlider
     tuning_tab: QWidget
     undo: QAction
+    view_history: QAction
