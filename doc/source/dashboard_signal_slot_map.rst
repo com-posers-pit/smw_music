@@ -26,6 +26,7 @@ Dashboard
       model.mml_generated --> dashboard.on_mml_generated
       model.response_generated --> dashboard.on_response_generated
       model.preferences_changed --> dashboard.on_preferences_changed
+      model.sample_packs_changed --> dashboard.on_sample_packs_changed
       model.recent_projects_updated --> dashboard.on_recent_projects_updated
       model.status_updated --> dashboard.on_status_updated
 

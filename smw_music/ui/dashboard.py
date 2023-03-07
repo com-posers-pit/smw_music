@@ -359,7 +359,6 @@ class Dashboard(QWidget):
         amk_valid: bool,
         spcplayer_valid: bool,
         dark_mode: bool,
-        sample_packs: dict[str, SamplePack],
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
 
@@ -394,19 +393,6 @@ class Dashboard(QWidget):
             action.setToolTip(tooltip)
             action.setEnabled(enable)
 
-        # sample_packs handling
-        self._sample_pack_items = {}
-        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
-
-        tree.clear()
-
-        for name, pack in sample_packs.items():
-            top = QTreeWidgetItem(tree, [name])
-            _mark_unselectable(top)
-
-            self._add_sample_pack(top, name, pack)
-            tree.addTopLevelItem(top)
-
     ###########################################################################
 
     def on_preview_envelope_clicked(self) -> None:
@@ -438,6 +424,24 @@ class Dashboard(QWidget):
             QMessageBox.critical(self._view, title, results)
         else:
             QMessageBox.information(self._view, title, results)
+
+    ###########################################################################
+
+    def on_sample_packs_changed(
+        self, sample_packs: dict[str, SamplePack]
+    ) -> None:
+        # sample_packs handling
+        self._sample_pack_items = {}
+        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+
+        tree.clear()
+
+        for name, pack in sample_packs.items():
+            top = QTreeWidgetItem(tree, [name])
+            _mark_unselectable(top)
+
+            self._add_sample_pack(top, name, pack)
+            tree.addTopLevelItem(top)
 
     ###########################################################################
 
@@ -830,6 +834,7 @@ class Dashboard(QWidget):
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
         m.preferences_changed.connect(self.on_preferences_changed)
+        m.sample_packs_changed.connect(self.on_sample_packs_changed)
         m.recent_projects_updated.connect(self.on_recent_projects_updated)
         v.actionClearRecentProjects.triggered.connect(
             m.on_recent_projects_cleared

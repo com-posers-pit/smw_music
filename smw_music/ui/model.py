@@ -29,6 +29,7 @@ from random import choice
 import yaml
 from mako.template import Template  # type: ignore
 from PyQt6.QtCore import QObject, pyqtSignal
+from watchdog import events, observers
 
 # Package imports
 from smw_music import SmwMusicException, __version__
@@ -73,6 +74,27 @@ def _parse_setting(val: int | str, maxval: int = 255) -> int:
 
 
 ###############################################################################
+# Private Class Definitions
+###############################################################################
+
+
+class _SamplePackWatcher(events.FileSystemEventHandler):
+    def __init__(self, model: "Model") -> None:
+        super().__init__()
+        self._model = model
+
+    ###########################################################################
+
+    def on_created(self, event) -> None:
+        self._model.update_sample_packs()
+
+    ###########################################################################
+
+    def on_deleted(self, event) -> None:
+        self._model.update_sample_packs()
+
+
+###############################################################################
 # API Class Definitions
 ###############################################################################
 
@@ -82,10 +104,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         State, bool
     )  # arguments=['state', 'update_instruments']
     preferences_changed = pyqtSignal(
-        bool, bool, bool, bool, dict
-    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode', 'sample_packs']
+        bool, bool, bool, bool
+    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode']
     instruments_changed = pyqtSignal(list)
     recent_projects_updated = pyqtSignal(list)
+    sample_packs_changed = pyqtSignal(dict)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     status_updated = pyqtSignal(str)  # arguments=['message']
@@ -99,6 +122,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _undo_level: int
     _sample_packs: dict[str, SamplePack]
     _project_path: Path | None
+    _sample_watcher: observers.Observer
 
     ###########################################################################
     # Constructor definitions
@@ -114,6 +138,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._project_path = None
 
         os.makedirs(self.config_dir, exist_ok=True)
+        self._start_watcher()
 
     ###########################################################################
     # API method definitions
@@ -194,6 +219,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def start(self) -> None:
         self._load_prefs()
+        self.update_sample_packs()
 
         self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
@@ -217,6 +243,30 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             yaml.safe_dump(prefs_dict, fobj)
 
         self._load_prefs()
+
+    ###########################################################################
+
+    def update_sample_packs(self) -> None:
+        self._sample_packs = {}
+
+        packs = {}
+        root_dir = self.preferences.sample_pack_dname
+        for fname in glob("*.zip", root_dir=root_dir):
+            pack = Path(fname)
+            packs[pack.stem] = root_dir / pack
+
+        for name, path in packs.items():
+            try:
+                self._sample_packs[name] = SamplePack(path)
+
+            except FileNotFoundError:
+                self.response_generated.emit(
+                    True,
+                    "Error loading sample pack",
+                    f"Could not open sample pack {name} at {path}",
+                )
+
+        self.sample_packs_changed.emit(self._sample_packs)
 
     ###########################################################################
     # API slot definitions
@@ -952,38 +1002,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.preferences.advanced_mode = prefs.get("advanced", False)
             self.preferences.dark_mode = prefs.get("dark_mode", False)
 
-            self._load_sample_packs()
+        self._start_watcher()
 
         self.preferences_changed.emit(
             self.preferences.advanced_mode,
             bool(self.preferences.amk_fname.name),
             bool(self.preferences.spcplay_fname.name),
             self.preferences.dark_mode,
-            self._sample_packs,
         )
-
-    ###########################################################################
-
-    def _load_sample_packs(self) -> None:
-
-        self._sample_packs = {}
-
-        packs = {}
-        root_dir = self.preferences.sample_pack_dname
-        for fname in glob("*.zip", root_dir=root_dir):
-            pack = Path(fname)
-            packs[pack.stem] = root_dir / pack
-
-        for name, path in packs.items():
-            try:
-                self._sample_packs[name] = SamplePack(path)
-
-            except FileNotFoundError:
-                self.response_generated.emit(
-                    True,
-                    "Error loading sample pack",
-                    f"Could not open sample pack {name} at {path}",
-                )
 
     ###########################################################################
 
@@ -1028,6 +1054,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ) -> None:
         self.state.unsaved = state_change
         self.state_changed.emit(self.state, update_instruments)
+
+    ###########################################################################
+
+    def _start_watcher(self) -> None:
+        with suppress(AttributeError):
+            if self._sample_watcher.is_alive():
+                self._sample_watcher.stop()
+                self._sample_watcher.join()
+
+        self._sample_watcher = observers.Observer()
+        self._sample_watcher.daemon = True
+
+        self._sample_watcher.schedule(
+            _SamplePackWatcher(self), self.preferences.sample_pack_dname, False
+        )
+        self._sample_watcher.start()
 
     ###########################################################################
 
