@@ -232,7 +232,7 @@ class Dashboard(QWidget):
         self._history.setCentralWidget(QListWidget())
 
         self._envelope_preview = EnvelopePreview(self)
-        self._history.setWindowTitle("Envelope")
+        self._history.setWindowTitle("History")
 
         self._setup_menus()
         self._fix_edit_widths()
