@@ -627,6 +627,12 @@ This is a hack and will be going away soon</string>
                             <property name="orientation">
                              <enum>Qt::Vertical</enum>
                             </property>
+                            <property name="invertedAppearance">
+                             <bool>true</bool>
+                            </property>
+                            <property name="invertedControls">
+                             <bool>true</bool>
+                            </property>
                            </widget>
                           </item>
                           <item row="3" column="0">
@@ -639,6 +645,12 @@ This is a hack and will be going away soon</string>
                             </property>
                             <property name="orientation">
                              <enum>Qt::Vertical</enum>
+                            </property>
+                            <property name="invertedAppearance">
+                             <bool>true</bool>
+                            </property>
+                            <property name="invertedControls">
+                             <bool>true</bool>
                             </property>
                            </widget>
                           </item>
@@ -665,6 +677,12 @@ This is a hack and will be going away soon</string>
                             </property>
                             <property name="orientation">
                              <enum>Qt::Vertical</enum>
+                            </property>
+                            <property name="invertedAppearance">
+                             <bool>true</bool>
+                            </property>
+                            <property name="invertedControls">
+                             <bool>true</bool>
                             </property>
                            </widget>
                           </item>

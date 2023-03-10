@@ -572,6 +572,11 @@ class Dashboard(QWidget):
             v.gain_mode_incbent.setChecked(inst.gain_mode == GainMode.INCBENT)
             v.gain_mode_declin.setChecked(inst.gain_mode == GainMode.DECLIN)
             v.gain_mode_decexp.setChecked(inst.gain_mode == GainMode.DECEXP)
+            invert = (not inst.adsr_mode) and (
+                inst.gain_mode != GainMode.DIRECT
+            )
+            v.gain_slider.setInvertedAppearance(invert)
+            v.gain_slider.setInvertedControls(invert)
             v.gain_slider.setValue(inst.gain_setting)
             v.gain_setting.setText(hexb(inst.gain_setting))
             v.attack_slider.setValue(inst.attack_setting)
