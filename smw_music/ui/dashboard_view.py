@@ -24,7 +24,6 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QSplitter,
     QStatusBar,
-    QTableWidget,
     QTabWidget,
     QTreeWidget,
     QWidget,
@@ -164,7 +163,7 @@ class DashboardView(QMainWindow):
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
-    instrument_list: QTableWidget
+    instrument_list: QTreeWidget
     instrument_list_box: QGroupBox
     instrument_sample_group: QGroupBox
     instrument_sample_tab: QWidget

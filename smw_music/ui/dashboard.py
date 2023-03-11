@@ -40,8 +40,6 @@ from PyQt6.QtWidgets import (
     QRadioButton,
     QSlider,
     QSpinBox,
-    QTableWidget,
-    QTableWidgetItem,
     QTextEdit,
     QTreeWidgetItem,
     QWidget,
@@ -81,7 +79,7 @@ def _le_proxy(slot: Callable[[str], None], widget: QLineEdit) -> None:
 ###############################################################################
 
 
-def _mark_unselectable(item: QTableWidgetItem | QTreeWidgetItem) -> None:
+def _mark_unselectable(item: QTreeWidgetItem) -> None:
     item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
 
 
@@ -153,9 +151,10 @@ class _DynamicsWidgets(NamedTuple):
 
 
 class _TblCol(enum.IntEnum):
-    SOLO = 0
-    MUTE = 1
-    NAME = 2
+    HIER = 0
+    SOLO = 1
+    MUTE = 2
+    NAME = 3
 
 
 ###############################################################################
@@ -368,8 +367,6 @@ class Dashboard(QWidget):
         sheet = qdarkstyle.load_stylesheet(qt_api="pyqt6") if dark_mode else ""
         cast(QApplication, QApplication.instance()).setStyleSheet(sheet)
 
-        v.instrument_list.resizeColumnsToContents()
-
         # advance_enabled handling
         v.generate_mml.setVisible(advanced_enabled)
         v.generate_spc.setVisible(advanced_enabled)
@@ -499,7 +496,8 @@ class Dashboard(QWidget):
             inst_list = self._view.instrument_list
             inst_idx = state.instrument_idx
             if inst_idx is not None:
-                inst_list.setCurrentCell(inst_idx, _TblCol.NAME)
+                item = inst_list.topLevelItem(inst_idx)
+                inst_list.setCurrentItem(item, _TblCol.NAME)
 
             v.mute_percussion.setChecked(state.mute_percussion)
             v.solo_percussion.setChecked(state.solo_percussion)
@@ -507,8 +505,10 @@ class Dashboard(QWidget):
             for row, inst_cfg in enumerate(state.instruments):
                 solo = _to_checked(inst_cfg.solo)
                 mute = _to_checked(inst_cfg.mute)
-                inst_list.item(row, _TblCol.SOLO.value).setCheckState(solo)
-                inst_list.item(row, _TblCol.MUTE.value).setCheckState(mute)
+
+                item = inst_list.topLevelItem(row)
+                item.setCheckState(_TblCol.SOLO, solo)
+                item.setCheckState(_TblCol.MUTE, mute)
 
             # Instrument dynamics settings
             for dkey, dval in inst.dynamics.items():
@@ -728,7 +728,6 @@ class Dashboard(QWidget):
             (v.reload_musicxml, m.on_reload_musicxml_clicked),
             (v.render_zip, m.on_render_zip_clicked),
             # Instrument settings
-            (v.instrument_list, m.on_instrument_changed),
             (v.interpolate, m.on_interpolate_changed),
             (v.mute_percussion, m.on_mute_percussion_changed),
             (v.solo_percussion, m.on_solo_percussion_changed),
@@ -824,9 +823,6 @@ class Dashboard(QWidget):
                 widget.toggled.connect(slot)
             elif isinstance(widget, (QAbstractSlider, QSpinBox)):
                 widget.valueChanged.connect(slot)
-            elif isinstance(widget, QTableWidget):
-                pass
-                # widget.currentRowChanged.connect(slot)
             else:
                 # This is basically a compile-time exception
                 raise Exception(f"Unhandled widget connection {widget}")
@@ -976,19 +972,17 @@ class Dashboard(QWidget):
 
     def _on_inst_change(self) -> None:
         widget = self._view.instrument_list
-        self._model.on_instrument_changed(widget.currentRow())
+        self._model.on_instrument_changed(widget.currentIndex().row())
 
     ###########################################################################
 
-    def _on_solomute_change(self, item: QTableWidgetItem) -> None:
-        role: tuple[_TblCol, int] | None = item.data(Qt.ItemDataRole.UserRole)
-        if role:
-            row = role[1]
-            checked = item.checkState() == Qt.CheckState.Checked
-            if role[0] == _TblCol.SOLO:
-                self._model.on_solo_changed(row, checked)
-            if role[0] == _TblCol.MUTE:
-                self._model.on_mute_changed(row, checked)
+    def _on_solomute_change(self, item: QTreeWidgetItem, col: int) -> None:
+        row = self._view.instrument_list.indexFromItem(item).row()
+        checked = item.checkState(col) == Qt.CheckState.Checked
+        if col == _TblCol.SOLO:
+            self._model.on_solo_changed(row, checked)
+        if col == _TblCol.MUTE:
+            self._model.on_mute_changed(row, checked)
 
     ###########################################################################
 
@@ -1030,17 +1024,12 @@ class Dashboard(QWidget):
 
     def _setup_instrument_table(self) -> None:
         widget = self._view.instrument_list
-        solo_item = QTableWidgetItem("S")
-        solo_item.setToolTip("Solo Instrument")
-        mute_item = QTableWidgetItem("M")
-        mute_item.setToolTip("Mute Instrument")
+        header = QTreeWidgetItem(["", "S", "M", "Instrument"])
 
-        widget.setHorizontalHeaderItem(0, solo_item)
-        widget.setHorizontalHeaderItem(1, mute_item)
-        widget.setHorizontalHeaderItem(2, QTableWidgetItem("Instrument"))
-        widget.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.ResizeToContents
-        )
+        header.setToolTip(_TblCol.SOLO, "Solo Instrument")
+        header.setToolTip(_TblCol.MUTE, "Mute Instrument")
+
+        widget.setHeaderItem(header)
 
     ###########################################################################
 
@@ -1126,30 +1115,17 @@ class Dashboard(QWidget):
         widget = self._view.instrument_list
 
         with QSignalBlocker(widget):
-            widget.clearContents()
-            widget.setRowCount(len(names))
+            widget.clear()
 
-            for row, name in enumerate(names):
-                solo_box = QTableWidgetItem()
-                solo_box.setCheckState(Qt.CheckState.Unchecked)
-                solo_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.SOLO, row))
-                solo_box.setToolTip(f"Solo {name}")
-                _mark_unselectable(solo_box)
+            for name in names:
+                item = QTreeWidgetItem(["", "", "", name])
+                item.setToolTip(_TblCol.SOLO, f"Solo {name}")
+                item.setToolTip(_TblCol.MUTE, f"Mute {name}")
 
-                mute_box = QTableWidgetItem()
-                mute_box.setCheckState(Qt.CheckState.Unchecked)
-                mute_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.MUTE, row))
-                mute_box.setToolTip(f"Mute {name}")
-                _mark_unselectable(mute_box)
+                item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
+                item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
 
-                name_box = QTableWidgetItem(name)
-                name_box.setFlags(
-                    name_box.flags() & ~Qt.ItemFlag.ItemIsEditable
-                )
-
-                widget.setItem(row, 0, solo_box)
-                widget.setItem(row, 1, mute_box)
-                widget.setItem(row, 2, name_box)
+                widget.addTopLevelItem(item)
 
     ###########################################################################
     # Private property definitions

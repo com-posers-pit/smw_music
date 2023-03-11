@@ -273,34 +273,42 @@ This is a hack and will be going away soon</string>
               </spacer>
              </item>
              <item row="0" column="0" colspan="4">
-              <widget class="QTableWidget" name="instrument_list">
+              <widget class="QTreeWidget" name="instrument_list">
                <property name="horizontalScrollBarPolicy">
                 <enum>Qt::ScrollBarAlwaysOff</enum>
                </property>
                <property name="selectionMode">
                 <enum>QAbstractItemView::SingleSelection</enum>
                </property>
-               <property name="showGrid">
-                <bool>false</bool>
-               </property>
-               <property name="gridStyle">
-                <enum>Qt::NoPen</enum>
-               </property>
-               <property name="wordWrap">
-                <bool>false</bool>
-               </property>
                <property name="columnCount">
-                <number>3</number>
+                <number>4</number>
                </property>
-               <attribute name="horizontalHeaderVisible">
-                <bool>true</bool>
+               <attribute name="headerMinimumSectionSize">
+                <number>35</number>
                </attribute>
-               <attribute name="verticalHeaderVisible">
-                <bool>false</bool>
+               <attribute name="headerDefaultSectionSize">
+                <number>35</number>
                </attribute>
-               <column/>
-               <column/>
-               <column/>
+               <column>
+                <property name="text">
+                 <string notr="true">1</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string notr="true">2</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string notr="true">3</string>
+                </property>
+               </column>
+               <column>
+                <property name="text">
+                 <string notr="true">4</string>
+                </property>
+               </column>
               </widget>
              </item>
             </layout>
