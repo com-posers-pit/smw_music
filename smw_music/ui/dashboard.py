@@ -185,7 +185,7 @@ class Dashboard(QWidget):
     # Constructor definitions
     ###########################################################################
 
-    def __init__(self) -> None:
+    def __init__(self, prj_file: Path | None = None) -> None:
         super().__init__()
         data_lib = resources.files("smw_music.data")
 
@@ -257,6 +257,9 @@ class Dashboard(QWidget):
         self._view.show()
 
         self._model.start()
+
+        if prj_file is not None:
+            self._model.on_load(prj_file)
 
     ###########################################################################
     # API slot definitions
