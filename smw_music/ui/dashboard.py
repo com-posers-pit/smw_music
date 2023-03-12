@@ -151,10 +151,9 @@ class _DynamicsWidgets(NamedTuple):
 
 
 class _TblCol(enum.IntEnum):
-    HIER = 0
+    NAME = 0
     SOLO = 1
     MUTE = 2
-    NAME = 3
 
 
 ###############################################################################
@@ -1024,12 +1023,14 @@ class Dashboard(QWidget):
 
     def _setup_instrument_table(self) -> None:
         widget = self._view.instrument_list
-        header = QTreeWidgetItem(["", "S", "M", "Instrument"])
+        header = QTreeWidgetItem(["Instrument", "S", "M"])
 
         header.setToolTip(_TblCol.SOLO, "Solo Instrument")
         header.setToolTip(_TblCol.MUTE, "Mute Instrument")
 
         widget.setHeaderItem(header)
+
+        widget.header().moveSection(_TblCol.NAME, len(_TblCol) - 1)
 
     ###########################################################################
 
@@ -1118,7 +1119,7 @@ class Dashboard(QWidget):
             widget.clear()
 
             for name in names:
-                item = QTreeWidgetItem(["", "", "", name])
+                item = QTreeWidgetItem([name, "", ""])
                 item.setToolTip(_TblCol.SOLO, f"Solo {name}")
                 item.setToolTip(_TblCol.MUTE, f"Mute {name}")
 
