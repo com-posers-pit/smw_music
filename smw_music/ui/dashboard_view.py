@@ -187,7 +187,6 @@ class DashboardView(QMainWindow):
     mp_slider: QSlider
     multisample_fname: QLineEdit
     musicxml_fname: QLineEdit
-    mute_percussion: QCheckBox
     new_project: QAction
     octave: QSpinBox
     octave_label: QLabel
@@ -207,7 +206,6 @@ class DashboardView(QMainWindow):
     pan_r_invert: QCheckBox
     pan_setting: QDial
     pan_setting_label: QLabel
-    percussion_label: QLabel
     play_spc: QPushButton
     porter_name: QLineEdit
     porter_name_label: QLabel
@@ -246,7 +244,6 @@ class DashboardView(QMainWindow):
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
-    solo_percussion: QCheckBox
     splitter: QSplitter
     splitter_2: QSplitter
     splitter_3: QSplitter

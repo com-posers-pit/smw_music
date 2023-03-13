@@ -59,8 +59,6 @@ class State:
     porter: str = ""
     game: str = ""
     start_measure: int = 1
-    mute_percussion: bool = False
-    solo_percussion: bool = False
 
     ###########################################################################
     # Property definitions

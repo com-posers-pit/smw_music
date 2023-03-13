@@ -498,9 +498,6 @@ class Dashboard(QWidget):
                 item = inst_list.topLevelItem(inst_idx)
                 inst_list.setCurrentItem(item, _TblCol.NAME)
 
-            v.mute_percussion.setChecked(state.mute_percussion)
-            v.solo_percussion.setChecked(state.solo_percussion)
-
             for row, inst_cfg in enumerate(state.instruments):
                 solo = _to_checked(inst_cfg.solo)
                 mute = _to_checked(inst_cfg.mute)
@@ -728,8 +725,6 @@ class Dashboard(QWidget):
             (v.render_zip, m.on_render_zip_clicked),
             # Instrument settings
             (v.interpolate, m.on_interpolate_changed),
-            (v.mute_percussion, m.on_mute_percussion_changed),
-            (v.solo_percussion, m.on_solo_percussion_changed),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),

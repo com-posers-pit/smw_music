@@ -562,8 +562,6 @@ class Song:
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
-        solo_percussion: bool = False,
-        mute_percussion: bool = False,
         start_measure: int = 1,
     ) -> str:
         """
@@ -648,8 +646,8 @@ class Song:
                 sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
-        solo = any(inst.solo for inst in instruments) or solo_percussion
-        mute = any(inst.mute for inst in instruments) or mute_percussion
+        solo = any(inst.solo for inst in instruments)
+        mute = any(inst.mute for inst in instruments)
 
         # TODO: Remove this hack
         percussion_voices = {
@@ -674,9 +672,6 @@ class Song:
                 if inst.mute or (solo and not inst.solo):
                     inst.sample_source = SampleSource.OVERRIDE
                     inst.instrument_idx = sample_id
-
-            if mute_percussion or (solo and not solo_percussion):
-                percussion_voices = {k: sample_id for k in percussion_voices}
 
             # Not necessary, but we keep it for consistency's sake
             sample_id += 1
@@ -721,8 +716,6 @@ class Song:
         echo_config: EchoConfig | None = None,
         optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
-        solo_percussion: bool = False,
-        mute_percussion: bool = False,
         start_measure: int = 1,
     ) -> str:
         """
@@ -761,8 +754,6 @@ class Song:
             echo_config,
             optimize_percussion,
             sample_path,
-            solo_percussion,
-            mute_percussion,
             start_measure,
         )
 

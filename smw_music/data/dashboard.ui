@@ -227,52 +227,7 @@
              <string>Instruments</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
-             <item row="1" column="2">
-              <widget class="QLabel" name="percussion_label">
-               <property name="toolTip">
-                <string>This is a hack and will be going away soon</string>
-               </property>
-               <property name="text">
-                <string>Percussion</string>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="1">
-              <widget class="QCheckBox" name="mute_percussion">
-               <property name="toolTip">
-                <string>Mute percusion.
-This is a hack and will be going away soon</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="0">
-              <widget class="QCheckBox" name="solo_percussion">
-               <property name="toolTip">
-                <string>Solo Percussion.
-This is a hack and will be going away soon</string>
-               </property>
-               <property name="text">
-                <string/>
-               </property>
-              </widget>
-             </item>
-             <item row="1" column="3">
-              <spacer name="horizontalSpacer_2">
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <property name="sizeHint" stdset="0">
-                <size>
-                 <width>40</width>
-                 <height>20</height>
-                </size>
-               </property>
-              </spacer>
-             </item>
-             <item row="0" column="0" colspan="4">
+             <item row="0" column="0" colspan="2">
               <widget class="QTreeWidget" name="instrument_list">
                <property name="horizontalScrollBarPolicy">
                 <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2324,8 +2279,6 @@ This is a hack and will be going away soon</string>
   <tabstop>echo_delay_slider</tabstop>
   <tabstop>echo_delay_setting</tabstop>
   <tabstop>start_measure</tabstop>
-  <tabstop>solo_percussion</tabstop>
-  <tabstop>mute_percussion</tabstop>
   <tabstop>pan_l_invert</tabstop>
   <tabstop>pan_r_invert</tabstop>
   <tabstop>pan_setting</tabstop>
