@@ -1114,7 +1114,7 @@ class Dashboard(QWidget):
             widget.clear()
 
             for name in names:
-                item = QTreeWidgetItem([name, "", ""])
+                item = QTreeWidgetItem([name])
                 item.setToolTip(_TblCol.SOLO, f"Solo {name}")
                 item.setToolTip(_TblCol.MUTE, f"Mute {name}")
 

@@ -48,6 +48,13 @@ from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import PreferencesState, State
+from smw_music.utils import newest_release
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+_CURRENT_PREFS_VERSION = 0
 
 ###############################################################################
 # Private Function Definitions
@@ -245,6 +252,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
             "advanced": preferences.advanced_mode,
             "dark_mode": preferences.dark_mode,
+            "version": _CURRENT_PREFS_VERSION,
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -990,6 +998,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if self.prefs_fname.exists():
             with open(self.prefs_fname, "r", encoding="utf8") as fobj:
                 prefs = yaml.safe_load(fobj)
+
+            prefs_version = prefs.get("version", _CURRENT_PREFS_VERSION)
+
+            if prefs_version > _CURRENT_PREFS_VERSION:
+                raise SmwMusicException(
+                    f"Preferences file version is {prefs_version}, tool "
+                    + f"version only supports up to {_CURRENT_PREFS_VERSION}"
+                )
 
             self.preferences.amk_fname = Path(prefs["amk"]["path"])
             self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
