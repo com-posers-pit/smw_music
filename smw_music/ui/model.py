@@ -234,6 +234,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def start(self) -> None:
         self._load_prefs()
+        if self.preferences.release_check:
+            release = newest_release()
+            if release is not None and release[1] != __version__:
+                url, version = release
+                self.response_generated.emit(
+                    False,
+                    "New Version",
+                    f"beer <a href={url}>v{version}</a> is available "
+                    + "for download<br />Version checking can be disabled "
+                    + "in preferences",
+                )
+
         self.update_sample_packs()
 
         self.recent_projects_updated.emit(self.recent_projects)
