@@ -186,6 +186,23 @@ class Annotation(Token):
 
 
 @dataclass
+class Clef(Token):
+    percussion: bool
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(cls, elem: music21.clef.Clef) -> "Clef":
+        percussion = isinstance(elem, music21.clef.PercussionClef)
+        return cls(percussion)
+
+
+###############################################################################
+
+
+@dataclass
 class CrescDelim(Token):
     """
     A crescendo delimiter.

@@ -19,6 +19,7 @@ from typing import Iterable, TypeVar, cast
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
+    Clef,
     Error,
     Note,
     Playable,
@@ -72,15 +73,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ----------
     tokens: list
         A list of valid channel tokens
-    percussion: bool
-        Ture iff this is a percussion channel
 
     Attributes
     ----------
     tokens: list
         A list of elements in this tokens
-    percussion: bool
-        Ture iff this is a percussion channel
 
     Todo
     ----
@@ -88,7 +85,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     """
 
     tokens: list[Token]
-    percussion: bool
     _directives: list[str] = field(init=False, repr=False, compare=False)
     _exporter: MmlExporter = field(init=False, repr=False, compare=False)
 
@@ -105,7 +101,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def _reset_state(self, instr_octave_map: dict[str, int]) -> None:
         self._exporter = MmlExporter(instr_octave_map)
-        self._exporter.percussion = self.percussion
 
         notelen = _default_notelen(flatten(self.tokens))
         self._update_state_defaults(notelen)
@@ -133,11 +128,15 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             outside octaves 1-6  is used.
         """
         msgs = []
+        percussion = False
         tokens = flatten(self.tokens)
         for token in filter(lambda x: isinstance(x, Error), tokens):
             msgs.append(cast(Error, token).msg)
-        for token in filter(lambda x: isinstance(x, Note), tokens):
-            msgs.extend(cast(Note, token).check(self.percussion))
+        for token in filter(lambda x: isinstance(x, (Note, Clef)), tokens):
+            if isinstance(token, Clef):
+                percussion = token.percussion
+            else:
+                msgs.extend(cast(Note, token).check(percussion))
         for token in filter(lambda x: isinstance(x, Playable), tokens):
             msgs.extend(cast(Playable, token).duration_check())
         return msgs

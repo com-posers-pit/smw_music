@@ -32,6 +32,7 @@ from smw_music.music_xml.reduction import reduce, remove_unused_instruments
 from smw_music.music_xml.shared import CRLF, MusicXmlException
 from smw_music.music_xml.tokens import (
     Annotation,
+    Clef,
     CrescDelim,
     Crescendo,
     Dynamic,
@@ -296,15 +297,9 @@ class Song:
 
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
-                percussion = False
-                for n in elem.flatten():
-                    if isinstance(n, music21.clef.PercussionClef):
-                        percussion = True
-                        break
-
                 part = cls._parse_part(elem, sections, len(parts))
-                part = remove_unused_instruments(percussion, part)
-                parts.append(Channel(part, percussion))
+                part = remove_unused_instruments(part)
+                parts.append(Channel(part))
 
         return cls(metadata, parts)
 
@@ -386,7 +381,9 @@ class Song:
         triplets = False
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
-                name = subpart.instrumentName
+                # This used to be .instrumentName, but that behaves...
+                # unintuitively... on percussion channels
+                name = subpart.partName
                 name = name.replace("\u266d", "b")  # Replace flats
                 name = name.replace(" ", "")  # Replace spaces
 
@@ -508,6 +505,8 @@ class Song:
                         channel_elem.append(annotation)
                 if isinstance(subelem, music21.tempo.MetronomeMark):
                     channel_elem.append(Tempo.from_music_xml(subelem))
+                if isinstance(subelem, music21.clef.Clef):
+                    channel_elem.append(Clef.from_music_xml(subelem))
 
                 if subelem.id in lines[1]:
                     channel_elem.append(
@@ -532,7 +531,6 @@ class Song:
                 chan.tokens,
                 loop_analysis,
                 superloop_analysis,
-                chan.percussion,
                 n != 0,
             )
 
@@ -625,8 +623,6 @@ class Song:
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        percussion = any(x.percussion for x in self._reduced_channels)
-
         instruments = copy.deepcopy(self.instruments)
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
@@ -686,7 +682,7 @@ class Song:
             song=self,
             channels=channels,
             datetime=build_dt,
-            percussion=percussion,
+            percussion=True,
             echo_config=echo_config,
             instruments=instruments,
             custom_samples=samples,

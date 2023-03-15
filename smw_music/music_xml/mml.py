@@ -19,6 +19,7 @@ from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
     Annotation,
     Artic,
+    Clef,
     CrescDelim,
     Crescendo,
     Dynamic,
@@ -131,6 +132,12 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     @_emit.register
     def _(self, token: CrescDelim) -> None:
         pass
+
+    ###########################################################################
+
+    @_emit.register
+    def _(self, token: Clef) -> None:
+        self.percussion = token.percussion
 
     ###########################################################################
 
