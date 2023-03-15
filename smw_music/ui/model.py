@@ -252,6 +252,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
             "advanced": preferences.advanced_mode,
             "dark_mode": preferences.dark_mode,
+            "release_check": preferences.release_check,
             "version": _CURRENT_PREFS_VERSION,
         }
 
@@ -1007,13 +1008,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     + f"version only supports up to {_CURRENT_PREFS_VERSION}"
                 )
 
+            self.preferences = PreferencesState()
             self.preferences.amk_fname = Path(prefs["amk"]["path"])
             self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
             self.preferences.sample_pack_dname = Path(
                 prefs["sample_packs"]["path"]
             )
-            self.preferences.advanced_mode = prefs.get("advanced", False)
-            self.preferences.dark_mode = prefs.get("dark_mode", False)
+            with suppress(KeyError):
+                self.preferences.advanced_mode = prefs["advanced"]
+            with suppress(KeyError):
+                self.preferences.dark_mode = prefs["dark_mode"]
+            with suppress(KeyError):
+                self.preferences.release_check = prefs["release_check"]
 
         self._start_watcher()
 

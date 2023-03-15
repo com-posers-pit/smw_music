@@ -106,6 +106,7 @@ class Preferences:
 
         d.advanced_mode.setChecked(preferences.advanced_mode)
         d.dark_mode.setChecked(preferences.dark_mode)
+        d.release_check.setChecked(preferences.release_check)
 
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
@@ -115,9 +116,17 @@ class Preferences:
                 d.advanced_mode.checkState() == Qt.CheckState.Checked
             )
             dark_mode = d.dark_mode.checkState() == Qt.CheckState.Checked
+            release_check = (
+                d.release_check.checkState() == Qt.CheckState.Checked
+            )
 
             return PreferencesState(
-                amk_fname, spcplay_fname, pack_dir, advanced_mode, dark_mode
+                amk_fname,
+                spcplay_fname,
+                pack_dir,
+                advanced_mode,
+                dark_mode,
+                release_check,
             )
 
         return None
