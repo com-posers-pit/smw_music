@@ -335,9 +335,6 @@
                   </item>
                   <item row="7" column="1" colspan="2">
                    <widget class="QRadioButton" name="select_multisample_sample">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
                     <property name="text">
                      <string>Multisample</string>
                     </property>
@@ -981,22 +978,6 @@
                 </property>
                 <widget class="QWidget" name="dynamics_widget" native="true">
                  <layout class="QGridLayout" name="gridLayout_15">
-                  <item row="4" column="1">
-                   <widget class="QSlider" name="mp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="2">
-                   <widget class="QLineEdit" name="ffff_setting"/>
-                  </item>
                   <item row="2" column="1">
                    <widget class="QSlider" name="pp_slider">
                     <property name="maximum">
@@ -1010,26 +991,19 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="7" column="2">
+                   <widget class="QLineEdit" name="ff_setting"/>
+                  </item>
                   <item row="4" column="2">
                    <widget class="QLineEdit" name="mp_setting"/>
                   </item>
-                  <item row="8" column="3">
-                   <widget class="QLabel" name="fff_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
+                  <item row="5" column="2">
+                   <widget class="QLineEdit" name="mf_setting"/>
                   </item>
-                  <item row="3" column="1">
-                   <widget class="QSlider" name="p_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                  <item row="8" column="0">
+                   <widget class="QLabel" name="fff_label">
+                    <property name="text">
+                     <string>FFF</string>
                     </property>
                    </widget>
                   </item>
@@ -1040,17 +1014,17 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="ff_label">
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="mp_label">
                     <property name="text">
-                     <string>FF</string>
+                     <string>MP</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="9" column="0">
-                   <widget class="QLabel" name="ffff_label">
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="pppp_label">
                     <property name="text">
-                     <string>FFFF</string>
+                     <string>PPPP</string>
                     </property>
                    </widget>
                   </item>
@@ -1067,82 +1041,6 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="2" column="2">
-                   <widget class="QLineEdit" name="pp_setting"/>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="pppp_label">
-                    <property name="text">
-                     <string>PPPP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="1">
-                   <widget class="QSlider" name="ff_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="2">
-                   <widget class="QLineEdit" name="p_setting"/>
-                  </item>
-                  <item row="8" column="2">
-                   <widget class="QLineEdit" name="fff_setting"/>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QLineEdit" name="pppp_setting"/>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QSlider" name="pppp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="3">
-                   <widget class="QLabel" name="p_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="2">
-                   <widget class="QLineEdit" name="ff_setting"/>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="mp_label">
-                    <property name="text">
-                     <string>MP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="3">
-                   <widget class="QLabel" name="mp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="pp_label">
-                    <property name="text">
-                     <string>PP</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="7" column="3">
                    <widget class="QLabel" name="ff_setting_label">
                     <property name="text">
@@ -1150,105 +1048,8 @@
                     </property>
                    </widget>
                   </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="mf_label">
-                    <property name="text">
-                     <string>MF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QLabel" name="pppp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QSlider" name="mf_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="3">
-                   <widget class="QLabel" name="ppp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="3">
-                   <widget class="QLabel" name="mf_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="2">
-                   <widget class="QLineEdit" name="f_setting"/>
-                  </item>
-                  <item row="5" column="2">
-                   <widget class="QLineEdit" name="mf_setting"/>
-                  </item>
-                  <item row="8" column="0">
-                   <widget class="QLabel" name="fff_label">
-                    <property name="text">
-                     <string>FFF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
-                   <widget class="QSlider" name="ffff_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="2">
-                   <widget class="QLineEdit" name="ppp_setting"/>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QSlider" name="ppp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="ppp_label">
-                    <property name="text">
-                     <string>PPP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="f_label">
-                    <property name="text">
-                     <string>F</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="3">
-                   <widget class="QLabel" name="ffff_setting_label">
+                  <item row="8" column="3">
+                   <widget class="QLabel" name="fff_setting_label">
                     <property name="text">
                      <string>1234</string>
                     </property>
@@ -1267,6 +1068,22 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="7" column="1">
+                   <widget class="QSlider" name="ff_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="9" column="2">
+                   <widget class="QLineEdit" name="ffff_setting"/>
+                  </item>
                   <item row="2" column="3">
                    <widget class="QLabel" name="pp_setting_label">
                     <property name="text">
@@ -1274,10 +1091,169 @@
                     </property>
                    </widget>
                   </item>
+                  <item row="9" column="1">
+                   <widget class="QSlider" name="ffff_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="3">
+                   <widget class="QLabel" name="p_setting_label">
+                    <property name="text">
+                     <string>1234</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="2">
+                   <widget class="QLineEdit" name="fff_setting"/>
+                  </item>
+                  <item row="5" column="1">
+                   <widget class="QSlider" name="mf_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="3">
+                   <widget class="QLabel" name="mf_setting_label">
+                    <property name="text">
+                     <string>1234</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="3">
+                   <widget class="QLabel" name="mp_setting_label">
+                    <property name="text">
+                     <string>1234</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="0">
+                   <widget class="QLabel" name="mf_label">
+                    <property name="text">
+                     <string>MF</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QLabel" name="ppp_setting_label">
+                    <property name="text">
+                     <string>1234</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="2">
+                   <widget class="QLineEdit" name="f_setting"/>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QSlider" name="mp_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QSlider" name="p_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QLineEdit" name="ppp_setting"/>
+                  </item>
                   <item row="3" column="0">
                    <widget class="QLabel" name="p_label">
                     <property name="text">
                      <string>P</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="0">
+                   <widget class="QLabel" name="f_label">
+                    <property name="text">
+                     <string>F</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QSlider" name="pppp_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QLabel" name="pppp_setting_label">
+                    <property name="text">
+                     <string>1234</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QLineEdit" name="pppp_setting"/>
+                  </item>
+                  <item row="3" column="2">
+                   <widget class="QLineEdit" name="p_setting"/>
+                  </item>
+                  <item row="9" column="3">
+                   <widget class="QLabel" name="ffff_setting_label">
+                    <property name="text">
+                     <string>1234</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QLineEdit" name="pp_setting"/>
+                  </item>
+                  <item row="7" column="0">
+                   <widget class="QLabel" name="ff_label">
+                    <property name="text">
+                     <string>FF</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QSlider" name="ppp_slider">
+                    <property name="maximum">
+                     <number>255</number>
+                    </property>
+                    <property name="tracking">
+                     <bool>false</bool>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
                     </property>
                    </widget>
                   </item>
@@ -1287,6 +1263,40 @@
                      <string>Interpolate</string>
                     </property>
                    </widget>
+                  </item>
+                  <item row="9" column="0">
+                   <widget class="QLabel" name="ffff_label">
+                    <property name="text">
+                     <string>FFFF</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QLabel" name="ppp_label">
+                    <property name="text">
+                     <string>PPP</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLabel" name="pp_label">
+                    <property name="text">
+                     <string>PP</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="11" column="0">
+                   <spacer name="verticalSpacer_4">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
                   </item>
                  </layout>
                 </widget>
@@ -1642,6 +1652,155 @@
                  </item>
                 </layout>
                </widget>
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="instrument_multisample_tab">
+             <attribute name="title">
+              <string>Multisample</string>
+             </attribute>
+             <layout class="QGridLayout" name="gridLayout_16">
+              <item row="9" column="2">
+               <widget class="QPushButton" name="multisample_sample_add">
+                <property name="text">
+                 <string>Add</string>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="0" rowspan="10">
+               <widget class="QGroupBox" name="multisample_unmapped_box">
+                <property name="title">
+                 <string>Unmapped</string>
+                </property>
+                <layout class="QGridLayout" name="gridLayout_18">
+                 <item row="0" column="0">
+                  <widget class="QListWidget" name="multismaple_unmapped_list"/>
+                 </item>
+                </layout>
+               </widget>
+              </item>
+              <item row="8" column="2" colspan="2">
+               <widget class="QLineEdit" name="multisample_sample_output"/>
+              </item>
+              <item row="9" column="3">
+               <widget class="QPushButton" name="multisample_sample_remove">
+                <property name="text">
+                 <string>Remove</string>
+                </property>
+               </widget>
+              </item>
+              <item row="10" column="1">
+               <spacer name="verticalSpacer_5">
+                <property name="orientation">
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="1" column="4">
+               <spacer name="horizontalSpacer_2">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item row="7" column="2" colspan="2">
+               <widget class="QComboBox" name="multisample_sample_notehead">
+                <item>
+                 <property name="text">
+                  <string>normal</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>x</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>o</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>+</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>⮾</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>▲</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>▼</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>/</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>◆</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item row="8" column="1">
+               <widget class="QLabel" name="multisample_sample_output_label">
+                <property name="text">
+                 <string>Ouput</string>
+                </property>
+               </widget>
+              </item>
+              <item row="7" column="1">
+               <widget class="QLabel" name="multisample_sample_notehead_label">
+                <property name="text">
+                 <string>Note Head</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="1">
+               <widget class="QLabel" name="multisample_sample_notes_label">
+                <property name="text">
+                 <string>Note(s)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="1">
+               <widget class="QLabel" name="multisample_sample_name_label">
+                <property name="text">
+                 <string>Name</string>
+                </property>
+               </widget>
+              </item>
+              <item row="4" column="2" colspan="2">
+               <widget class="QLineEdit" name="multisample_sample_notes">
+                <property name="maxLength">
+                 <number>200</number>
+                </property>
+               </widget>
+              </item>
+              <item row="2" column="2" colspan="2">
+               <widget class="QLineEdit" name="multisample_sample_name"/>
               </item>
              </layout>
             </widget>

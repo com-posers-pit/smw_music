@@ -161,6 +161,7 @@ Sample
       view.select_brr_sample.toggled --> model.on_brr_sample_selected
       view.select_brr_fname.released --> dashboard.on_brr_clicked
       view.brr_fname.editingFinished --> model.on_brr_fname_changed
+      view.select_multisample_sample.toggled --> model.on_multisample_sample_selected
       view.select_adsr_mode.toggled --> model.on_select_adsr_mode_selected
       view.gain_mode_direct.toggled --> model.on_gain_direct_selected
       view.gain_mode_inclin.toggled --> model.on_gain_inclin_selected

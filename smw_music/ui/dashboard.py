@@ -29,7 +29,6 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QFileDialog,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QListWidget,
@@ -562,6 +561,11 @@ class Dashboard(QWidget):
             )
             fname = str(inst.brr_fname) if inst.brr_fname.name else ""
             v.brr_fname.setText(fname)
+
+            multisample = inst.sample_source == SampleSource.MULTISAMPLE
+            v.select_multisample_sample.setChecked(multisample)
+            idx = v.instrument_config_tab.indexOf(v.instrument_multisample_tab)
+            v.instrument_config_tab.setTabVisible(idx, multisample)
             v.octave.setValue(inst.octave)
 
             v.select_adsr_mode.setChecked(inst.adsr_mode)
@@ -736,6 +740,7 @@ class Dashboard(QWidget):
             (v.select_pack_sample, m.on_pack_sample_selected),
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
+            (v.select_multisample_sample, m.on_multisample_sample_selected),
             (v.brr_fname, m.on_brr_fname_changed),
             (v.octave, m.on_octave_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),

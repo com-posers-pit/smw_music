@@ -704,6 +704,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_multisample_sample_selected(self, state: bool) -> None:
+        if state:
+            self._update_inst_state(sample_source=SampleSource.MULTISAMPLE)
+            self.update_status("Sample source set to multisample")
+
+    ###########################################################################
+
     def on_musicxml_fname_changed(self, fname: str) -> None:
         try:
             self.song = Song.from_music_xml(fname)

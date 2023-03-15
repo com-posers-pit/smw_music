@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QLabel,
     QLineEdit,
+    QListWidget,
     QMainWindow,
     QMenu,
     QMenuBar,
@@ -165,6 +166,7 @@ class DashboardView(QMainWindow):
     instrument_dynamics_tab: QWidget
     instrument_list: QTreeWidget
     instrument_list_box: QGroupBox
+    instrument_multisample_tab: QWidget
     instrument_sample_group: QGroupBox
     instrument_sample_tab: QWidget
     instrument_settings_tab: QWidget
@@ -186,6 +188,18 @@ class DashboardView(QMainWindow):
     mp_setting_label: QLabel
     mp_slider: QSlider
     multisample_fname: QLineEdit
+    multisample_sample_add: QPushButton
+    multisample_sample_name: QLineEdit
+    multisample_sample_name_label: QLabel
+    multisample_sample_notehead: QComboBox
+    multisample_sample_notehead_label: QLabel
+    multisample_sample_notes: QLineEdit
+    multisample_sample_notes_label: QLabel
+    multisample_sample_output: QLineEdit
+    multisample_sample_output_label: QLabel
+    multisample_sample_remove: QPushButton
+    multisample_unmapped_box: QGroupBox
+    multismaple_unmapped_list: QListWidget
     musicxml_fname: QLineEdit
     new_project: QAction
     octave: QSpinBox
