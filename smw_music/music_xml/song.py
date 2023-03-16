@@ -13,6 +13,7 @@
 import copy
 import pkgutil
 from datetime import datetime
+from itertools import chain
 from pathlib import PurePosixPath
 
 # Library imports
@@ -228,8 +229,9 @@ class Song:
         The song's source game, or '???' if one was not provided
     channels : list
         A list of up to 8 channels of music in this song.
-    instruments: list
-        A list of InstrumentConfig objects for each detected instrument
+    instruments: dict
+        A dictionary of instrument name -> InstrumentConfig object for each
+        detected instrument
     volume: int
         Global volume
     """
@@ -624,50 +626,41 @@ class Song:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
         instruments = copy.deepcopy(self.instruments)
+        inst_samples = list(
+            chain.from_iterable(inst.samples for inst in instruments)
+        )
+
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
-        for inst in instruments:
-            if inst.sample_source == SampleSource.SAMPLEPACK:
+        for sample in inst_samples:
+            if sample.sample_source == SampleSource.SAMPLEPACK:
                 fname = str(
-                    PurePosixPath(inst.pack_sample[0]) / inst.pack_sample[1]
+                    PurePosixPath(sample.pack_sample[0])
+                    / sample.pack_sample[1]
                 )
-                samples.append((fname, inst.brr_str, sample_id))
-                inst.instrument_idx = sample_id
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
                 sample_id += 1
-            if inst.sample_source == SampleSource.BRR:
-                fname = inst.brr_fname.name
-                samples.append((fname, inst.brr_str, sample_id))
-                inst.instrument_idx = sample_id
+            if sample.sample_source == SampleSource.BRR:
+                fname = sample.brr_fname.name
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
                 sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
-        solo = any(inst.solo for inst in instruments)
-        mute = any(inst.mute for inst in instruments)
-
-        # TODO: Remove this hack
-        percussion_voices = {
-            "CR3": 22,
-            "CR2": 22,
-            "CR": 22,
-            "CH": 22,
-            "OH": 22,
-            "RD": 22,
-            "RD2": 22,
-            "HT": 24,
-            "MT": 23,
-            "SN": 10,
-            "LT": 21,
-            "KD": 21,
-        }
+        solo = any(sample.solo for sample in inst_samples)
+        mute = any(sample.mute for sample in inst_samples)
+        solo |= any(inst.solo for inst in instruments)
+        mute |= any(inst.mute for inst in instruments)
 
         if solo or mute:
             samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
 
-            for inst in instruments:
-                if inst.mute or (solo and not inst.solo):
-                    inst.sample_source = SampleSource.OVERRIDE
-                    inst.instrument_idx = sample_id
+            for inst_sample in inst_samples:
+                if inst_sample.mute or (solo and not inst_sample.solo):
+                    inst_sample.sample_source = SampleSource.OVERRIDE
+                    inst_sample.instrument_idx = sample_id
 
             # Not necessary, but we keep it for consistency's sake
             sample_id += 1
@@ -682,12 +675,10 @@ class Song:
             song=self,
             channels=channels,
             datetime=build_dt,
-            percussion=True,
             echo_config=echo_config,
-            instruments=instruments,
+            inst_samples=inst_samples,
             custom_samples=samples,
             dynamics=list(Dynamics),
-            percussion_voices=percussion_voices,
             sample_path=str(sample_path),
         )
 

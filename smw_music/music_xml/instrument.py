@@ -97,6 +97,29 @@ class SampleSource(IntEnum):
 @dataclass
 class InstrumentConfig:
     name: str
+    transpose: int = 0
+    dynamics_present: set[Dynamics] = field(
+        default_factory=lambda: set(Dynamics)
+    )
+    mute: bool = False
+    solo: bool = False
+    samples: list["InstrumentSample"] = field(default_factory=lambda: [])
+
+    ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __post_init__(self) -> None:
+        if not self.samples:
+            self.samples = [InstrumentSample(self.name)]
+
+
+###############################################################################
+
+
+@dataclass
+class InstrumentSample:
+    name: str
     octave: int = 3
     transpose: int = 0
     dynamics: dict[Dynamics, int] = field(
@@ -112,9 +135,6 @@ class InstrumentConfig:
             Dynamics.FFF: 230,
             Dynamics.FFFF: 245,
         }
-    )
-    dynamics_present: set[Dynamics] = field(
-        default_factory=lambda: set(Dynamics)
     )
     dyn_interpolate: bool = False
     artics: dict[Artic, ArticSetting] = field(
