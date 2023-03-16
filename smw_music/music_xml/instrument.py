@@ -11,7 +11,11 @@
 # Standard library imports
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
+from functools import total_ordering
 from pathlib import Path
+
+# Library imports
+from music21.pitch import Pitch
 
 # Package imports
 from smw_music.utils import hexb
@@ -83,6 +87,21 @@ class GainMode(IntEnum):
 ###############################################################################
 
 
+class NoteHead(IntEnum):
+    NORMAL = auto()
+    X = auto()
+    O = auto()
+    PLUS = auto()
+    TENSOR = auto()
+    TRIUP = auto()
+    TRIDOWN = auto()
+    SLASH = auto()
+    DIAMOND = auto()
+
+
+###############################################################################
+
+
 class SampleSource(IntEnum):
     BUILTIN = auto()
     SAMPLEPACK = auto()
@@ -106,12 +125,55 @@ class InstrumentConfig:
     samples: list["InstrumentSample"] = field(default_factory=lambda: [])
 
     ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, note: Pitch, notehead: str | None = None) -> Pitch | None:
+        for sample in self.samples:
+            sample_out = sample.emit(note, notehead)
+            if sample_out is not None:
+                return sample_out
+        return None
+
+    ###########################################################################
     # Data model method definitions
     ###########################################################################
 
     def __post_init__(self) -> None:
         if not self.samples:
-            self.samples = [InstrumentSample(self.name)]
+            name = self.name
+            if name == "Drumset":
+                # Weinberg:
+                # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
+                samples = [
+                    ("C3_", Pitch("C6"), NoteHead.X, 22),
+                    ("C2_", Pitch("B5"), NoteHead.X, 22),
+                    ("CR", Pitch("A5"), NoteHead.X, 22),
+                    ("CH", Pitch("G5"), NoteHead.X, 22),
+                    ("RD", Pitch("F5"), NoteHead.X, 22),
+                    ("OH", Pitch("E5"), NoteHead.X, 22),
+                    ("RD2_", Pitch("D5"), NoteHead.X, 22),
+                    ("HT", Pitch("E5"), NoteHead.NORMAL, 24),
+                    ("MT", Pitch("D5"), NoteHead.NORMAL, 23),
+                    ("SN", Pitch("C5"), NoteHead.NORMAL, 10),
+                    ("LT", Pitch("A4"), NoteHead.NORMAL, 21),
+                    ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
+                ]
+
+                self.samples = [
+                    InstrumentSample(
+                        name,
+                        llim=pitch,
+                        ulim=pitch,
+                        start=pitch,
+                        notehead=notehead,
+                        builtin_sample_index=idx,
+                    )
+                    for name, pitch, notehead, idx in samples
+                ]
+
+            else:
+                self.samples = [InstrumentSample(self.name)]
 
 
 ###############################################################################
@@ -121,7 +183,6 @@ class InstrumentConfig:
 class InstrumentSample:
     name: str
     octave: int = 3
-    transpose: int = 0
     dynamics: dict[Dynamics, int] = field(
         default_factory=lambda: {
             Dynamics.PPPP: 26,
@@ -164,6 +225,10 @@ class InstrumentSample:
     subtune_setting: int = 0
     mute: bool = False
     solo: bool = False
+    llim: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
+    ulim: Pitch = field(default_factory=lambda: Pitch("C", octave=7))
+    notehead: NoteHead = NoteHead.NORMAL
+    start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
 
     _instrument_idx: int = field(default=0, init=False)
 
@@ -188,6 +253,20 @@ class InstrumentSample:
 
         if self.builtin_sample_index == -1:
             self.builtin_sample_index = inst_map.get(self.name.lower(), 0)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit(self, note: Pitch, notehead: str | None = None) -> Pitch | None:
+        match = True
+        match &= note < self.llim
+        match &= note > self.ulim
+        match &= self.notehead != notehead
+
+        if match:
+            return Pitch(note.ps - self.llim.ps + self.start.ps)
+        return None
 
     ###########################################################################
     # Property definitions
@@ -295,3 +374,22 @@ class InstrumentSample:
         if any(inv):
             rv += f",{int(inv[0])},{int(inv[1])}"
         return rv
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def lookup_notehead(notehead: str) -> NoteHead | None:
+    return {
+        "normal": NoteHead.NORMAL,
+        "x": NoteHead.X,
+        "o": NoteHead.O,
+        "cross": NoteHead.PLUS,
+        "circle-x": NoteHead.TENSOR,
+        "arrow up": NoteHead.TRIUP,
+        "arrow down": NoteHead.TRIDOWN,
+        "slash": NoteHead.SLASH,
+        "diamond": NoteHead.DIAMOND,
+    }.get(notehead, None)
