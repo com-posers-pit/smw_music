@@ -588,20 +588,25 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             os.makedirs(samples_path, exist_ok=True)
 
             for inst in self.state.instruments:
-                if inst.sample_source == SampleSource.BRR:
-                    shutil.copy2(inst.brr_fname, samples_path)
-                if inst.sample_source == SampleSource.SAMPLEPACK:
-                    pack_name, pack_path = inst.pack_sample
-                    target = samples_path / pack_name / pack_path
-                    os.makedirs(target.parents[0], exist_ok=True)
-                    with open(target, "wb") as fobj:
-                        try:
-                            fobj.write(
-                                self._sample_packs[pack_name][pack_path].data
-                            )
-                        except KeyError:
-                            error = True
-                            msg += f"Could not find sample pack {pack_name}\n"
+                for sample in inst.samples:
+                    if sample.sample_source == SampleSource.BRR:
+                        shutil.copy2(sample.brr_fname, samples_path)
+                    if sample.sample_source == SampleSource.SAMPLEPACK:
+                        pack_name, pack_path = sample.pack_sample
+                        target = samples_path / pack_name / pack_path
+                        os.makedirs(target.parents[0], exist_ok=True)
+                        with open(target, "wb") as fobj:
+                            try:
+                                fobj.write(
+                                    self._sample_packs[pack_name][
+                                        pack_path
+                                    ].data
+                                )
+                            except KeyError:
+                                error = True
+                                msg += (
+                                    f"Could not find sample pack {pack_name}\n"
+                                )
 
             if not error:
                 try:
