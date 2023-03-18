@@ -177,6 +177,7 @@ class Dashboard(QWidget):
     _keyhist: deque[int]
     _window_title: str
     _default_tooltips: dict[QWidget | QAction, str]
+    _samples: dict[tuple[str, str], QTreeWidgetItem]
 
     ###########################################################################
     # Constructor definitions
@@ -200,6 +201,7 @@ class Dashboard(QWidget):
         self._unsaved = False
         self._project_name = None
         self._sample_pack_items = {}
+        self._samples = {}
 
         # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
         font = QFont("_")
@@ -454,7 +456,6 @@ class Dashboard(QWidget):
             self._update_instruments(insts)
 
         v = self._view  # pylint: disable=invalid-name
-        inst = state.inst
         self._unsaved = state.unsaved
         self._project_name = state.project_name
 
@@ -497,112 +498,12 @@ class Dashboard(QWidget):
             v.mml_fname.setEnabled(standalone_mode)
 
             # Solo/mute settings
-            inst_list = self._view.instrument_list
-            inst_idx = state.instrument_idx
-            if inst_idx is not None:
-                item = inst_list.topLevelItem(inst_idx)
-                inst_list.setCurrentItem(item, _TblCol.NAME)
-
-            for row, inst_cfg in enumerate(state.instruments):
-                solo = _to_checked(inst_cfg.solo)
-                mute = _to_checked(inst_cfg.mute)
-
-                item = inst_list.topLevelItem(row)
-                item.setCheckState(_TblCol.SOLO, solo)
-                item.setCheckState(_TblCol.MUTE, mute)
-
-            # Instrument dynamics settings
-            for dkey, dval in inst.dynamics.items():
-                dwidgets = self._dyn_widgets[dkey]
-                enable = dkey in inst.dynamics_present
-
-                dwidgets.slider.setValue(dval)
-                dwidgets.slider.setEnabled(enable)
-                dwidgets.setting.setText(pct(dval))
-                dwidgets.setting.setEnabled(enable)
-                dwidgets.label.setText(hexb(dval))
-                dwidgets.label.setEnabled(enable)
-
-            # Instrument articulation settings
-            for akey, aval in inst.artics.items():
-                awidgets = self._artic_widgets[akey]
-                awidgets.length_slider.setValue(aval.length)
-                awidgets.length_setting.setText(hexb(aval.length))
-                awidgets.volume_slider.setValue(aval.volume)
-                awidgets.volume_setting.setText(hexb(aval.volume))
-                awidgets.setting_label.setText(hexb(aval.setting))
-
-            # Instrument pan settings
-            v.pan_enable.setChecked(inst.pan_enabled)
-            v.pan_setting.setEnabled(inst.pan_enabled)
-            v.pan_setting_label.setEnabled(inst.pan_enabled)
-            v.pan_l_invert.setEnabled(inst.pan_enabled)
-            v.pan_r_invert.setEnabled(inst.pan_enabled)
-            v.pan_invert_label.setEnabled(inst.pan_enabled)
-            v.pan_setting.setValue(inst.pan_setting)
-            v.pan_setting_label.setText(inst.pan_description)
-            v.pan_l_invert.setChecked(inst.pan_invert[0])
-            v.pan_r_invert.setChecked(inst.pan_invert[1])
-
-            # Instrument sample
-            v.select_builtin_sample.setChecked(
-                inst.sample_source == SampleSource.BUILTIN
-            )
-            v.builtin_sample.setCurrentIndex(inst.builtin_sample_index)
-            v.select_pack_sample.setChecked(
-                inst.sample_source == SampleSource.SAMPLEPACK
-            )
-            v.sample_settings_box.setEnabled(
-                inst.sample_source != SampleSource.BUILTIN
-            )
-            try:
-                v.sample_pack_list.setCurrentItem(
-                    self._sample_pack_items[state.inst.pack_sample]
-                )
-            except KeyError:
-                pass
-
-            v.select_brr_sample.setChecked(
-                inst.sample_source == SampleSource.BRR
-            )
-            fname = str(inst.brr_fname) if inst.brr_fname.name else ""
-            v.brr_fname.setText(fname)
-
-            multisample = inst.sample_source == SampleSource.MULTISAMPLE
-            v.select_multisample_sample.setChecked(multisample)
-            idx = v.instrument_config_tab.indexOf(v.instrument_multisample_tab)
-            v.instrument_config_tab.setTabVisible(idx, multisample)
-            v.octave.setValue(inst.octave)
-
-            v.select_adsr_mode.setChecked(inst.adsr_mode)
-            v.select_gain_mode.setChecked(not inst.adsr_mode)
-            v.gain_mode_direct.setChecked(inst.gain_mode == GainMode.DIRECT)
-            v.gain_mode_inclin.setChecked(inst.gain_mode == GainMode.INCLIN)
-            v.gain_mode_incbent.setChecked(inst.gain_mode == GainMode.INCBENT)
-            v.gain_mode_declin.setChecked(inst.gain_mode == GainMode.DECLIN)
-            v.gain_mode_decexp.setChecked(inst.gain_mode == GainMode.DECEXP)
-            invert = (not inst.adsr_mode) and (
-                inst.gain_mode != GainMode.DIRECT
-            )
-            v.gain_slider.setInvertedAppearance(invert)
-            v.gain_slider.setInvertedControls(invert)
-            v.gain_slider.setValue(inst.gain_setting)
-            v.gain_setting.setText(hexb(inst.gain_setting))
-            v.attack_slider.setValue(inst.attack_setting)
-            v.attack_setting.setText(hexb(inst.attack_setting))
-            v.decay_slider.setValue(inst.decay_setting)
-            v.decay_setting.setText(hexb(inst.decay_setting))
-            v.sus_level_slider.setValue(inst.sus_level_setting)
-            v.sus_level_setting.setText(hexb(inst.sus_level_setting))
-            v.sus_rate_slider.setValue(inst.sus_rate_setting)
-            v.sus_rate_setting.setText(hexb(inst.sus_rate_setting))
-
-            v.tune_slider.setValue(inst.tune_setting)
-            v.tune_setting.setText(hexb(inst.tune_setting))
-            v.subtune_slider.setValue(inst.subtune_setting)
-            v.subtune_setting.setText(hexb(inst.subtune_setting))
-
-            v.brr_setting.setText(inst.brr_str)
+            sample_list = self._view.sample_list
+            sample_idx = state.sample_idx
+            if sample_idx is not None:
+                self._update_sample_config(state, sample_idx)
+            else:
+                sample_list.clearSelection()
 
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
@@ -646,18 +547,6 @@ class Dashboard(QWidget):
 
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
-
-            # Apply the more interesting UI updates
-            self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)
-            self._update_envelope(
-                inst.adsr_mode,
-                inst.attack_setting,
-                inst.decay_setting,
-                inst.sus_level_setting,
-                inst.sus_rate_setting,
-                inst.gain_mode,
-                inst.gain_setting,
-            )
 
     ###########################################################################
 
@@ -832,8 +721,8 @@ class Dashboard(QWidget):
                 # This is basically a compile-time exception
                 raise Exception(f"Unhandled widget connection {widget}")
 
-        v.instrument_list.itemChanged.connect(self._on_solomute_change)
-        v.instrument_list.itemSelectionChanged.connect(self._on_inst_change)
+        v.sample_list.itemChanged.connect(self._on_solomute_change)
+        v.sample_list.itemSelectionChanged.connect(self._on_inst_change)
         v.sample_pack_list.itemSelectionChanged.connect(
             self.on_pack_sample_changed
         )
@@ -976,13 +865,13 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_inst_change(self) -> None:
-        widget = self._view.instrument_list
+        widget = self._view.sample_list
         self._model.on_instrument_changed(widget.currentIndex().row())
 
     ###########################################################################
 
     def _on_solomute_change(self, item: QTreeWidgetItem, col: int) -> None:
-        row = self._view.instrument_list.indexFromItem(item).row()
+        row = self._view.sample_list.indexFromItem(item).row()
         checked = item.checkState(col) == Qt.CheckState.Checked
         if col == _TblCol.SOLO:
             self._model.on_solo_changed(row, checked)
@@ -1028,7 +917,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _setup_instrument_table(self) -> None:
-        widget = self._view.instrument_list
+        widget = self._view.sample_list
         header = QTreeWidgetItem(["Instrument", "S", "M"])
 
         header.setToolTip(_TblCol.SOLO, "Solo Instrument")
@@ -1119,10 +1008,11 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _update_instruments(self, instruments: list[str | list[str]]) -> None:
-        widget = self._view.instrument_list
+        widget = self._view.sample_list
 
         with QSignalBlocker(widget):
             widget.clear()
+            self._samples.clear()
 
             for inst in instruments:
                 if isinstance(inst, str):
@@ -1135,6 +1025,8 @@ class Dashboard(QWidget):
 
                     widget.addTopLevelItem(item)
                     parent = item
+                    parent_name = inst
+                    self._samples[(inst, inst)] = item
                 else:
                     for sample in inst:
                         item = QTreeWidgetItem([sample])
@@ -1149,6 +1041,134 @@ class Dashboard(QWidget):
                         )
 
                         parent.addChild(item)
+                        self._samples[(parent_name, sample)] = item
+
+    ###########################################################################
+
+    def _update_sample_config(
+        self, state: State, sample_idx: tuple[str, str]
+    ) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        sample_list = self._view.sample_list
+        sel_sample = state.samples[sample_idx]
+        sample_list.setCurrentItem(self._samples[sample_idx], _TblCol.NAME)
+
+        for key, sample in state.samples.items():
+            solo = _to_checked(sample.solo)
+            mute = _to_checked(sample.mute)
+
+            item = self._samples[key]
+            item.setCheckState(_TblCol.SOLO, solo)
+            item.setCheckState(_TblCol.MUTE, mute)
+
+        # Instrument dynamics settings
+        for dkey, dval in sel_sample.dynamics.items():
+            dwidgets = self._dyn_widgets[dkey]
+            # TODO: Re-add this
+            # enable = dkey in sample.dynamics_present
+
+            dwidgets.slider.setValue(dval)
+            # dwidgets.slider.setEnabled(enable)
+            dwidgets.setting.setText(pct(dval))
+            # dwidgets.setting.setEnabled(enable)
+            dwidgets.label.setText(hexb(dval))
+            # dwidgets.label.setEnabled(enable)
+
+        # Instrument articulation settings
+        for akey, aval in sel_sample.artics.items():
+            awidgets = self._artic_widgets[akey]
+            awidgets.length_slider.setValue(aval.length)
+            awidgets.length_setting.setText(hexb(aval.length))
+            awidgets.volume_slider.setValue(aval.volume)
+            awidgets.volume_setting.setText(hexb(aval.volume))
+            awidgets.setting_label.setText(hexb(aval.setting))
+
+        # Instrument pan settings
+        v.pan_enable.setChecked(sel_sample.pan_enabled)
+        v.pan_setting.setEnabled(sel_sample.pan_enabled)
+        v.pan_setting_label.setEnabled(sel_sample.pan_enabled)
+        v.pan_l_invert.setEnabled(sel_sample.pan_enabled)
+        v.pan_r_invert.setEnabled(sel_sample.pan_enabled)
+        v.pan_invert_label.setEnabled(sel_sample.pan_enabled)
+        v.pan_setting.setValue(sel_sample.pan_setting)
+        v.pan_setting_label.setText(sel_sample.pan_description)
+        v.pan_l_invert.setChecked(sel_sample.pan_invert[0])
+        v.pan_r_invert.setChecked(sel_sample.pan_invert[1])
+
+        # Instrument sample
+        v.select_builtin_sample.setChecked(
+            sel_sample.sample_source == SampleSource.BUILTIN
+        )
+        v.builtin_sample.setCurrentIndex(sel_sample.builtin_sample_index)
+        v.select_pack_sample.setChecked(
+            sel_sample.sample_source == SampleSource.SAMPLEPACK
+        )
+        v.sample_settings_box.setEnabled(
+            sel_sample.sample_source != SampleSource.BUILTIN
+        )
+        try:
+            v.sample_pack_list.setCurrentItem(
+                self._sample_pack_items[sel_sample.pack_sample]
+            )
+        except KeyError:
+            pass
+
+        v.select_brr_sample.setChecked(
+            sel_sample.sample_source == SampleSource.BRR
+        )
+        fname = str(sel_sample.brr_fname) if sel_sample.brr_fname.name else ""
+        v.brr_fname.setText(fname)
+
+        multisample = sel_sample.sample_source == SampleSource.MULTISAMPLE
+        v.select_multisample_sample.setChecked(multisample)
+        idx = v.instrument_config_tab.indexOf(v.instrument_multisample_tab)
+        v.instrument_config_tab.setTabVisible(idx, multisample)
+        v.octave.setValue(sel_sample.octave)
+
+        v.select_adsr_mode.setChecked(sel_sample.adsr_mode)
+        v.select_gain_mode.setChecked(not sel_sample.adsr_mode)
+        v.gain_mode_direct.setChecked(sel_sample.gain_mode == GainMode.DIRECT)
+        v.gain_mode_inclin.setChecked(sel_sample.gain_mode == GainMode.INCLIN)
+        v.gain_mode_incbent.setChecked(
+            sel_sample.gain_mode == GainMode.INCBENT
+        )
+        v.gain_mode_declin.setChecked(sel_sample.gain_mode == GainMode.DECLIN)
+        v.gain_mode_decexp.setChecked(sel_sample.gain_mode == GainMode.DECEXP)
+        invert = (not sel_sample.adsr_mode) and (
+            sel_sample.gain_mode != GainMode.DIRECT
+        )
+        v.gain_slider.setInvertedAppearance(invert)
+        v.gain_slider.setInvertedControls(invert)
+        v.gain_slider.setValue(sel_sample.gain_setting)
+        v.gain_setting.setText(hexb(sel_sample.gain_setting))
+        v.attack_slider.setValue(sel_sample.attack_setting)
+        v.attack_setting.setText(hexb(sel_sample.attack_setting))
+        v.decay_slider.setValue(sel_sample.decay_setting)
+        v.decay_setting.setText(hexb(sel_sample.decay_setting))
+        v.sus_level_slider.setValue(sel_sample.sus_level_setting)
+        v.sus_level_setting.setText(hexb(sel_sample.sus_level_setting))
+        v.sus_rate_slider.setValue(sel_sample.sus_rate_setting)
+        v.sus_rate_setting.setText(hexb(sel_sample.sus_rate_setting))
+
+        v.tune_slider.setValue(sel_sample.tune_setting)
+        v.tune_setting.setText(hexb(sel_sample.tune_setting))
+        v.subtune_slider.setValue(sel_sample.subtune_setting)
+        v.subtune_setting.setText(hexb(sel_sample.subtune_setting))
+
+        v.brr_setting.setText(sel_sample.brr_str)
+
+        # Apply the more interesting UI updates
+        self._update_gain_limits(sel_sample.gain_mode == GainMode.DIRECT)
+        self._update_envelope(
+            sel_sample.adsr_mode,
+            sel_sample.attack_setting,
+            sel_sample.decay_setting,
+            sel_sample.sus_level_setting,
+            sel_sample.sus_rate_setting,
+            sel_sample.gain_mode,
+            sel_sample.gain_setting,
+        )
 
     ###########################################################################
     # Private property definitions

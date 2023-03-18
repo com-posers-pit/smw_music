@@ -11,7 +11,6 @@
 # Standard library imports
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
-from functools import total_ordering
 from pathlib import Path
 
 # Library imports

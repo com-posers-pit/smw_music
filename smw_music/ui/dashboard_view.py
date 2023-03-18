@@ -164,8 +164,6 @@ class DashboardView(QMainWindow):
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
-    instrument_list: QTreeWidget
-    instrument_list_box: QGroupBox
     instrument_multisample_tab: QWidget
     instrument_sample_group: QGroupBox
     instrument_sample_tab: QWidget
@@ -239,6 +237,8 @@ class DashboardView(QMainWindow):
     redo: QAction
     reload_musicxml: QPushButton
     render_zip: QPushButton
+    sample_list: QTreeWidget
+    sample_list_box: QGroupBox
     sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox
     sample_settings_tabs: QTabWidget

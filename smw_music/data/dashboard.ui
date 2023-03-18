@@ -222,13 +222,13 @@
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <widget class="QGroupBox" name="instrument_list_box">
+           <widget class="QGroupBox" name="sample_list_box">
             <property name="title">
              <string>Instruments</string>
             </property>
             <layout class="QGridLayout" name="gridLayout_2">
              <item row="0" column="0" colspan="2">
-              <widget class="QTreeWidget" name="instrument_list">
+              <widget class="QTreeWidget" name="sample_list">
                <property name="horizontalScrollBarPolicy">
                 <enum>Qt::ScrollBarAlwaysOff</enum>
                </property>
@@ -2339,7 +2339,7 @@
   <tabstop>render_zip</tabstop>
   <tabstop>settings_tab_widget</tabstop>
   <tabstop>instrument_config_tab</tabstop>
-  <tabstop>instrument_list</tabstop>
+  <tabstop>sample_list</tabstop>
   <tabstop>select_builtin_sample</tabstop>
   <tabstop>builtin_sample</tabstop>
   <tabstop>select_pack_sample</tabstop>

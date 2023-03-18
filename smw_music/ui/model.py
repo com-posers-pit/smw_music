@@ -669,7 +669,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._append_recent_project(fname)
 
             self._undo_level = 0
-            self._history = [replace(save_state, instrument_idx=0)]
+            self._history = [replace(save_state)]
             self._project_path = fname.parent
             if musicxml := self.state.musicxml_fname:
                 try:
@@ -720,8 +720,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.response_generated.emit(True, "Song load", str(e))
         else:
             self.state.instruments = self.song.instruments
-        inst_idx = 0 if len(self.state.instruments) else None
-        self._update_state(True, musicxml_fname=fname, instrument_idx=inst_idx)
+        self._update_state(True, musicxml_fname=fname)
         self.update_status(f"MusicXML name set to {fname}")
 
     ###########################################################################
