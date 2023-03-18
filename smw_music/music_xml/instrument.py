@@ -145,8 +145,8 @@ class InstrumentConfig:
                 # Weinberg:
                 # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
                 samples = [
-                    ("C3_", Pitch("C6"), NoteHead.X, 22),
-                    ("C2_", Pitch("B5"), NoteHead.X, 22),
+                    ("CR3_", Pitch("C6"), NoteHead.X, 22),
+                    ("CR2_", Pitch("B5"), NoteHead.X, 22),
                     ("CR", Pitch("A5"), NoteHead.X, 22),
                     ("CH", Pitch("G5"), NoteHead.X, 22),
                     ("RD", Pitch("F5"), NoteHead.X, 22),
