@@ -680,13 +680,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         "Error loading score",
                         f"Could not open score {musicxml}: {str(e)}",
                     )
-                else:
-                    self.reinforce_state()
-                    self.update_status(
-                        f"Opened project {self.state.project_name}"
-                    )
             else:
                 self.song = None
+
+            self.reinforce_state()
+            self.update_status(f"Opened project {self.state.project_name}")
 
     ###########################################################################
 
