@@ -447,13 +447,7 @@ class Dashboard(QWidget):
 
     def on_state_changed(self, state: State, update_instruments: bool) -> None:
         if update_instruments:
-            insts: list[str | list[str]] = []
-            for inst in state.instruments:
-                if len(inst.samples) == 1:
-                    insts.append(inst.name)
-                else:
-                    insts.append([sample.name for sample in inst.samples])
-            self._update_instruments(insts)
+            self._update_instruments(state)
 
         v = self._view  # pylint: disable=invalid-name
         self._unsaved = state.unsaved
@@ -1007,41 +1001,38 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _update_instruments(self, instruments: list[str | list[str]]) -> None:
+    def _update_instruments(self, state: State) -> None:
         widget = self._view.sample_list
 
         with QSignalBlocker(widget):
             widget.clear()
             self._samples.clear()
 
-            for inst in instruments:
-                if isinstance(inst, str):
-                    item = QTreeWidgetItem([inst])
-                    item.setToolTip(_TblCol.SOLO, f"Solo {inst}")
-                    item.setToolTip(_TblCol.MUTE, f"Mute {inst}")
+            for inst in state.instruments:
+                name = inst.name
+                item = QTreeWidgetItem([name])
+                item.setToolTip(_TblCol.SOLO, f"Solo {name}")
+                item.setToolTip(_TblCol.MUTE, f"Mute {name}")
+
+                item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
+                item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
+
+                widget.addTopLevelItem(item)
+                parent = item
+                parent_name = name
+                self._samples[(name, name)] = item
+
+                for sample in inst.samples[1:]:
+                    name = sample.name
+                    item = QTreeWidgetItem([name])
+                    item.setToolTip(_TblCol.SOLO, f"Solo {name}")
+                    item.setToolTip(_TblCol.MUTE, f"Mute {name}")
 
                     item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
                     item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
 
-                    widget.addTopLevelItem(item)
-                    parent = item
-                    parent_name = inst
-                    self._samples[(inst, inst)] = item
-                else:
-                    for sample in inst:
-                        item = QTreeWidgetItem([sample])
-                        item.setToolTip(_TblCol.SOLO, f"Solo {inst}")
-                        item.setToolTip(_TblCol.MUTE, f"Mute {inst}")
-
-                        item.setCheckState(
-                            _TblCol.SOLO, Qt.CheckState.Unchecked
-                        )
-                        item.setCheckState(
-                            _TblCol.MUTE, Qt.CheckState.Unchecked
-                        )
-
-                        parent.addChild(item)
-                        self._samples[(parent_name, sample)] = item
+                    parent.addChild(item)
+                    self._samples[(parent_name, name)] = item
 
     ###########################################################################
 
