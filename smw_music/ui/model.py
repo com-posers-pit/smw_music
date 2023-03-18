@@ -661,6 +661,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             save_state = load(fname)
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
+        except FileNotFoundError:
+            self.response_generated.emit(
+                True, "Invalid project file", "Could not find project file"
+            )
         else:
             self._append_recent_project(fname)
 
