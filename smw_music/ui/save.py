@@ -283,8 +283,8 @@ def load(fname: Path) -> State:
     project = contents["song"]
     sdict = contents["state"]
     state = State(
-        musicxml_fname=sdict["musicxml_fname"],
-        mml_fname=sdict["mml_fname"],
+        musicxml_fname=Path(sdict["musicxml_fname"]),
+        mml_fname=Path(sdict["mml_fname"]),
         loop_analysis=sdict["loop_analysis"],
         measure_numbers=sdict["measure_numbers"],
         global_volume=sdict["global_volume"],
@@ -311,8 +311,8 @@ def save(fname: Path, state: State) -> None:
         "song": state.project_name,
         "time": f"{datetime.datetime.utcnow()}",
         "state": {
-            "musicxml_fname": state.musicxml_fname,
-            "mml_fname": state.mml_fname,
+            "musicxml_fname": str(state.musicxml_fname),
+            "mml_fname": str(state.mml_fname),
             "loop_analysis": state.loop_analysis,
             "measure_numbers": state.measure_numbers,
             "global_volume": state.global_volume,

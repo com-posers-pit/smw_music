@@ -474,8 +474,8 @@ class Dashboard(QWidget):
                 stack.enter_context(QSignalBlocker(child))
 
             # Control Panel
-            v.musicxml_fname.setText(state.musicxml_fname)
-            v.mml_fname.setText(state.mml_fname)
+            v.musicxml_fname.setText(str(state.musicxml_fname))
+            v.mml_fname.setText(str(state.mml_fname))
             v.porter_name.setText(state.porter)
             v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)

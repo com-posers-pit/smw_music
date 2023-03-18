@@ -38,8 +38,8 @@ class PreferencesState:
 
 @dataclass
 class State:
-    musicxml_fname: str = ""
-    mml_fname: str = ""
+    musicxml_fname: Path = field(default_factory=lambda: Path(""))
+    mml_fname: Path = field(default_factory=lambda: Path(""))
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
