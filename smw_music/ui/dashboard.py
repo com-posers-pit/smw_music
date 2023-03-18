@@ -716,7 +716,7 @@ class Dashboard(QWidget):
                 raise Exception(f"Unhandled widget connection {widget}")
 
         v.sample_list.itemChanged.connect(self._on_solomute_change)
-        v.sample_list.itemSelectionChanged.connect(self._on_inst_change)
+        v.sample_list.itemSelectionChanged.connect(self._on_sample_change)
         v.sample_pack_list.itemSelectionChanged.connect(
             self.on_pack_sample_changed
         )
@@ -858,9 +858,12 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _on_inst_change(self) -> None:
+    def _on_sample_change(self) -> None:
         widget = self._view.sample_list
-        self._model.on_instrument_changed(widget.currentIndex().row())
+        sample = widget.currentItem().data(
+            _TblCol.NAME, Qt.ItemDataRole.UserRole
+        )
+        self._model.on_sample_changed(sample)
 
     ###########################################################################
 
@@ -1009,21 +1012,12 @@ class Dashboard(QWidget):
             self._samples.clear()
 
             for inst in state.instruments:
-                name = inst.name
-                item = QTreeWidgetItem([name])
-                item.setToolTip(_TblCol.SOLO, f"Solo {name}")
-                item.setToolTip(_TblCol.MUTE, f"Mute {name}")
+                names = [inst.name]
+                if len(inst.samples) > 1:
+                    names.extend(sample.name for sample in inst.samples)
 
-                item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
-                item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
+                for n, name in enumerate(names):
 
-                widget.addTopLevelItem(item)
-                parent = item
-                parent_name = name
-                self._samples[(name, name)] = item
-
-                for sample in inst.samples[1:]:
-                    name = sample.name
                     item = QTreeWidgetItem([name])
                     item.setToolTip(_TblCol.SOLO, f"Solo {name}")
                     item.setToolTip(_TblCol.MUTE, f"Mute {name}")
@@ -1031,8 +1025,16 @@ class Dashboard(QWidget):
                     item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
                     item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
 
-                    parent.addChild(item)
-                    self._samples[(parent_name, name)] = item
+                    if n == 0:
+                        widget.addTopLevelItem(item)
+                        parent = item
+                        parent_name = name
+                    else:
+                        parent.addChild(item)
+
+                    role = (parent_name, name)
+                    self._samples[role] = item
+                    item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
 
     ###########################################################################
 

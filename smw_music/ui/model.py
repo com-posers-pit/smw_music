@@ -643,13 +643,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_instrument_changed(self, idx: int) -> None:
-        self._update_state(instrument_idx=idx)
-        inst = self.state.instruments[idx].name
-        self.update_status(f"{inst} selected")
-
-    ###########################################################################
-
     def on_interpolate_changed(self, state: bool) -> None:
         self._update_inst_state(dyn_interpolate=state)
         self.update_status(f"Dynamics interpolation {_endis(state)}")
@@ -866,6 +859,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.response_generated.emit(
             False, "Zip Render", f"Zip file {zname} rendered"
         )
+
+    ###########################################################################
+
+    def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
+        self._update_state(sample_idx=sample_idx)
+        sample = self.state.samples[sample_idx].name
+        self.update_status(f"{sample} selected")
 
     ###########################################################################
 
@@ -1180,7 +1180,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | list[InstrumentConfig]
         | None
         | EchoConfig
-        | int,
+        | int
+        | tuple[str, str],
     ) -> None:
         if kwargs:
             new_state = replace(self.state, **kwargs)

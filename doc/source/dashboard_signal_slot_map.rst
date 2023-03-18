@@ -90,7 +90,7 @@ Instruments
 
    flowchart LR
       view.sample_list.itemChanged --> dashboard._on_solomute_change --> model.on_mute_changed & on_solo_changed
-      view.sample_list.selectionChanged --> dashboard._on_inst_change --> model.on_instrument_changed
+      view.sample_list.selectionChanged --> dashboard._on_sample_change --> model.on_sample_changed
       view.octave.valueChanged --> model.on_octave_changed
 
 Dynamics
