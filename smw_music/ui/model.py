@@ -672,14 +672,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._history = [replace(save_state)]
             self._project_path = fname.parent
             if musicxml := self.state.musicxml_fname:
-                try:
-                    self.song = Song.from_music_xml(musicxml)
-                except MusicXmlException as e:
-                    self.response_generated.emit(
-                        True,
-                        "Error loading score",
-                        f"Could not open score {musicxml}: {str(e)}",
-                    )
+                self._load_musicxml(musicxml, True)
             else:
                 self.song = None
 
@@ -714,12 +707,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_musicxml_fname_changed(self, fname: str) -> None:
-        try:
-            self.song = Song.from_music_xml(fname)
-        except MusicXmlException as e:
-            self.response_generated.emit(True, "Song load", str(e))
-        else:
-            self.state.instruments = self.song.instruments
+        self._load_musicxml(Path(fname), False)
+
         self._update_state(True, musicxml_fname=fname)
         self.update_status(f"MusicXML name set to {fname}")
 
@@ -834,15 +823,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        self.song = Song.from_music_xml(self.state.musicxml_fname)
+        self._load_musicxml(self.state.musicxml_fname, True)
 
-        instruments = {inst.name: inst for inst in self.state.instruments}
-
-        for n, instrument in enumerate(self.song.instruments):
-            if instrument.name in instruments:
-                self.song.instruments[n] = instruments[instrument.name]
-
-        self.state.instruments[:] = self.song.instruments
         self.reinforce_state()
         self.update_status("MusicXML reloaded")
 
@@ -1012,6 +994,30 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             dynamics[dyn] = val
 
         self._update_inst_state(dynamics=dynamics)
+
+    ###########################################################################
+
+    def _load_musicxml(self, musicxml: Path, keep_inst_settings: bool) -> None:
+        try:
+            self.song = Song.from_music_xml(str(musicxml))
+        except MusicXmlException as e:
+            self.response_generated.emit(
+                True,
+                "Error loading score",
+                f"Could not open score {musicxml}: {str(e)}",
+            )
+        else:
+            if keep_inst_settings:
+                # Reconcile instrument settings
+                for song_inst in self.song.instruments:
+                    for state_inst in self.state.instruments:
+                        if song_inst.name == state_inst.name:
+                            song_inst.mute = state_inst.mute
+                            song_inst.solo = state_inst.solo
+                            song_inst.samples = state_inst.samples
+
+            # State instruments aliases the song's instruments
+            self.state.instruments = self.song.instruments
 
     ###########################################################################
 
