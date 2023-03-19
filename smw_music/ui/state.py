@@ -11,7 +11,6 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from itertools import chain
 from pathlib import Path
 
 # Package imports
@@ -38,12 +37,14 @@ class PreferencesState:
 
 @dataclass
 class State:
-    musicxml_fname: Path = field(default_factory=lambda: Path(""))
-    mml_fname: Path = field(default_factory=lambda: Path(""))
+    musicxml_fname: Path | None = None
+    mml_fname: Path | None = None
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
-    instruments: list[InstrumentConfig] = field(default_factory=lambda: [])
+    instruments: dict[str, InstrumentConfig] = field(
+        default_factory=lambda: {}
+    )
     global_volume: int = 128
     global_legato: bool = True
     global_echo_enable: bool = True
@@ -58,7 +59,7 @@ class State:
     game: str = ""
     start_measure: int = 1
 
-    sample_idx: tuple[str, str] | None = None
+    sample_idx: tuple[str, str | None] | None = None
 
     ###########################################################################
     # Property definitions

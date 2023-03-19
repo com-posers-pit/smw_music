@@ -105,7 +105,6 @@ class SampleSource(IntEnum):
     BUILTIN = auto()
     SAMPLEPACK = auto()
     BRR = auto()
-    MULTISAMPLE = auto()
     OVERRIDE = auto()
 
 
@@ -114,65 +113,85 @@ class SampleSource(IntEnum):
 
 @dataclass
 class InstrumentConfig:
-    name: str
     transpose: int = 0
     dynamics_present: set[Dynamics] = field(
         default_factory=lambda: set(Dynamics)
     )
     mute: bool = False
     solo: bool = False
-    samples: list["InstrumentSample"] = field(default_factory=lambda: [])
+    samples: dict[str, "InstrumentSample"] = field(default_factory=lambda: {})
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_name(cls, name: str) -> "InstrumentConfig":
+        name = name.lower()
+
+        if name == "drumset":
+            # Weinberg:
+            # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
+            sample_defs = [
+                ("CR3_", Pitch("C6"), NoteHead.X, 22),
+                ("CR2_", Pitch("B5"), NoteHead.X, 22),
+                ("CR", Pitch("A5"), NoteHead.X, 22),
+                ("CH", Pitch("G5"), NoteHead.X, 22),
+                ("RD", Pitch("F5"), NoteHead.X, 22),
+                ("OH", Pitch("E5"), NoteHead.X, 22),
+                ("RD2_", Pitch("D5"), NoteHead.X, 22),
+                ("HT", Pitch("E5"), NoteHead.NORMAL, 24),
+                ("MT", Pitch("D5"), NoteHead.NORMAL, 23),
+                ("SN", Pitch("C5"), NoteHead.NORMAL, 10),
+                ("LT", Pitch("A4"), NoteHead.NORMAL, 21),
+                ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
+            ]
+
+            samples = {
+                name: InstrumentSample(
+                    llim=pitch,
+                    ulim=pitch,
+                    start=pitch,
+                    notehead=notehead,
+                    builtin_sample_index=idx,
+                )
+                for name, pitch, notehead, idx in sample_defs
+            }
+        else:
+            # Default instrument mapping, from Wakana's tutorial
+            inst_map = {
+                "flute": 0,
+                "marimba": 3,
+                "cello": 4,
+                "trumpet": 6,
+                "bass": 8,
+                "bassguitar": 8,
+                "electricbass": 8,
+                "piano": 13,
+                "guitar": 17,
+                "electricguitar": 17,
+            }
+
+            samples = {
+                "": InstrumentSample(
+                    builtin_sample_index=inst_map.get(name, 0)
+                )
+            }
+
+        return cls(samples=samples)
 
     ###########################################################################
     # API method definitions
     ###########################################################################
 
-    def emit(self, note: Pitch, notehead: str | None = None) -> Pitch | None:
+    def emit_note(
+        self, note: Pitch, notehead: str | None = None
+    ) -> Pitch | None:
         for sample in self.samples:
             sample_out = sample.emit(note, notehead)
             if sample_out is not None:
                 return sample_out
         return None
-
-    ###########################################################################
-    # Data model method definitions
-    ###########################################################################
-
-    def __post_init__(self) -> None:
-        if not self.samples:
-            name = self.name
-            if name == "Drumset":
-                # Weinberg:
-                # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
-                samples = [
-                    ("CR3_", Pitch("C6"), NoteHead.X, 22),
-                    ("CR2_", Pitch("B5"), NoteHead.X, 22),
-                    ("CR", Pitch("A5"), NoteHead.X, 22),
-                    ("CH", Pitch("G5"), NoteHead.X, 22),
-                    ("RD", Pitch("F5"), NoteHead.X, 22),
-                    ("OH", Pitch("E5"), NoteHead.X, 22),
-                    ("RD2_", Pitch("D5"), NoteHead.X, 22),
-                    ("HT", Pitch("E5"), NoteHead.NORMAL, 24),
-                    ("MT", Pitch("D5"), NoteHead.NORMAL, 23),
-                    ("SN", Pitch("C5"), NoteHead.NORMAL, 10),
-                    ("LT", Pitch("A4"), NoteHead.NORMAL, 21),
-                    ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
-                ]
-
-                self.samples = [
-                    InstrumentSample(
-                        name,
-                        llim=pitch,
-                        ulim=pitch,
-                        start=pitch,
-                        notehead=notehead,
-                        builtin_sample_index=idx,
-                    )
-                    for name, pitch, notehead, idx in samples
-                ]
-
-            else:
-                self.samples = [InstrumentSample(self.name)]
 
 
 ###############################################################################
@@ -180,7 +199,6 @@ class InstrumentConfig:
 
 @dataclass
 class InstrumentSample:
-    name: str
     octave: int = 3
     dynamics: dict[Dynamics, int] = field(
         default_factory=lambda: {
@@ -230,28 +248,6 @@ class InstrumentSample:
     start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
 
     _instrument_idx: int = field(default=0, init=False)
-
-    ###########################################################################
-    # Data model method definitions
-    ###########################################################################
-
-    def __post_init__(self) -> None:
-        # Default instrument mapping, from Wakana's tutorial
-        inst_map = {
-            "flute": 0,
-            "marimba": 3,
-            "cello": 4,
-            "trumpet": 6,
-            "bass": 8,
-            "bassguitar": 8,
-            "electricbass": 8,
-            "piano": 13,
-            "guitar": 17,
-            "electricguitar": 17,
-        }
-
-        if self.builtin_sample_index == -1:
-            self.builtin_sample_index = inst_map.get(self.name.lower(), 0)
 
     ###########################################################################
     # API method definitions

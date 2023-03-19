@@ -669,10 +669,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._undo_level = 0
             self._history = [replace(save_state)]
             self._project_path = fname.parent
-            if musicxml := self.state.musicxml_fname:
-                self._load_musicxml(musicxml, True)
-            else:
+            musicxml = self.state.musicxml_fname
+            if musicxml is None:
                 self.song = None
+            else:
+                self._load_musicxml(musicxml, True)
 
             self.reinforce_state()
             self.update_status(f"Opened project {self.state.project_name}")
@@ -867,10 +868,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
+    def on_sample_changed(self, sample_idx: tuple[str, str | None]) -> None:
         self._update_state(sample_idx=sample_idx)
-        sample = self.state.samples[sample_idx].name
-        self.update_status(f"{sample} selected")
+
+        inst, sample = sample_idx
+        name = inst if sample is None else sample
+        self.update_status(f"{name} selected")
 
     ###########################################################################
 
@@ -1186,7 +1189,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | None
         | EchoConfig
         | int
-        | tuple[str, str],
+        | tuple[str, str | None],
     ) -> None:
         if kwargs:
             new_state = replace(self.state, **kwargs)

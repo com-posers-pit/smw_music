@@ -16,6 +16,7 @@ from itertools import takewhile
 from typing import Iterable, TypeVar, cast
 
 # Package imports
+from smw_music.music_xml.instrument import InstrumentConfig
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
@@ -99,8 +100,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # Private method definitions
     ###########################################################################
 
-    def _reset_state(self, instr_octave_map: dict[str, int]) -> None:
-        self._exporter = MmlExporter(instr_octave_map)
+    def _reset_state(self, instruments: list[InstrumentConfig]) -> None:
+        self._exporter = MmlExporter(instruments)
 
         notelen = _default_notelen(flatten(self.tokens))
         self._update_state_defaults(notelen)
@@ -174,7 +175,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
                 self._update_state_defaults(
                     _default_notelen(flatten(self.tokens[n + 1 :]))
                 )
-            self._exporter._emit(token)
+            self._exporter.emit(token)
 
         lines = " ".join(self._exporter.directives).splitlines()
         return CRLF.join(x.strip() for x in lines)

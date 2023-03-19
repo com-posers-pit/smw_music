@@ -15,6 +15,7 @@ from enum import Enum, auto
 from functools import singledispatchmethod
 
 # Package imports
+from smw_music.music_xml.instrument import InstrumentConfig
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
     Annotation,
@@ -77,12 +78,12 @@ class Exporter:
 
     # This needs to be included to keep mypy from complaining in subclasses
     @singledispatchmethod
-    def _emit(self, token: Token) -> None:
+    def emit(self, token: Token) -> None:
         raise NotImplementedError
 
     def generate(self, tokens: list[Token]) -> None:
         for token in tokens:
-            self._emit(token)
+            self.emit(token)
 
 
 ###############################################################################
@@ -99,6 +100,7 @@ class SlurState(Enum):
 
 @dataclass
 class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
+    instruments: list[InstrumentConfig]
     instr_octave_map: dict[str, int]
     octave: int = 4
     default_note_len: int = 8
@@ -118,43 +120,43 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     @singledispatchmethod
-    def _emit(self, token: Token) -> None:
+    def emit(self, token: Token) -> None:
         raise NotImplementedError
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Annotation) -> None:
         self._append(token.text)
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: CrescDelim) -> None:
         pass
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Clef) -> None:
         self.percussion = token.percussion
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Crescendo) -> None:
         cmd = "CRESC" if token.cresc else "DIM"
         self._append(f"{cmd}${token.duration:02X}$_{token.target.upper()}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Dynamic) -> None:
         self._append(f"v{token.level.upper()}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Instrument) -> None:
         instr = token.name
         self._append(f"@{instr}")
@@ -162,7 +164,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Loop) -> None:
         if token.superloop:
             open_dir = "[["
@@ -183,20 +185,20 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: LoopDelim) -> None:
         pass
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: LoopRef) -> None:
         repeats = f"{token.repeats}" if token.repeats > 1 else ""
         self._append(f"({token.loop_id}){repeats}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Measure) -> None:
         comment = ""
         if self.measure_numbers:
@@ -209,7 +211,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: RehearsalMark) -> None:
         self._append(CRLF)
         self._append(f";===================={CRLF}")
@@ -222,14 +224,14 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Repeat) -> None:
         if token.start:
             self._append("/")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Rest) -> None:
         directive = "r"
         if token.duration != self.default_note_len:
@@ -240,7 +242,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Slur) -> None:
         self.slur = (
             SlurState.SLUR_ACTIVE if token.start else SlurState.SLUR_END
@@ -248,7 +250,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Tempo) -> None:
         # Magic BPM -> MML/SPC tempo conversion
         tempo = int(token.bpm * 255 / 625)
@@ -256,20 +258,20 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Triplet) -> None:
         self._in_triplet = token.start
         self._append("{" if token.start else "}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Vibrato) -> None:
         self._append("$DE$01$23$45" if token.start else "VIB_OFF")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Note) -> None:
         if token.grace:
             self.grace = True

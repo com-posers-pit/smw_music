@@ -60,17 +60,15 @@ class _EchoDict(TypedDict):
 
 
 class _InstrumentDict(TypedDict):
-    name: str
     mute: bool
     solo: bool
-    samples: list["_SampleDict"]
+    samples: dict[str, "_SampleDict"]
 
 
 ###############################################################################
 
 
 class _SampleDict(TypedDict):
-    name: str
     octave: int
     dynamics: dict[int, int]
     interpolate_dynamics: bool
@@ -115,15 +113,15 @@ class _SaveDict(TypedDict):
 
 
 class _StateDict(TypedDict):
-    musicxml_fname: str
-    mml_fname: str
+    musicxml_fname: str | None
+    mml_fname: str | None
     loop_analysis: bool
     measure_numbers: bool
     global_volume: bool
     global_legato: bool
     global_echo_enable: bool
     echo: _EchoDict
-    instruments: list[_InstrumentDict]
+    instruments: dict[str, _InstrumentDict]
     porter: str
     game: str
     start_measure: int
@@ -151,8 +149,7 @@ def _load_echo(echo: _EchoDict) -> EchoConfig:
 
 def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
     return InstrumentConfig(
-        name=inst["name"],
-        samples=[_load_sample(x) for x in inst["samples"]],
+        samples={k: _load_sample(v) for k, v in inst["samples"].items()},
         mute=inst["mute"],
         solo=inst["solo"],
     )
@@ -163,7 +160,6 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
 
 def _load_sample(inst: _SampleDict) -> InstrumentSample:
     return InstrumentSample(
-        name=inst["name"],
         octave=inst["octave"],
         dynamics={Dynamics(k): v for k, v in inst["dynamics"].items()},
         dyn_interpolate=inst["interpolate_dynamics"],
@@ -219,10 +215,9 @@ def _save_echo(echo: EchoConfig) -> _EchoDict:
 
 def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
     return {
-        "name": inst.name,
         "mute": inst.mute,
         "solo": inst.solo,
-        "samples": [_save_sample(x) for x in inst.samples],
+        "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
     }
 
 
@@ -231,7 +226,6 @@ def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
 
 def _save_sample(sample: InstrumentSample) -> _SampleDict:
     return {
-        "name": sample.name,
         "octave": sample.octave,
         "dynamics": {k.value: v for k, v in sample.dynamics.items()},
         "interpolate_dynamics": sample.dyn_interpolate,
@@ -282,16 +276,20 @@ def load(fname: Path) -> State:
 
     project = contents["song"]
     sdict = contents["state"]
+    musicxml = sdict["musicxml_fname"]
+    mml = sdict["mml_fname"]
     state = State(
-        musicxml_fname=Path(sdict["musicxml_fname"]),
-        mml_fname=Path(sdict["mml_fname"]),
+        musicxml_fname=None if musicxml is None else Path(musicxml),
+        mml_fname=None if mml is None else Path(mml),
         loop_analysis=sdict["loop_analysis"],
         measure_numbers=sdict["measure_numbers"],
         global_volume=sdict["global_volume"],
         global_legato=sdict["global_legato"],
         global_echo_enable=sdict["global_echo_enable"],
         echo=_load_echo(sdict["echo"]),
-        instruments=[_load_instrument(inst) for inst in sdict["instruments"]],
+        instruments={
+            k: _load_instrument(v) for k, v in sdict["instruments"].items()
+        },
         project_name=project,
         porter=sdict["porter"],
         game=sdict["game"],
@@ -305,23 +303,26 @@ def load(fname: Path) -> State:
 
 
 def save(fname: Path, state: State) -> None:
+    musicxml = state.musicxml_fname
+    mml = state.mml_fname
+
     contents = {
         "tool_version": __version__,
         "save_version": _CURRENT_SAVE_VERSION,
         "song": state.project_name,
         "time": f"{datetime.datetime.utcnow()}",
         "state": {
-            "musicxml_fname": str(state.musicxml_fname),
-            "mml_fname": str(state.mml_fname),
+            "musicxml_fname": None if musicxml is None else str(musicxml),
+            "mml_fname": None if mml is None else str(mml),
             "loop_analysis": state.loop_analysis,
             "measure_numbers": state.measure_numbers,
             "global_volume": state.global_volume,
             "global_legato": state.global_legato,
             "global_echo_enable": state.global_echo_enable,
             "echo": _save_echo(state.echo),
-            "instruments": [
-                _save_instrument(inst) for inst in state.instruments
-            ],
+            "instruments": {
+                k: _save_instrument(v) for k, v in state.instruments.items()
+            },
             "porter": state.porter,
             "game": state.game,
             "start_measure": state.start_measure,

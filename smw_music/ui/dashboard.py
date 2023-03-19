@@ -177,7 +177,7 @@ class Dashboard(QWidget):
     _keyhist: deque[int]
     _window_title: str
     _default_tooltips: dict[QWidget | QAction, str]
-    _samples: dict[tuple[str, str], QTreeWidgetItem]
+    _samples: dict[tuple[str, str | None], QTreeWidgetItem]
 
     ###########################################################################
     # Constructor definitions
@@ -468,8 +468,14 @@ class Dashboard(QWidget):
                 stack.enter_context(QSignalBlocker(child))
 
             # Control Panel
-            v.musicxml_fname.setText(str(state.musicxml_fname))
-            v.mml_fname.setText(str(state.mml_fname))
+            musicxml_fname = state.musicxml_fname
+            fname = "" if musicxml_fname is None else str(musicxml_fname)
+            v.musicxml_fname.setText(fname)
+
+            mml_fname = state.mml_fname
+            fname = "" if mml_fname is None else str(mml_fname)
+            v.mml_fname.setText(fname)
+
             v.porter_name.setText(state.porter)
             v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)
@@ -495,7 +501,12 @@ class Dashboard(QWidget):
             sample_list = self._view.sample_list
             sample_idx = state.sample_idx
             if sample_idx is not None:
-                self._update_sample_config(state, sample_idx)
+                sample_list.setCurrentItem(
+                    self._samples[sample_idx], _TblCol.NAME
+                )
+                if sample_idx[1] is not None:
+                    sample_idx = cast(tuple[str, str], sample_idx)
+                    self._update_sample_config(state, sample_idx)
             else:
                 sample_list.clearSelection()
 
@@ -1005,6 +1016,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _update_instruments(self, state: State) -> None:
+        role: tuple[str, str | None]
         widget = self._view.sample_list
 
         with QSignalBlocker(widget):
@@ -1029,10 +1041,11 @@ class Dashboard(QWidget):
                         widget.addTopLevelItem(item)
                         parent = item
                         parent_name = name
+                        role = (name, None)
                     else:
                         parent.addChild(item)
+                        role = (parent_name, name)
 
-                    role = (parent_name, name)
                     self._samples[role] = item
                     item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
 
@@ -1043,10 +1056,7 @@ class Dashboard(QWidget):
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
 
-        sample_list = self._view.sample_list
         sel_sample = state.samples[sample_idx]
-        sample_list.setCurrentItem(self._samples[sample_idx], _TblCol.NAME)
-
         for key, sample in state.samples.items():
             solo = _to_checked(sample.solo)
             mute = _to_checked(sample.mute)
@@ -1113,10 +1123,6 @@ class Dashboard(QWidget):
         fname = str(sel_sample.brr_fname) if sel_sample.brr_fname.name else ""
         v.brr_fname.setText(fname)
 
-        multisample = sel_sample.sample_source == SampleSource.MULTISAMPLE
-        v.select_multisample_sample.setChecked(multisample)
-        idx = v.instrument_config_tab.indexOf(v.instrument_multisample_tab)
-        v.instrument_config_tab.setTabVisible(idx, multisample)
         v.octave.setValue(sel_sample.octave)
 
         v.select_adsr_mode.setChecked(sel_sample.adsr_mode)
