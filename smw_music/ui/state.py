@@ -66,6 +66,26 @@ class State:
     ###########################################################################
 
     @property
+    def sample(self) -> InstrumentSample | None:
+        if self.sample_idx is None:
+            return None
+        return self.samples[self.sample_idx]
+
+    ###########################################################################
+
+    @sample.setter
+    def sample(self, sample: InstrumentSample) -> None:
+        if self.sample_idx is not None:
+            inst_name, sample_name = self.sample_idx
+            inst = self.instruments[inst_name]
+            if sample_name is None:
+                inst.sample = sample
+            else:
+                inst.samples[sample_name] = sample
+
+    ###########################################################################
+
+    @property
     def samples(self) -> dict[tuple[str, str | None], InstrumentSample]:
         samples: dict[tuple[str, str | None], InstrumentSample] = {}
 
