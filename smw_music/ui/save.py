@@ -13,6 +13,7 @@
 
 # Standard library imports
 import datetime
+from dataclasses import replace
 from pathlib import Path
 from typing import TypedDict
 
@@ -63,6 +64,7 @@ class _InstrumentDict(TypedDict):
     mute: bool
     solo: bool
     samples: dict[str, "_SampleDict"]
+    sample: "_SampleDict"
 
 
 ###############################################################################
@@ -148,11 +150,15 @@ def _load_echo(echo: _EchoDict) -> EchoConfig:
 
 
 def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
-    return InstrumentConfig(
-        samples={k: _load_sample(v) for k, v in inst["samples"].items()},
+    rv = InstrumentConfig(
         mute=inst["mute"],
         solo=inst["solo"],
+        samples={k: _load_sample(v) for k, v in inst["samples"].items()},
     )
+
+    rv.sample = _load_sample(inst["sample"])
+
+    return rv
 
 
 ###############################################################################
@@ -218,6 +224,7 @@ def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
         "mute": inst.mute,
         "solo": inst.solo,
         "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
+        "sample": _save_sample(inst.sample),
     }
 
 

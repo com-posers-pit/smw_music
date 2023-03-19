@@ -1017,12 +1017,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             if keep_inst_settings:
                 # Reconcile instrument settings
-                for song_inst in self.song.instruments:
-                    for state_inst in self.state.instruments:
-                        if song_inst.name == state_inst.name:
-                            song_inst.mute = state_inst.mute
-                            song_inst.solo = state_inst.solo
-                            song_inst.samples = state_inst.samples
+                for inst_name, song_inst in self.song.instruments.items():
+                    with suppress(KeyError):
+                        state_inst = self.state.instruments[inst_name]
+                        song_inst.solo = state_inst.solo
+                        song_inst.samples = state_inst.samples
 
             # State instruments aliases the song's instruments
             self.state.instruments = self.song.instruments

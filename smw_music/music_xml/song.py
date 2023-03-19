@@ -247,7 +247,7 @@ class Song:
         self.game = metadata.get("game", "???")
         self.volume = int(metadata.get("volume", 180))
         self.channels = channels[:8]
-        self.instruments: list[InstrumentConfig] = []
+        self.instruments: dict[str, InstrumentConfig] = {}
 
         self._reduced_channels: list["Channel"] = []
 
@@ -334,14 +334,14 @@ class Song:
 
         inst_names = sorted(inst_dyns)
 
-        self.instruments = [
-            InstrumentConfig(
+        self.instruments = {
+            inst: InstrumentConfig.from_name(
                 inst,
                 dynamics_present=inst_dyns[inst],
                 transpose=transposes[inst],
             )
             for inst in inst_names
-        ]
+        }
 
     ###########################################################################
 

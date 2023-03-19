@@ -504,9 +504,7 @@ class Dashboard(QWidget):
                 sample_list.setCurrentItem(
                     self._samples[sample_idx], _TblCol.NAME
                 )
-                if sample_idx[1] is not None:
-                    sample_idx = cast(tuple[str, str], sample_idx)
-                    self._update_sample_config(state, sample_idx)
+                self._update_sample_config(state, sample_idx)
             else:
                 sample_list.clearSelection()
 
@@ -862,6 +860,23 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def _make_sample_item(
+        self, name: str, role: tuple[str, str | None]
+    ) -> QTreeWidgetItem:
+        item = QTreeWidgetItem([name])
+        item.setToolTip(_TblCol.SOLO, f"Solo {name}")
+        item.setToolTip(_TblCol.MUTE, f"Mute {name}")
+
+        item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
+        item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
+
+        self._samples[role] = item
+        item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
+
+        return item
+
+    ###############################################################################
+
     def _on_close_project_clicked(self) -> None:
         close = self._prompt_to_save()
         if close != QMessageBox.StandardButton.Cancel:
@@ -1016,43 +1031,27 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _update_instruments(self, state: State) -> None:
-        role: tuple[str, str | None]
         widget = self._view.sample_list
 
         with QSignalBlocker(widget):
             widget.clear()
             self._samples.clear()
 
-            for inst in state.instruments:
-                names = [inst.name]
-                if len(inst.samples) > 1:
-                    names.extend(sample.name for sample in inst.samples)
+            for inst_name, inst in state.instruments.items():
 
-                for n, name in enumerate(names):
+                parent = self._make_sample_item(inst_name, (inst_name, None))
+                widget.addTopLevelItem(parent)
 
-                    item = QTreeWidgetItem([name])
-                    item.setToolTip(_TblCol.SOLO, f"Solo {name}")
-                    item.setToolTip(_TblCol.MUTE, f"Mute {name}")
-
-                    item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
-                    item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
-
-                    if n == 0:
-                        widget.addTopLevelItem(item)
-                        parent = item
-                        parent_name = name
-                        role = (name, None)
-                    else:
-                        parent.addChild(item)
-                        role = (parent_name, name)
-
-                    self._samples[role] = item
-                    item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
+                for sample_name in inst.samples.keys():
+                    item = self._make_sample_item(
+                        sample_name, (inst_name, sample_name)
+                    )
+                    parent.addChild(item)
 
     ###########################################################################
 
     def _update_sample_config(
-        self, state: State, sample_idx: tuple[str, str]
+        self, state: State, sample_idx: tuple[str, str | None]
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
 

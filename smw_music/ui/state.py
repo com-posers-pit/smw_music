@@ -66,10 +66,12 @@ class State:
     ###########################################################################
 
     @property
-    def samples(self) -> dict[tuple[str, str], InstrumentSample]:
-        samples = {}
-        for inst in self.instruments:
-            for sample in inst.samples:
-                samples[(inst.name, sample.name)] = sample
+    def samples(self) -> dict[tuple[str, str | None], InstrumentSample]:
+        samples: dict[tuple[str, str | None], InstrumentSample] = {}
+
+        for inst_name, inst in self.instruments.items():
+            samples[(inst_name, None)] = inst.sample
+            for sample_name, sample in inst.samples.items():
+                samples[(inst_name, sample_name)] = sample
 
         return samples
