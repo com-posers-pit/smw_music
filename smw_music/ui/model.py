@@ -534,6 +534,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
 
+                self.song.instruments = deepcopy(self.state.instruments)
+
                 self.song.volume = self.state.global_volume
                 if self.state.porter:
                     self.song.porter = self.state.porter
@@ -1020,8 +1022,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         song_inst.mute = state_inst.mute
                         song_inst.samples = state_inst.samples
 
-            # State instruments aliases the song's instruments
-            self.state.instruments = self.song.instruments
+            self.state.instruments = deepcopy(self.song.instruments)
 
     ###########################################################################
 
@@ -1138,7 +1139,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _update_sample_state(
         self,
-        idx: int = -1,
         **kwargs: str
         | int
         | dict[Dynamics, int]

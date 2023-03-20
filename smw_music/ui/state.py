@@ -78,7 +78,10 @@ class State:
         if self.sample_idx is not None:
             inst_name, sample_name = self.sample_idx
             inst = self.instruments[inst_name]
-            inst.samples[sample_name] = sample
+            if sample_name:
+                inst.multisamples[sample_name] = sample
+            else:
+                inst.sample = sample
 
     ###########################################################################
 
