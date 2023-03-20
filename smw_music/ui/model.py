@@ -868,11 +868,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_sample_changed(self, sample_idx: tuple[str, str | None]) -> None:
+    def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
         self._update_state(sample_idx=sample_idx)
 
         inst, sample = sample_idx
-        name = inst if sample is None else sample
+        name = inst if sample else sample
         self.update_status(f"{name} selected")
 
     ###########################################################################

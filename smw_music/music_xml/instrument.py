@@ -296,7 +296,9 @@ class InstrumentConfig:
     )
     mute: bool = False
     solo: bool = False
-    samples: dict[str, InstrumentSample] = field(default_factory=lambda: {})
+    multisamples: dict[str, InstrumentSample] = field(
+        default_factory=lambda: {}
+    )
 
     sample: InstrumentSample = field(
         init=False, default_factory=InstrumentSample
@@ -330,7 +332,7 @@ class InstrumentConfig:
                 ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
             ]
 
-            samples = {
+            multisamples = {
                 name: InstrumentSample(
                     llim=pitch,
                     ulim=pitch,
@@ -341,7 +343,7 @@ class InstrumentConfig:
                 for name, pitch, notehead, idx in sample_defs
             }
 
-            inst = cls(samples=samples, **kwargs)
+            inst = cls(multisamples=multisamples, **kwargs)
         else:
             # Default instrument mapping, from Wakana's tutorial
             inst_map = {
@@ -367,13 +369,39 @@ class InstrumentConfig:
     ###########################################################################
 
     def emit_note(
-        self, note: Pitch, notehead: str | None = None
-    ) -> Pitch | None:
-        for sample in self.samples:
-            sample_out = sample.emit(note, notehead)
-            if sample_out is not None:
-                return sample_out
-        return None
+        self, note: Pitch, notehead: str = "normal"
+    ) -> tuple[Pitch, str | None] | None:
+        if self.multisample:
+            for name, sample in self.multisamples.items():
+                sample_out = sample.emit(note, notehead)
+                if sample_out is not None:
+                    return (sample_out, name)
+            return None
+
+        return (self.sample.emit(note, notehead), None)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def multisample(self) -> bool:
+        return bool(len(self.samples))
+
+    ###########################################################################
+
+    @property
+    def samples(self) -> dict[str, InstrumentSample]:
+        samples = {"": self.sample}
+        samples.update(self.multisamples)
+        return samples
+
+    ###########################################################################
+
+    @samples.setter
+    def samples(self, value: dict[str, InstrumentSample]) -> None:
+        self.multisamples = dict(value)
+        self.sample = self.multisamples.pop("")
 
 
 ###############################################################################

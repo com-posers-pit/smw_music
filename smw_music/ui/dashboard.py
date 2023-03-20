@@ -861,7 +861,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _make_sample_item(
-        self, name: str, role: tuple[str, str | None]
+        self, name: str, role: tuple[str, str]
     ) -> QTreeWidgetItem:
         item = QTreeWidgetItem([name])
         item.setToolTip(_TblCol.SOLO, f"Solo {name}")
@@ -1039,10 +1039,10 @@ class Dashboard(QWidget):
 
             for inst_name, inst in state.instruments.items():
 
-                parent = self._make_sample_item(inst_name, (inst_name, None))
+                parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 
-                for sample_name in inst.samples.keys():
+                for sample_name in inst.multisamples.keys():
                     item = self._make_sample_item(
                         sample_name, (inst_name, sample_name)
                     )
@@ -1051,7 +1051,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _update_sample_config(
-        self, state: State, sample_idx: tuple[str, str | None]
+        self, state: State, sample_idx: tuple[str, str]
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
 

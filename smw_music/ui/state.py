@@ -59,7 +59,7 @@ class State:
     game: str = ""
     start_measure: int = 1
 
-    sample_idx: tuple[str, str | None] | None = None
+    sample_idx: tuple[str, str] | None = None
 
     ###########################################################################
     # Property definitions
@@ -78,19 +78,15 @@ class State:
         if self.sample_idx is not None:
             inst_name, sample_name = self.sample_idx
             inst = self.instruments[inst_name]
-            if sample_name is None:
-                inst.sample = sample
-            else:
-                inst.samples[sample_name] = sample
+            inst.samples[sample_name] = sample
 
     ###########################################################################
 
     @property
-    def samples(self) -> dict[tuple[str, str | None], InstrumentSample]:
-        samples: dict[tuple[str, str | None], InstrumentSample] = {}
+    def samples(self) -> dict[tuple[str, str], InstrumentSample]:
+        samples = {}
 
         for inst_name, inst in self.instruments.items():
-            samples[(inst_name, None)] = inst.sample
             for sample_name, sample in inst.samples.items():
                 samples[(inst_name, sample_name)] = sample
 

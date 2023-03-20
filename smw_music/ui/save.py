@@ -64,7 +64,6 @@ class _InstrumentDict(TypedDict):
     mute: bool
     solo: bool
     samples: dict[str, "_SampleDict"]
-    sample: "_SampleDict"
 
 
 ###############################################################################
@@ -153,10 +152,10 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
     rv = InstrumentConfig(
         mute=inst["mute"],
         solo=inst["solo"],
-        samples={k: _load_sample(v) for k, v in inst["samples"].items()},
     )
-
-    rv.sample = _load_sample(inst["sample"])
+    # This is a property setter, not a field in the dataclass, so it has to be
+    # set ex post facto
+    rv.samples = {k: _load_sample(v) for k, v in inst["samples"].items()}
 
     return rv
 
@@ -224,7 +223,6 @@ def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
         "mute": inst.mute,
         "solo": inst.solo,
         "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
-        "sample": _save_sample(inst.sample),
     }
 
 
