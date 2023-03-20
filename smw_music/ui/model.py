@@ -534,10 +534,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
 
-                # Update the instruments in the song
-                # Applying this here means we can reload
-                self.song.instruments = self.state.instruments
-
                 self.song.volume = self.state.global_volume
                 if self.state.porter:
                     self.song.porter = self.state.porter
@@ -587,8 +583,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             shutil.rmtree(samples_path, ignore_errors=True)
             os.makedirs(samples_path, exist_ok=True)
 
-            for inst in self.state.instruments:
-                for sample in inst.samples:
+            for inst in self.state.instruments.values():
+                for sample in inst.samples.values():
                     if sample.sample_source == SampleSource.BRR:
                         shutil.copy2(sample.brr_fname, samples_path)
                     if sample.sample_source == SampleSource.SAMPLEPACK:
@@ -737,10 +733,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_pack_sample_selected(self, state: bool) -> None:
-        if state:
+        if state and self.state.sample:
             self._update_sample_state(sample_source=SampleSource.SAMPLEPACK)
             self.update_status("Sample source set to sample pack")
-            sample = self.state.inst.pack_sample
+            sample = self.state.sample.pack_sample
             if sample[0]:
                 self._load_sample_settings(sample)
 
@@ -840,9 +836,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         # Turn off the preview features
         self.state.start_measure = 1
-        for inst in self.state.instruments:
-            inst.mute = False
-            inst.solo = False
+        for sample in self.state.samples.values():
+            sample.mute = False
+            sample.solo = False
         self.reinforce_state()
 
         self.on_generate_mml_clicked(False)

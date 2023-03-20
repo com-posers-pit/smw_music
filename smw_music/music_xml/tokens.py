@@ -15,6 +15,7 @@ from enum import Enum, auto
 
 # Library imports
 import music21
+from music21.pitch import Pitch
 
 # Package imports
 from smw_music.music_xml.shared import MusicXmlException
@@ -521,9 +522,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     Duration, octave, and tie are poorly implemented, clean this up.
     """
 
-    name: str
+    pitch: Pitch
     duration: int
-    octave: int
     head: str
     dots: int = 0
     tie: str = ""
@@ -554,11 +554,9 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         articulations = [type(x) for x in elem.articulations]
 
         if isinstance(elem, music21.note.Note):
-            name = elem.name
-            octave = elem.octave
+            pitch = elem.pitch
         else:
-            name = elem.displayPitch().name
-            octave = elem.displayOctave
+            pitch = elem.displayPitch()
 
         accent = music21.articulations.Accent in articulations
         staccato = music21.articulations.Staccato in articulations
@@ -568,9 +566,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             articulation = Artic.STACCATO if staccato else Artic.NORMAL
 
         return cls(
-            name.lower().replace("#", "+"),
+            pitch,
             _get_duration(elem),
-            octave - 1,
             elem.notehead,
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
@@ -581,6 +578,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def check(self, percussion: bool) -> list[str]:
+        return []
         msgs = []
         note = self.note_num
         measure = self.measure_num

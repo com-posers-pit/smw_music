@@ -167,11 +167,13 @@ class InstrumentSample:
     # API method definitions
     ###########################################################################
 
-    def emit(self, note: Pitch, notehead: str | None = None) -> Pitch | None:
+    def emit(
+        self, note: Pitch, notehead: NoteHead | None = None
+    ) -> Pitch | None:
         match = True
-        match &= note < self.llim
-        match &= note > self.ulim
-        match &= self.notehead != notehead
+        match &= self.llim <= note <= self.ulim
+        if notehead is not None:
+            match &= self.notehead == notehead
 
         if match:
             return Pitch(note.ps - self.llim.ps + self.start.ps)
@@ -370,15 +372,18 @@ class InstrumentConfig:
 
     def emit_note(
         self, note: Pitch, notehead: str = "normal"
-    ) -> tuple[Pitch, str | None] | None:
+    ) -> tuple[Pitch, str] | None:
+        head = lookup_notehead(notehead)
+
         if self.multisample:
             for name, sample in self.multisamples.items():
-                sample_out = sample.emit(note, notehead)
+                sample_out = sample.emit(note, head)
                 if sample_out is not None:
                     return (sample_out, name)
             return None
 
-        return (self.sample.emit(note, notehead), None)
+        rv = (self.sample.emit(note, None), "")
+        return rv
 
     ###########################################################################
     # API property definitions
@@ -386,7 +391,7 @@ class InstrumentConfig:
 
     @property
     def multisample(self) -> bool:
-        return bool(len(self.samples))
+        return bool(len(self.multisamples))
 
     ###########################################################################
 

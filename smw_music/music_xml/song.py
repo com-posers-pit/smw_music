@@ -27,6 +27,7 @@ from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import (
     Dynamics,
     InstrumentConfig,
+    InstrumentSample,
     SampleSource,
 )
 from smw_music.music_xml.reduction import reduce, remove_unused_instruments
@@ -617,7 +618,9 @@ class Song:
 
         self._validate()
         channels = [
-            x.generate_mml({}, measure_numbers, optimize_percussion)
+            x.generate_mml(
+                self.instruments, measure_numbers, optimize_percussion
+            )
             for x in self._reduced_channels
         ]
 
@@ -626,14 +629,18 @@ class Song:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
         instruments = copy.deepcopy(self.instruments)
-        inst_samples = list(
-            chain.from_iterable(inst.samples for inst in instruments)
-        )
+        inst_samples: dict[str, InstrumentSample] = {}
+
+        for inst_name, inst in instruments.items():
+            if inst.multisample:
+                inst_samples.update(inst.multisamples)
+            else:
+                inst_samples[inst_name] = inst.samples[""]
 
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
-        for sample in inst_samples:
+        for sample in inst_samples.values():
             if sample.sample_source == SampleSource.SAMPLEPACK:
                 fname = str(
                     PurePosixPath(sample.pack_sample[0])
@@ -649,15 +656,15 @@ class Song:
                 sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
-        solo = any(sample.solo for sample in inst_samples)
-        mute = any(sample.mute for sample in inst_samples)
-        solo |= any(inst.solo for inst in instruments)
-        mute |= any(inst.mute for inst in instruments)
+        solo = any(sample.solo for sample in inst_samples.values())
+        mute = any(sample.mute for sample in inst_samples.values())
+        solo |= any(inst.solo for inst in instruments.values())
+        mute |= any(inst.mute for inst in instruments.values())
 
         if solo or mute:
             samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
 
-            for inst_sample in inst_samples:
+            for inst_sample in inst_samples.values():
                 if inst_sample.mute or (solo and not inst_sample.solo):
                     inst_sample.sample_source = SampleSource.OVERRIDE
                     inst_sample.instrument_idx = sample_id

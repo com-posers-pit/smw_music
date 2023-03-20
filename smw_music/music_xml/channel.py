@@ -100,7 +100,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # Private method definitions
     ###########################################################################
 
-    def _reset_state(self, instruments: list[InstrumentConfig]) -> None:
+    def _reset_state(self, instruments: dict[str, InstrumentConfig]) -> None:
         self._exporter = MmlExporter(instruments)
 
         notelen = _default_notelen(flatten(self.tokens))
@@ -146,7 +146,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def generate_mml(
         self,
-        instr_octave_map: dict[str, int],
+        instruments: dict[str, InstrumentConfig],
         measure_numbers: bool = True,
         optimize_percussion: bool = True,
     ) -> str:
@@ -166,7 +166,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         str
             The MML text for this channel
         """
-        self._reset_state(instr_octave_map)
+        self._reset_state(instruments)
         self._exporter.measure_numbers = measure_numbers
         self._exporter.optimize_percussion = optimize_percussion
 

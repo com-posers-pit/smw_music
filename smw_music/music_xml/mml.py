@@ -14,8 +14,11 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from functools import singledispatchmethod
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
-from smw_music.music_xml.instrument import InstrumentConfig
+from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
     Annotation,
@@ -100,8 +103,7 @@ class SlurState(Enum):
 
 @dataclass
 class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
-    instruments: list[InstrumentConfig]
-    instr_octave_map: dict[str, int]
+    instruments: dict[str, InstrumentConfig]
     octave: int = 4
     default_note_len: int = 8
     grace: bool = False
@@ -114,8 +116,11 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     optimize_percussion: bool = False
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
+
+    _instrument: InstrumentConfig = field(init=False)
+    _active_sample: str = field(init=False)
     _in_loop: bool = field(default=False, init=False)
-    _in_triplet: bool = False
+    _in_triplet: bool = field(default=False, init=False)
 
     ###########################################################################
 
@@ -158,9 +163,13 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @emit.register
     def _(self, token: Instrument) -> None:
-        instr = token.name
-        self._append(f"@{instr}")
-        self.octave = self.instr_octave_map.get(instr, 3)
+        name = token.name
+        self._instrument = self.instruments[name]
+        self._active_sample = ""
+
+        if not self._instrument.multisample:
+            self.octave = self._instrument.samples[""].octave
+            self._append(f"@{name}")
 
     ###########################################################################
 
@@ -276,18 +285,24 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if token.grace:
             self.grace = True
 
+        note = self._instrument.emit_note(token.pitch, token.head)
+        assert note is not None
+        pitch, sample = note
+
+        if self._active_sample != sample:
+            self._append(f"@{sample}")
+            self.octave = self._instrument.samples[sample].octave
+
         if not self.percussion:
-            self._emit_octave(token)
+            self._emit_octave(pitch)
 
         if self.tie:
             directive = "^"
         else:
             if not self.percussion:
-                directive = token.name
+                directive = pitch.name.lower().replace("#", "+")
             else:
-                directive = PERCUSSION_MAP[token.head][
-                    token.name + str(token.octave + 1)
-                ]
+                directive = pitch.name.lower().replace("#", "+")
                 if self.optimize_percussion:
                     if (
                         directive == self.last_percussion
@@ -376,9 +391,9 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _emit_octave(self, token: Note) -> None:
+    def _emit_octave(self, pitch: Pitch) -> None:
         cur_octave = self.octave
-        octave = token.octave
+        octave = pitch.octave
         octave_diff = octave - cur_octave
 
         directive = ""

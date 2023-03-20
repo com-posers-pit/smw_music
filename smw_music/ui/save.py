@@ -194,7 +194,7 @@ def _load_sample(inst: _SampleDict) -> InstrumentSample:
         mute=inst["mute"],
         solo=inst["solo"],
         ulim=Pitch(inst["ulim"]),
-        llim=Pitch(inst["ulim"]),
+        llim=Pitch(inst["llim"]),
         notehead=NoteHead(inst["notehead"]),
         start=Pitch(inst["start"]),
     )
