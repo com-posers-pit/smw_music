@@ -19,7 +19,11 @@ from typing import Iterable, TypeVar, cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml.instrument import InstrumentConfig, NoteHead
+from smw_music.music_xml.instrument import (
+    InstrumentConfig,
+    NoteHead,
+    lookup_notehead,
+)
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
@@ -190,7 +194,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             if isinstance(token, Instrument):
                 last_inst = token.name
             if isinstance(token, Note) and (last_inst == inst_name):
-                if inst.emit_note(token) is None:
-                    rv.add((token.pitch, token.head))
+                if not inst.emit_note(token)[1]:
+                    rv.add((token.pitch, lookup_notehead(token.head)))
 
         return rv

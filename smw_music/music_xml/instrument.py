@@ -142,7 +142,7 @@ class InstrumentSample:
     pan_setting: int = 10
     pan_invert: tuple[bool, bool] = (False, False)
     sample_source: SampleSource = SampleSource.BUILTIN
-    builtin_sample_index: int = -1
+    builtin_sample_index: int = 0
     pack_sample: tuple[str, Path] = ("", Path())
     brr_fname: Path = field(default_factory=Path)
     # TODO: see if the following settings can be rolled into a Sample object
@@ -321,9 +321,7 @@ class InstrumentConfig:
         default_factory=lambda: {}
     )
 
-    sample: InstrumentSample = field(
-        init=False, default_factory=InstrumentSample
-    )
+    sample: InstrumentSample = field(default_factory=InstrumentSample)
 
     ###########################################################################
     # API constructor definitions
@@ -389,7 +387,7 @@ class InstrumentConfig:
     # API method definitions
     ###########################################################################
 
-    def emit_note(self, note: Note) -> tuple[Pitch, str] | None:
+    def emit_note(self, note: Note) -> tuple[Pitch, str]:
         head = lookup_notehead(note.head)
 
         if self.multisample:
@@ -397,9 +395,8 @@ class InstrumentConfig:
                 sample_out = sample.emit(note.pitch, head)
                 if sample_out is not None:
                     return (sample_out, name)
-            return None
 
-        rv = (self.sample.emit(note, None), "")
+        rv = (self.sample.emit(note.pitch, None), "")
         return rv
 
     ###########################################################################

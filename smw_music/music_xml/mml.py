@@ -284,7 +284,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if token.grace:
             self.grace = True
 
-        note = inst.emit_note(token.pitch, token.head)
+        note = inst.emit_note(token)
         assert note is not None
 
         pitch, sample = note
