@@ -282,18 +282,19 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     @emit.register
     def _(self, token: Note) -> None:
+        inst = self._instrument
         if token.grace:
             self.grace = True
 
-        note = self._instrument.emit_note(token.pitch, token.head)
+        note = inst.emit_note(token.pitch, token.head)
         assert note is not None
         pitch, sample = note
 
-        if (self._active_sample != sample) and not self._instrument.samples[
+        if (self._active_sample != sample) and not inst.samples[
             sample
         ].percussion:
             self._append(f"@{sample}")
-            self.octave = self._instrument.samples[sample].octave
+            self.octave = inst.samples[sample].octave
 
         self._active_sample = sample
 
@@ -307,14 +308,16 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
                 directive = pitch.name.lower().replace("#", "+")
             else:
                 directive = sample
-                if self.optimize_percussion:
-                    if (
-                        directive == self.last_percussion
-                    ) and not self._in_loop:
-                        self.last_percussion = directive
-                        directive += "n"
-                    else:
-                        self.last_percussion = directive
+                # This exclusion is related to some special logic in N-SPC
+                # where these percussion samples triggered on @ rather than on
+                # a note being used
+                if 18 < inst.samples[sample].builtin_sample_index < 30:
+                    self.last_percussion = directive
+                elif (directive == self.last_percussion) and not self._in_loop:
+                    self.last_percussion = directive
+                    directive += "n"
+                else:
+                    self.last_percussion = directive
 
         directive += self._calc_note_length(token)
 
