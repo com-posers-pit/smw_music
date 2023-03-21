@@ -551,6 +551,8 @@ class Dashboard(QWidget):
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
 
+            self._update_unmapped(state)
+
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
@@ -1167,6 +1169,15 @@ class Dashboard(QWidget):
             sel_sample.gain_mode,
             sel_sample.gain_setting,
         )
+
+    ###########################################################################
+
+    def _update_unmapped(self, state: State) -> None:
+        widget = self._view.multisample_unmapped_list
+        with QSignalBlocker(widget):
+            widget.clear()
+            for pitch, head in state.unmapped:
+                widget.addItem(f"{pitch}:{head}")
 
     ###########################################################################
     # Private property definitions

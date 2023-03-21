@@ -17,6 +17,7 @@ from pathlib import Path
 from music21.pitch import Pitch
 
 # Package imports
+from smw_music.music_xml.tokens import Note
 from smw_music.utils import hexb
 
 ###############################################################################
@@ -388,14 +389,12 @@ class InstrumentConfig:
     # API method definitions
     ###########################################################################
 
-    def emit_note(
-        self, note: Pitch, notehead: str = "normal"
-    ) -> tuple[Pitch, str] | None:
-        head = lookup_notehead(notehead)
+    def emit_note(self, note: Note) -> tuple[Pitch, str] | None:
+        head = lookup_notehead(note.head)
 
         if self.multisample:
             for name, sample in self.multisamples.items():
-                sample_out = sample.emit(note, head)
+                sample_out = sample.emit(note.pitch, head)
                 if sample_out is not None:
                     return (sample_out, name)
             return None

@@ -1107,6 +1107,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, update_instruments: bool = False, state_change: bool = True
     ) -> None:
         self.state.unsaved = state_change
+        if self.song and self.state.sample_idx:
+            unmapped = self.song.unmapped_notes(self.state.sample_idx[0])
+            self.state.unmapped = {
+                (pitch.nameWithOctave, str(head)) for pitch, head in unmapped
+            }
         self.state_changed.emit(self.state, update_instruments)
 
     ###########################################################################

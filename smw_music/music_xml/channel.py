@@ -15,13 +15,17 @@ from dataclasses import dataclass, field
 from itertools import takewhile
 from typing import Iterable, TypeVar, cast
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
-from smw_music.music_xml.instrument import InstrumentConfig
+from smw_music.music_xml.instrument import InstrumentConfig, NoteHead
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
     Clef,
     Error,
+    Instrument,
     Note,
     Playable,
     RehearsalMark,
@@ -174,3 +178,19 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
         lines = " ".join(self._exporter.directives).splitlines()
         return CRLF.join(x.strip() for x in lines)
+
+    ###########################################################################
+
+    def unmapped(
+        self, inst_name: str, inst: InstrumentConfig
+    ) -> set[tuple[Pitch, NoteHead]]:
+        last_inst = ""
+        rv = set()
+        for token in self.tokens:
+            if isinstance(token, Instrument):
+                last_inst = token.name
+            if isinstance(token, Note) and (last_inst == inst_name):
+                if inst.emit_note(token) is None:
+                    rv.add((token.pitch, token.head))
+
+        return rv

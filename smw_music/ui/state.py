@@ -13,6 +13,9 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
@@ -60,6 +63,8 @@ class State:
     start_measure: int = 1
 
     sample_idx: tuple[str, str] | None = None
+
+    unmapped: set[tuple[Pitch, str]] = field(default_factory=set)
 
     ###########################################################################
     # Property definitions

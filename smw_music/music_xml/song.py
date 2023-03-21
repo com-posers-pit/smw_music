@@ -28,6 +28,7 @@ from smw_music.music_xml.instrument import (
     Dynamics,
     InstrumentConfig,
     InstrumentSample,
+    NoteHead,
     SampleSource,
 )
 from smw_music.music_xml.reduction import reduce, remove_unused_instruments
@@ -745,3 +746,17 @@ class Song:
                 fobj.write(mml.encode("ascii", "ignore"))
 
         return mml
+
+    ###########################################################################
+
+    def unmapped_notes(
+        self, inst_name: str
+    ) -> set[tuple[music21.pitch.Pitch, NoteHead]]:
+        inst = self.instruments[inst_name]
+        rv = set()
+
+        if inst.multisample:
+            for channel in self.channels:
+                rv |= channel.unmapped(inst_name, inst)
+
+        return rv

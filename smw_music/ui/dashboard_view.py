@@ -197,7 +197,7 @@ class DashboardView(QMainWindow):
     multisample_sample_output_label: QLabel
     multisample_sample_remove: QPushButton
     multisample_unmapped_box: QGroupBox
-    multismaple_unmapped_list: QListWidget
+    multisample_unmapped_list: QListWidget
     musicxml_fname: QLineEdit
     new_project: QAction
     octave: QSpinBox

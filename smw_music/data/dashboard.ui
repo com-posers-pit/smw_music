@@ -1677,7 +1677,7 @@
                 </property>
                 <layout class="QGridLayout" name="gridLayout_18">
                  <item row="0" column="0">
-                  <widget class="QListWidget" name="multismaple_unmapped_list"/>
+                  <widget class="QListWidget" name="multisample_unmapped_list"/>
                  </item>
                 </layout>
                </widget>
