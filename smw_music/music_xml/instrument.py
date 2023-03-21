@@ -286,6 +286,12 @@ class InstrumentSample:
             rv += f",{int(inv[0])},{int(inv[1])}"
         return rv
 
+    ###########################################################################
+
+    @property
+    def percussion(self) -> bool:
+        return self.ulim == self.llim
+
 
 ###############################################################################
 

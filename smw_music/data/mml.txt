@@ -111,8 +111,12 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 
 ; Instrument definitions.  Smoosh together the instrument voice definition
 ; with its dynamics, articulation, and pan definitions
-%for name in inst_samples.keys():
+%for name, sample in inst_samples.items():
+%if not sample.percussion:
 "${name} = ${voice(name)} ${dyn(name)} ${artic(name)} ${pan(name)}"
+%else:
+"${name} = ${dyn(name)} ${artic(name)} ${pan(name)} @${voice(name)} ${name}n" "${name}n = o${sample.llim.octave} ${sample.llim.name.lower().replace('#', '+')}"
+%endif
 %endfor
 
 ; This is a way to use a hex value in a volume command.  We want to use hex

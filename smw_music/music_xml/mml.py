@@ -289,9 +289,13 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         assert note is not None
         pitch, sample = note
 
-        if self._active_sample != sample:
+        if (self._active_sample != sample) and not self._instrument.samples[
+            sample
+        ].percussion:
             self._append(f"@{sample}")
             self.octave = self._instrument.samples[sample].octave
+
+        self._active_sample = sample
 
         if not self.percussion:
             self._emit_octave(pitch)
@@ -302,7 +306,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             if not self.percussion:
                 directive = pitch.name.lower().replace("#", "+")
             else:
-                directive = pitch.name.lower().replace("#", "+")
+                directive = sample
                 if self.optimize_percussion:
                     if (
                         directive == self.last_percussion
