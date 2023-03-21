@@ -111,9 +111,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     slur: SlurState = SlurState.SLUR_IDLE
     tie: bool = False
     legato: bool = False
-    percussion: bool = False
     articulation: Artic = Artic.NORMAL
-    optimize_percussion: bool = False
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
 
@@ -288,23 +286,23 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
         note = inst.emit_note(token.pitch, token.head)
         assert note is not None
-        pitch, sample = note
 
-        if (self._active_sample != sample) and not inst.samples[
-            sample
-        ].percussion:
+        pitch, sample = note
+        percussion = inst.samples[sample].percussion
+
+        if (self._active_sample != sample) and not percussion:
             self._append(f"@{sample}")
             self.octave = inst.samples[sample].octave
 
         self._active_sample = sample
 
-        if not self.percussion:
+        if not percussion:
             self._emit_octave(pitch)
 
         if self.tie:
             directive = "^"
         else:
-            if not self.percussion:
+            if not percussion:
                 directive = pitch.name.lower().replace("#", "+")
             else:
                 directive = sample

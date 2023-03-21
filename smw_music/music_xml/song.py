@@ -561,7 +561,6 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
-        optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
         start_measure: int = 1,
     ) -> str:
@@ -582,9 +581,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        optimize_percussion: bool
-            True iff repeated percussion notes should not repeat their
-            instrument
         sample_path: PurePosicPath
             Base path where custom BRR samples are stored
         start_measure: int
@@ -618,9 +614,7 @@ class Song:
 
         self._validate()
         channels = [
-            x.generate_mml(
-                self.instruments, measure_numbers, optimize_percussion
-            )
+            x.generate_mml(self.instruments, measure_numbers)
             for x in self._reduced_channels
         ]
 
@@ -708,7 +702,6 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
-        optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
         start_measure: int = 1,
     ) -> str:
@@ -731,9 +724,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        optimize_percussion: bool
-            True iff repeated percussion notes should not repeat their
-            instrument
         sample_path: PurePosicPath
             Base path where custom BRR samples are stored
         start_measure: int
@@ -746,7 +736,6 @@ class Song:
             measure_numbers,
             include_dt,
             echo_config,
-            optimize_percussion,
             sample_path,
             start_measure,
         )

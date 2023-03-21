@@ -550,7 +550,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     self.state.measure_numbers,
                     True,
                     self.state.echo if self.state.global_echo_enable else None,
-                    True,
                     PurePosixPath(self.state.project_name),
                     self.state.start_measure,
                 )

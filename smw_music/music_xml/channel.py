@@ -148,7 +148,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self,
         instruments: dict[str, InstrumentConfig],
         measure_numbers: bool = True,
-        optimize_percussion: bool = True,
     ) -> str:
         """
         Generate this channel's AddMusicK MML text.
@@ -157,9 +156,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         ----------
         measure_numbers: bool
             True iff measure numbers should be included in MML
-        optimize_percussion: bool
-            True iff repeated percussion notes should not repeat their
-            instrument
 
         Return
         ------
@@ -168,7 +164,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         """
         self._reset_state(instruments)
         self._exporter.measure_numbers = measure_numbers
-        self._exporter.optimize_percussion = optimize_percussion
 
         for n, token in enumerate(self.tokens):
             if isinstance(token, RehearsalMark):
