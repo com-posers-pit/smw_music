@@ -336,7 +336,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_brr_fname_changed(self, fname: str) -> None:
-        self._update_sample_state(brr_fname=Path(fname))
+        self._update_sample_state(
+            brr_fname=Path(fname), sample_source=SampleSource.BRR
+        )
         self.update_status(f"BRR set to {fname}")
 
     ###########################################################################
@@ -355,7 +357,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_builtin_sample_changed(self, index: int) -> None:
-        self._update_sample_state(builtin_sample_index=index)
+        self._update_sample_state(
+            builtin_sample_index=index, sample_source=SampleSource.BUILTIN
+        )
         self.update_status(f"Builtin sample {index} selected")
 
     ###########################################################################
@@ -724,12 +728,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_pack_sample_changed(self, item_id: tuple[str, Path]) -> None:
-        self._update_sample_state(pack_sample=item_id)
-        if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
-            self._load_sample_settings(item_id)
-            self.update_status(
-                f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
-            )
+        self._update_sample_state(
+            pack_sample=item_id, sample_source=SampleSource.SAMPLEPACK
+        )
+        self._load_sample_settings(item_id)
+        self.update_status(
+            f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
+        )
 
     ###########################################################################
 
