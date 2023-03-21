@@ -185,6 +185,14 @@ Sample
       view.brr_setting.editingFinished --> model.on_brr_setting_changed
       view.preview_envelope.released --> self.on_preview_envelope_clicked
 
+Multisample
+~~~~~~~~~~~
+
+.. mermaid::
+
+   flowchart LR
+      view.multisample_sample_add.released --> self.on_multisample_add_clicked --> model.on_multisample_add_clicked
+      view.multisample_sample_remove.released --> model.multisample_sample_remove_clicked
 
 Global Settings
 ---------------

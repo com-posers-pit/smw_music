@@ -750,9 +750,8 @@ class Song:
     ###########################################################################
 
     def unmapped_notes(
-        self, inst_name: str
+        self, inst_name: str, inst: InstrumentConfig
     ) -> set[tuple[music21.pitch.Pitch, NoteHead]]:
-        inst = self.instruments[inst_name]
         rv = set()
 
         if inst.multisample:

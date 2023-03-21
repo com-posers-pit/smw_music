@@ -28,6 +28,7 @@ from random import choice
 # Library imports
 import yaml
 from mako.template import Template  # type: ignore
+from music21.pitch import Pitch
 from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
@@ -41,7 +42,9 @@ from smw_music.music_xml.instrument import (
     Dynamics,
     GainMode,
     InstrumentConfig,
+    InstrumentSample,
     SampleSource,
+    lookup_notehead,
 )
 from smw_music.music_xml.song import Song
 from smw_music.ui.quotes import ashtley, quotes
@@ -699,10 +702,61 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_multisample_sample_add_clicked(
+        self, name: str, notes: str, notehead: str, output: str
+    ) -> None:
+        # TODO: Error handling
+        if ";" in notes:
+            llim = Pitch(notes.split(":")[0])
+            ulim = Pitch(notes.split(":")[0])
+        else:
+            llim = ulim = Pitch(notes)
+
+        head = lookup_notehead(notehead)
+        start = Pitch(output)
+
+        sample = InstrumentSample(
+            ulim=ulim, llim=llim, notehead=head, start=start
+        )
+
+        state = self.state
+        if state.sample_idx is not None:
+            inst, _ = state.sample_idx
+
+            instruments = state.instruments.copy()
+            instruments[inst].multisamples[name] = sample
+            self._update_state(
+                update_instruments=True,
+                instruments=instruments,
+                sample_idx=(inst, name),
+            )
+            self.update_status(f"Added sample {name} to instrument {inst}")
+
+    ###########################################################################
+
+    def on_multisample_sample_remove_clicked(self) -> None:
+        state = self.state
+        if state.sample_idx is not None:
+            inst, sample = state.sample_idx
+            if sample:
+                instruments = state.instruments.copy()
+                instruments[inst].multisamples.pop(sample)
+                self._update_state(
+                    update_instruments=True,
+                    instruments=instruments,
+                    sample_idx=(inst, ""),
+                )
+                self.update_status(
+                    f"Removed sample {sample} from instrument {inst}"
+                )
+
+    ###########################################################################
+
     def on_multisample_sample_selected(self, state: bool) -> None:
-        if state:
-            self._update_sample_state(sample_source=SampleSource.MULTISAMPLE)
-            self.update_status("Sample source set to multisample")
+        return
+        # if state:
+        #     self._update_sample_state(sample_source=SampleSource.MULTISAMPLE)
+        #     self.update_status("Sample source set to multisample")
 
     ###########################################################################
 
@@ -1106,9 +1160,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _signal_state_change(
         self, update_instruments: bool = False, state_change: bool = True
     ) -> None:
-        self.state.unsaved = state_change
-        if self.song and self.state.sample_idx:
-            unmapped = self.song.unmapped_notes(self.state.sample_idx[0])
+        state = self.state
+
+        state.unsaved = state_change
+        if self.song and state.sample_idx:
+            name = state.sample_idx[0]
+
+            unmapped = self.song.unmapped_notes(name, state.instruments[name])
+
             self.state.unmapped = {
                 (pitch.nameWithOctave, str(head)) for pitch, head in unmapped
             }
@@ -1183,7 +1242,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         **kwargs: str
         | bool
         | InstrumentConfig
-        | list[InstrumentConfig]
+        | dict[str, InstrumentConfig]
         | None
         | EchoConfig
         | int

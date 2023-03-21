@@ -325,6 +325,18 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_multisample_sample_add_clicked(self) -> None:
+        v = self._view
+
+        self._model.on_multisample_sample_add_clicked(
+            v.multisample_sample_name.text(),
+            v.multisample_sample_notes.text(),
+            v.multisample_sample_notehead.currentText(),
+            v.multisample_sample_output.text(),
+        )
+
+    ###########################################################################
+
     def on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view,
@@ -634,6 +646,11 @@ class Dashboard(QWidget):
             (v.pan_setting, m.on_pan_setting_changed),
             (v.pan_l_invert, partial(m.on_pan_invert_changed, True)),
             (v.pan_r_invert, partial(m.on_pan_invert_changed, False)),
+            (v.multisample_sample_add, self.on_multisample_sample_add_clicked),
+            (
+                v.multisample_sample_remove,
+                m.on_multisample_sample_remove_clicked,
+            ),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),

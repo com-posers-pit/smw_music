@@ -2445,6 +2445,13 @@
   <tabstop>pan_r_invert</tabstop>
   <tabstop>pan_setting</tabstop>
   <tabstop>pan_enable</tabstop>
+  <tabstop>multisample_sample_remove</tabstop>
+  <tabstop>multisample_unmapped_list</tabstop>
+  <tabstop>multisample_sample_name</tabstop>
+  <tabstop>multisample_sample_notes</tabstop>
+  <tabstop>multisample_sample_notehead</tabstop>
+  <tabstop>multisample_sample_output</tabstop>
+  <tabstop>multisample_sample_add</tabstop>
  </tabstops>
  <resources/>
  <connections/>
