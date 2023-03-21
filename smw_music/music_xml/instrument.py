@@ -292,6 +292,18 @@ class InstrumentSample:
     def percussion(self) -> bool:
         return self.ulim == self.llim
 
+    ###########################################################################
+
+    @property
+    def percussion_note(self) -> int:
+        return self.ulim.name.lower().replace("#", "-")
+
+    ###########################################################################
+
+    @property
+    def percussion_octave(self) -> int:
+        return self.ulim.octave
+
 
 ###############################################################################
 

@@ -69,6 +69,14 @@ w${song.volume}
 
     def transpose(sample):
         return f' h{sample.transpose}' if do_transpose else ''
+
+    def pitched_defn(name):
+        return f'"{name} = {voice(name)} {dyn(name)} {artic(name)} {pan(name)}"'
+
+    def unpitched_defn(name):
+        return f'"{name} = {dyn(name)} {artic(name)} {pan(name)} @{voice(name)} {name}n"'
+
+    unpitched_sz = max(len(unpitched_defn(k)) for k, v in inst_samples.items() if v.percussion)
 %>\
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
@@ -113,9 +121,13 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 ; with its dynamics, articulation, and pan definitions
 %for name, sample in inst_samples.items():
 %if not sample.percussion:
+${pitched_defn(name)}
 "${name} = ${voice(name)} ${dyn(name)} ${artic(name)} ${pan(name)}"
-%else:
-"${name} = ${dyn(name)} ${artic(name)} ${pan(name)} @${voice(name)} ${name}n" "${name}n = o${sample.llim.octave} ${sample.llim.name.lower().replace('#', '+')}"
+%endif
+%endfor
+%for name, sample in inst_samples.items():
+%if sample.percussion:
+${f'{unpitched_defn(name):{unpitched_sz}}'} "${name}n = o${sample.percussion_octave} ${sample.percussion_note}"
 %endif
 %endfor
 
