@@ -520,6 +520,8 @@ class Dashboard(QWidget):
             else:
                 sample_list.clearSelection()
 
+            self._update_multisample(state)
+
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
             v.global_volume_setting.setText(pct(state.global_volume))
@@ -562,8 +564,6 @@ class Dashboard(QWidget):
 
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
-
-            self._update_unmapped(state)
 
     ###########################################################################
 
@@ -1061,11 +1061,38 @@ class Dashboard(QWidget):
                 parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 
-                for sample_name in inst.multisamples.keys():
+                for sample_name in sorted(inst.multisamples.keys()):
                     item = self._make_sample_item(
                         sample_name, (inst_name, sample_name)
                     )
                     parent.addChild(item)
+
+    ###########################################################################
+
+    def _update_multisample(self, state: State) -> None:
+        v = self._view
+        name = ""
+        notes = ""
+        notehead = "normal"
+        start = ""
+        if sample := state.sample:
+            name = cast(tuple[str, str], state.sample_idx)[1]
+            if name:
+                notehead = str(sample.notehead)
+                if sample.llim == sample.ulim:
+                    notes = sample.llim.nameWithOctave
+                else:
+                    notes = ":".join(
+                        x.nameWithOctave for x in [sample.llim, sample.ulim]
+                    )
+                start = sample.start.nameWithOctave
+
+        v.multisample_sample_name.setText(name)
+        v.multisample_sample_notehead.setCurrentText(notehead)
+        v.multisample_sample_notes.setText(notes)
+        v.multisample_sample_output.setText(start)
+
+        self._update_unmapped(state)
 
     ###########################################################################
 
@@ -1191,10 +1218,9 @@ class Dashboard(QWidget):
 
     def _update_unmapped(self, state: State) -> None:
         widget = self._view.multisample_unmapped_list
-        with QSignalBlocker(widget):
-            widget.clear()
-            for pitch, head in state.unmapped:
-                widget.addItem(f"{pitch}:{head}")
+        widget.clear()
+        for pitch, head in state.unmapped:
+            widget.addItem(f"{pitch}:{head}")
 
     ###########################################################################
     # Private property definitions

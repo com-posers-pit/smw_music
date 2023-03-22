@@ -95,7 +95,7 @@ class _SampleDict(TypedDict):
     solo: bool
     llim: str
     ulim: str
-    notehead: int
+    notehead: str
     start: str
 
 
@@ -258,7 +258,7 @@ def _save_sample(sample: InstrumentSample) -> _SampleDict:
         "solo": sample.solo,
         "ulim": str(sample.ulim),
         "llim": str(sample.llim),
-        "notehead": sample.notehead.value,
+        "notehead": str(sample.notehead),
         "start": str(sample.start),
     }
 

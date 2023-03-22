@@ -10,7 +10,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from enum import IntEnum, auto
+from enum import IntEnum, StrEnum, auto
 from pathlib import Path
 
 # Library imports
@@ -87,16 +87,16 @@ class GainMode(IntEnum):
 ###############################################################################
 
 
-class NoteHead(IntEnum):
-    NORMAL = auto()
-    X = auto()
-    O = auto()
-    PLUS = auto()
-    TENSOR = auto()
-    TRIUP = auto()
-    TRIDOWN = auto()
-    SLASH = auto()
-    DIAMOND = auto()
+class NoteHead(StrEnum):
+    NORMAL = "normal"
+    X = "x"
+    O = "o"
+    PLUS = "cross"
+    TENSOR = "circle-x"
+    TRIUP = "arrow up"
+    TRIDOWN = "arrow down"
+    SLASH = "slash"
+    DIAMOND = "diamond"
 
 
 ###############################################################################
@@ -388,7 +388,7 @@ class InstrumentConfig:
     ###########################################################################
 
     def emit_note(self, note: Note) -> tuple[Pitch, str]:
-        head = lookup_notehead(note.head)
+        head = NoteHead(note.head)
 
         if self.multisample:
             for name, sample in self.multisamples.items():
@@ -421,22 +421,3 @@ class InstrumentConfig:
     def samples(self, value: dict[str, InstrumentSample]) -> None:
         self.multisamples = dict(value)
         self.sample = self.multisamples.pop("")
-
-
-###############################################################################
-# API function definitions
-###############################################################################
-
-
-def lookup_notehead(notehead: str) -> NoteHead | None:
-    return {
-        "normal": NoteHead.NORMAL,
-        "x": NoteHead.X,
-        "o": NoteHead.O,
-        "cross": NoteHead.PLUS,
-        "circle-x": NoteHead.TENSOR,
-        "arrow up": NoteHead.TRIUP,
-        "arrow down": NoteHead.TRIDOWN,
-        "slash": NoteHead.SLASH,
-        "diamond": NoteHead.DIAMOND,
-    }.get(notehead, None)

@@ -43,8 +43,8 @@ from smw_music.music_xml.instrument import (
     GainMode,
     InstrumentConfig,
     InstrumentSample,
+    NoteHead,
     SampleSource,
-    lookup_notehead,
 )
 from smw_music.music_xml.song import Song
 from smw_music.ui.quotes import ashtley, quotes
@@ -712,7 +712,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             llim = ulim = Pitch(notes)
 
-        head = lookup_notehead(notehead)
+        head = NoteHead(notehead)
         start = Pitch(output)
 
         sample = InstrumentSample(
