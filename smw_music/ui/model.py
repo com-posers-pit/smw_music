@@ -521,115 +521,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_generate_and_play_clicked(self) -> None:
         self.update_status("SPC generated and played")
-        self.on_generate_mml_clicked(False)
-        self.on_generate_spc_clicked(False)
-        self.on_play_spc_clicked()
+        if self._on_generate_mml_clicked(False):
+            if self._on_generate_spc_clicked(False):
+                self.on_play_spc_clicked()
 
     ###########################################################################
 
     def on_generate_mml_clicked(self, report: bool = True) -> None:
-        title = "MML Generation"
-        error = True
-        fname = self.state.mml_fname
-        if self.song is None:
-            msg = "Song not loaded"
-            self.mml_generated.emit("\n".join(ashtley))
-        else:
-            assert self.state.project_name is not None  # nosec: B101
-
-            try:
-                if os.path.exists(fname):
-                    shutil.copy2(fname, f"{fname}.bak")
-
-                self.song.instruments = deepcopy(self.state.instruments)
-
-                self.song.volume = self.state.global_volume
-                if self.state.porter:
-                    self.song.porter = self.state.porter
-                if self.state.game:
-                    self.song.game = self.state.game
-
-                mml = self.song.to_mml_file(
-                    fname,
-                    self.state.global_legato,
-                    self.state.loop_analysis,
-                    self.state.superloop_analysis,
-                    self.state.measure_numbers,
-                    True,
-                    self.state.echo if self.state.global_echo_enable else None,
-                    PurePosixPath(self.state.project_name),
-                    self.state.start_measure,
-                )
-                self.mml_generated.emit(mml)
-                self.update_status("MML generated")
-            except MusicXmlException as e:
-                msg = str(e)
-            else:
-                error = False
-                msg = "Done"
-
-        if report or error:
-            self.response_generated.emit(error, title, msg)
+        self._on_generate_mml_clicked(report)
 
     ###########################################################################
 
     def on_generate_spc_clicked(self, report: bool = True) -> None:
-        assert self._project_path is not None  # nosec: B101
-        assert self.state.project_name is not None  # nosec: B101
-
-        error = False
-        msg = ""
-
-        if not os.path.exists(self.state.mml_fname):
-            error = True
-            msg = "MML not generated"
-        else:
-            samples_path = (
-                self._project_path / "samples" / self.state.project_name
-            )
-
-            shutil.rmtree(samples_path, ignore_errors=True)
-            os.makedirs(samples_path, exist_ok=True)
-
-            for inst in self.state.instruments.values():
-                for sample in inst.samples.values():
-                    if sample.sample_source == SampleSource.BRR:
-                        shutil.copy2(sample.brr_fname, samples_path)
-                    if sample.sample_source == SampleSource.SAMPLEPACK:
-                        pack_name, pack_path = sample.pack_sample
-                        target = samples_path / pack_name / pack_path
-                        os.makedirs(target.parents[0], exist_ok=True)
-                        with open(target, "wb") as fobj:
-                            try:
-                                fobj.write(
-                                    self._sample_packs[pack_name][
-                                        pack_path
-                                    ].data
-                                )
-                            except KeyError:
-                                error = True
-                                msg += (
-                                    f"Could not find sample pack {pack_name}\n"
-                                )
-
-            if not error:
-                try:
-                    msg = subprocess.check_output(  # nosec B603
-                        self.convert,
-                        cwd=self._project_path,
-                        stderr=subprocess.STDOUT,
-                        timeout=5,
-                    ).decode()
-                except subprocess.CalledProcessError as e:
-                    error = True
-                    msg = e.output.decode("utf8")
-                except subprocess.TimeoutExpired:
-                    error = True
-                    msg = "Conversion timed out"
-
-        if report or error:
-            self.response_generated.emit(error, "SPC Generated", msg)
-            self.update_status("SPC generated")
+        self._on_generate_spc_clicked(report)
 
     ###########################################################################
 
@@ -1137,6 +1041,116 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "subtune_setting": params.subtuning,
         }
         self._update_sample_state(**new_state)
+
+    ###########################################################################
+
+    def _on_generate_mml_clicked(self, report: bool = True) -> bool:
+        title = "MML Generation"
+        error = True
+        fname = self.state.mml_fname
+        if self.song is None:
+            msg = "Song not loaded"
+            self.mml_generated.emit("\n".join(ashtley))
+        else:
+            assert self.state.project_name is not None  # nosec: B101
+
+            try:
+                if os.path.exists(fname):
+                    shutil.copy2(fname, f"{fname}.bak")
+
+                self.song.instruments = deepcopy(self.state.instruments)
+
+                self.song.volume = self.state.global_volume
+                if self.state.porter:
+                    self.song.porter = self.state.porter
+                if self.state.game:
+                    self.song.game = self.state.game
+
+                mml = self.song.to_mml_file(
+                    fname,
+                    self.state.global_legato,
+                    self.state.loop_analysis,
+                    self.state.superloop_analysis,
+                    self.state.measure_numbers,
+                    True,
+                    self.state.echo if self.state.global_echo_enable else None,
+                    PurePosixPath(self.state.project_name),
+                    self.state.start_measure,
+                )
+                self.mml_generated.emit(mml)
+                self.update_status("MML generated")
+            except MusicXmlException as e:
+                msg = str(e)
+            else:
+                error = False
+                msg = "Done"
+
+        if report or error:
+            self.response_generated.emit(error, title, msg)
+
+        return not error
+
+    ###########################################################################
+
+    def _on_generate_spc_clicked(self, report: bool = True) -> bool:
+        assert self._project_path is not None  # nosec: B101
+        assert self.state.project_name is not None  # nosec: B101
+
+        error = False
+        msg = ""
+
+        if not os.path.exists(self.state.mml_fname):
+            error = True
+            msg = "MML not generated"
+        else:
+            samples_path = (
+                self._project_path / "samples" / self.state.project_name
+            )
+
+            shutil.rmtree(samples_path, ignore_errors=True)
+            os.makedirs(samples_path, exist_ok=True)
+
+            for inst in self.state.instruments.values():
+                for sample in inst.samples.values():
+                    if sample.sample_source == SampleSource.BRR:
+                        shutil.copy2(sample.brr_fname, samples_path)
+                    if sample.sample_source == SampleSource.SAMPLEPACK:
+                        pack_name, pack_path = sample.pack_sample
+                        target = samples_path / pack_name / pack_path
+                        os.makedirs(target.parents[0], exist_ok=True)
+                        with open(target, "wb") as fobj:
+                            try:
+                                fobj.write(
+                                    self._sample_packs[pack_name][
+                                        pack_path
+                                    ].data
+                                )
+                            except KeyError:
+                                error = True
+                                msg += (
+                                    f"Could not find sample pack {pack_name}\n"
+                                )
+
+            if not error:
+                try:
+                    msg = subprocess.check_output(  # nosec B603
+                        self.convert,
+                        cwd=self._project_path,
+                        stderr=subprocess.STDOUT,
+                        timeout=5,
+                    ).decode()
+                except subprocess.CalledProcessError as e:
+                    error = True
+                    msg = e.output.decode("utf8")
+                except subprocess.TimeoutExpired:
+                    error = True
+                    msg = "Conversion timed out"
+
+        if report or error:
+            self.response_generated.emit(error, "SPC Generated", msg)
+            self.update_status("SPC generated")
+
+        return not error
 
     ###########################################################################
 
