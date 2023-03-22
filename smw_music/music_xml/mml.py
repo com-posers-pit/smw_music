@@ -285,19 +285,25 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             self.grace = True
 
         note = inst.emit_note(token)
-        assert note is not None
 
         pitch, sample = note
         percussion = inst.samples[sample].percussion
 
         if (self._active_sample != sample) and not percussion:
-            self._append(f"@{sample}")
-            self.octave = inst.samples[sample].octave
+            if sample:
+                self._append(f"@{sample}")
+                self.octave = inst.samples[sample].octave
+            else:
+                self.octave = inst.sample.octave
+                self._append(
+                    f"@{inst.sample.builtin_sample_index} o{self.octave}"
+                )
 
         self._active_sample = sample
 
         if not percussion:
             self._emit_octave(pitch)
+            self.last_percussion = ""
 
         if self.tie:
             directive = "^"
