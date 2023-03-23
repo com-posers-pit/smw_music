@@ -168,7 +168,7 @@
            <string>Just DO It</string>
           </property>
           <property name="shortcut">
-           <string>Space</string>
+           <string>Ctrl+Space</string>
           </property>
          </widget>
         </item>
