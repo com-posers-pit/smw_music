@@ -686,11 +686,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             inst, sample = state.sample_idx
             if sample:
                 instruments = deepcopy(state.instruments)
+                keys = sorted(instruments[inst].multisamples.keys())
                 instruments[inst].multisamples.pop(sample)
+
+                idx = keys.index(sample)
+                try:
+                    new_inst = keys[idx + 1]
+                except IndexError:
+                    new_inst = keys[idx - 1] if idx else ""
+
                 self._update_state(
                     update_instruments=True,
                     instruments=instruments,
-                    sample_idx=(inst, ""),
+                    sample_idx=(inst, new_inst),
                 )
                 self.update_status(
                     f"Removed sample {sample} from instrument {inst}"
