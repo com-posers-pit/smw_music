@@ -668,7 +668,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             )
 
             instruments = deepcopy(state.instruments)
-            if name != old_name:
+            if name != old_name and old_name:
                 instruments[inst].multisamples.pop(old_name)
             instruments[inst].multisamples[name] = sample
             self._update_state(
@@ -703,29 +703,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # if state:
         #     self._update_sample_state(sample_source=SampleSource.MULTISAMPLE)
         #     self.update_status("Sample source set to multisample")
-
-    ###########################################################################
-
-    def on_multisample_unmapped_selected(
-        self, name: str, note: str, nh_symbol: str
-    ) -> None:
-        # TODO: Error check
-        if self.state.sample_idx:
-            notehead = NoteHead.from_symbol(nh_symbol)
-
-            sample = self.state.sample_idx[1]
-            if sample:
-                pitch = Pitch(note)
-                self._update_sample_state(
-                    ulim=pitch, llim=pitch, start=pitch, notehead=notehead
-                )
-                self.update_status(
-                    f"Loaded {note}:{notehead} into multisample {sample}"
-                )
-            else:
-                self.on_multisample_sample_add_clicked(
-                    "TMP", note, notehead, note
-                )
 
     ###########################################################################
 

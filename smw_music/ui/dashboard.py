@@ -929,9 +929,12 @@ class Dashboard(QWidget):
     def _on_multisample_unmapped_doubleclicked(self, idx: QModelIndex) -> None:
         item = self._view.multisample_unmapped_list.itemFromIndex(idx)
 
-        name = self._view.multisample_sample_name.text()
+        name = f"TMP{self._view.multisample_unmapped_list.count()}"
         note, notehead = item.text().split(":")
-        self._model.on_multisample_unmapped_selected(name, note, notehead)
+
+        self._model.on_multisample_sample_add_clicked(
+            name, note, notehead, note
+        )
 
     ###########################################################################
     def _on_sample_change(self) -> None:
@@ -1083,6 +1086,10 @@ class Dashboard(QWidget):
     def _update_instruments(self, state: State) -> None:
         widget = self._view.sample_list
 
+        open_inst = None
+        if state.sample_idx:
+            open_inst = state.sample_idx[0]
+
         with QSignalBlocker(widget):
             widget.clear()
             self._samples.clear()
@@ -1097,6 +1104,9 @@ class Dashboard(QWidget):
                         sample_name, (inst_name, sample_name)
                     )
                     parent.addChild(item)
+
+                if inst_name == open_inst:
+                    widget.expand(widget.indexFromItem(parent))
 
     ###########################################################################
 
