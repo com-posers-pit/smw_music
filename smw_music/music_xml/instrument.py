@@ -11,6 +11,7 @@
 # Standard library imports
 from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum, auto
+from functools import cache
 from pathlib import Path
 
 # Library imports
@@ -19,6 +20,34 @@ from music21.pitch import Pitch
 # Package imports
 from smw_music.music_xml.tokens import Note
 from smw_music.utils import hexb
+
+###############################################################################
+# Private variable definitions
+###############################################################################
+
+
+@cache
+def _symbol_map() -> dict[str, "NoteHead"]:
+    return {
+        "normal": NoteHead.NORMAL,
+        "x": NoteHead.X,
+        "o": NoteHead.O,
+        "+": NoteHead.PLUS,
+        "⮾": NoteHead.TENSOR,
+        "▲": NoteHead.TRIUP,
+        "▼": NoteHead.TRIDOWN,
+        "/": NoteHead.SLASH,
+        "◆": NoteHead.DIAMOND,
+    }
+
+
+###############################################################################
+
+
+@cache
+def _symbol_unmap() -> dict["NoteHead", str]:
+    return {v: k for k, v in _symbol_map().items()}
+
 
 ###############################################################################
 # API class definitions
@@ -97,6 +126,18 @@ class NoteHead(StrEnum):
     TRIDOWN = "arrow down"
     SLASH = "slash"
     DIAMOND = "diamond"
+
+    ###########################################################################
+
+    @classmethod
+    def from_symbol(cls, symbol: str) -> "NoteHead":
+        return _symbol_map()[symbol]
+
+    ###########################################################################
+
+    @property
+    def symbol(self) -> str:
+        return _symbol_unmap()[self]
 
 
 ###############################################################################
