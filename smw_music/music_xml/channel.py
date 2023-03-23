@@ -182,7 +182,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def unmapped(
-        self, inst_name: str, inst: InstrumentConfig
+        self, inst_name: str, inst: InstrumentConfig | None
     ) -> set[tuple[Pitch, NoteHead]]:
         last_inst = ""
         rv = set()
@@ -190,7 +190,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             if isinstance(token, Instrument):
                 last_inst = token.name
             if isinstance(token, Note) and (last_inst == inst_name):
-                if not inst.emit_note(token)[1]:
+                if (inst is None) or (not inst.emit_note(token)[1]):
                     rv.add((token.pitch, NoteHead(token.head)))
 
         return rv

@@ -754,8 +754,8 @@ class Song:
     ) -> set[tuple[music21.pitch.Pitch, NoteHead]]:
         rv = set()
 
-        if inst.multisample:
-            for channel in self.channels:
-                rv |= channel.unmapped(inst_name, inst)
+        instrument = inst if inst.multisample else None
+        for channel in self.channels:
+            rv |= channel.unmapped(inst_name, instrument)
 
         return rv
