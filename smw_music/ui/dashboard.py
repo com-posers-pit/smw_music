@@ -49,7 +49,7 @@ from smw_music import __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
-from smw_music.music_xml.instrument import GainMode, NoteHead, SampleSource
+from smw_music.music_xml.instrument import GainMode, SampleSource
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -149,6 +149,24 @@ class _DynamicsWidgets(NamedTuple):
 ###############################################################################
 
 
+class _SampleRemover(QObject):
+    def __init__(self, model: Model) -> None:
+        super().__init__()
+        self._model = model
+
+    ###########################################################################
+
+    def eventFilter(self, _: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.KeyRelease:
+            if cast(QKeyEvent, event).key() == Qt.Key.Key_Delete:
+                self._model.on_multisample_sample_remove_clicked()
+                return True
+        return False
+
+
+###############################################################################
+
+
 class _TblCol(enum.IntEnum):
     NAME = 0
     SOLO = 1
@@ -178,6 +196,7 @@ class Dashboard(QWidget):
     _window_title: str
     _default_tooltips: dict[QWidget | QAction, str]
     _samples: dict[tuple[str, str | None], QTreeWidgetItem]
+    _sample_remover: _SampleRemover
 
     ###########################################################################
     # Constructor definitions
@@ -252,6 +271,9 @@ class Dashboard(QWidget):
             self._envelope_preview,
         ]:
             widget.setWindowIcon(QIcon(str(data_lib / "maestro.svg")))
+
+        self._sample_remover = _SampleRemover(self._model)
+        self._view.sample_list.installEventFilter(self._sample_remover)
 
         self._view.show()
 
@@ -929,7 +951,7 @@ class Dashboard(QWidget):
     def _on_multisample_unmapped_doubleclicked(self, idx: QModelIndex) -> None:
         item = self._view.multisample_unmapped_list.itemFromIndex(idx)
 
-        name = f"TMP{self._view.multisample_unmapped_list.count()}"
+        name = f"TMP{self._view.multisample_unmapped_list.count()}_"
         note, notehead = item.text().split(":")
 
         self._model.on_multisample_sample_add_clicked(
