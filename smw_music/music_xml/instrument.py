@@ -297,13 +297,13 @@ class InstrumentSample:
 
     @property
     def percussion_note(self) -> int:
-        return self.ulim.name.lower().replace("#", "-")
+        return self.start.name.lower().replace("#", "-")
 
     ###########################################################################
 
     @property
     def percussion_octave(self) -> int:
-        return self.ulim.octave
+        return self.start.octave
 
 
 ###############################################################################
