@@ -396,7 +396,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_echo_en_changed(self, chan: EchoCh, state: bool) -> None:
-        enables = self.state.echo.enables.copy()
+        enables = deepcopy(self.state.echo.enables)
         if state:
             enables.add(chan)
         else:
@@ -628,7 +628,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if state.sample_idx is not None:
             inst, _ = state.sample_idx
 
-            instruments = state.instruments.copy()
+            instruments = deepcopy(state.instruments)
             instruments[inst].multisamples[name] = sample
             self._update_state(
                 update_instruments=True,
@@ -667,7 +667,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 notehead=head,
             )
 
-            instruments = state.instruments.copy()
+            instruments = deepcopy(state.instruments)
             if name != old_name:
                 instruments[inst].multisamples.pop(old_name)
             instruments[inst].multisamples[name] = sample
@@ -685,7 +685,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if state.sample_idx is not None:
             inst, sample = state.sample_idx
             if sample:
-                instruments = state.instruments.copy()
+                instruments = deepcopy(state.instruments)
                 instruments[inst].multisamples.pop(sample)
                 self._update_state(
                     update_instruments=True,
