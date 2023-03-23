@@ -24,6 +24,7 @@ from dataclasses import replace
 from glob import glob
 from pathlib import Path, PurePosixPath
 from random import choice
+from typing import cast
 
 # Library imports
 import yaml
@@ -635,6 +636,47 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 sample_idx=(inst, name),
             )
             self.update_status(f"Added sample {name} to instrument {inst}")
+
+    ###########################################################################
+
+    def on_multisample_sample_changed(
+        self, name: str, notes: str, notehead: str, output: str
+    ) -> None:
+        if not all([name, notes, notehead, output]):
+            return
+
+        # TODO: Error handling
+        if ";" in notes:
+            llim = Pitch(notes.split(":")[0])
+            ulim = Pitch(notes.split(":")[0])
+        else:
+            llim = ulim = Pitch(notes)
+
+        head = NoteHead(notehead)
+        start = Pitch(output)
+
+        state = self.state
+        if state.sample_idx is not None:
+            inst, old_name = state.sample_idx
+
+            sample = replace(
+                cast(InstrumentSample, state.sample),
+                llim=llim,
+                ulim=ulim,
+                start=start,
+                notehead=head,
+            )
+
+            instruments = state.instruments.copy()
+            if name != old_name:
+                instruments[inst].multisamples.pop(old_name)
+            instruments[inst].multisamples[name] = sample
+            self._update_state(
+                update_instruments=True,
+                instruments=instruments,
+                sample_idx=(inst, name),
+            )
+            self.update_status(f"sample {name} in instrument {inst} changed")
 
     ###########################################################################
 

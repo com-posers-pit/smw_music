@@ -193,6 +193,10 @@ Multisample
    flowchart LR
       view.multisample_sample_add.released --> self.on_multisample_add_clicked --> model.on_multisample_add_clicked
       view.multisample_sample_remove.released --> model.multisample_sample_remove_clicked
+      view.multisample_sample_name.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_notes.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_notehead.currentIndexChanged --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_output.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
 
 Global Settings
 ---------------
