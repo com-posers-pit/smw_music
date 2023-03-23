@@ -21,7 +21,7 @@ from typing import Callable, NamedTuple, cast
 # Library imports
 import qdarkstyle  # type: ignore
 from PyQt6 import uic
-from PyQt6.QtCore import QEvent, QObject, QSignalBlocker, Qt
+from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
 from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
@@ -49,7 +49,7 @@ from smw_music import __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
-from smw_music.music_xml.instrument import GainMode, SampleSource
+from smw_music.music_xml.instrument import GainMode, NoteHead, SampleSource
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -768,6 +768,10 @@ class Dashboard(QWidget):
             self.on_pack_sample_changed
         )
 
+        v.multisample_unmapped_list.doubleClicked.connect(
+            self._on_multisample_unmapped_doubleclicked
+        )
+
         # Return signals
         m.state_changed.connect(self.on_state_changed)
         m.mml_generated.connect(self.on_mml_generated)
@@ -922,6 +926,14 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def _on_multisample_unmapped_doubleclicked(self, idx: QModelIndex) -> None:
+        item = self._view.multisample_unmapped_list.itemFromIndex(idx)
+
+        name = self._view.multisample_sample_name.text()
+        note, notehead = item.text().split(":")
+        self._model.on_multisample_unmapped_selected(name, note, notehead)
+
+    ###########################################################################
     def _on_sample_change(self) -> None:
         widget = self._view.sample_list
         sample = widget.currentItem().data(
@@ -1097,7 +1109,7 @@ class Dashboard(QWidget):
         if sample := state.sample:
             name = cast(tuple[str, str], state.sample_idx)[1]
             if name:
-                notehead = str(sample.notehead)
+                notehead = sample.notehead.symbol
                 if sample.llim == sample.ulim:
                     notes = sample.llim.nameWithOctave
                 else:

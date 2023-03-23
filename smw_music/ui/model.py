@@ -706,6 +706,29 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_multisample_unmapped_selected(
+        self, name: str, note: str, nh_symbol: str
+    ) -> None:
+        # TODO: Error check
+        if self.state.sample_idx:
+            notehead = NoteHead.from_symbol(nh_symbol)
+
+            sample = self.state.sample_idx[1]
+            if sample:
+                pitch = Pitch(note)
+                self._update_sample_state(
+                    ulim=pitch, llim=pitch, start=pitch, notehead=notehead
+                )
+                self.update_status(
+                    f"Loaded {note}:{notehead} into multisample {sample}"
+                )
+            else:
+                self.on_multisample_sample_add_clicked(
+                    "TMP", note, notehead, note
+                )
+
+    ###########################################################################
+
     def on_musicxml_fname_changed(self, fname: str) -> None:
         self._load_musicxml(Path(fname), False)
 

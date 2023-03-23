@@ -197,6 +197,7 @@ Multisample
       view.multisample_sample_notes.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
       view.multisample_sample_notehead.currentIndexChanged --> self.multisample_sample_hanged --> model.on_multisample_changed
       view.multisample_sample_output.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_unmapped_list.doubleClicked --> self._on_multisample_umapped_doubleclicked --> model.on_multisample_unmapped_selected
 
 Global Settings
 ---------------
