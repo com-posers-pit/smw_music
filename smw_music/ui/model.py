@@ -735,13 +735,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_mute_changed(self, idx: int, state: bool) -> None:
-        self._update_sample_state(idx=idx, mute=state)
-        inst = self.state.instruments[idx].name
-        self.update_status(f"{inst} mute {_endis(state)}")
-
-    ###########################################################################
-
     def on_octave_changed(self, octave: int) -> None:
         self._update_sample_state(octave=octave)
         self.update_status(f"Octave set to {octave}")
@@ -922,10 +915,36 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_solo_changed(self, idx: int, state: bool) -> None:
-        self._update_sample_state(idx=idx, solo=state)
-        inst = self.state.instruments[idx].name
-        self.update_status(f"{inst} solo {_endis(state)}")
+    def on_solomute_changed(
+        self, sample_idx: tuple[str, str], solo: bool, state: bool
+    ) -> None:
+        inst_name, sample_name = sample_idx
+        instruments = deepcopy(self.state.instruments)
+        inst = instruments[inst_name]
+
+        field = "solo" if solo else "mute"
+        update = {field: state}
+
+        if sample_name:
+            msg = f"{inst_name}.{sample_name}"
+            inst.multisamples[sample_name] = replace(
+                inst.multisamples[sample_name], **update
+            )
+            # If a sample's solo/mute is being disabled, disable it in the
+            # instrument as well
+            if not state:
+                inst.sample = replace(inst.sample, **update)
+
+        else:
+            # Apply an instrument mute/solo to all samples
+            msg = f"{inst_name}"
+            inst.sample = replace(inst.sample, **update)
+            for sample_name, sample in inst.multisamples.items():
+                inst.multisamples[sample_name] = replace(sample, **update)
+
+        self._update_state(instruments=instruments)
+
+        self.update_status(f"{msg} {field} {_endis(state)}")
 
     ###########################################################################
 

@@ -554,6 +554,7 @@ class Dashboard(QWidget):
             else:
                 sample_list.clearSelection()
 
+            self._update_solomute(state)
             self._update_multisample(state)
 
             # Global settings
@@ -959,6 +960,7 @@ class Dashboard(QWidget):
         )
 
     ###########################################################################
+
     def _on_sample_change(self) -> None:
         widget = self._view.sample_list
         sample = widget.currentItem().data(
@@ -969,12 +971,11 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_solomute_change(self, item: QTreeWidgetItem, col: int) -> None:
-        row = self._view.sample_list.indexFromItem(item).row()
         checked = item.checkState(col) == Qt.CheckState.Checked
-        if col == _TblCol.SOLO:
-            self._model.on_solo_changed(row, checked)
-        if col == _TblCol.MUTE:
-            self._model.on_mute_changed(row, checked)
+        sample = item.data(_TblCol.NAME, Qt.ItemDataRole.UserRole)
+
+        solo = col == _TblCol.SOLO
+        self._model.on_solomute_changed(sample, solo, checked)
 
     ###########################################################################
 
@@ -1164,27 +1165,20 @@ class Dashboard(QWidget):
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
 
+        sel_inst = state.instruments[sample_idx[0]]
         sel_sample = state.samples[sample_idx]
-        for key, sample in state.samples.items():
-            solo = _to_checked(sample.solo)
-            mute = _to_checked(sample.mute)
-
-            item = self._samples[key]
-            item.setCheckState(_TblCol.SOLO, solo)
-            item.setCheckState(_TblCol.MUTE, mute)
 
         # Instrument dynamics settings
         for dkey, dval in sel_sample.dynamics.items():
             dwidgets = self._dyn_widgets[dkey]
-            # TODO: Re-add this
-            # enable = dkey in sample.dynamics_present
+            enable = dkey in sel_inst.dynamics_present
 
             dwidgets.slider.setValue(dval)
-            # dwidgets.slider.setEnabled(enable)
+            dwidgets.slider.setEnabled(enable)
             dwidgets.setting.setText(pct(dval))
-            # dwidgets.setting.setEnabled(enable)
+            dwidgets.setting.setEnabled(enable)
             dwidgets.label.setText(hexb(dval))
-            # dwidgets.label.setEnabled(enable)
+            dwidgets.label.setEnabled(enable)
 
         # Instrument articulation settings
         for akey, aval in sel_sample.artics.items():
@@ -1276,6 +1270,17 @@ class Dashboard(QWidget):
             sel_sample.gain_mode,
             sel_sample.gain_setting,
         )
+
+    ###########################################################################
+
+    def _update_solomute(self, state: State) -> None:
+        for key, sample in state.samples.items():
+            solo = _to_checked(sample.solo)
+            mute = _to_checked(sample.mute)
+
+            item = self._samples[key]
+            item.setCheckState(_TblCol.SOLO, solo)
+            item.setCheckState(_TblCol.MUTE, mute)
 
     ###########################################################################
 
