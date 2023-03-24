@@ -397,14 +397,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_dynamics_changed(self, level: Dynamics, val: int | str) -> None:
         setting = _parse_setting(val)
-        if self.state.inst.dyn_interpolate:
-            self._interpolate(level, setting)
-        else:
-            dynamics = dict(self.state.inst.dynamics)
-            dynamics[level] = setting
-            self._update_sample_state(dynamics=dynamics)
-
-        self.update_status(f"Dynamics {level} set to {setting}")
+        state = self.state
+        if state.sample:
+            if state.sample.dyn_interpolate:
+                self._interpolate(level, setting)
+            else:
+                dynamics = dict(state.sample.dynamics)
+                dynamics[level] = setting
+                self._update_sample_state(dynamics=dynamics)
+            self.update_status(f"Dynamics {level} set to {setting}")
 
     ###########################################################################
 
@@ -571,8 +572,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_interpolate_changed(self, state: bool) -> None:
-        self._update_sample_state(dyn_interpolate=state)
-        self.update_status(f"Dynamics interpolation {_endis(state)}")
+        if self.state.sample:
+            assert self.state.sample_idx is not None
+            sample_idx = self.state.sample_idx
+            sample_name = sample_idx[1] or sample_idx[0]
+
+            self._update_sample_state(dyn_interpolate=state)
+            self.update_status(
+                f"Dynamics interpolation for {sample_name} {_endis(state)}"
+            )
 
     ###########################################################################
 
@@ -888,7 +896,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_state(sample_idx=sample_idx)
 
         inst, sample = sample_idx
-        name = inst if sample else sample
+        name = sample or inst
         self.update_status(f"{name} selected")
 
     ###########################################################################
