@@ -557,6 +557,11 @@ class Dashboard(QWidget):
             self._update_solomute(state)
             self._update_multisample(state)
 
+            if (state.sample is None) or (
+                state.sample.sample_source == SampleSource.BUILTIN
+            ):
+                v.sample_pack_list.clearSelection()
+
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
             v.global_volume_setting.setText(pct(state.global_volume))
