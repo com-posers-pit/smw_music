@@ -10,6 +10,7 @@
 ###############################################################################
 
 # Standard library imports
+import hashlib
 import os
 import pkgutil
 import platform
@@ -196,6 +197,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 shutil.move(path / root / member, path / member)
 
             shutil.rmtree(path / root)
+
+        # Apply updates to stock AMK files
+        # https://www.smwcentral.net/?p=viewthread&t=98793&page=2&pid=1601787#p1601787
+        fname = path / "music/originals/09 Bonus End.txt"
+        with open(fname, "rb") as fobj:
+            data = fobj.read()
+        if hashlib.md5(data).hexdigest() == "7e9d4bd864cfc1e82272fb0a9379e318":
+            contents = data.split(b"\n")
+            contents = contents[:15] + contents[16:]
+            data = b"\n".join(contents)
+            with open(fname, "wb") as fobj:
+                fobj.write(data)
 
         # Create the conversion scripts
         for tmpl_name in ["convert.bat", "convert.sh"]:
