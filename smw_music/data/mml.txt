@@ -122,7 +122,6 @@ ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:0
 %for name, sample in inst_samples.items():
 %if not sample.percussion:
 ${pitched_defn(name)}
-"${name} = ${voice(name)} ${dyn(name)} ${artic(name)} ${pan(name)}"
 %endif
 %endfor
 %for name, sample in inst_samples.items():
