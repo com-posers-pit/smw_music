@@ -658,9 +658,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_musicxml_fname_changed(self, fname: str) -> None:
-        self._load_musicxml(Path(fname), False)
+        file_path = Path(fname)
+        if file_path == self.state.musicxml_fname:
+            return
 
-        self._update_state(True, musicxml_fname=fname)
+        self._load_musicxml(file_path, False)
+
+        self._update_state(True, musicxml_fname=file_path)
         self.update_status(f"MusicXML name set to {fname}")
 
     ###########################################################################
@@ -1363,7 +1367,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | None
         | EchoConfig
         | int
-        | tuple[str, str | None],
+        | tuple[str, str | None]
+        | Path,
     ) -> None:
         if kwargs:
             new_state = replace(self.state)
