@@ -706,13 +706,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_pan_invert_changed(self, left: bool, state: bool) -> None:
-        pan_setting = list(self.state.inst.pan_invert)
-        pan_setting[0 if left else 1] = state
+        with suppress(NoSample):
+            pan_setting = list(self.state.sample.pan_invert)
+            pan_setting[0 if left else 1] = state
 
-        self._update_sample_state(pan_invert=(pan_setting[0], pan_setting[1]))
-        self.update_status(
-            f'Pan {"left" if left else "right"} inversion {_endis(state)}'
-        )
+            self._update_sample_state(
+                pan_invert=(pan_setting[0], pan_setting[1])
+            )
+            self.update_status(
+                f'Pan {"left" if left else "right"} inversion {_endis(state)}'
+            )
 
     ###########################################################################
 
