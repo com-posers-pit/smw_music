@@ -23,6 +23,7 @@ from smw_music.music_xml.instrument import InstrumentConfig, NoteHead
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
+    Clef,
     Error,
     Instrument,
     Note,
@@ -133,18 +134,23 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         """
         msgs = []
         tokens = flatten(self.tokens)
+        percussion = False
 
         for token in filter(lambda x: isinstance(x, Error), tokens):
             msgs.append(cast(Error, token).msg)
         for token in filter(
-            lambda x: isinstance(x, (Instrument, Note)), tokens
+            lambda x: isinstance(x, (Clef, Instrument, Note)), tokens
         ):
-            if isinstance(token, Instrument):
+            if isinstance(token, Clef):
+                percussion = cast(Clef, token).percussion
+            elif isinstance(token, Instrument):
                 inst = instruments[cast(Instrument, token).name]
             else:
                 note = cast(Note, token)
                 _, sample = inst.emit_note(note)
-                octave_shift = inst.samples[sample].octave_shift
+                octave_shift = (
+                    0 if percussion else inst.samples[sample].octave_shift
+                )
                 msgs.extend(note.check(octave_shift))
         for token in filter(lambda x: isinstance(x, Playable), tokens):
             msgs.extend(cast(Playable, token).duration_check())
