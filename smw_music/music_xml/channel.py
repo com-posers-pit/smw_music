@@ -23,7 +23,6 @@ from smw_music.music_xml.instrument import InstrumentConfig, NoteHead
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
-    Clef,
     Error,
     Instrument,
     Note,
@@ -122,7 +121,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def check(self) -> list[str]:
+    def check(self, instruments: dict[str, InstrumentConfig]) -> list[str]:
         """
         Confirm that the channel's notes are acceptable.
 
@@ -133,15 +132,20 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             outside octaves 1-6  is used.
         """
         msgs = []
-        percussion = False
         tokens = flatten(self.tokens)
+
         for token in filter(lambda x: isinstance(x, Error), tokens):
             msgs.append(cast(Error, token).msg)
-        for token in filter(lambda x: isinstance(x, (Note, Clef)), tokens):
-            if isinstance(token, Clef):
-                percussion = token.percussion
+        for token in filter(
+            lambda x: isinstance(x, (Instrument, Note)), tokens
+        ):
+            if isinstance(token, Instrument):
+                inst = instruments[cast(Instrument, token).name]
             else:
-                msgs.extend(cast(Note, token).check(percussion))
+                note = cast(Note, token)
+                _, sample = inst.emit_note(note)
+                octave_shift = inst.samples[sample].octave_shift
+                msgs.extend(note.check(octave_shift))
         for token in filter(lambda x: isinstance(x, Playable), tokens):
             msgs.extend(cast(Playable, token).duration_check())
         return msgs

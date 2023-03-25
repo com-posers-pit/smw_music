@@ -52,31 +52,6 @@ def _get_duration(elem: music21.note.GeneralNote) -> int:
 
 
 ###############################################################################
-# API constant definitions
-###############################################################################
-
-# Weinberg:
-# http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
-PERCUSSION_MAP = {
-    "x": {
-        "c6": "CR3_",
-        "b5": "CR2_",
-        "a5": "CR",
-        "g5": "CH",
-        "f5": "RD",
-        "e5": "OH",
-        "d5": "RD2_",
-    },
-    "normal": {
-        "e5": "HT",
-        "d5": "MT",
-        "c5": "SN",
-        "a4": "LT",
-        "f4": "KD",
-    },
-}
-
-###############################################################################
 # API function definitions
 ###############################################################################
 
@@ -577,28 +552,21 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def check(self, percussion: bool) -> list[str]:
-        return []
+    def check(self, octave_shift: int) -> list[str]:
         msgs = []
+
         note = self.note_num
         measure = self.measure_num
-        if percussion:
-            try:
-                PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
-            except KeyError:
-                msgs.append(
-                    f"Unsupported percussion note #{note} in measure {measure}"
-                )
-        else:
-            octave = self.octave
-            name = self.name
-            bad = octave < 1
-            bad |= octave > 6
-            bad |= octave == 0 and name in ["a+", "b-", "b"]
-            if bad:
-                msg = f"Unsupported note {name}{octave} #{note} in "
-                msg += f"measure {measure}"
-                msgs.append(msg)
+        octave = self.pitch.octave + octave_shift
+        name = self.pitch.name.lower()
+        bad = octave < 1
+        bad |= octave > 6
+        bad |= octave == 0 and name in ["a#", "b-", "b"]
+        if bad:
+            msg = f"Unsupported note {name}{octave} #{note} in "
+            msg += f"measure {measure}"
+            msgs.append(msg)
+
         return msgs
 
 
