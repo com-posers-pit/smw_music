@@ -325,23 +325,21 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
         max_len = 7
-        artics = dict(self.state.inst.artics)
-        artics[artic] = replace(
-            artics[artic], length=_parse_setting(val, max_len)
-        )
-        self._update_sample_state(artics=artics)
-        self.update_status(f"{artic} length set to {val}")
+        with suppress(NoSample):
+            artics = deepcopy(self.state.sample.artics)
+            artics[artic].length = _parse_setting(val, max_len)
+            self._update_sample_state(artics=artics)
+            self.update_status(f"{artic} length set to {val}")
 
     ###########################################################################
 
     def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
         max_vol = 15
-        artics = dict(self.state.inst.artics)
-        artics[artic] = replace(
-            artics[artic], volume=_parse_setting(val, max_vol)
-        )
-        self._update_sample_state(artics=artics)
-        self.update_status(f"{artic} volume set to {val}")
+        with suppress(NoSample):
+            artics = deepcopy(self.state.sample.artics)
+            artics[artic].volume = _parse_setting(val, max_vol)
+            self._update_sample_state(artics=artics)
+            self.update_status(f"{artic} volume set to {val}")
 
     ###########################################################################
 
