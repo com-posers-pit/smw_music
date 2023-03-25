@@ -345,7 +345,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_attack_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 15)
-        self._update_sample_state(attack_setting=setting)
+        self._update_sample_state(attack_setting=setting, adsr_mode=True)
         self.update_status(f"Attack set to {setting}")
 
     ###########################################################################
@@ -388,7 +388,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_decay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_sample_state(decay_setting=setting)
+        self._update_sample_state(decay_setting=setting, adsr_mode=True)
         self.update_status(f"Decay set to {setting}")
 
     ###########################################################################
@@ -471,58 +471,42 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_gain_declin_selected(self, state: bool) -> None:
-        if state:
-            self._update_sample_state(
-                gain_mode=GainMode.DECLIN,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self.update_status("Decreasing linear envelope selected")
+        self._select_gain(state, GainMode.DECLIN, "Decreasing linear")
 
     ###########################################################################
 
     def on_gain_decexp_selected(self, state: bool) -> None:
-        if state:
-            self._update_sample_state(
-                gain_mode=GainMode.DECEXP,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self.update_status("Decreasing exponential envelope selected")
+        self._select_gain(state, GainMode.DECEXP, "Decreasing exponential")
 
     ###########################################################################
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
-            self._update_sample_state(gain_mode=GainMode.DIRECT)
+            self._update_sample_state(
+                gain_mode=GainMode.DIRECT, adsr_mode=False
+            )
             self.update_status("Direct gain envelope selected")
 
     ###########################################################################
 
     def on_gain_incbent_selected(self, state: bool) -> None:
-        if state:
-            self._update_sample_state(
-                gain_mode=GainMode.INCBENT,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self.update_status("Increasing bent envelope selected")
+        self._select_gain(state, GainMode.INCBENT, "Increasing bent")
 
     ###########################################################################
 
     def on_gain_inclin_selected(self, state: bool) -> None:
-        if state:
-            self._update_sample_state(
-                gain_mode=GainMode.INCLIN,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self.update_status("Increasing linear envelope selected")
+        self._select_gain(state, GainMode.INCLIN, "Increasing linear")
 
     ###########################################################################
 
     def on_gain_changed(self, val: int | str) -> None:
-        # TODO: Unify this 31 with the others
-        limit = 127 if self.state.inst.gain_mode == GainMode.DIRECT else 31
-        setting = _parse_setting(val, limit)
-        self._update_sample_state(gain_setting=setting)
-        self.update_status("Gain setting changed to {setting}")
+        with suppress(NoSample):
+            mode = self.state.sample.gain_mode
+            # TODO: Unify this 31 with the others
+            limit = 127 if mode == GainMode.DIRECT else 31
+            setting = _parse_setting(val, limit)
+            self._update_sample_state(gain_setting=setting, adsr_mode=False)
+            self.update_status("Gain setting changed to {setting}")
 
     ###########################################################################
 
@@ -977,14 +961,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_sus_level_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_sample_state(sus_level_setting=setting)
+        self._update_sample_state(sus_level_setting=setting, adsr_mode=True)
         self.update_status(f"Sustain level set to {setting}")
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 31)
-        self._update_sample_state(sus_rate_setting=setting)
+        self._update_sample_state(sus_rate_setting=setting, adsr_mode=True)
         self.update_status(f"Decay rate set to {setting}")
 
     ###########################################################################
@@ -1258,6 +1242,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if path is not None and project is not None:
             fname = path / (project + ".prj.bak")
             save(fname, self.state)
+
+    ###########################################################################
+
+    def _select_gain(self, state: bool, mode: GainMode, caption: str) -> None:
+        if state:
+            kwargs: dict[str, GainMode | int | bool] = {
+                "gain_mode": mode,
+                "adsr_mode": False,
+            }
+            with suppress(NoSample):
+                kwargs["gain_setting"] = min(
+                    31, self.state.sample.gain_setting
+                )
+
+            self._update_sample_state(**kwargs)
+            self.update_status(f"{caption} envelope selected")
 
     ###########################################################################
 

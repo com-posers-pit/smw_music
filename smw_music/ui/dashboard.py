@@ -1217,12 +1217,10 @@ class Dashboard(QWidget):
         v.sample_settings_box.setEnabled(
             sel_sample.sample_source != SampleSource.BUILTIN
         )
-        try:
+        with suppress(KeyError):
             v.sample_pack_list.setCurrentItem(
                 self._sample_pack_items[sel_sample.pack_sample]
             )
-        except KeyError:
-            pass
 
         v.select_brr_sample.setChecked(
             sel_sample.sample_source == SampleSource.BRR
