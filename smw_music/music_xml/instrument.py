@@ -156,7 +156,7 @@ class SampleSource(IntEnum):
 @dataclass
 class InstrumentSample:
     default_octave: int = 3
-    octave_shift: int = 0
+    octave_shift: int = -1
     dynamics: dict[Dynamics, int] = field(
         default_factory=lambda: {
             Dynamics.PPPP: 26,
