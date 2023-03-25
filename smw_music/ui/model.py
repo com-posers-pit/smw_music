@@ -401,7 +401,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             if state.sample.dyn_interpolate:
                 self._interpolate(level, setting)
             else:
-                dynamics = dict(state.sample.dynamics)
+                dynamics = deepcopy(state.sample.dynamics)
                 dynamics[level] = setting
                 self._update_sample_state(dynamics=dynamics)
             self.update_status(f"Dynamics {level} set to {setting}")
@@ -1001,9 +1001,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _interpolate(self, level: Dynamics, setting: int) -> None:
-        inst = self.state.inst
+        inst = self.state.instrument
+        sample = self.state.sample
         dyns = sorted(inst.dynamics_present)
-        dynamics = dict(inst.dynamics)
+        dynamics = deepcopy(sample.dynamics)
 
         min_dyn = min(dyns)
         max_dyn = max(dyns)
@@ -1036,7 +1037,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             dynamics[dyn] = val
 
-        self._update_sample_state(dynamics=dynamics)
+        self._update_sample_state(force_update=True, dynamics=dynamics)
 
     ###########################################################################
 
@@ -1318,6 +1319,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _update_sample_state(
         self,
+        force_update: bool = False,
         **kwargs: str
         | int
         | dict[Dynamics, int]
@@ -1336,7 +1338,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             for key, val in kwargs.items():
                 setattr(new_sample, key, val)
 
-            if new_sample != old_sample:
+            if (new_sample != old_sample) or force_update:
                 self._rollback_undo()
 
                 new_state = deepcopy(self.state)

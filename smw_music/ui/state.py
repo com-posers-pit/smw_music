@@ -79,6 +79,12 @@ class State:
     ###########################################################################
 
     @property
+    def instrument(self) -> InstrumentConfig:
+        return self.instruments[self.sample_idx[0]]
+
+    ###########################################################################
+
+    @property
     def sample(self) -> InstrumentSample:
         return self.samples[self.sample_idx]
 

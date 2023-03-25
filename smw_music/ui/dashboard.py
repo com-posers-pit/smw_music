@@ -1173,6 +1173,8 @@ class Dashboard(QWidget):
         sel_inst = state.instruments[sample_idx[0]]
         sel_sample = state.samples[sample_idx]
 
+        v.interpolate.setChecked(sel_sample.dyn_interpolate)
+
         # Instrument dynamics settings
         for dkey, dval in sel_sample.dynamics.items():
             dwidgets = self._dyn_widgets[dkey]
