@@ -25,12 +25,11 @@ from dataclasses import replace
 from glob import glob
 from pathlib import Path, PurePosixPath
 from random import choice
-from typing import cast
 
 # Library imports
 import yaml
 from mako.template import Template  # type: ignore
-from music21.pitch import Pitch
+from music21.pitch import Pitch, PitchException
 from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
@@ -613,73 +612,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_multisample_sample_add_clicked(
         self, name: str, notes: str, notehead: str, output: str
     ) -> None:
-        # TODO: Error handling
-        if ";" in notes:
-            llim = Pitch(notes.split(":")[0])
-            ulim = Pitch(notes.split(":")[0])
-        else:
-            llim = ulim = Pitch(notes)
-
-        head = NoteHead(notehead)
-        start = Pitch(output)
-
-        sample = InstrumentSample(
-            ulim=ulim, llim=llim, notehead=head, start=start
-        )
-
-        state = self.state
-        with suppress(NoSample):
-            inst, _ = state.sample_idx
-
-            instruments = deepcopy(state.instruments)
-            instruments[inst].multisamples[name] = sample
-            self._update_state(
-                update_instruments=True,
-                instruments=instruments,
-                sample_idx=(inst, name),
-            )
-            self.update_status(f"Added sample {name} to instrument {inst}")
+        self._multisample_changed(True, name, notes, notehead, output)
 
     ###########################################################################
 
     def on_multisample_sample_changed(
         self, name: str, notes: str, notehead: str, output: str
     ) -> None:
-        if not all([name, notes, notehead, output]):
-            return
-
-        # TODO: Error handling
-        if ":" in notes:
-            llim = Pitch(notes.split(":")[0])
-            ulim = Pitch(notes.split(":")[1])
-        else:
-            llim = ulim = Pitch(notes)
-
-        head = NoteHead(notehead)
-        start = Pitch(output)
-
-        state = self.state
-        with suppress(NoSample):
-            inst, old_name = state.sample_idx
-
-            sample = replace(
-                state.sample,
-                llim=llim,
-                ulim=ulim,
-                start=start,
-                notehead=head,
-            )
-
-            instruments = deepcopy(state.instruments)
-            if name != old_name and old_name:
-                instruments[inst].multisamples.pop(old_name)
-            instruments[inst].multisamples[name] = sample
-            self._update_state(
-                update_instruments=True,
-                instruments=instruments,
-                sample_idx=(inst, name),
-            )
-            self.update_status(f"sample {name} in instrument {inst} changed")
+        self._multisample_changed(False, name, notes, notehead, output)
 
     ###########################################################################
 
@@ -1117,6 +1057,71 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "subtune_setting": params.subtuning,
         }
         self._update_sample_state(**new_state)
+
+    ###########################################################################
+
+    def _multisample_changed(
+        self, new: bool, name: str, notes: str, notehead: str, output: str
+    ) -> None:
+        state = self.state
+
+        # All the inputs need to be present to continue
+        if not all([name, notes, notehead, output]):
+            return
+
+        # Make sure we've got an instrument selected
+        try:
+            sample = state.sample
+        except NoSample:
+            return
+
+        # Exit if we're trying to change a sample that doesn't exist (this can
+        # happen when tabbing through and entering values before adding it
+        if not new and name not in state.instrument.multisamples:
+            return
+
+        # Parse the input parameters and bail if something went wrong
+        try:
+            if ":" in notes:
+                llim = Pitch(notes.split(":")[0])
+                ulim = Pitch(notes.split(":")[1])
+            else:
+                llim = ulim = Pitch(notes)
+
+            head = NoteHead.from_symbol(notehead)
+            start = Pitch(output)
+        except (PitchException, ValueError) as e:
+            self.response_generated.emit(True, "Multisample error", str(e))
+            return
+
+        if new:
+            sample = InstrumentSample(
+                ulim=ulim, llim=llim, notehead=head, start=start
+            )
+        else:
+            sample = replace(
+                sample,
+                llim=llim,
+                ulim=ulim,
+                start=start,
+                notehead=head,
+            )
+
+        inst, _ = state.sample_idx
+
+        instruments = deepcopy(state.instruments)
+        instruments[inst].multisamples[name] = sample
+        self._update_state(
+            update_instruments=True,
+            instruments=instruments,
+            sample_idx=(inst, name),
+        )
+        if new:
+            msg = f"Added multisample {name} to {inst}"
+        else:
+            msg = f"Updated multisample {name} of {inst}"
+
+        self.update_status(msg)
 
     ###########################################################################
 
