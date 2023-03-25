@@ -724,9 +724,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_octave_changed(self, octave: int) -> None:
-        self._update_sample_state(octave=octave)
-        self.update_status(f"Octave set to {octave}")
+    def on_octave_shift_changed(self, octave_shift: int) -> None:
+        self._update_sample_state(octave_shift=octave_shift)
+        self.update_status(f"Octave set to {octave_shift}")
 
     ###########################################################################
 

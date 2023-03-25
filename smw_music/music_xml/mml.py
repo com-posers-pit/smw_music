@@ -91,7 +91,8 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     directives: list[str] = field(default_factory=list)
 
     _instrument: InstrumentConfig = field(init=False)
-    _active_sample: str = field(init=False)
+    _active_sample_name: str = field(init=False)
+    _active_sample: InstrumentSample = field(init=False)
     _in_loop: bool = field(default=False, init=False)
     _in_triplet: bool = field(default=False, init=False)
 
@@ -138,10 +139,10 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     def _(self, token: Instrument) -> None:
         name = token.name
         self._instrument = self.instruments[name]
-        self._active_sample = ""
+        self._active_sample_name = ""
 
         if not self._instrument.multisample:
-            self.octave = self._instrument.samples[""].octave
+            self.octave = self._instrument.samples[""].default_octave
             self._append(f"@{name}")
 
     ###########################################################################
@@ -264,17 +265,19 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         pitch, sample = note
         percussion = inst.samples[sample].percussion
 
-        if (self._active_sample != sample) and not percussion:
+        if (self._active_sample_name != sample) and not percussion:
             if sample:
                 self._append(f"@{sample}")
-                self.octave = inst.samples[sample].octave
+                self.octave = inst.samples[sample].default_octave
             else:
-                self.octave = inst.sample.octave
+                # This is a fallback for when a sample isn't found
+                self.octave = inst.sample.default_octave
                 self._append(
                     f"@{inst.sample.builtin_sample_index} o{self.octave}"
                 )
 
-        self._active_sample = sample
+        self._active_sample_name = sample
+        self._active_sample = inst.samples[sample]
 
         if not percussion:
             self._emit_octave(pitch)
@@ -379,7 +382,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     def _emit_octave(self, pitch: Pitch) -> None:
         cur_octave = self.octave
-        octave = pitch.octave
+        octave = pitch.octave + self._active_sample.octave_shift
         octave_diff = octave - cur_octave
 
         directive = ""

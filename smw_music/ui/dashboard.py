@@ -704,7 +704,7 @@ class Dashboard(QWidget):
             (v.select_brr_fname, self.on_brr_clicked),
             (v.select_multisample_sample, m.on_multisample_sample_selected),
             (v.brr_fname, m.on_brr_fname_changed),
-            (v.octave, m.on_octave_changed),
+            (v.octave_shift, m.on_octave_shift_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),
             (v.gain_mode_direct, m.on_gain_direct_selected),
             (v.gain_mode_inclin, m.on_gain_inclin_selected),
@@ -1228,7 +1228,7 @@ class Dashboard(QWidget):
         fname = str(sel_sample.brr_fname) if sel_sample.brr_fname.name else ""
         v.brr_fname.setText(fname)
 
-        v.octave.setValue(sel_sample.octave)
+        v.octave_shift.setValue(sel_sample.octave_shift)
 
         v.select_adsr_mode.setChecked(sel_sample.adsr_mode)
         v.select_gain_mode.setChecked(not sel_sample.adsr_mode)

@@ -313,16 +313,19 @@
                    </widget>
                   </item>
                   <item row="9" column="2">
-                   <widget class="QSpinBox" name="octave">
+                   <widget class="QSpinBox" name="octave_shift">
+                    <property name="minimum">
+                     <number>-6</number>
+                    </property>
                     <property name="maximum">
                      <number>6</number>
                     </property>
                    </widget>
                   </item>
                   <item row="9" column="1">
-                   <widget class="QLabel" name="octave_label">
+                   <widget class="QLabel" name="octave_shift_label">
                     <property name="text">
-                     <string>Octave</string>
+                     <string>Octave Shift</string>
                     </property>
                    </widget>
                   </item>
@@ -2353,7 +2356,7 @@
   <tabstop>select_multisample_sample</tabstop>
   <tabstop>select_multisample_fname</tabstop>
   <tabstop>multisample_fname</tabstop>
-  <tabstop>octave</tabstop>
+  <tabstop>octave_shift</tabstop>
   <tabstop>sample_settings_tabs</tabstop>
   <tabstop>select_adsr_mode</tabstop>
   <tabstop>attack_slider</tabstop>

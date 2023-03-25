@@ -200,8 +200,8 @@ class DashboardView(QMainWindow):
     multisample_unmapped_list: QListWidget
     musicxml_fname: QLineEdit
     new_project: QAction
-    octave: QSpinBox
-    octave_label: QLabel
+    octave_shift: QSpinBox
+    octave_shift_label: QLabel
     open_history: QPushButton
     open_preferences: QAction
     open_project: QAction

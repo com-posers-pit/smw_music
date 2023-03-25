@@ -155,7 +155,8 @@ class SampleSource(IntEnum):
 
 @dataclass
 class InstrumentSample:
-    octave: int = 3
+    default_octave: int = 3
+    octave_shift: int = 0
     dynamics: dict[Dynamics, int] = field(
         default_factory=lambda: {
             Dynamics.PPPP: 26,
@@ -437,8 +438,7 @@ class InstrumentConfig:
                 if sample_out is not None:
                     return (sample_out, name)
 
-        rv = (self.sample.emit(note.pitch, None), "")
-        return rv
+        return (self.sample.emit(note.pitch, None), "")
 
     ###########################################################################
     # API property definitions

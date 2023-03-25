@@ -70,7 +70,7 @@ class _InstrumentDict(TypedDict):
 
 
 class _SampleDict(TypedDict):
-    octave: int
+    octave_shift: int
     dynamics: dict[int, int]
     interpolate_dynamics: bool
     articulations: dict[int, list[int]]
@@ -165,7 +165,7 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
 
 def _load_sample(inst: _SampleDict) -> InstrumentSample:
     return InstrumentSample(
-        octave=inst["octave"],
+        octave_shift=inst["octave_shift"],
         dynamics={Dynamics(k): v for k, v in inst["dynamics"].items()},
         dyn_interpolate=inst["interpolate_dynamics"],
         artics={
@@ -231,7 +231,7 @@ def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
 
 def _save_sample(sample: InstrumentSample) -> _SampleDict:
     return {
-        "octave": sample.octave,
+        "octave_shift": sample.octave_shift,
         "dynamics": {k.value: v for k, v in sample.dynamics.items()},
         "interpolate_dynamics": sample.dyn_interpolate,
         "articulations": {

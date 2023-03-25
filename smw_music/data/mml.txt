@@ -81,7 +81,7 @@ w${song.volume}
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
 %for name, sample in inst_samples.items():
-"${f'{voice(name):{voice_sz}}'} = ${f'{sample.instrument_idx:3} o{sample.octave}'}"
+"${f'{voice(name):{voice_sz}}'} = ${f'{sample.instrument_idx:3} o{sample.default_octave}'}"
 %endfor
 
 ; Instrument dynamics definitions
