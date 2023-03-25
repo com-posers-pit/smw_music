@@ -1329,19 +1329,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | Path
         | GainMode,
     ) -> None:
-        old_sample = self.state.sample
-        new_sample = replace(old_sample)
-        for key, val in kwargs.items():
-            setattr(new_sample, key, val)
+        with suppress(NoSample):
+            old_sample = self.state.sample
+            new_sample = replace(old_sample)
+            for key, val in kwargs.items():
+                setattr(new_sample, key, val)
 
-        if new_sample != old_sample:
-            self._rollback_undo()
+            if new_sample != old_sample:
+                self._rollback_undo()
 
-            new_state = deepcopy(self.state)
-            new_state.sample = new_sample
+                new_state = deepcopy(self.state)
+                new_state.sample = new_sample
 
-            self._history.append(new_state)
-            self._signal_state_change()
+                self._history.append(new_state)
+                self._signal_state_change()
 
     ###########################################################################
 
