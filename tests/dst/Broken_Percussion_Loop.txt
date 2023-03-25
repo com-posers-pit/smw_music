@@ -1,6 +1,6 @@
 #amk 2
 
-; beer v0.3.3
+; beer v0.3.4
 
 #spc {
     #author  "COMPOSER HERE"
@@ -56,9 +56,9 @@ w180
 "CRESC         = $E8"
 "DIM           = $E8"
 "PAN_LEFT      = y20"
-"PAN_MID_LEFT  = y15"
+"PAN_MID_LEFT  = y12"
 "PAN_CENTER    = y10"
-"PAN_MID_RIGHT = y05"
+"PAN_MID_RIGHT = y08"
 "PAN_RIGHT     = y00"
 "VIB_OFF       = $DF"
 

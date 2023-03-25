@@ -13,6 +13,7 @@
 import copy
 import pkgutil
 from datetime import datetime
+from itertools import chain
 from pathlib import PurePosixPath
 
 # Library imports
@@ -26,12 +27,15 @@ from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import (
     Dynamics,
     InstrumentConfig,
+    InstrumentSample,
+    NoteHead,
     SampleSource,
 )
 from smw_music.music_xml.reduction import reduce, remove_unused_instruments
 from smw_music.music_xml.shared import CRLF, MusicXmlException
 from smw_music.music_xml.tokens import (
     Annotation,
+    Clef,
     CrescDelim,
     Crescendo,
     Dynamic,
@@ -227,8 +231,9 @@ class Song:
         The song's source game, or '???' if one was not provided
     channels : list
         A list of up to 8 channels of music in this song.
-    instruments: list
-        A list of InstrumentConfig objects for each detected instrument
+    instruments: dict
+        A dictionary of instrument name -> InstrumentConfig object for each
+        detected instrument
     volume: int
         Global volume
     """
@@ -244,7 +249,7 @@ class Song:
         self.game = metadata.get("game", "???")
         self.volume = int(metadata.get("volume", 180))
         self.channels = channels[:8]
-        self.instruments: list[InstrumentConfig] = []
+        self.instruments: dict[str, InstrumentConfig] = {}
 
         self._reduced_channels: list["Channel"] = []
 
@@ -296,15 +301,9 @@ class Song:
 
         for elem in stream:
             if isinstance(elem, music21.stream.Part):
-                percussion = False
-                for n in elem.flatten():
-                    if isinstance(n, music21.clef.PercussionClef):
-                        percussion = True
-                        break
-
                 part = cls._parse_part(elem, sections, len(parts))
-                part = remove_unused_instruments(percussion, part)
-                parts.append(Channel(part, percussion))
+                part = remove_unused_instruments(part)
+                parts.append(Channel(part))
 
         return cls(metadata, parts)
 
@@ -337,14 +336,14 @@ class Song:
 
         inst_names = sorted(inst_dyns)
 
-        self.instruments = [
-            InstrumentConfig(
+        self.instruments = {
+            inst: InstrumentConfig.from_name(
                 inst,
                 dynamics_present=inst_dyns[inst],
                 transpose=transposes[inst],
             )
             for inst in inst_names
-        ]
+        }
 
     ###########################################################################
 
@@ -386,7 +385,9 @@ class Song:
         triplets = False
         for subpart in part:
             if isinstance(subpart, music21.instrument.Instrument):
-                name = subpart.instrumentName
+                # This used to be .instrumentName, but that behaves...
+                # unintuitively... on percussion channels
+                name = subpart.partName
                 name = name.replace("\u266d", "b")  # Replace flats
                 name = name.replace(" ", "")  # Replace spaces
 
@@ -508,6 +509,8 @@ class Song:
                         channel_elem.append(annotation)
                 if isinstance(subelem, music21.tempo.MetronomeMark):
                     channel_elem.append(Tempo.from_music_xml(subelem))
+                if isinstance(subelem, music21.clef.Clef):
+                    channel_elem.append(Clef.from_music_xml(subelem))
 
                 if subelem.id in lines[1]:
                     channel_elem.append(
@@ -532,7 +535,6 @@ class Song:
                 chan.tokens,
                 loop_analysis,
                 superloop_analysis,
-                chan.percussion,
                 n != 0,
             )
 
@@ -541,7 +543,7 @@ class Song:
     def _validate(self) -> None:
         errors = []
         for n, channel in enumerate(self._reduced_channels):
-            msgs = channel.check()
+            msgs = channel.check(self.instruments)
             for msg in msgs:
                 errors.append(f"{msg} in staff {n + 1}")
 
@@ -560,10 +562,7 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
-        optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
-        solo_percussion: bool = False,
-        mute_percussion: bool = False,
         start_measure: int = 1,
     ) -> str:
         """
@@ -583,9 +582,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        optimize_percussion: bool
-            True iff repeated percussion notes should not repeat their
-            instrument
         sample_path: PurePosicPath
             Base path where custom BRR samples are stored
         start_measure: int
@@ -619,7 +615,7 @@ class Song:
 
         self._validate()
         channels = [
-            x.generate_mml({}, measure_numbers, optimize_percussion)
+            x.generate_mml(self.instruments, measure_numbers)
             for x in self._reduced_channels
         ]
 
@@ -627,62 +623,46 @@ class Song:
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        percussion = any(x.percussion for x in self._reduced_channels)
-
         instruments = copy.deepcopy(self.instruments)
+        inst_samples: dict[str, InstrumentSample] = {}
+
+        for inst_name, inst in instruments.items():
+            if inst.multisample:
+                inst_samples.update(inst.multisamples)
+            else:
+                inst_samples[inst_name] = inst.samples[""]
+
         samples: list[tuple[str, str, int]] = []
         sample_id = 30
 
-        for inst in instruments:
-            if inst.sample_source == SampleSource.SAMPLEPACK:
-                assert sample_path is not None  # nosec: B101
-
-                # TODO: This is pretty blah, song shouldn't rely on pathlib,
-                # see if this can be refactored
+        for sample in inst_samples.values():
+            if sample.sample_source == SampleSource.SAMPLEPACK:
                 fname = str(
-                    sample_path / inst.pack_sample[0] / inst.pack_sample[1]
+                    PurePosixPath(sample.pack_sample[0])
+                    / sample.pack_sample[1]
                 )
-                samples.append((fname, inst.brr_str, sample_id))
-                inst.instrument_idx = sample_id
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
                 sample_id += 1
-            if inst.sample_source == SampleSource.BRR:
-                assert sample_path is not None  # nosec: B101
-
-                fname = str(sample_path / inst.brr_fname.name)
-                samples.append((fname, inst.brr_str, sample_id))
-                inst.instrument_idx = sample_id
+            if sample.sample_source == SampleSource.BRR:
+                fname = sample.brr_fname.name
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
                 sample_id += 1
 
         # Overwrite muted/soloed instrument sample numbers
-        solo = any(inst.solo for inst in instruments) or solo_percussion
-        mute = any(inst.mute for inst in instruments) or mute_percussion
-
-        # TODO: Remove this hack
-        percussion_voices = {
-            "CR3": 22,
-            "CR2": 22,
-            "CR": 22,
-            "CH": 22,
-            "OH": 22,
-            "RD": 22,
-            "RD2": 22,
-            "HT": 24,
-            "MT": 23,
-            "SN": 10,
-            "LT": 21,
-            "KD": 21,
-        }
+        solo = any(sample.solo for sample in inst_samples.values())
+        mute = any(sample.mute for sample in inst_samples.values())
+        solo |= any(inst.solo for inst in instruments.values())
+        mute |= any(inst.mute for inst in instruments.values())
 
         if solo or mute:
-            samples.append(("EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
+            samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
 
-            for inst in instruments:
-                if inst.mute or (solo and not inst.solo):
-                    inst.sample_source = SampleSource.OVERRIDE
-                    inst.instrument_idx = sample_id
-
-            if mute_percussion or (solo and not solo_percussion):
-                percussion_voices = {k: sample_id for k in percussion_voices}
+            for inst_sample in inst_samples.values():
+                if inst_sample.mute or (solo and not inst_sample.solo):
+                    inst_sample.sample_source = SampleSource.OVERRIDE
+                    inst_sample.instrument_idx = sample_id
 
             # Not necessary, but we keep it for consistency's sake
             sample_id += 1
@@ -697,12 +677,11 @@ class Song:
             song=self,
             channels=channels,
             datetime=build_dt,
-            percussion=percussion,
             echo_config=echo_config,
-            instruments=instruments,
+            inst_samples=inst_samples,
             custom_samples=samples,
             dynamics=list(Dynamics),
-            percussion_voices=percussion_voices,
+            sample_path=str(sample_path),
         )
 
         rv = rv.replace(" ^", "^")
@@ -724,10 +703,7 @@ class Song:
         measure_numbers: bool = True,
         include_dt: bool = True,
         echo_config: EchoConfig | None = None,
-        optimize_percussion: bool = True,
         sample_path: PurePosixPath | None = None,
-        solo_percussion: bool = False,
-        mute_percussion: bool = False,
         start_measure: int = 1,
     ) -> str:
         """
@@ -749,9 +725,6 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        optimize_percussion: bool
-            True iff repeated percussion notes should not repeat their
-            instrument
         sample_path: PurePosicPath
             Base path where custom BRR samples are stored
         start_measure: int
@@ -764,10 +737,7 @@ class Song:
             measure_numbers,
             include_dt,
             echo_config,
-            optimize_percussion,
             sample_path,
-            solo_percussion,
-            mute_percussion,
             start_measure,
         )
 
@@ -776,3 +746,16 @@ class Song:
                 fobj.write(mml.encode("ascii", "ignore"))
 
         return mml
+
+    ###########################################################################
+
+    def unmapped_notes(
+        self, inst_name: str, inst: InstrumentConfig
+    ) -> set[tuple[music21.pitch.Pitch, NoteHead]]:
+        rv = set()
+
+        instrument = inst if inst.multisample else None
+        for channel in self.channels:
+            rv |= channel.unmapped(inst_name, instrument)
+
+        return rv

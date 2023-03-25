@@ -11,17 +11,18 @@
 
 # Standard library imports
 import enum
-import io
-import pkgutil
 from collections import deque
-from contextlib import ExitStack
+from contextlib import ExitStack, suppress
 from functools import cached_property, partial
+from importlib import resources
 from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
 # Library imports
+import qdarkstyle  # type: ignore
+from music21.pitch import Pitch
 from PyQt6 import uic
-from PyQt6.QtCore import QEvent, QObject, QSignalBlocker, Qt
+from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
 from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
 from PyQt6.QtWidgets import (
     QAbstractSlider,
@@ -29,10 +30,10 @@ from PyQt6.QtWidgets import (
     QCheckBox,
     QComboBox,
     QFileDialog,
-    QHeaderView,
     QLabel,
     QLineEdit,
     QListWidget,
+    QListWidgetItem,
     QMainWindow,
     QMenu,
     QMessageBox,
@@ -40,8 +41,6 @@ from PyQt6.QtWidgets import (
     QRadioButton,
     QSlider,
     QSpinBox,
-    QTableWidget,
-    QTableWidgetItem,
     QTextEdit,
     QTreeWidgetItem,
     QWidget,
@@ -53,14 +52,13 @@ from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource
-from smw_music.ui import resources  # pylint: disable=unused-import
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
-from smw_music.ui.state import State
+from smw_music.ui.state import NoSample, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -82,7 +80,7 @@ def _le_proxy(slot: Callable[[str], None], widget: QLineEdit) -> None:
 ###############################################################################
 
 
-def _mark_unselectable(item: QTableWidgetItem | QTreeWidgetItem) -> None:
+def _mark_unselectable(item: QTreeWidgetItem) -> None:
     item.setFlags(item.flags() & ~Qt.ItemFlag.ItemIsSelectable)
 
 
@@ -153,10 +151,28 @@ class _DynamicsWidgets(NamedTuple):
 ###############################################################################
 
 
+class _SampleRemover(QObject):
+    def __init__(self, model: Model) -> None:
+        super().__init__()
+        self._model = model
+
+    ###########################################################################
+
+    def eventFilter(self, _: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.Type.KeyRelease:
+            if cast(QKeyEvent, event).key() == Qt.Key.Key_Delete:
+                self._model.on_multisample_sample_remove_clicked()
+                return True
+        return False
+
+
+###############################################################################
+
+
 class _TblCol(enum.IntEnum):
-    SOLO = 0
-    MUTE = 1
-    NAME = 2
+    NAME = 0
+    SOLO = 1
+    MUTE = 2
 
 
 ###############################################################################
@@ -181,21 +197,23 @@ class Dashboard(QWidget):
     _keyhist: deque[int]
     _window_title: str
     _default_tooltips: dict[QWidget | QAction, str]
+    _samples: dict[tuple[str, str | None], QTreeWidgetItem]
+    _sample_remover: _SampleRemover
 
     ###########################################################################
     # Constructor definitions
     ###########################################################################
 
-    def __init__(self) -> None:
+    def __init__(self, prj_file: Path | None = None) -> None:
         super().__init__()
+        data_lib = resources.files("smw_music.data")
+
         self._window_title = f"beer v{__version__}"
 
         self._keyhist = deque(maxlen=len(_KONAMI))
-        ui_contents = pkgutil.get_data("smw_music", "/data/dashboard.ui")
-        if ui_contents is None:
-            raise Exception("Can't locate dashboard")
+        ui_contents = data_lib / "dashboard.ui"
 
-        self._view: DashboardView = uic.loadUi(io.BytesIO(ui_contents))
+        self._view: DashboardView = uic.loadUi(ui_contents)
         self._view.installEventFilter(self)
         self._view.setWindowTitle(self._window_title)
 
@@ -204,6 +222,7 @@ class Dashboard(QWidget):
         self._unsaved = False
         self._project_name = None
         self._sample_pack_items = {}
+        self._samples = {}
 
         # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
         font = QFont("_")
@@ -222,7 +241,7 @@ class Dashboard(QWidget):
         )
         label = QLabel(self)
         movie = QMovie(parent=self)
-        movie.setFileName(":/gifs/ashtley.gif")
+        movie.setFileName(str(data_lib / "ashtley.gif"))
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
@@ -233,7 +252,7 @@ class Dashboard(QWidget):
         self._history.setCentralWidget(QListWidget())
 
         self._envelope_preview = EnvelopePreview(self)
-        self._history.setWindowTitle("Envelope")
+        self._history.setWindowTitle("History")
 
         self._setup_menus()
         self._fix_edit_widths()
@@ -253,11 +272,17 @@ class Dashboard(QWidget):
             self._checkitout,
             self._envelope_preview,
         ]:
-            widget.setWindowIcon(QIcon(":/icons/maestro.svg"))
+            widget.setWindowIcon(QIcon(str(data_lib / "maestro.svg")))
+
+        self._sample_remover = _SampleRemover(self._model)
+        self._view.sample_list.installEventFilter(self._sample_remover)
 
         self._view.show()
 
         self._model.start()
+
+        if prj_file is not None:
+            self._model.on_load(prj_file)
 
     ###########################################################################
     # API slot definitions
@@ -324,6 +349,30 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_multisample_sample_add_clicked(self) -> None:
+        v = self._view
+
+        self._model.on_multisample_sample_add_clicked(
+            v.multisample_sample_name.text(),
+            v.multisample_sample_notes.text(),
+            v.multisample_sample_notehead.currentText(),
+            v.multisample_sample_output.text(),
+        )
+
+    ###########################################################################
+
+    def on_multisample_sample_changed(self, _) -> None:
+        v = self._view
+
+        self._model.on_multisample_sample_changed(
+            v.multisample_sample_name.text(),
+            v.multisample_sample_notes.text(),
+            v.multisample_sample_notehead.currentText(),
+            v.multisample_sample_output.text(),
+        )
+
+    ###########################################################################
+
     def on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view,
@@ -359,9 +408,12 @@ class Dashboard(QWidget):
         advanced_enabled: bool,
         amk_valid: bool,
         spcplayer_valid: bool,
-        sample_packs: dict[str, SamplePack],
+        dark_mode: bool,
     ) -> None:
         v = self._view  # pylint: disable=invalid-name
+
+        sheet = qdarkstyle.load_stylesheet(qt_api="pyqt6") if dark_mode else ""
+        cast(QApplication, QApplication.instance()).setStyleSheet(sheet)
 
         # advance_enabled handling
         v.generate_mml.setVisible(advanced_enabled)
@@ -388,19 +440,6 @@ class Dashboard(QWidget):
 
             action.setToolTip(tooltip)
             action.setEnabled(enable)
-
-        # sample_packs handling
-        self._sample_pack_items = {}
-        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
-
-        tree.clear()
-
-        for name, pack in sample_packs.items():
-            top = QTreeWidgetItem(tree, [name])
-            _mark_unselectable(top)
-
-            self._add_sample_pack(top, name, pack)
-            tree.addTopLevelItem(top)
 
     ###########################################################################
 
@@ -436,12 +475,29 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_sample_packs_changed(
+        self, sample_packs: dict[str, SamplePack]
+    ) -> None:
+        # sample_packs handling
+        self._sample_pack_items = {}
+        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+
+        tree.clear()
+
+        for name, pack in sample_packs.items():
+            top = QTreeWidgetItem(tree, [name])
+            _mark_unselectable(top)
+
+            self._add_sample_pack(top, name, pack)
+            tree.addTopLevelItem(top)
+
+    ###########################################################################
+
     def on_state_changed(self, state: State, update_instruments: bool) -> None:
         if update_instruments:
-            self._update_instruments([inst.name for inst in state.instruments])
+            self._update_instruments(state)
 
         v = self._view  # pylint: disable=invalid-name
-        inst = state.inst
         self._unsaved = state.unsaved
         self._project_name = state.project_name
 
@@ -460,8 +516,14 @@ class Dashboard(QWidget):
                 stack.enter_context(QSignalBlocker(child))
 
             # Control Panel
-            v.musicxml_fname.setText(state.musicxml_fname)
-            v.mml_fname.setText(state.mml_fname)
+            musicxml_fname = state.musicxml_fname
+            fname = "" if musicxml_fname is None else str(musicxml_fname)
+            v.musicxml_fname.setText(fname)
+
+            mml_fname = state.mml_fname
+            fname = "" if mml_fname is None else str(mml_fname)
+            v.mml_fname.setText(fname)
+
             v.porter_name.setText(state.porter)
             v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)
@@ -475,6 +537,7 @@ class Dashboard(QWidget):
             project_mode = not standalone_mode
 
             v.generate_and_play.setEnabled(project_mode)
+            v.render_zip.setEnabled(project_mode)
             v.generate_spc.setEnabled(project_mode)
             v.play_spc.setEnabled(project_mode)
             v.save_project.setEnabled(project_mode)
@@ -483,102 +546,21 @@ class Dashboard(QWidget):
             v.mml_fname.setEnabled(standalone_mode)
 
             # Solo/mute settings
-            inst_list = self._view.instrument_list
-            inst_idx = state.instrument_idx
-            if inst_idx is not None:
-                inst_list.setCurrentCell(inst_idx, _TblCol.NAME)
-
-            v.mute_percussion.setChecked(state.mute_percussion)
-            v.solo_percussion.setChecked(state.solo_percussion)
-
-            for row, inst_cfg in enumerate(state.instruments):
-                solo = _to_checked(inst_cfg.solo)
-                mute = _to_checked(inst_cfg.mute)
-                inst_list.item(row, _TblCol.SOLO.value).setCheckState(solo)
-                inst_list.item(row, _TblCol.MUTE.value).setCheckState(mute)
-
-            # Instrument dynamics settings
-            for dkey, dval in inst.dynamics.items():
-                dwidgets = self._dyn_widgets[dkey]
-                enable = dkey in inst.dynamics_present
-
-                dwidgets.slider.setValue(dval)
-                dwidgets.slider.setEnabled(enable)
-                dwidgets.setting.setText(pct(dval))
-                dwidgets.setting.setEnabled(enable)
-                dwidgets.label.setText(hexb(dval))
-                dwidgets.label.setEnabled(enable)
-
-            # Instrument articulation settings
-            for akey, aval in inst.artics.items():
-                awidgets = self._artic_widgets[akey]
-                awidgets.length_slider.setValue(aval.length)
-                awidgets.length_setting.setText(hexb(aval.length))
-                awidgets.volume_slider.setValue(aval.volume)
-                awidgets.volume_setting.setText(hexb(aval.volume))
-                awidgets.setting_label.setText(hexb(aval.setting))
-
-            # Instrument pan settings
-            v.pan_enable.setChecked(inst.pan_enabled)
-            v.pan_setting.setEnabled(inst.pan_enabled)
-            v.pan_setting_label.setEnabled(inst.pan_enabled)
-            v.pan_l_invert.setEnabled(inst.pan_enabled)
-            v.pan_r_invert.setEnabled(inst.pan_enabled)
-            v.pan_invert_label.setEnabled(inst.pan_enabled)
-            v.pan_setting.setValue(inst.pan_setting)
-            v.pan_setting_label.setText(inst.pan_description)
-            v.pan_l_invert.setChecked(inst.pan_invert[0])
-            v.pan_r_invert.setChecked(inst.pan_invert[1])
-
-            # Instrument sample
-            v.select_builtin_sample.setChecked(
-                inst.sample_source == SampleSource.BUILTIN
-            )
-            v.builtin_sample.setCurrentIndex(inst.builtin_sample_index)
-            v.select_pack_sample.setChecked(
-                inst.sample_source == SampleSource.SAMPLEPACK
-            )
-            v.sample_settings_box.setEnabled(
-                inst.sample_source != SampleSource.BUILTIN
-            )
-            try:
-                v.sample_pack_list.setCurrentItem(
-                    self._sample_pack_items[state.inst.pack_sample]
+            sample_list = self._view.sample_list
+            sample_list.clearSelection()
+            with suppress(NoSample):
+                sample_idx = state.sample_idx
+                sample_list.setCurrentItem(
+                    self._samples[sample_idx], _TblCol.NAME
                 )
-            except KeyError:
-                pass
+                self._update_sample_config(state, sample_idx)
 
-            v.select_brr_sample.setChecked(
-                inst.sample_source == SampleSource.BRR
-            )
-            fname = str(inst.brr_fname) if inst.brr_fname.name else ""
-            v.brr_fname.setText(fname)
-            v.octave.setValue(inst.octave)
+            self._update_solomute(state)
+            self._update_multisample(state)
 
-            v.select_adsr_mode.setChecked(inst.adsr_mode)
-            v.select_gain_mode.setChecked(not inst.adsr_mode)
-            v.gain_mode_direct.setChecked(inst.gain_mode == GainMode.DIRECT)
-            v.gain_mode_inclin.setChecked(inst.gain_mode == GainMode.INCLIN)
-            v.gain_mode_incbent.setChecked(inst.gain_mode == GainMode.INCBENT)
-            v.gain_mode_declin.setChecked(inst.gain_mode == GainMode.DECLIN)
-            v.gain_mode_decexp.setChecked(inst.gain_mode == GainMode.DECEXP)
-            v.gain_slider.setValue(inst.gain_setting)
-            v.gain_setting.setText(hexb(inst.gain_setting))
-            v.attack_slider.setValue(inst.attack_setting)
-            v.attack_setting.setText(hexb(inst.attack_setting))
-            v.decay_slider.setValue(inst.decay_setting)
-            v.decay_setting.setText(hexb(inst.decay_setting))
-            v.sus_level_slider.setValue(inst.sus_level_setting)
-            v.sus_level_setting.setText(hexb(inst.sus_level_setting))
-            v.sus_rate_slider.setValue(inst.sus_rate_setting)
-            v.sus_rate_setting.setText(hexb(inst.sus_rate_setting))
-
-            v.tune_slider.setValue(inst.tune_setting)
-            v.tune_setting.setText(hexb(inst.tune_setting))
-            v.subtune_slider.setValue(inst.subtune_setting)
-            v.subtune_setting.setText(hexb(inst.subtune_setting))
-
-            v.brr_setting.setText(inst.brr_str)
+            with suppress(NoSample):
+                if state.sample.sample_source == SampleSource.BUILTIN:
+                    v.sample_pack_list.clearSelection()
 
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
@@ -622,18 +604,6 @@ class Dashboard(QWidget):
 
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
-
-            # Apply the more interesting UI updates
-            self._update_gain_limits(inst.gain_mode == GainMode.DIRECT)
-            self._update_envelope(
-                inst.adsr_mode,
-                inst.attack_setting,
-                inst.decay_setting,
-                inst.sus_level_setting,
-                inst.sus_rate_setting,
-                inst.gain_mode,
-                inst.gain_setting,
-            )
 
     ###########################################################################
 
@@ -708,24 +678,35 @@ class Dashboard(QWidget):
             (v.generate_and_play, m.on_generate_and_play_clicked),
             (v.generate_and_play, self._update_generate_and_play_tooltip),
             (v.reload_musicxml, m.on_reload_musicxml_clicked),
+            (v.render_zip, m.on_render_zip_clicked),
             # Instrument settings
-            (v.instrument_list, m.on_instrument_changed),
             (v.interpolate, m.on_interpolate_changed),
-            (v.mute_percussion, m.on_mute_percussion_changed),
-            (v.solo_percussion, m.on_solo_percussion_changed),
             # Instrument pan settings
             (v.pan_enable, m.on_pan_enable_changed),
             (v.pan_setting, m.on_pan_setting_changed),
             (v.pan_l_invert, partial(m.on_pan_invert_changed, True)),
             (v.pan_r_invert, partial(m.on_pan_invert_changed, False)),
+            (v.multisample_sample_add, self.on_multisample_sample_add_clicked),
+            (
+                v.multisample_sample_remove,
+                m.on_multisample_sample_remove_clicked,
+            ),
+            (v.multisample_sample_name, self.on_multisample_sample_changed),
+            (v.multisample_sample_notes, self.on_multisample_sample_changed),
+            (
+                v.multisample_sample_notehead,
+                self.on_multisample_sample_changed,
+            ),
+            (v.multisample_sample_output, self.on_multisample_sample_changed),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
             (v.select_pack_sample, m.on_pack_sample_selected),
             (v.select_brr_sample, m.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
+            (v.select_multisample_sample, m.on_multisample_sample_selected),
             (v.brr_fname, m.on_brr_fname_changed),
-            (v.octave, m.on_octave_changed),
+            (v.octave_shift, m.on_octave_shift_changed),
             (v.select_adsr_mode, m.on_select_adsr_mode_selected),
             (v.gain_mode_direct, m.on_gain_direct_selected),
             (v.gain_mode_inclin, m.on_gain_inclin_selected),
@@ -805,17 +786,18 @@ class Dashboard(QWidget):
                 widget.toggled.connect(slot)
             elif isinstance(widget, (QAbstractSlider, QSpinBox)):
                 widget.valueChanged.connect(slot)
-            elif isinstance(widget, QTableWidget):
-                pass
-                # widget.currentRowChanged.connect(slot)
             else:
                 # This is basically a compile-time exception
                 raise Exception(f"Unhandled widget connection {widget}")
 
-        v.instrument_list.itemChanged.connect(self._on_solomute_change)
-        v.instrument_list.itemSelectionChanged.connect(self._on_inst_change)
+        v.sample_list.itemChanged.connect(self._on_solomute_change)
+        v.sample_list.itemSelectionChanged.connect(self._on_sample_change)
         v.sample_pack_list.itemSelectionChanged.connect(
             self.on_pack_sample_changed
+        )
+
+        v.multisample_unmapped_list.doubleClicked.connect(
+            self._on_multisample_unmapped_doubleclicked
         )
 
         # Return signals
@@ -823,6 +805,7 @@ class Dashboard(QWidget):
         m.mml_generated.connect(self.on_mml_generated)
         m.response_generated.connect(self.on_response_generated)
         m.preferences_changed.connect(self.on_preferences_changed)
+        m.sample_packs_changed.connect(self.on_sample_packs_changed)
         m.recent_projects_updated.connect(self.on_recent_projects_updated)
         v.actionClearRecentProjects.triggered.connect(
             m.on_recent_projects_cleared
@@ -947,6 +930,23 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def _make_sample_item(
+        self, name: str, role: tuple[str, str]
+    ) -> QTreeWidgetItem:
+        item = QTreeWidgetItem([name])
+        item.setToolTip(_TblCol.SOLO, f"Solo {name}")
+        item.setToolTip(_TblCol.MUTE, f"Mute {name}")
+
+        item.setCheckState(_TblCol.SOLO, Qt.CheckState.Unchecked)
+        item.setCheckState(_TblCol.MUTE, Qt.CheckState.Unchecked)
+
+        self._samples[role] = item
+        item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
+
+        return item
+
+    ###############################################################################
+
     def _on_close_project_clicked(self) -> None:
         close = self._prompt_to_save()
         if close != QMessageBox.StandardButton.Cancel:
@@ -954,21 +954,35 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _on_inst_change(self) -> None:
-        widget = self._view.instrument_list
-        self._model.on_instrument_changed(widget.currentRow())
+    def _on_multisample_unmapped_doubleclicked(self, idx: QModelIndex) -> None:
+        item = self._view.multisample_unmapped_list.itemFromIndex(idx)
+
+        name = f"TMP{self._view.multisample_unmapped_list.count()}_"
+        note, notehead = cast(
+            tuple[Pitch, str], item.data(Qt.ItemDataRole.UserRole)
+        )
+
+        self._model.on_multisample_sample_add_clicked(
+            name, str(note), notehead, note
+        )
 
     ###########################################################################
 
-    def _on_solomute_change(self, item: QTableWidgetItem) -> None:
-        role: tuple[_TblCol, int] | None = item.data(Qt.ItemDataRole.UserRole)
-        if role:
-            row = role[1]
-            checked = item.checkState() == Qt.CheckState.Checked
-            if role[0] == _TblCol.SOLO:
-                self._model.on_solo_changed(row, checked)
-            if role[0] == _TblCol.MUTE:
-                self._model.on_mute_changed(row, checked)
+    def _on_sample_change(self) -> None:
+        widget = self._view.sample_list
+        sample = widget.currentItem().data(
+            _TblCol.NAME, Qt.ItemDataRole.UserRole
+        )
+        self._model.on_sample_changed(sample)
+
+    ###########################################################################
+
+    def _on_solomute_change(self, item: QTreeWidgetItem, col: int) -> None:
+        checked = item.checkState(col) == Qt.CheckState.Checked
+        sample = item.data(_TblCol.NAME, Qt.ItemDataRole.UserRole)
+
+        solo = col == _TblCol.SOLO
+        self._model.on_solomute_changed(sample, solo, checked)
 
     ###########################################################################
 
@@ -1009,18 +1023,15 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _setup_instrument_table(self) -> None:
-        widget = self._view.instrument_list
-        solo_item = QTableWidgetItem("S")
-        solo_item.setToolTip("Solo Instrument")
-        mute_item = QTableWidgetItem("M")
-        mute_item.setToolTip("Mute Instrument")
+        widget = self._view.sample_list
+        header = QTreeWidgetItem(["Instrument", "S", "M"])
 
-        widget.setHorizontalHeaderItem(0, solo_item)
-        widget.setHorizontalHeaderItem(1, mute_item)
-        widget.setHorizontalHeaderItem(2, QTableWidgetItem("Instrument"))
-        widget.horizontalHeader().setSectionResizeMode(
-            QHeaderView.ResizeMode.ResizeToContents
-        )
+        header.setToolTip(_TblCol.SOLO, "Solo Instrument")
+        header.setToolTip(_TblCol.MUTE, "Mute Instrument")
+
+        widget.setHeaderItem(header)
+
+        widget.header().moveSection(_TblCol.NAME, len(_TblCol) - 1)
 
     ###########################################################################
 
@@ -1037,6 +1048,7 @@ class Dashboard(QWidget):
 
         view.undo.triggered.connect(model.on_undo_clicked)
         view.redo.triggered.connect(model.on_redo_clicked)
+        view.view_history.triggered.connect(self.on_open_history_clicked)
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)
@@ -1101,34 +1113,200 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _update_instruments(self, names: list[str]) -> None:
-        widget = self._view.instrument_list
+    def _update_instruments(self, state: State) -> None:
+        widget = self._view.sample_list
+
+        open_inst = None
+        with suppress(NoSample):
+            open_inst = state.sample_idx[0]
 
         with QSignalBlocker(widget):
-            widget.clearContents()
-            widget.setRowCount(len(names))
+            widget.clear()
+            self._samples.clear()
 
-            for row, name in enumerate(names):
-                solo_box = QTableWidgetItem()
-                solo_box.setCheckState(Qt.CheckState.Unchecked)
-                solo_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.SOLO, row))
-                solo_box.setToolTip(f"Solo {name}")
-                _mark_unselectable(solo_box)
+            for inst_name, inst in state.instruments.items():
 
-                mute_box = QTableWidgetItem()
-                mute_box.setCheckState(Qt.CheckState.Unchecked)
-                mute_box.setData(Qt.ItemDataRole.UserRole, (_TblCol.MUTE, row))
-                mute_box.setToolTip(f"Mute {name}")
-                _mark_unselectable(mute_box)
+                parent = self._make_sample_item(inst_name, (inst_name, ""))
+                widget.addTopLevelItem(parent)
 
-                name_box = QTableWidgetItem(name)
-                name_box.setFlags(
-                    name_box.flags() & ~Qt.ItemFlag.ItemIsEditable
-                )
+                for sample_name in sorted(inst.multisamples.keys()):
+                    item = self._make_sample_item(
+                        sample_name, (inst_name, sample_name)
+                    )
+                    parent.addChild(item)
 
-                widget.setItem(row, 0, solo_box)
-                widget.setItem(row, 1, mute_box)
-                widget.setItem(row, 2, name_box)
+                if inst_name == open_inst:
+                    widget.expand(widget.indexFromItem(parent))
+
+    ###########################################################################
+
+    def _update_multisample(self, state: State) -> None:
+        v = self._view
+        name = ""
+        notes = ""
+        notehead = "normal"
+        start = ""
+        with suppress(NoSample):
+            sample = state.sample
+            name = state.sample_idx[1]
+
+            if name:
+                notehead = sample.notehead.symbol
+                if sample.llim == sample.ulim:
+                    notes = sample.llim.nameWithOctave
+                else:
+                    notes = ":".join(
+                        x.nameWithOctave for x in [sample.llim, sample.ulim]
+                    )
+                start = sample.start.nameWithOctave
+
+        v.multisample_sample_name.setText(name)
+        v.multisample_sample_notehead.setCurrentText(notehead)
+        v.multisample_sample_notes.setText(notes)
+        v.multisample_sample_output.setText(start)
+
+        self._update_unmapped(state)
+
+    ###########################################################################
+
+    def _update_sample_config(
+        self, state: State, sample_idx: tuple[str, str]
+    ) -> None:
+        v = self._view  # pylint: disable=invalid-name
+
+        sel_inst = state.instruments[sample_idx[0]]
+        sel_sample = state.samples[sample_idx]
+
+        v.interpolate.setChecked(sel_sample.dyn_interpolate)
+
+        # Instrument dynamics settings
+        for dkey, dval in sel_sample.dynamics.items():
+            dwidgets = self._dyn_widgets[dkey]
+            enable = dkey in sel_inst.dynamics_present
+
+            dwidgets.slider.setValue(dval)
+            dwidgets.slider.setEnabled(enable)
+            dwidgets.setting.setText(pct(dval))
+            dwidgets.setting.setEnabled(enable)
+            dwidgets.label.setText(hexb(dval))
+            dwidgets.label.setEnabled(enable)
+
+        # Instrument articulation settings
+        for akey, aval in sel_sample.artics.items():
+            awidgets = self._artic_widgets[akey]
+            awidgets.length_slider.setValue(aval.length)
+            awidgets.length_setting.setText(hexb(aval.length))
+            awidgets.volume_slider.setValue(aval.volume)
+            awidgets.volume_setting.setText(hexb(aval.volume))
+            awidgets.setting_label.setText(hexb(aval.setting))
+
+        # Instrument pan settings
+        v.pan_enable.setChecked(sel_sample.pan_enabled)
+        v.pan_setting.setEnabled(sel_sample.pan_enabled)
+        v.pan_setting_label.setEnabled(sel_sample.pan_enabled)
+        v.pan_l_invert.setEnabled(sel_sample.pan_enabled)
+        v.pan_r_invert.setEnabled(sel_sample.pan_enabled)
+        v.pan_invert_label.setEnabled(sel_sample.pan_enabled)
+        v.pan_setting.setValue(sel_sample.pan_setting)
+        v.pan_setting_label.setText(sel_sample.pan_description)
+        v.pan_l_invert.setChecked(sel_sample.pan_invert[0])
+        v.pan_r_invert.setChecked(sel_sample.pan_invert[1])
+
+        # Instrument sample
+        v.select_builtin_sample.setChecked(
+            sel_sample.sample_source == SampleSource.BUILTIN
+        )
+        v.builtin_sample.setCurrentIndex(sel_sample.builtin_sample_index)
+        v.select_pack_sample.setChecked(
+            sel_sample.sample_source == SampleSource.SAMPLEPACK
+        )
+        v.sample_settings_box.setEnabled(
+            sel_sample.sample_source != SampleSource.BUILTIN
+        )
+        with suppress(KeyError):
+            v.sample_pack_list.setCurrentItem(
+                self._sample_pack_items[sel_sample.pack_sample]
+            )
+
+        v.select_brr_sample.setChecked(
+            sel_sample.sample_source == SampleSource.BRR
+        )
+        fname = str(sel_sample.brr_fname) if sel_sample.brr_fname.name else ""
+        v.brr_fname.setText(fname)
+
+        v.octave_shift.setValue(sel_sample.octave_shift)
+
+        v.select_adsr_mode.setChecked(sel_sample.adsr_mode)
+        v.select_gain_mode.setChecked(not sel_sample.adsr_mode)
+        v.gain_mode_direct.setChecked(sel_sample.gain_mode == GainMode.DIRECT)
+        v.gain_mode_inclin.setChecked(sel_sample.gain_mode == GainMode.INCLIN)
+        v.gain_mode_incbent.setChecked(
+            sel_sample.gain_mode == GainMode.INCBENT
+        )
+        v.gain_mode_declin.setChecked(sel_sample.gain_mode == GainMode.DECLIN)
+        v.gain_mode_decexp.setChecked(sel_sample.gain_mode == GainMode.DECEXP)
+        invert = (not sel_sample.adsr_mode) and (
+            sel_sample.gain_mode != GainMode.DIRECT
+        )
+        v.gain_slider.setInvertedAppearance(invert)
+        v.gain_slider.setInvertedControls(invert)
+        v.gain_slider.setValue(sel_sample.gain_setting)
+        v.gain_setting.setText(hexb(sel_sample.gain_setting))
+        v.attack_slider.setValue(sel_sample.attack_setting)
+        v.attack_setting.setText(hexb(sel_sample.attack_setting))
+        v.decay_slider.setValue(sel_sample.decay_setting)
+        v.decay_setting.setText(hexb(sel_sample.decay_setting))
+        v.sus_level_slider.setValue(sel_sample.sus_level_setting)
+        v.sus_level_setting.setText(hexb(sel_sample.sus_level_setting))
+        v.sus_rate_slider.setValue(sel_sample.sus_rate_setting)
+        v.sus_rate_setting.setText(hexb(sel_sample.sus_rate_setting))
+
+        v.tune_slider.setValue(sel_sample.tune_setting)
+        v.tune_setting.setText(hexb(sel_sample.tune_setting))
+        v.subtune_slider.setValue(sel_sample.subtune_setting)
+        v.subtune_setting.setText(hexb(sel_sample.subtune_setting))
+
+        v.brr_setting.setText(sel_sample.brr_str)
+
+        # Apply the more interesting UI updates
+        self._update_gain_limits(sel_sample.gain_mode == GainMode.DIRECT)
+        self._update_envelope(
+            sel_sample.adsr_mode,
+            sel_sample.attack_setting,
+            sel_sample.decay_setting,
+            sel_sample.sus_level_setting,
+            sel_sample.sus_rate_setting,
+            sel_sample.gain_mode,
+            sel_sample.gain_setting,
+        )
+
+    ###########################################################################
+
+    def _update_solomute(self, state: State) -> None:
+        for key, sample in state.samples.items():
+            solo = _to_checked(sample.solo)
+            mute = _to_checked(sample.mute)
+
+            item = self._samples[key]
+            item.setCheckState(_TblCol.SOLO, solo)
+            item.setCheckState(_TblCol.MUTE, mute)
+
+    ###########################################################################
+
+    def _update_unmapped(self, state: State) -> None:
+        widget = self._view.multisample_unmapped_list
+        widget.clear()
+
+        for pitch, head in reversed(
+            sorted(state.unmapped, key=lambda x: x[0].ps)
+        ):
+            text = pitch.nameWithOctave.replace("-", "♭")
+            if head != "normal":
+                text += f":{head}"
+
+            item = QListWidgetItem(text)
+            item.setData(Qt.ItemDataRole.UserRole, (pitch, head))
+            widget.addItem(item)
 
     ###########################################################################
     # Private property definitions

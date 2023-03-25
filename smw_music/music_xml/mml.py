@@ -14,11 +14,16 @@ from dataclasses import dataclass, field
 from enum import Enum, auto
 from functools import singledispatchmethod
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
+from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
     Annotation,
     Artic,
+    Clef,
     CrescDelim,
     Crescendo,
     Dynamic,
@@ -39,31 +44,6 @@ from smw_music.music_xml.tokens import (
 )
 
 ###############################################################################
-# API constant definitions
-###############################################################################
-
-# Weinberg:
-# http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
-PERCUSSION_MAP = {
-    "x": {
-        "c6": "CR3_",
-        "b5": "CR2_",
-        "a5": "CR",
-        "g5": "CH",
-        "f5": "RD",
-        "e5": "OH",
-        "d5": "RD2_",
-    },
-    "normal": {
-        "e5": "HT",
-        "d5": "MT",
-        "c5": "SN",
-        "a4": "LT",
-        "f4": "KD",
-    },
-}
-
-###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -76,12 +56,12 @@ class Exporter:
 
     # This needs to be included to keep mypy from complaining in subclasses
     @singledispatchmethod
-    def _emit(self, token: Token) -> None:
+    def emit(self, token: Token) -> None:
         raise NotImplementedError
 
     def generate(self, tokens: list[Token]) -> None:
         for token in tokens:
-            self._emit(token)
+            self.emit(token)
 
 
 ###############################################################################
@@ -98,7 +78,7 @@ class SlurState(Enum):
 
 @dataclass
 class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
-    instr_octave_map: dict[str, int]
+    instruments: dict[str, InstrumentConfig]
     octave: int = 4
     default_note_len: int = 8
     grace: bool = False
@@ -106,56 +86,68 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     slur: SlurState = SlurState.SLUR_IDLE
     tie: bool = False
     legato: bool = False
-    percussion: bool = False
     articulation: Artic = Artic.NORMAL
-    optimize_percussion: bool = False
     last_percussion: str = ""
     directives: list[str] = field(default_factory=list)
+
+    _instrument: InstrumentConfig = field(init=False)
+    _active_sample_name: str = field(init=False)
+    _active_sample: InstrumentSample = field(init=False)
     _in_loop: bool = field(default=False, init=False)
-    _in_triplet: bool = False
+    _in_triplet: bool = field(default=False, init=False)
 
     ###########################################################################
 
     @singledispatchmethod
-    def _emit(self, token: Token) -> None:
+    def emit(self, token: Token) -> None:
         raise NotImplementedError
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Annotation) -> None:
         self._append(token.text)
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: CrescDelim) -> None:
         pass
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
+    def _(self, token: Clef) -> None:
+        self.percussion = token.percussion
+
+    ###########################################################################
+
+    @emit.register
     def _(self, token: Crescendo) -> None:
         cmd = "CRESC" if token.cresc else "DIM"
         self._append(f"{cmd}${token.duration:02X}$_{token.target.upper()}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Dynamic) -> None:
         self._append(f"v{token.level.upper()}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Instrument) -> None:
-        instr = token.name
-        self._append(f"@{instr}")
-        self.octave = self.instr_octave_map.get(instr, 3)
+        name = token.name
+        self._instrument = self.instruments[name]
+        self._active_sample_name = ""
+
+        if not self._instrument.multisample:
+            self.octave = self._instrument.samples[""].default_octave
+            self._append(f"@{name}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Loop) -> None:
         if token.superloop:
             open_dir = "[["
@@ -176,20 +168,20 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: LoopDelim) -> None:
         pass
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: LoopRef) -> None:
         repeats = f"{token.repeats}" if token.repeats > 1 else ""
         self._append(f"({token.loop_id}){repeats}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Measure) -> None:
         comment = ""
         if self.measure_numbers:
@@ -202,7 +194,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: RehearsalMark) -> None:
         self._append(CRLF)
         self._append(f";===================={CRLF}")
@@ -215,14 +207,14 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Repeat) -> None:
         if token.start:
             self._append("/")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Rest) -> None:
         directive = "r"
         if token.duration != self.default_note_len:
@@ -233,7 +225,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Slur) -> None:
         self.slur = (
             SlurState.SLUR_ACTIVE if token.start else SlurState.SLUR_END
@@ -241,7 +233,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Tempo) -> None:
         # Magic BPM -> MML/SPC tempo conversion
         tempo = int(token.bpm * 255 / 625)
@@ -249,44 +241,65 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Triplet) -> None:
         self._in_triplet = token.start
         self._append("{" if token.start else "}")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Vibrato) -> None:
         self._append("$DE$01$23$45" if token.start else "VIB_OFF")
 
     ###########################################################################
 
-    @_emit.register
+    @emit.register
     def _(self, token: Note) -> None:
+        inst = self._instrument
         if token.grace:
             self.grace = True
 
-        if not self.percussion:
-            self._emit_octave(token)
+        note = inst.emit_note(token)
+
+        pitch, sample = note
+        percussion = inst.samples[sample].percussion
+
+        if (self._active_sample_name != sample) and not percussion:
+            if sample:
+                self._append(f"@{sample}")
+                self.octave = inst.samples[sample].default_octave
+            else:
+                # This is a fallback for when a sample isn't found
+                self.octave = inst.sample.default_octave
+                self._append(
+                    f"@{inst.sample.builtin_sample_index} o{self.octave}"
+                )
+
+        self._active_sample_name = sample
+        self._active_sample = inst.samples[sample]
+
+        if not percussion:
+            self._emit_octave(pitch)
+            self.last_percussion = ""
 
         if self.tie:
             directive = "^"
         else:
-            if not self.percussion:
-                directive = token.name
+            if not percussion:
+                directive = pitch.name.lower().replace("#", "+")
             else:
-                directive = PERCUSSION_MAP[token.head][
-                    token.name + str(token.octave + 1)
-                ]
-                if self.optimize_percussion:
-                    if (
-                        directive == self.last_percussion
-                    ) and not self._in_loop:
-                        self.last_percussion = directive
-                        directive += "n"
-                    else:
-                        self.last_percussion = directive
+                directive = sample
+                # This exclusion is related to some special logic in N-SPC
+                # where these percussion samples triggered on @ rather than on
+                # a note being used
+                if 18 < inst.samples[sample].builtin_sample_index < 30:
+                    self.last_percussion = directive
+                elif (directive == self.last_percussion) and not self._in_loop:
+                    self.last_percussion = directive
+                    directive += "n"
+                else:
+                    self.last_percussion = directive
 
         directive += self._calc_note_length(token)
 
@@ -367,9 +380,9 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def _emit_octave(self, token: Note) -> None:
+    def _emit_octave(self, pitch: Pitch) -> None:
         cur_octave = self.octave
-        octave = token.octave
+        octave = pitch.octave + self._active_sample.octave_shift
         octave_diff = octave - cur_octave
 
         directive = ""

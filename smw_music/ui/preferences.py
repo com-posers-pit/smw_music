@@ -10,8 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-import io
-import pkgutil
+from importlib import resources
 from pathlib import Path
 
 # Library imports
@@ -36,10 +35,10 @@ class Preferences:
     ###########################################################################
 
     def __init__(self) -> None:
-        ui_contents = pkgutil.get_data("smw_music", "/data/preferences.ui")
-        if ui_contents is None:
-            raise Exception("Can't locate preferences")
-        dialog: PreferencesView = uic.loadUi(io.BytesIO(ui_contents))
+
+        data_lib = resources.files("smw_music.data")
+        ui_contents = data_lib / "preferences.ui"
+        dialog: PreferencesView = uic.loadUi(ui_contents)
         self._dialog = dialog
 
         connections = [
@@ -106,6 +105,8 @@ class Preferences:
         d.sample_pack_dirname.setText(text)
 
         d.advanced_mode.setChecked(preferences.advanced_mode)
+        d.dark_mode.setChecked(preferences.dark_mode)
+        d.release_check.setChecked(preferences.release_check)
 
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
@@ -114,9 +115,18 @@ class Preferences:
             advanced_mode = (
                 d.advanced_mode.checkState() == Qt.CheckState.Checked
             )
+            dark_mode = d.dark_mode.checkState() == Qt.CheckState.Checked
+            release_check = (
+                d.release_check.checkState() == Qt.CheckState.Checked
+            )
 
             return PreferencesState(
-                amk_fname, spcplay_fname, pack_dir, advanced_mode
+                amk_fname,
+                spcplay_fname,
+                pack_dir,
+                advanced_mode,
+                dark_mode,
+                release_check,
             )
 
         return None

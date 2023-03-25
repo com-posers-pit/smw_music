@@ -13,12 +13,23 @@
 from dataclasses import dataclass, field
 from pathlib import Path
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
+from smw_music import SmwMusicException
 from smw_music.music_xml.echo import EchoConfig
-from smw_music.music_xml.instrument import InstrumentConfig
+from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
 
 ###############################################################################
 # API class definitions
+###############################################################################
+
+
+class NoSample(SmwMusicException):
+    pass
+
+
 ###############################################################################
 
 
@@ -28,6 +39,8 @@ class PreferencesState:
     spcplay_fname: Path = Path("")
     sample_pack_dname: Path = Path("")
     advanced_mode: bool = False
+    dark_mode: bool = False
+    release_check: bool = True
 
 
 ###############################################################################
@@ -35,16 +48,14 @@ class PreferencesState:
 
 @dataclass
 class State:
-    musicxml_fname: str = ""
-    mml_fname: str = ""
+    musicxml_fname: Path | None = None
+    mml_fname: Path | None = None
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
-    global_instrument: InstrumentConfig = field(
-        default_factory=lambda: InstrumentConfig("")
+    instruments: dict[str, InstrumentConfig] = field(
+        default_factory=lambda: {}
     )
-    instruments: list[InstrumentConfig] = field(default_factory=lambda: [])
-    instrument_idx: int | None = None
     global_volume: int = 128
     global_legato: bool = True
     global_echo_enable: bool = True
@@ -58,26 +69,58 @@ class State:
     porter: str = ""
     game: str = ""
     start_measure: int = 1
-    mute_percussion: bool = False
-    solo_percussion: bool = False
+
+    _sample_idx: tuple[str, str] | None = None
+
+    unmapped: set[tuple[Pitch, str]] = field(default_factory=set)
 
     ###########################################################################
     # Property definitions
     ###########################################################################
 
     @property
-    def inst(self) -> InstrumentConfig:
-        idx = self.instrument_idx
-        if idx is None or not 0 <= idx < len(self.instruments):
-            return self.global_instrument
-        return self.instruments[idx]
+    def instrument(self) -> InstrumentConfig:
+        return self.instruments[self.sample_idx[0]]
 
     ###########################################################################
 
-    @inst.setter
-    def inst(self, inst: InstrumentConfig) -> None:
-        idx = self.instrument_idx
-        if idx is None or not 0 <= idx < len(self.instruments):
-            self.global_instrument = inst
+    @property
+    def sample(self) -> InstrumentSample:
+        return self.samples[self.sample_idx]
+
+    ###########################################################################
+
+    @sample.setter
+    def sample(self, sample: InstrumentSample) -> None:
+        inst_name, sample_name = self.sample_idx
+        inst = self.instruments[inst_name]
+        if sample_name:
+            inst.multisamples[sample_name] = sample
         else:
-            self.instruments[idx] = inst
+            inst.sample = sample
+
+    ###########################################################################
+
+    @property
+    def sample_idx(self) -> tuple[str, str]:
+        if self._sample_idx is None:
+            raise NoSample()
+        return self._sample_idx
+
+    ###########################################################################
+
+    @sample_idx.setter
+    def sample_idx(self, sample_idx: tuple[str, str]) -> None:
+        self._sample_idx = sample_idx
+
+    ###########################################################################
+
+    @property
+    def samples(self) -> dict[tuple[str, str], InstrumentSample]:
+        samples = {}
+
+        for inst_name, inst in self.instruments.items():
+            for sample_name, sample in inst.samples.items():
+                samples[(inst_name, sample_name)] = sample
+
+        return samples

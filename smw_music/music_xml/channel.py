@@ -15,11 +15,17 @@ from dataclasses import dataclass, field
 from itertools import takewhile
 from typing import Iterable, TypeVar, cast
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
+from smw_music.music_xml.instrument import InstrumentConfig, NoteHead
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
+    Clef,
     Error,
+    Instrument,
     Note,
     Playable,
     RehearsalMark,
@@ -72,15 +78,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     ----------
     tokens: list
         A list of valid channel tokens
-    percussion: bool
-        Ture iff this is a percussion channel
 
     Attributes
     ----------
     tokens: list
         A list of elements in this tokens
-    percussion: bool
-        Ture iff this is a percussion channel
 
     Todo
     ----
@@ -88,7 +90,6 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     """
 
     tokens: list[Token]
-    percussion: bool
     _directives: list[str] = field(init=False, repr=False, compare=False)
     _exporter: MmlExporter = field(init=False, repr=False, compare=False)
 
@@ -103,9 +104,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # Private method definitions
     ###########################################################################
 
-    def _reset_state(self, instr_octave_map: dict[str, int]) -> None:
-        self._exporter = MmlExporter(instr_octave_map)
-        self._exporter.percussion = self.percussion
+    def _reset_state(self, instruments: dict[str, InstrumentConfig]) -> None:
+        self._exporter = MmlExporter(instruments)
 
         notelen = _default_notelen(flatten(self.tokens))
         self._update_state_defaults(notelen)
@@ -122,7 +122,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def check(self) -> list[str]:
+    def check(self, instruments: dict[str, InstrumentConfig]) -> list[str]:
         """
         Confirm that the channel's notes are acceptable.
 
@@ -134,10 +134,24 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         """
         msgs = []
         tokens = flatten(self.tokens)
+        percussion = False
+
         for token in filter(lambda x: isinstance(x, Error), tokens):
             msgs.append(cast(Error, token).msg)
-        for token in filter(lambda x: isinstance(x, Note), tokens):
-            msgs.extend(cast(Note, token).check(self.percussion))
+        for token in filter(
+            lambda x: isinstance(x, (Clef, Instrument, Note)), tokens
+        ):
+            if isinstance(token, Clef):
+                percussion = cast(Clef, token).percussion
+            elif isinstance(token, Instrument):
+                inst = instruments[cast(Instrument, token).name]
+            else:
+                note = cast(Note, token)
+                _, sample = inst.emit_note(note)
+                octave_shift = (
+                    0 if percussion else inst.samples[sample].octave_shift
+                )
+                msgs.extend(note.check(octave_shift))
         for token in filter(lambda x: isinstance(x, Playable), tokens):
             msgs.extend(cast(Playable, token).duration_check())
         return msgs
@@ -146,9 +160,8 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def generate_mml(
         self,
-        instr_octave_map: dict[str, int],
+        instruments: dict[str, InstrumentConfig],
         measure_numbers: bool = True,
-        optimize_percussion: bool = True,
     ) -> str:
         """
         Generate this channel's AddMusicK MML text.
@@ -157,25 +170,37 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         ----------
         measure_numbers: bool
             True iff measure numbers should be included in MML
-        optimize_percussion: bool
-            True iff repeated percussion notes should not repeat their
-            instrument
 
         Return
         ------
         str
             The MML text for this channel
         """
-        self._reset_state(instr_octave_map)
+        self._reset_state(instruments)
         self._exporter.measure_numbers = measure_numbers
-        self._exporter.optimize_percussion = optimize_percussion
 
         for n, token in enumerate(self.tokens):
             if isinstance(token, RehearsalMark):
                 self._update_state_defaults(
                     _default_notelen(flatten(self.tokens[n + 1 :]))
                 )
-            self._exporter._emit(token)
+            self._exporter.emit(token)
 
         lines = " ".join(self._exporter.directives).splitlines()
         return CRLF.join(x.strip() for x in lines)
+
+    ###########################################################################
+
+    def unmapped(
+        self, inst_name: str, inst: InstrumentConfig | None
+    ) -> set[tuple[Pitch, NoteHead]]:
+        last_inst = ""
+        rv = set()
+        for token in self.tokens:
+            if isinstance(token, Instrument):
+                last_inst = token.name
+            if isinstance(token, Note) and (last_inst == inst_name):
+                if (inst is None) or (not inst.emit_note(token)[1]):
+                    rv.add((token.pitch, NoteHead(token.head)))
+
+        return rv

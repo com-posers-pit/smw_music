@@ -26,6 +26,7 @@ Dashboard
       model.mml_generated --> dashboard.on_mml_generated
       model.response_generated --> dashboard.on_response_generated
       model.preferences_changed --> dashboard.on_preferences_changed
+      model.sample_packs_changed --> dashboard.on_sample_packs_changed
       model.recent_projects_updated --> dashboard.on_recent_projects_updated
       model.status_updated --> dashboard.on_status_updated
 
@@ -49,6 +50,7 @@ Menus
       view.exit_dashboard.triggered --> QApplication.quit
       view.undo.triggered --> model.on_undo_clicked
       view.redo.triggered --> model.on_redo_clicked
+      view.view_history.triggered --> dashboard.on_open_history_clicked
       view.show_about.triggered --> dashboard._about
       view.show_about_qt.triggered --> QApplication.aboutQt
 
@@ -76,6 +78,7 @@ Control Panel
       view.generate_spc.released --> model.on_generate_spc_clicked
       view.play_spc.released --> model.on_play_spc_clicked
       view.generate_and_play.released --> model.on_generate_and_play_clicked
+      view.render_zip.released --> model.on_render_zip_clicked
 
 Instrument Settings
 -------------------
@@ -86,9 +89,9 @@ Instruments
 .. mermaid::
 
    flowchart LR
-      view.instrument_list.itemChanged --> dashboard._on_solomute_change --> model.on_mute_changed & on_solo_changed
-      view.instrument_list.selectionChanged --> dashboard._on_inst_change --> model.on_instrument_changed
-      view.octave.valueChanged --> model.on_octave_changed
+      view.sample_list.itemChanged --> dashboard._on_solomute_change --> model.on_solomute_changed
+      view.sample_list.selectionChanged --> dashboard._on_sample_change --> model.on_sample_changed
+      view.octave_shift.valueChanged --> model.on_octave_shift_changed
 
 Dynamics
 ~~~~~~~~
@@ -158,6 +161,7 @@ Sample
       view.select_brr_sample.toggled --> model.on_brr_sample_selected
       view.select_brr_fname.released --> dashboard.on_brr_clicked
       view.brr_fname.editingFinished --> model.on_brr_fname_changed
+      view.select_multisample_sample.toggled --> model.on_multisample_sample_selected
       view.select_adsr_mode.toggled --> model.on_select_adsr_mode_selected
       view.gain_mode_direct.toggled --> model.on_gain_direct_selected
       view.gain_mode_inclin.toggled --> model.on_gain_inclin_selected
@@ -181,6 +185,19 @@ Sample
       view.brr_setting.editingFinished --> model.on_brr_setting_changed
       view.preview_envelope.released --> self.on_preview_envelope_clicked
 
+Multisample
+~~~~~~~~~~~
+
+.. mermaid::
+
+   flowchart LR
+      view.multisample_sample_add.released --> self.on_multisample_add_clicked --> model.on_multisample_add_clicked
+      view.multisample_sample_remove.released --> model.multisample_sample_remove_clicked
+      view.multisample_sample_name.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_notes.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_notehead.currentIndexChanged --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_output.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_unmapped_list.doubleClicked --> self._on_multisample_umapped_doubleclicked --> model.on_multisample_add_clicked
 
 Global Settings
 ---------------

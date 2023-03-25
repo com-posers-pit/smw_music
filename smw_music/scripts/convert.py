@@ -66,11 +66,6 @@ def main(arg_list: list[str] | None = None) -> None:
         type=EchoConfig.from_csv,
         default=None,
     )
-    parser.add_argument(
-        "--optimize_percussion",
-        action="store_true",
-        help="Remove repeated percussion instrument directives",
-    )
 
     args = parser.parse_args(arg_list)
 
@@ -82,7 +77,6 @@ def main(arg_list: list[str] | None = None) -> None:
         args.measure_numbers,
         args.enable_dt,
         args.echo,
-        args.optimize_percussion,
     )
 
 

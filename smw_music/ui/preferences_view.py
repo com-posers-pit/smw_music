@@ -21,6 +21,8 @@ class PreferencesView(QDialog):
     amk_fname: QLineEdit
     amk_group_box: QGroupBox
     buttonBox: QDialogButtonBox
+    dark_mode: QCheckBox
+    release_check: QCheckBox
     sample_pack_box: QGroupBox
     sample_pack_dirname: QLineEdit
     select_amk_fname: QPushButton

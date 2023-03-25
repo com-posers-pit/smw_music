@@ -14,6 +14,7 @@
 # Standard library imports
 import argparse
 import logging
+from pathlib import Path
 
 # Library imports
 from PyQt6.QtWidgets import QApplication
@@ -29,6 +30,7 @@ from smw_music.ui.dashboard import Dashboard
 def main() -> None:
     parser = argparse.ArgumentParser("UI")
     parser.add_argument("-v", action="count", default=0, help="Verbosity")
+    parser.add_argument("project", default=None, type=Path, nargs="?")
 
     args, _ = parser.parse_known_args()
     level = {
@@ -44,7 +46,7 @@ def main() -> None:
 
     app = QApplication([])
     app.setApplicationName("MusicXML -> MML")
-    _ = Dashboard()
+    _ = Dashboard(args.project)
     app.exec()
 
 

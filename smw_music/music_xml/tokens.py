@@ -15,6 +15,7 @@ from enum import Enum, auto
 
 # Library imports
 import music21
+from music21.pitch import Pitch
 
 # Package imports
 from smw_music.music_xml.shared import MusicXmlException
@@ -49,31 +50,6 @@ def _get_duration(elem: music21.note.GeneralNote) -> int:
 
     return rv
 
-
-###############################################################################
-# API constant definitions
-###############################################################################
-
-# Weinberg:
-# http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
-PERCUSSION_MAP = {
-    "x": {
-        "c6": "CR3_",
-        "b5": "CR2_",
-        "a5": "CR",
-        "g5": "CH",
-        "f5": "RD",
-        "e5": "OH",
-        "d5": "RD2_",
-    },
-    "normal": {
-        "e5": "HT",
-        "d5": "MT",
-        "c5": "SN",
-        "a4": "LT",
-        "f4": "KD",
-    },
-}
 
 ###############################################################################
 # API function definitions
@@ -180,6 +156,23 @@ class Annotation(Token):
             `elem`'s text content.
         """
         return cls(elem.content)
+
+
+###############################################################################
+
+
+@dataclass
+class Clef(Token):
+    percussion: bool
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_music_xml(cls, elem: music21.clef.Clef) -> "Clef":
+        percussion = isinstance(elem, music21.clef.PercussionClef)
+        return cls(percussion)
 
 
 ###############################################################################
@@ -504,9 +497,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     Duration, octave, and tie are poorly implemented, clean this up.
     """
 
-    name: str
+    pitch: Pitch
     duration: int
-    octave: int
     head: str
     dots: int = 0
     tie: str = ""
@@ -537,11 +529,9 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         articulations = [type(x) for x in elem.articulations]
 
         if isinstance(elem, music21.note.Note):
-            name = elem.name
-            octave = elem.octave
+            pitch = elem.pitch
         else:
-            name = elem.displayPitch().name
-            octave = elem.displayOctave
+            pitch = elem.displayPitch()
 
         accent = music21.articulations.Accent in articulations
         staccato = music21.articulations.Staccato in articulations
@@ -551,9 +541,8 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             articulation = Artic.STACCATO if staccato else Artic.NORMAL
 
         return cls(
-            name.lower().replace("#", "+"),
+            pitch,
             _get_duration(elem),
-            octave - 1,
             elem.notehead,
             elem.duration.dots,
             elem.tie.type if elem.tie is not None else "",
@@ -563,27 +552,21 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def check(self, percussion: bool) -> list[str]:
+    def check(self, octave_shift: int) -> list[str]:
         msgs = []
+
         note = self.note_num
         measure = self.measure_num
-        if percussion:
-            try:
-                PERCUSSION_MAP[self.head][self.name + str(self.octave + 1)]
-            except KeyError:
-                msgs.append(
-                    f"Unsupported percussion note #{note} in measure {measure}"
-                )
-        else:
-            octave = self.octave
-            name = self.name
-            bad = octave < 1
-            bad |= octave > 6
-            bad |= octave == 0 and name in ["a+", "b-", "b"]
-            if bad:
-                msg = f"Unsupported note {name}{octave} #{note} in "
-                msg += f"measure {measure}"
-                msgs.append(msg)
+        octave = self.pitch.octave + octave_shift
+        name = self.pitch.name.lower()
+        bad = octave < 1
+        bad |= octave > 6
+        bad |= octave == 0 and name in ["a#", "b-", "b"]
+        if bad:
+            msg = f"Unsupported note {name}{octave} #{note} in "
+            msg += f"measure {measure}"
+            msgs.append(msg)
+
         return msgs
 
 

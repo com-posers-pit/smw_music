@@ -11,7 +11,163 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.4`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.4 - 2023-03-25
+--------------------------
+
+CODENAME: `I'm Pissed`_
+
+You won't like me 'til I've had my dance.
+
+`Release 0.3.4`_
+
 `Differences from 0.3.3`_
+
+Purpose
++++++++
+
+Add multisample and proper percussion support
+
+
+Affected Issues
++++++++++++++++
+
+- `#184 Apply fix to bonus ending builtin song`_
+
+- `#182 Update drm file`_
+
+- `#180 Auto-select sample pack when one is picked`_
+
+- `#179 Alert on new release`_
+
+- `#175 Interpolate check box sometimes takes multiple clicks`_
+
+- `#172 UI likes to retain prior project information`_
+
+- `#171 Double click prj files to open`_
+
+- `#170 Invert ADSR sliders`_
+
+- `#169 Reloading xml doesn't catch new dynamics`_
+
+- `#164 Verify open/save/close/create project permutations are saftey`_
+
+- `#162 Multiple instruments using the same samples breaks conversion`_
+
+- `#159 Final mix button`_
+
+- `#156 History window has the wrong title`_
+
+- `#154 Add history edit menu item`_
+
+- `#153 Custom sample selections are broken`_
+
+- `#150 Sample folder watching`_
+
+- `#136 Add multisample definition support`_
+
+- `#130 Automatic optimized percussion handling`_
+
+- `#95 Triplet bug`_
+
+- `#94 Per-note sample definition`_
+
+- `#90 Add proper artic/pan/dynamics support for percussion`_
+
+Changed
++++++++
+
+- Save file version updated
+
+  - We best-effort an upgrade and save a backup
+
+- Sample pack selections are cleared when changing to a sample that doesn't use
+  them
+
+- Old ``octave`` setting is now an ``octave shift``; semantics are slightly
+  different
+
+- ADSR sliders flipped upside down so "more of X" is higher
+
+- "Just do it" hotkey changed to Ctrl+Space
+
+- SPC generation timeout changed to 15s
+
+- Bail on "just do it" if there was an error in MML or SPC generation
+
+- Load projects even when no musicxml is found
+
+- Error on opening missing project files
+
+- UI elements are cleared on project close
+
+- Changed pan mid left/right values
+
+- Custom samples go in a ``#path``
+
+- DRM file changes to put all instruments on voice 0
+
+  - Added a MuseScore v4 drm file
+
+- History window title
+
+- Instrument UI element looks a little different
+
+Added
++++++
+
+- Dark mode
+
+- Per-note sample definitions
+
+  - This enables using multiple brr files for a single instrument based on a
+    note range
+
+  - Also enables custom percussion kits
+
+  - Now there are ``instruments``, which can have multiple ``samples``;
+    defaults to a single sample, just like previously
+
+  - An instrument named ``Drumset`` is auto-populated with a fully featured kit
+
+- First-class support for percussion, including artic, pan, and dynamics
+
+- Sample folder watching---new samples are automatically found
+
+- ``.prj`` files can be opened by double-clicking or as a CLI dashboard
+  argument
+
+- Sample pack and builtin sources are automatically chosen when a sample or
+  builtin is chosen
+
+- Automatic handling for vanilla vs. custom percussion samples
+
+- An alert on new releases from github
+
+- Logic to handle blankl ines and comments in sample packs
+
+- Render/mixdown button
+
+- History menu item under "Edit"
+
+- Versioning to preferences file
+
+- Logic to remove a glitch at the end of a builtin song
+
+Removed
++++++++
+
+- QML plugin
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
 
 --------------------------------------------------------------------------------
 
@@ -745,6 +901,22 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#184 Apply fix to bonus ending builtin song: https://github.com/com-posers-pit/smw_music/issues/184
+.. _#182 Update drm file: https://github.com/com-posers-pit/smw_music/issues/182
+.. _#180 Auto-select sample pack when one is picked: https://github.com/com-posers-pit/smw_music/issues/180
+.. _#179 Alert on new release: https://github.com/com-posers-pit/smw_music/issues/179
+.. _#175 Interpolate check box sometimes takes multiple clicks: https://github.com/com-posers-pit/smw_music/issues/175
+.. _#172 UI likes to retain prior project information: https://github.com/com-posers-pit/smw_music/issues/172
+.. _#171 Double click prj files to open: https://github.com/com-posers-pit/smw_music/issues/171
+.. _#170 Invert ADSR sliders: https://github.com/com-posers-pit/smw_music/issues/170
+.. _#169 Reloading xml doesn't catch new dynamics: https://github.com/com-posers-pit/smw_music/issues/169
+.. _#164 Verify open/save/close/create project permutations are saftey: https://github.com/com-posers-pit/smw_music/issues/164
+.. _#162 Multiple instruments using the same samples breaks conversion: https://github.com/com-posers-pit/smw_music/issues/162
+.. _#159 Final mix button: https://github.com/com-posers-pit/smw_music/issues/159
+.. _#156 History window has the wrong title: https://github.com/com-posers-pit/smw_music/issues/156
+.. _#154 Add history edit menu item: https://github.com/com-posers-pit/smw_music/issues/154
+.. _#153 Custom sample selections are broken: https://github.com/com-posers-pit/smw_music/issues/153
+.. _#150 Sample folder watching: https://github.com/com-posers-pit/smw_music/issues/150
 .. _#147 Slurs in triplets are broken: https://github.com/com-posers-pit/smw_music/issues/147
 .. _#146 Emit error messages if AMK zip and SPC player are not set: https://github.com/com-posers-pit/smw_music/issues/146
 .. _#144 MML generation asserts when not used in project mode: https://github.com/com-posers-pit/smw_music/issues/144
@@ -752,11 +924,13 @@ Affected Issues
 .. _#140 Hide global legato behind advanced: https://github.com/com-posers-pit/smw_music/issues/140
 .. _#138 Some ability to start from measure #X: https://github.com/com-posers-pit/smw_music/issues/138
 .. _#137 Update mermaid.js deps: https://github.com/com-posers-pit/smw_music/issues/137
+.. _#136 Add multisample definition support: https://github.com/com-posers-pit/smw_music/issues/136
 .. _#135 Surround support for panning: https://github.com/com-posers-pit/smw_music/issues/135
 .. _#134 Solo and mute are broken for percussion channels: https://github.com/com-posers-pit/smw_music/issues/134
 .. _#133 Make custom samples directory match the project name: https://github.com/com-posers-pit/smw_music/issues/133
 .. _#132 Echo channel mapping error: https://github.com/com-posers-pit/smw_music/issues/132
 .. _#131 SPC conversion error w/o MML generation: https://github.com/com-posers-pit/smw_music/issues/131
+.. _#130 Automatic optimized percussion handling: https://github.com/com-posers-pit/smw_music/issues/130
 .. _#129 Add porter and game name to UI: https://github.com/com-posers-pit/smw_music/issues/129
 .. _#128 Put custom samples in a specific subdir: https://github.com/com-posers-pit/smw_music/issues/128
 .. _#126 Select an instrument after loading: https://github.com/com-posers-pit/smw_music/issues/126
@@ -778,8 +952,10 @@ Affected Issues
 .. _#100 Slur starting/ending on the same note: https://github.com/com-posers-pit/smw_music/issues/100
 .. _#97 Dynamics limits: https://github.com/com-posers-pit/smw_music/issues/97
 .. _#95 Triplet bug: https://github.com/com-posers-pit/smw_music/issues/95
+.. _#94 Per-note sample definition: https://github.com/com-posers-pit/smw_music/issues/94
 .. _#93 Incorrect KDn immediately following SNn commands: https://github.com/com-posers-pit/smw_music/issues/93
 .. _#92 Explicit default q values: https://github.com/com-posers-pit/smw_music/issues/92
+.. _#90 Add proper artic/pan/dynamics support for percussion: https://github.com/com-posers-pit/smw_music/issues/90
 .. _#87 Generate a backup mml: https://github.com/com-posers-pit/smw_music/issues/87
 .. _#86 Add vibrato support: https://github.com/com-posers-pit/smw_music/issues/86
 .. _#85 Non-concert pitch instruments: https://github.com/com-posers-pit/smw_music/issues/85
@@ -843,6 +1019,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.4: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.4
 .. _Release 0.3.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.3
 .. _Release 0.3.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.2
 .. _Release 0.3.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.1
@@ -855,7 +1032,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.3: https://github.com/com-posers-pit/smw_music/compare/v0.3.3...HEAD
+.. _Differences from 0.3.4: https://github.com/com-posers-pit/smw_music/compare/v0.3.4...HEAD
+.. _Differences from 0.3.3: https://github.com/com-posers-pit/smw_music/compare/v0.3.3...v0.3.4
 .. _Differences from 0.3.2: https://github.com/com-posers-pit/smw_music/compare/v0.3.2...v0.3.3
 .. _Differences from 0.3.1: https://github.com/com-posers-pit/smw_music/compare/v0.3.1...v0.3.2
 .. _Differences from 0.3.0: https://github.com/com-posers-pit/smw_music/compare/v0.3.0...v0.3.1
@@ -866,3 +1044,6 @@ Affected Issues
 .. _Differences from 0.1.2: https://github.com/com-posers-pit/smw_music/compare/v0.1.2...v0.2.0
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
+
+
+.. _I'm Pissed: https://www.youtube.com/watch?v=T6dmMUR9TVI

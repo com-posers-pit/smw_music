@@ -172,7 +172,9 @@ recommendations, with the exception of the open hi-hat:
 
 |
 
-A MuseScore drumset definition file is available on
-`GitHub <https://github.com/com-posers-pit/smw_music/blob/develop/misc/mml.drm>`_
-that includes all supported percussion instruments.
+`MuseScore v4.0 <https://github.com/com-posers-pit/smw_music/blob/develop/misc/mml_v4.00.drm>`_
+and
+`MuseScore v3.6 <https://github.com/com-posers-pit/smw_music/blob/develop/misc/mml_v3.02.drm>`_
+drumset definition files are available on GitHub that include all supported
+percussion instruments.
 We recommend using this to ensure you're using the correct notation.

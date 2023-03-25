@@ -4,7 +4,7 @@
 
 #spc {
     #author  "COMPOSER HERE"
-    #title   "Pickup Measure"
+    #title   "Artic_Instrument_Changes"
     #game    "GAME NAME HERE"
     #comment "Ported by: PORTER NAME HERE"
 }
@@ -16,22 +16,26 @@ w180
 
 ; Instrument voice definitions
 ; Only change the instrument octave numbers on the right of the equals signs
-"Piano_voice =  13 o3"
+"Guitar_voice =  17 o3"
+"Piano_voice  =  13 o3"
 
 ; Instrument dynamics definitions
 ; Yes, this is ugly.  But it lets you tie dynamic levels to instruments and
 ; crescendos. Only change the hex (00-FF) volumes right after each equals sign.
-"Piano_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Guitar_dyn = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
+"Piano_dyn  = \"_PPPP=1A\" \"_PPP=26\" \"_PP=40\" \"_P=5A\" \"_MP=73\" \"_MF=8D\" \"_F=B3\" \"_FF=D9\" \"_FFF=E6\" \"_FFFF=F5\""
 
 ; Instrument articulation definitions
 ; Just like dynamics, only touch numbers after the 'q' after each equals sign.
-"Piano_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Guitar_artic = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
+"Piano_artic  = \"qDEF=q7A\" \"qSTAC=q5A\" \"qACC=q7F\" \"qACCSTAC=q5F\""
 
 ; Instrument pan definitions
 ; Set these to PAN_LEFT, PAN_MID_LEFT, PAN_CENTER, PAN_MID_RIGHT, PAN_RIGHT, or
 ; pick your own using a y command.  These are blank by default because not
 ; everyone uses them and it ; saves space to leave them out.
-"Piano_pan = "
+"Guitar_pan = "
+"Piano_pan  = "
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Macro magic.  Look, but don't touch.
@@ -39,6 +43,7 @@ w180
 
 ; Instrument definitions.  Smoosh together the instrument voice definition
 ; with its dynamics, articulation, and pan definitions
+"Guitar = Guitar_voice Guitar_dyn Guitar_artic Guitar_pan"
 "Piano = Piano_voice Piano_dyn Piano_artic Piano_pan"
 
 ; This is a way to use a hex value in a volume command.  We want to use hex
@@ -75,6 +80,5 @@ w180
 #0 GLOBAL_LEGATO /
 
 l4
-@Piano a b ; Measure 0
-> c < b a b ; Measure 1
-> c < b a b ; Measure 2
+@Piano > c c c qSTAC c
+@Guitar > qDEF d d d qSTAC d

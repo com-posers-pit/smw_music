@@ -1,8 +1,0 @@
-<RCC>
-    <qresource prefix="/icons">
-        <file>maestro.svg</file>
-    </qresource>
-    <qresource prefix="/gifs">
-        <file>ashtley.gif</file>
-    </qresource>
-</RCC>

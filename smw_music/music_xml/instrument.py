@@ -10,11 +10,44 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from enum import IntEnum, auto
+from enum import IntEnum, StrEnum, auto
+from functools import cache
 from pathlib import Path
 
+# Library imports
+from music21.pitch import Pitch
+
 # Package imports
+from smw_music.music_xml.tokens import Note
 from smw_music.utils import hexb
+
+###############################################################################
+# Private variable definitions
+###############################################################################
+
+
+@cache
+def _symbol_map() -> dict[str, "NoteHead"]:
+    return {
+        "normal": NoteHead.NORMAL,
+        "x": NoteHead.X,
+        "o": NoteHead.O,
+        "+": NoteHead.PLUS,
+        "⮾": NoteHead.TENSOR,
+        "▲": NoteHead.TRIUP,
+        "▼": NoteHead.TRIDOWN,
+        "/": NoteHead.SLASH,
+        "◆": NoteHead.DIAMOND,
+    }
+
+
+###############################################################################
+
+
+@cache
+def _symbol_unmap() -> dict["NoteHead", str]:
+    return {v: k for k, v in _symbol_map().items()}
+
 
 ###############################################################################
 # API class definitions
@@ -83,6 +116,33 @@ class GainMode(IntEnum):
 ###############################################################################
 
 
+class NoteHead(StrEnum):
+    NORMAL = "normal"
+    X = "x"
+    O = "o"
+    PLUS = "cross"
+    TENSOR = "circle-x"
+    TRIUP = "arrow up"
+    TRIDOWN = "arrow down"
+    SLASH = "slash"
+    DIAMOND = "diamond"
+
+    ###########################################################################
+
+    @classmethod
+    def from_symbol(cls, symbol: str) -> "NoteHead":
+        return _symbol_map()[symbol]
+
+    ###########################################################################
+
+    @property
+    def symbol(self) -> str:
+        return _symbol_unmap()[self]
+
+
+###############################################################################
+
+
 class SampleSource(IntEnum):
     BUILTIN = auto()
     SAMPLEPACK = auto()
@@ -94,10 +154,9 @@ class SampleSource(IntEnum):
 
 
 @dataclass
-class InstrumentConfig:
-    name: str
-    octave: int = 3
-    transpose: int = 0
+class InstrumentSample:
+    default_octave: int = 3
+    octave_shift: int = -1
     dynamics: dict[Dynamics, int] = field(
         default_factory=lambda: {
             Dynamics.PPPP: 26,
@@ -112,9 +171,6 @@ class InstrumentConfig:
             Dynamics.FFFF: 245,
         }
     )
-    dynamics_present: set[Dynamics] = field(
-        default_factory=lambda: set(Dynamics)
-    )
     dyn_interpolate: bool = False
     artics: dict[Artic, ArticSetting] = field(
         default_factory=lambda: {
@@ -128,7 +184,7 @@ class InstrumentConfig:
     pan_setting: int = 10
     pan_invert: tuple[bool, bool] = (False, False)
     sample_source: SampleSource = SampleSource.BUILTIN
-    builtin_sample_index: int = -1
+    builtin_sample_index: int = 0
     pack_sample: tuple[str, Path] = ("", Path())
     brr_fname: Path = field(default_factory=Path)
     # TODO: see if the following settings can be rolled into a Sample object
@@ -143,30 +199,28 @@ class InstrumentConfig:
     subtune_setting: int = 0
     mute: bool = False
     solo: bool = False
+    llim: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
+    ulim: Pitch = field(default_factory=lambda: Pitch("C", octave=7))
+    notehead: NoteHead = NoteHead.NORMAL
+    start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
 
     _instrument_idx: int = field(default=0, init=False)
 
     ###########################################################################
-    # Data model method definitions
+    # API method definitions
     ###########################################################################
 
-    def __post_init__(self) -> None:
-        # Default instrument mapping, from Wakana's tutorial
-        inst_map = {
-            "flute": 0,
-            "marimba": 3,
-            "cello": 4,
-            "trumpet": 6,
-            "bass": 8,
-            "bassguitar": 8,
-            "electricbass": 8,
-            "piano": 13,
-            "guitar": 17,
-            "electricguitar": 17,
-        }
+    def emit(
+        self, note: Pitch, notehead: NoteHead | None = None
+    ) -> Pitch | None:
+        match = True
+        match &= self.llim <= note <= self.ulim
+        if notehead is not None:
+            match &= self.notehead == notehead
 
-        if self.builtin_sample_index == -1:
-            self.builtin_sample_index = inst_map.get(self.name.lower(), 0)
+        if match:
+            return Pitch(note.ps - self.llim.ps + self.start.ps)
+        return None
 
     ###########################################################################
     # Property definitions
@@ -274,3 +328,137 @@ class InstrumentConfig:
         if any(inv):
             rv += f",{int(inv[0])},{int(inv[1])}"
         return rv
+
+    ###########################################################################
+
+    @property
+    def percussion(self) -> bool:
+        return self.ulim == self.llim
+
+    ###########################################################################
+
+    @property
+    def percussion_note(self) -> int:
+        return self.start.name.lower().replace("#", "-")
+
+    ###########################################################################
+
+    @property
+    def percussion_octave(self) -> int:
+        return self.start.octave
+
+
+###############################################################################
+
+
+@dataclass
+class InstrumentConfig:
+    transpose: int = 0
+    dynamics_present: set[Dynamics] = field(
+        default_factory=lambda: set(Dynamics)
+    )
+    mute: bool = False
+    solo: bool = False
+    multisamples: dict[str, InstrumentSample] = field(
+        default_factory=lambda: {}
+    )
+
+    sample: InstrumentSample = field(default_factory=InstrumentSample)
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_name(
+        cls, name: str, **kwargs: int | set[Dynamics] | bool
+    ) -> "InstrumentConfig":
+        name = name.lower()
+
+        if name == "drumset":
+            # Weinberg:
+            # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
+            sample_defs = [
+                ("CR3_", Pitch("C6"), NoteHead.X, 22),
+                ("CR2_", Pitch("B5"), NoteHead.X, 22),
+                ("CR", Pitch("A5"), NoteHead.X, 22),
+                ("CH", Pitch("G5"), NoteHead.X, 22),
+                ("RD", Pitch("F5"), NoteHead.X, 22),
+                ("OH", Pitch("E5"), NoteHead.X, 22),
+                ("RD2_", Pitch("D5"), NoteHead.X, 22),
+                ("HT", Pitch("E5"), NoteHead.NORMAL, 24),
+                ("MT", Pitch("D5"), NoteHead.NORMAL, 23),
+                ("SN", Pitch("C5"), NoteHead.NORMAL, 10),
+                ("LT", Pitch("A4"), NoteHead.NORMAL, 21),
+                ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
+            ]
+
+            multisamples = {
+                name: InstrumentSample(
+                    llim=pitch,
+                    ulim=pitch,
+                    start=pitch,
+                    notehead=notehead,
+                    builtin_sample_index=idx,
+                )
+                for name, pitch, notehead, idx in sample_defs
+            }
+
+            inst = cls(multisamples=multisamples, **kwargs)
+        else:
+            # Default instrument mapping, from Wakana's tutorial
+            inst_map = {
+                "flute": 0,
+                "marimba": 3,
+                "cello": 4,
+                "trumpet": 6,
+                "bass": 8,
+                "bassguitar": 8,
+                "electricbass": 8,
+                "piano": 13,
+                "guitar": 17,
+                "electricguitar": 17,
+            }
+
+            inst = cls(**kwargs)
+            inst.sample.builtin_sample_index = inst_map.get(name, 0)
+
+        return inst
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def emit_note(self, note: Note) -> tuple[Pitch, str]:
+        head = NoteHead(note.head)
+
+        if self.multisample:
+            for name, sample in self.multisamples.items():
+                sample_out = sample.emit(note.pitch, head)
+                if sample_out is not None:
+                    return (sample_out, name)
+
+        return (self.sample.emit(note.pitch, None), "")
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def multisample(self) -> bool:
+        return bool(len(self.multisamples))
+
+    ###########################################################################
+
+    @property
+    def samples(self) -> dict[str, InstrumentSample]:
+        samples = {"": self.sample}
+        samples.update(self.multisamples)
+        return samples
+
+    ###########################################################################
+
+    @samples.setter
+    def samples(self, value: dict[str, InstrumentSample]) -> None:
+        self.multisamples = dict(value)
+        self.sample = self.multisamples.pop("")

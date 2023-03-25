@@ -15,6 +15,7 @@ from PyQt6.QtWidgets import (
     QGroupBox,
     QLabel,
     QLineEdit,
+    QListWidget,
     QMainWindow,
     QMenu,
     QMenuBar,
@@ -24,7 +25,6 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QSplitter,
     QStatusBar,
-    QTableWidget,
     QTabWidget,
     QTreeWidget,
     QWidget,
@@ -164,8 +164,7 @@ class DashboardView(QMainWindow):
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
-    instrument_list: QTableWidget
-    instrument_list_box: QGroupBox
+    instrument_multisample_tab: QWidget
     instrument_sample_group: QGroupBox
     instrument_sample_tab: QWidget
     instrument_settings_tab: QWidget
@@ -187,11 +186,22 @@ class DashboardView(QMainWindow):
     mp_setting_label: QLabel
     mp_slider: QSlider
     multisample_fname: QLineEdit
+    multisample_sample_add: QPushButton
+    multisample_sample_name: QLineEdit
+    multisample_sample_name_label: QLabel
+    multisample_sample_notehead: QComboBox
+    multisample_sample_notehead_label: QLabel
+    multisample_sample_notes: QLineEdit
+    multisample_sample_notes_label: QLabel
+    multisample_sample_output: QLineEdit
+    multisample_sample_output_label: QLabel
+    multisample_sample_remove: QPushButton
+    multisample_unmapped_box: QGroupBox
+    multisample_unmapped_list: QListWidget
     musicxml_fname: QLineEdit
-    mute_percussion: QCheckBox
     new_project: QAction
-    octave: QSpinBox
-    octave_label: QLabel
+    octave_shift: QSpinBox
+    octave_shift_label: QLabel
     open_history: QPushButton
     open_preferences: QAction
     open_project: QAction
@@ -208,7 +218,6 @@ class DashboardView(QMainWindow):
     pan_r_invert: QCheckBox
     pan_setting: QDial
     pan_setting_label: QLabel
-    percussion_label: QLabel
     play_spc: QPushButton
     porter_name: QLineEdit
     porter_name_label: QLabel
@@ -227,6 +236,9 @@ class DashboardView(QMainWindow):
     preview_envelope: QPushButton
     redo: QAction
     reload_musicxml: QPushButton
+    render_zip: QPushButton
+    sample_list: QTreeWidget
+    sample_list_box: QGroupBox
     sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox
     sample_settings_tabs: QTabWidget
@@ -246,7 +258,6 @@ class DashboardView(QMainWindow):
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
-    solo_percussion: QCheckBox
     splitter: QSplitter
     splitter_2: QSplitter
     splitter_3: QSplitter
@@ -274,3 +285,4 @@ class DashboardView(QMainWindow):
     tune_slider: QSlider
     tuning_tab: QWidget
     undo: QAction
+    view_history: QAction

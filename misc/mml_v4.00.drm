@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<museScore version="4.00">
+  <Drum pitch="36">
+    <head>normal</head>
+    <line>7</line>
+    <voice>1</voice>
+    <name>Bass Drum 1</name>
+    <stem>2</stem>
+    <shortcut>B</shortcut>
+    </Drum>
+  <Drum pitch="40">
+    <head>normal</head>
+    <line>3</line>
+    <voice>1</voice>
+    <name>Electric Snare</name>
+    <stem>1</stem>
+    <shortcut>A</shortcut>
+    </Drum>
+  <Drum pitch="41">
+    <head>normal</head>
+    <line>5</line>
+    <voice>1</voice>
+    <name>Low Tom</name>
+    <stem>1</stem>
+    </Drum>
+  <Drum pitch="42">
+    <head>cross</head>
+    <line>-1</line>
+    <voice>0</voice>
+    <name>Closed Hi-Hat</name>
+    <stem>1</stem>
+    <shortcut>G</shortcut>
+    </Drum>
+  <Drum pitch="45">
+    <head>normal</head>
+    <line>2</line>
+    <voice>1</voice>
+    <name>Mid Tom</name>
+    <stem>1</stem>
+    </Drum>
+  <Drum pitch="46">
+    <head>cross</head>
+    <line>1</line>
+    <voice>0</voice>
+    <name>Open Hi-Hat</name>
+    <stem>1</stem>
+    </Drum>
+  <Drum pitch="47">
+    <head>normal</head>
+    <line>1</line>
+    <voice>1</voice>
+    <name>High Tom</name>
+    <stem>1</stem>
+    </Drum>
+  <Drum pitch="49">
+    <head>cross</head>
+    <line>-2</line>
+    <voice>0</voice>
+    <name>Crash Cymbal</name>
+    <stem>1</stem>
+    <shortcut>C</shortcut>
+    </Drum>
+  <Drum pitch="51">
+    <head>cross</head>
+    <line>0</line>
+    <voice>0</voice>
+    <name>Ride Cymbal</name>
+    <stem>1</stem>
+    <shortcut>D</shortcut>
+    </Drum>
+  <Drum pitch="52">
+    <head>cross</head>
+    <line>-4</line>
+    <voice>0</voice>
+    <name>Chinese Cymbal</name>
+    <stem>1</stem>
+    </Drum>
+  <Drum pitch="55">
+    <head>cross</head>
+    <line>-3</line>
+    <voice>0</voice>
+    <name>Splash Cymbal</name>
+    <stem>1</stem>
+    </Drum>
+  <Drum pitch="59">
+    <head>cross</head>
+    <line>2</line>
+    <voice>0</voice>
+    <name>Ride Cymbal 2</name>
+    <stem>1</stem>
+    </Drum>
+  </museScore>

@@ -10,6 +10,7 @@
 ###############################################################################
 
 # Standard library imports
+import hashlib
 import os
 import pkgutil
 import platform
@@ -28,7 +29,9 @@ from random import choice
 # Library imports
 import yaml
 from mako.template import Template  # type: ignore
+from music21.pitch import Pitch, PitchException
 from PyQt6.QtCore import QObject, pyqtSignal
+from watchdog import events, observers
 
 # Package imports
 from smw_music import SmwMusicException, __version__
@@ -40,13 +43,22 @@ from smw_music.music_xml.instrument import (
     Dynamics,
     GainMode,
     InstrumentConfig,
+    InstrumentSample,
+    NoteHead,
     SampleSource,
 )
 from smw_music.music_xml.song import Song
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
-from smw_music.ui.state import PreferencesState, State
+from smw_music.ui.state import NoSample, PreferencesState, State
+from smw_music.utils import newest_release
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+_CURRENT_PREFS_VERSION = 0
 
 ###############################################################################
 # Private Function Definitions
@@ -73,6 +85,35 @@ def _parse_setting(val: int | str, maxval: int = 255) -> int:
 
 
 ###############################################################################
+# Private Class Definitions
+###############################################################################
+
+
+class _SamplePackWatcher(events.FileSystemEventHandler):
+    def __init__(self, model: "Model") -> None:
+        super().__init__()
+        self._model = model
+
+    ###########################################################################
+
+    def on_created(
+        self, event: events.FileCreatedEvent | events.DirCreatedEvent
+    ) -> None:
+        fname = Path(event.src_path).name
+        self._model.update_status(f"Sample pack {fname} added")
+        self._model.update_sample_packs()
+
+    ###########################################################################
+
+    def on_deleted(
+        self, event: events.FileDeletedEvent | events.DirDeletedEvent
+    ) -> None:
+        fname = Path(event.src_path).name
+        self._model.update_status(f"Sample pack {fname} removed")
+        self._model.update_sample_packs()
+
+
+###############################################################################
 # API Class Definitions
 ###############################################################################
 
@@ -82,10 +123,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         State, bool
     )  # arguments=['state', 'update_instruments']
     preferences_changed = pyqtSignal(
-        bool, bool, bool, dict
-    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'sample_packs']
+        bool, bool, bool, bool
+    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode']
     instruments_changed = pyqtSignal(list)
     recent_projects_updated = pyqtSignal(list)
+    sample_packs_changed = pyqtSignal(dict)
 
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     status_updated = pyqtSignal(str)  # arguments=['message']
@@ -99,6 +141,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _undo_level: int
     _sample_packs: dict[str, SamplePack]
     _project_path: Path | None
+    _sample_watcher: observers.Observer
 
     ###########################################################################
     # Constructor definitions
@@ -114,6 +157,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._project_path = None
 
         os.makedirs(self.config_dir, exist_ok=True)
+        self._start_watcher()
 
     ###########################################################################
     # API method definitions
@@ -153,6 +197,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             shutil.rmtree(path / root)
 
+        # Apply updates to stock AMK files
+        # https://www.smwcentral.net/?p=viewthread&t=98793&page=2&pid=1601787#p1601787
+        fname = path / "music/originals/09 Bonus End.txt"
+        with open(fname, "rb") as fobj:
+            data = fobj.read()
+        if hashlib.md5(data).hexdigest() == "7e9d4bd864cfc1e82272fb0a9379e318":
+            contents = data.split(b"\n")
+            contents = contents[:15] + contents[16:]
+            data = b"\n".join(contents)
+            with open(fname, "wb") as fobj:
+                fobj.write(data)
+
         # Create the conversion scripts
         for tmpl_name in ["convert.bat", "convert.sh"]:
             tmpl = Template(  # nosec B702
@@ -166,6 +222,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
 
+        self._update_state()
         self._update_state(
             project_name=project_name,
             mml_fname=str(
@@ -175,15 +232,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         # TODO: Unify this project path with what's used in on_save
         self._append_recent_project(path / (project_name + ".prj"))
-        self._update_status(f"Created project {project_name}")
+        self.update_status(f"Created project {project_name}")
         self.on_save()
 
     ###########################################################################
 
     def close_project(self) -> None:
         self._project_path = None
-        self._update_state(project_name=None)
-        self._update_status("Project closed")
+        self._update_state(update_instruments=True)
+        self.update_status("Project closed")
 
     ###########################################################################
 
@@ -194,12 +251,25 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def start(self) -> None:
         self._load_prefs()
+        if self.preferences.release_check:
+            release = newest_release()
+            if release is not None and release[1] != __version__:
+                url, version = release
+                self.response_generated.emit(
+                    False,
+                    "New Version",
+                    f"beer <a href={url}>v{version}</a> is available "
+                    + "for download<br />Version checking can be disabled "
+                    + "in preferences",
+                )
+
+        self.update_sample_packs()
 
         self.recent_projects_updated.emit(self.recent_projects)
         self.reinforce_state()
 
         quote: tuple[str, str] = choice(quotes)  # nosec: B311
-        self._update_status(f"{quote[1]}: {quote[0]}")
+        self.update_status(f"{quote[1]}: {quote[0]}")
 
     ###########################################################################
 
@@ -210,6 +280,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "spcplay": {"path": str(preferences.spcplay_fname)},
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
             "advanced": preferences.advanced_mode,
+            "dark_mode": preferences.dark_mode,
+            "release_check": preferences.release_check,
+            "version": _CURRENT_PREFS_VERSION,
         }
 
         with open(self.prefs_fname, "w", encoding="utf8") as fobj:
@@ -218,480 +291,449 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._load_prefs()
 
     ###########################################################################
+
+    def update_sample_packs(self) -> None:
+        self._sample_packs = {}
+
+        packs = {}
+        root_dir = self.preferences.sample_pack_dname
+        for fname in glob("*.zip", root_dir=root_dir):
+            pack = Path(fname)
+            packs[pack.stem] = root_dir / pack
+
+        for name, path in packs.items():
+            try:
+                self._sample_packs[name] = SamplePack(path)
+
+            except FileNotFoundError:
+                self.response_generated.emit(
+                    True,
+                    "Error loading sample pack",
+                    f"Could not open sample pack {name} at {path}",
+                )
+
+        self.sample_packs_changed.emit(self._sample_packs)
+
+    ###########################################################################
+
+    def update_status(self, msg: str) -> None:
+        self.status_updated.emit(msg)
+
+    ###########################################################################
     # API slot definitions
     ###########################################################################
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
         max_len = 7
-        artics = dict(self.state.inst.artics)
-        artics[artic] = replace(
-            artics[artic], length=_parse_setting(val, max_len)
-        )
-        self._update_inst_state(artics=artics)
-        self._update_status(f"{artic} length set to {val}")
+        with suppress(NoSample):
+            artics = deepcopy(self.state.sample.artics)
+            artics[artic].length = _parse_setting(val, max_len)
+            self._update_sample_state(artics=artics)
+            self.update_status(f"{artic} length set to {val}")
 
     ###########################################################################
 
     def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
         max_vol = 15
-        artics = dict(self.state.inst.artics)
-        artics[artic] = replace(
-            artics[artic], volume=_parse_setting(val, max_vol)
-        )
-        self._update_inst_state(artics=artics)
-        self._update_status(f"{artic} volume set to {val}")
+        with suppress(NoSample):
+            artics = deepcopy(self.state.sample.artics)
+            artics[artic].volume = _parse_setting(val, max_vol)
+            self._update_sample_state(artics=artics)
+            self.update_status(f"{artic} volume set to {val}")
 
     ###########################################################################
 
     def on_attack_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 15)
-        self._update_inst_state(attack_setting=setting)
-        self._update_status(f"Attack set to {setting}")
+        self._update_sample_state(attack_setting=setting, adsr_mode=True)
+        self.update_status(f"Attack set to {setting}")
 
     ###########################################################################
 
     def on_brr_fname_changed(self, fname: str) -> None:
-        self._update_inst_state(brr_fname=Path(fname))
-        self._update_status(f"BRR set to {fname}")
+        self._update_sample_state(
+            brr_fname=Path(fname), sample_source=SampleSource.BRR
+        )
+        self.update_status(f"BRR set to {fname}")
 
     ###########################################################################
 
     def on_brr_sample_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(sample_source=SampleSource.BRR)
-            self._update_status("Sample source set to BRR")
+            self._update_sample_state(sample_source=SampleSource.BRR)
+            self.update_status("Sample source set to BRR")
 
     ###########################################################################
 
     def on_brr_setting_changed(self, val: str) -> None:
-        self._update_inst_state(brr_setting=val)
-        self._update_status(f"BRR setting changed to {val}")
+        self._update_sample_state(brr_setting=val)
+        self.update_status(f"BRR setting changed to {val}")
 
     ###########################################################################
 
     def on_builtin_sample_changed(self, index: int) -> None:
-        self._update_inst_state(builtin_sample_index=index)
-        self._update_status(f"Builtin sample {index} selected")
+        self._update_sample_state(
+            builtin_sample_index=index, sample_source=SampleSource.BUILTIN
+        )
+        self.update_status(f"Builtin sample {index} selected")
 
     ###########################################################################
 
     def on_builtin_sample_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(sample_source=SampleSource.BUILTIN)
-            self._update_status("Sample source set to builtin")
+            self._update_sample_state(sample_source=SampleSource.BUILTIN)
+            self.update_status("Sample source set to builtin")
 
     ###########################################################################
 
     def on_decay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_inst_state(decay_setting=setting)
-        self._update_status(f"Decay set to {setting}")
+        self._update_sample_state(decay_setting=setting, adsr_mode=True)
+        self.update_status(f"Decay set to {setting}")
 
     ###########################################################################
 
     def on_dynamics_changed(self, level: Dynamics, val: int | str) -> None:
         setting = _parse_setting(val)
-        if self.state.inst.dyn_interpolate:
-            self._interpolate(level, setting)
-        else:
-            dynamics = dict(self.state.inst.dynamics)
-            dynamics[level] = setting
-            self._update_inst_state(dynamics=dynamics)
-
-        self._update_status(f"Dynamics {level} set to {setting}")
+        state = self.state
+        with suppress(NoSample):
+            if state.sample.dyn_interpolate:
+                self._interpolate(level, setting)
+            else:
+                dynamics = deepcopy(state.sample.dynamics)
+                dynamics[level] = setting
+                self._update_sample_state(dynamics=dynamics)
+            self.update_status(f"Dynamics {level} set to {setting}")
 
     ###########################################################################
 
     def on_echo_en_changed(self, chan: EchoCh, state: bool) -> None:
-        enables = self.state.echo.enables.copy()
+        enables = deepcopy(self.state.echo.enables)
         if state:
             enables.add(chan)
         else:
             enables.remove(chan)
         self._update_echo_state(enables=enables)
-        self._update_status(f"Echo {str(chan)} {_endis(state)}")
+        self.update_status(f"Echo {str(chan)} {_endis(state)}")
 
     ###########################################################################
 
     def on_echo_feedback_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
         self._update_echo_state(fb_mag=setting)
-        self._update_status(f"Echo feedback magnitude set to {setting}")
+        self.update_status(f"Echo feedback magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_feedback_surround_changed(self, state: bool) -> None:
         self._update_echo_state(fb_inv=state)
-        self._update_status(f"Echo feedback surround {_endis(state)}")
+        self.update_status(f"Echo feedback surround {_endis(state)}")
 
     ###########################################################################
 
     def on_echo_left_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
         self._update_echo_state(vol_mag=(setting, self.state.echo.vol_mag[1]))
-        self._update_status(f"Echo left channel magnitude set to {setting}")
+        self.update_status(f"Echo left channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
         self._update_echo_state(vol_inv=(state, self.state.echo.vol_inv[1]))
-        self._update_status(f"Echo left channel surround {_endis(state)}")
+        self.update_status(f"Echo left channel surround {_endis(state)}")
 
     ###########################################################################
 
     def on_echo_right_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
         self._update_echo_state(vol_mag=(self.state.echo.vol_mag[0], setting))
-        self._update_status(f"Echo right channel magnitude set to {setting}")
+        self.update_status(f"Echo right channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
         self._update_echo_state(vol_inv=(self.state.echo.vol_inv[0], state))
-        self._update_status(f"Echo right channel surround {_endis(state)}")
+        self.update_status(f"Echo right channel surround {_endis(state)}")
 
     ###########################################################################
 
     def on_echo_delay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 15)
         self._update_echo_state(delay=setting)
-        self._update_status(f"Echo delay changed to {val}")
+        self.update_status(f"Echo delay changed to {val}")
 
     ###########################################################################
 
     def on_filter_0_toggled(self, state: bool) -> None:
         self._update_echo_state(fir_filt=0 if state else 1)
-        self._update_status(f"Echo filter set to {0 if state else 1}")
+        self.update_status(f"Echo filter set to {0 if state else 1}")
 
     ###########################################################################
 
     def on_gain_declin_selected(self, state: bool) -> None:
-        if state:
-            self._update_inst_state(
-                gain_mode=GainMode.DECLIN,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self._update_status("Decreasing linear envelope selected")
+        self._select_gain(state, GainMode.DECLIN, "Decreasing linear")
 
     ###########################################################################
 
     def on_gain_decexp_selected(self, state: bool) -> None:
-        if state:
-            self._update_inst_state(
-                gain_mode=GainMode.DECEXP,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self._update_status("Decreasing exponential envelope selected")
+        self._select_gain(state, GainMode.DECEXP, "Decreasing exponential")
 
     ###########################################################################
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
-            self._update_inst_state(gain_mode=GainMode.DIRECT)
-            self._update_status("Direct gain envelope selected")
+            self._update_sample_state(
+                gain_mode=GainMode.DIRECT, adsr_mode=False
+            )
+            self.update_status("Direct gain envelope selected")
 
     ###########################################################################
 
     def on_gain_incbent_selected(self, state: bool) -> None:
-        if state:
-            self._update_inst_state(
-                gain_mode=GainMode.INCBENT,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self._update_status("Increasing bent envelope selected")
+        self._select_gain(state, GainMode.INCBENT, "Increasing bent")
 
     ###########################################################################
 
     def on_gain_inclin_selected(self, state: bool) -> None:
-        if state:
-            self._update_inst_state(
-                gain_mode=GainMode.INCLIN,
-                gain_setting=min(31, self.state.inst.gain_setting),
-            )
-            self._update_status("Increasing linear envelope selected")
+        self._select_gain(state, GainMode.INCLIN, "Increasing linear")
 
     ###########################################################################
 
     def on_gain_changed(self, val: int | str) -> None:
-        # TODO: Unify this 31 with the others
-        limit = 127 if self.state.inst.gain_mode == GainMode.DIRECT else 31
-        setting = _parse_setting(val, limit)
-        self._update_inst_state(gain_setting=setting)
-        self._update_status("Gain setting changed to {setting}")
+        with suppress(NoSample):
+            mode = self.state.sample.gain_mode
+            # TODO: Unify this 31 with the others
+            limit = 127 if mode == GainMode.DIRECT else 31
+            setting = _parse_setting(val, limit)
+            self._update_sample_state(gain_setting=setting, adsr_mode=False)
+            self.update_status("Gain setting changed to {setting}")
 
     ###########################################################################
 
     def on_game_name_changed(self, val: str) -> None:
         self._update_state(game=val)
-        self._update_status(f"Game name set to {val}")
+        self.update_status(f"Game name set to {val}")
 
     ###########################################################################
 
     def on_generate_and_play_clicked(self) -> None:
-        self._update_status("SPC generated and played")
-        self.on_generate_mml_clicked(False)
-        self.on_generate_spc_clicked(False)
-        self.on_play_spc_clicked()
+        self.update_status("SPC generated and played")
+        if self._on_generate_mml_clicked(False):
+            if self._on_generate_spc_clicked(False):
+                self.on_play_spc_clicked()
 
     ###########################################################################
 
     def on_generate_mml_clicked(self, report: bool = True) -> None:
-        title = "MML Generation"
-        error = True
-        fname = self.state.mml_fname
-        if self.song is None:
-            msg = "Song not loaded"
-            self.mml_generated.emit("\n".join(ashtley))
-        else:
-            assert self.state.project_name is not None  # nosec: B101
-
-            try:
-                if os.path.exists(fname):
-                    shutil.copy2(fname, f"{fname}.bak")
-
-                # Update the instruments in the song
-                # Applying this here means we can reload
-                self.song.instruments = self.state.instruments
-
-                self.song.volume = self.state.global_volume
-                if self.state.porter:
-                    self.song.porter = self.state.porter
-                if self.state.game:
-                    self.song.game = self.state.game
-
-                mml = self.song.to_mml_file(
-                    fname,
-                    self.state.global_legato,
-                    self.state.loop_analysis,
-                    self.state.superloop_analysis,
-                    self.state.measure_numbers,
-                    True,
-                    self.state.echo if self.state.global_echo_enable else None,
-                    True,
-                    PurePosixPath(self.state.project_name),
-                    self.state.solo_percussion,
-                    self.state.mute_percussion,
-                    self.state.start_measure,
-                )
-                self.mml_generated.emit(mml)
-                self._update_status("MML generated")
-            except MusicXmlException as e:
-                msg = str(e)
-            else:
-                error = False
-                msg = "Done"
-
-        if report or error:
-            self.response_generated.emit(error, title, msg)
+        self._on_generate_mml_clicked(report)
 
     ###########################################################################
 
     def on_generate_spc_clicked(self, report: bool = True) -> None:
-        assert self._project_path is not None  # nosec: B101
-        assert self.state.project_name is not None  # nosec: B101
-
-        error = False
-        msg = ""
-
-        if not os.path.exists(self.state.mml_fname):
-            error = True
-            msg = "MML not generated"
-        else:
-            samples_path = (
-                self._project_path / "samples" / self.state.project_name
-            )
-
-            shutil.rmtree(samples_path, ignore_errors=True)
-
-            for inst in self.state.instruments:
-                if inst.sample_source == SampleSource.BRR:
-                    shutil.copy2(inst.brr_fname, samples_path)
-                if inst.sample_source == SampleSource.SAMPLEPACK:
-                    pack_name, pack_path = inst.pack_sample
-                    target = samples_path / pack_name / pack_path
-                    os.makedirs(target.parents[0], exist_ok=True)
-                    with open(target, "wb") as fobj:
-                        try:
-                            fobj.write(
-                                self._sample_packs[pack_name][pack_path].data
-                            )
-                        except KeyError:
-                            error = True
-                            msg += f"Could not find sample pack {pack_name}\n"
-
-            if not error:
-                try:
-                    msg = subprocess.check_output(  # nosec B603
-                        self.convert,
-                        cwd=self._project_path,
-                        stderr=subprocess.STDOUT,
-                        timeout=5,
-                    ).decode()
-                except subprocess.CalledProcessError as e:
-                    error = True
-                    msg = e.output.decode("utf8")
-                except subprocess.TimeoutExpired:
-                    error = True
-                    msg = "Conversion timed out"
-
-        if report or error:
-            self.response_generated.emit(error, "SPC Generated", msg)
-            self._update_status("SPC generated")
+        self._on_generate_spc_clicked(report)
 
     ###########################################################################
 
     def on_global_echo_en_changed(self, state: bool) -> None:
         self._update_state(global_echo_enable=state)
-        self._update_status(f"Echo {_endis(state)}")
+        self.update_status(f"Echo {_endis(state)}")
 
     ###########################################################################
 
     def on_global_legato_changed(self, state: bool) -> None:
         self._update_state(global_legato=state)
-        self._update_status(f"Global legato {_endis(state)}")
+        self.update_status(f"Global legato {_endis(state)}")
 
     ###########################################################################
 
     def on_global_volume_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
         self._update_state(global_volume=setting)
-        self._update_status(f"Global volume set to {setting}")
-
-    ###########################################################################
-
-    def on_instrument_changed(self, idx: int) -> None:
-        self._update_state(instrument_idx=idx)
-        inst = self.state.instruments[idx].name
-        self._update_status(f"{inst} selected")
+        self.update_status(f"Global volume set to {setting}")
 
     ###########################################################################
 
     def on_interpolate_changed(self, state: bool) -> None:
-        self._update_inst_state(dyn_interpolate=state)
-        self._update_status(f"Dynamics interpolation {_endis(state)}")
+        with suppress(NoSample):
+            sample_idx = self.state.sample_idx
+            sample_name = sample_idx[1] or sample_idx[0]
+
+            self._update_sample_state(dyn_interpolate=state)
+            self.update_status(
+                f"Dynamics interpolation for {sample_name} {_endis(state)}"
+            )
 
     ###########################################################################
 
     def on_load(self, fname: Path) -> None:
         try:
-            save_state = load(fname)
+            save_state, backup_fname = load(fname)
+            if backup_fname is not None:
+                self.response_generated.emit(
+                    False,
+                    "Old File",
+                    "This project uses an old save file format.  "
+                    "We've tried our best to upgrade, but there might still "
+                    "be some problems.  Your old save file was backed up as "
+                    f"{backup_fname}, you should probably keep a copy until "
+                    "you've confirmed the upgrade was successful.  Or fixed "
+                    "any problems with it, it's all the same to beer.",
+                )
+
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
+        except FileNotFoundError:
+            self.response_generated.emit(
+                True, "Invalid project file", "Could not find project file"
+            )
         else:
             self._append_recent_project(fname)
 
             self._undo_level = 0
-            self._history = [replace(save_state, instrument_idx=0)]
+            self._history = [replace(save_state)]
             self._project_path = fname.parent
-            if musicxml := self.state.musicxml_fname:
-                try:
-                    self.song = Song.from_music_xml(musicxml)
-                except MusicXmlException as e:
-                    self.response_generated.emit(
-                        True,
-                        "Error loading score",
-                        f"Could not open score {musicxml}: {str(e)}",
-                    )
-                else:
-                    self.reinforce_state()
-                    self._update_status(
-                        f"Opened project {self.state.project_name}"
-                    )
-            else:
+            musicxml = self.state.musicxml_fname
+            if musicxml is None:
                 self.song = None
+            else:
+                self._load_musicxml(musicxml, True)
+
+            self.reinforce_state()
+            self.update_status(f"Opened project {self.state.project_name}")
 
     ###########################################################################
 
     def on_loop_analysis_changed(self, enabled: bool) -> None:
         self._update_state(loop_analysis=enabled)
-        self._update_status(f"Loop analysis {_endis(enabled)}")
+        self.update_status(f"Loop analysis {_endis(enabled)}")
 
     ###########################################################################
 
     def on_measure_numbers_changed(self, enabled: bool) -> None:
         self._update_state(measure_numbers=enabled)
-        self._update_status(f"Measure # reporting {_endis(enabled)}")
+        self.update_status(f"Measure # reporting {_endis(enabled)}")
 
     ###########################################################################
 
     def on_mml_fname_changed(self, fname: str) -> None:
         self._update_state(mml_fname=fname)
-        self._update_status(f"MML name set to {fname}")
+        self.update_status(f"MML name set to {fname}")
+
+    ###########################################################################
+
+    def on_multisample_sample_add_clicked(
+        self, name: str, notes: str, notehead: str, output: str
+    ) -> None:
+        self._multisample_changed(True, name, notes, notehead, output)
+
+    ###########################################################################
+
+    def on_multisample_sample_changed(
+        self, name: str, notes: str, notehead: str, output: str
+    ) -> None:
+        self._multisample_changed(False, name, notes, notehead, output)
+
+    ###########################################################################
+
+    def on_multisample_sample_remove_clicked(self) -> None:
+        state = self.state
+        with suppress(NoSample):
+            inst, sample = state.sample_idx
+            if sample:
+                instruments = deepcopy(state.instruments)
+                keys = sorted(instruments[inst].multisamples.keys())
+                instruments[inst].multisamples.pop(sample)
+
+                idx = keys.index(sample)
+                try:
+                    new_inst = keys[idx + 1]
+                except IndexError:
+                    new_inst = keys[idx - 1] if idx else ""
+
+                self._update_state(
+                    update_instruments=True,
+                    instruments=instruments,
+                    sample_idx=(inst, new_inst),
+                )
+                self.update_status(
+                    f"Removed sample {sample} from instrument {inst}"
+                )
+
+    ###########################################################################
+
+    def on_multisample_sample_selected(self, state: bool) -> None:
+        return
+        # if state:
+        #     self._update_sample_state(sample_source=SampleSource.MULTISAMPLE)
+        #     self.update_status("Sample source set to multisample")
 
     ###########################################################################
 
     def on_musicxml_fname_changed(self, fname: str) -> None:
-        try:
-            self.song = Song.from_music_xml(fname)
-        except MusicXmlException as e:
-            self.response_generated.emit(True, "Song load", str(e))
-        else:
-            self.state.instruments = self.song.instruments
-        inst_idx = 0 if len(self.state.instruments) else None
-        self._update_state(True, musicxml_fname=fname, instrument_idx=inst_idx)
-        self._update_status(f"MusicXML name set to {fname}")
+        file_path = Path(fname)
+        if file_path == self.state.musicxml_fname:
+            return
+
+        self._load_musicxml(file_path, False)
+
+        self._update_state(True, musicxml_fname=file_path)
+        self.update_status(f"MusicXML name set to {fname}")
 
     ###########################################################################
 
-    def on_mute_changed(self, idx: int, state: bool) -> None:
-        self._update_inst_state(idx=idx, mute=state)
-        inst = self.state.instruments[idx].name
-        self._update_status(f"{inst} mute {_endis(state)}")
-
-    ###########################################################################
-
-    def on_mute_percussion_changed(self, state: bool) -> None:
-        self._update_state(mute_percussion=state)
-        self._update_status(f"Percussion mute {_endis(state)}")
-
-    ###########################################################################
-
-    def on_octave_changed(self, octave: int) -> None:
-        self._update_inst_state(octave=octave)
-        self._update_status(f"Octave set to {octave}")
+    def on_octave_shift_changed(self, octave_shift: int) -> None:
+        self._update_sample_state(octave_shift=octave_shift)
+        self.update_status(f"Octave set to {octave_shift}")
 
     ###########################################################################
 
     def on_pack_sample_changed(self, item_id: tuple[str, Path]) -> None:
-        self._update_inst_state(pack_sample=item_id)
-        if self.state.inst.sample_source == SampleSource.SAMPLEPACK:
-            self._load_sample_settings(item_id)
-            self._update_status(
-                f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
-            )
-
-    ###########################################################################
-
-    def on_pack_sample_selected(self, state: bool) -> None:
-        if state:
-            self._update_inst_state(sample_source=SampleSource.SAMPLEPACK)
-            self._update_status("Sample source set to sample pack")
-            sample = self.state.inst.pack_sample
-            if sample[0]:
-                self._load_sample_settings(sample)
-
-    ###########################################################################
-
-    def on_pan_enable_changed(self, state: bool) -> None:
-        self._update_inst_state(pan_enabled=state)
-        self._update_status(f"Pan {_endis(state)}")
-
-    ###########################################################################
-
-    def on_pan_invert_changed(self, left: bool, state: bool) -> None:
-        pan_setting = list(self.state.inst.pan_invert)
-        pan_setting[0 if left else 1] = state
-
-        self._update_inst_state(pan_invert=(pan_setting[0], pan_setting[1]))
-        self._update_status(
-            f'Pan {"left" if left else "right"} inversion {_endis(state)}'
+        self._update_sample_state(
+            pack_sample=item_id, sample_source=SampleSource.SAMPLEPACK
+        )
+        self._load_sample_settings(item_id)
+        self.update_status(
+            f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
         )
 
     ###########################################################################
 
+    def on_pack_sample_selected(self, state: bool) -> None:
+        with suppress(NoSample):
+            if state:
+                self._update_sample_state(
+                    sample_source=SampleSource.SAMPLEPACK
+                )
+                self.update_status("Sample source set to sample pack")
+                sample = self.state.sample.pack_sample
+                if sample[0]:
+                    self._load_sample_settings(sample)
+
+    ###########################################################################
+
+    def on_pan_enable_changed(self, state: bool) -> None:
+        self._update_sample_state(pan_enabled=state)
+        self.update_status(f"Pan {_endis(state)}")
+
+    ###########################################################################
+
+    def on_pan_invert_changed(self, left: bool, state: bool) -> None:
+        with suppress(NoSample):
+            pan_setting = list(self.state.sample.pan_invert)
+            pan_setting[0 if left else 1] = state
+
+            self._update_sample_state(
+                pan_invert=(pan_setting[0], pan_setting[1])
+            )
+            self.update_status(
+                f'Pan {"left" if left else "right"} inversion {_endis(state)}'
+            )
+
+    ###########################################################################
+
     def on_pan_setting_changed(self, val: int) -> None:
-        self._update_inst_state(pan_setting=val)
-        self._update_status(f"Pan changed to {val}")
+        self._update_sample_state(pan_setting=val)
+        self.update_status(f"Pan changed to {val}")
 
     ###########################################################################
 
@@ -723,19 +765,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 args=(args,),
             ).start()
 
-        self._update_status("SPC played")
+        self.update_status("SPC played")
 
     ###########################################################################
 
     def on_porter_name_changed(self, val: str) -> None:
         self._update_state(porter=val)
-        self._update_status(f"Porter name set to {val}")
+        self.update_status(f"Porter name set to {val}")
 
     ###########################################################################
 
     def on_recent_projects_cleared(self) -> None:
         self.recent_projects = []
-        self._update_status("Recent projects cleared")
+        self.update_status("Recent projects cleared")
 
     ###########################################################################
 
@@ -743,22 +785,62 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if self._undo_level > 0:
             self._undo_level -= 1
             self._signal_state_change()
-            self._update_status("Redo")
+            self.update_status("Redo")
 
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        self.song = Song.from_music_xml(self.state.musicxml_fname)
+        assert self.state.musicxml_fname is not None
+        self._load_musicxml(self.state.musicxml_fname, True)
 
-        instruments = {inst.name: inst for inst in self.state.instruments}
-
-        for n, instrument in enumerate(self.song.instruments):
-            if instrument.name in instruments:
-                self.song.instruments[n] = instruments[instrument.name]
-
-        self.state.instruments[:] = self.song.instruments
         self.reinforce_state()
-        self._update_status("MusicXML reloaded")
+        self.update_status("MusicXML reloaded")
+
+    ###########################################################################
+
+    def on_render_zip_clicked(self) -> None:
+        self.update_status("Zip file generated")
+
+        path = self._project_path
+        project = self.state.project_name
+
+        assert path is not None  # nosec: B101
+        assert project is not None  # nosec: B101
+
+        # Turn off the preview features
+        self.state.start_measure = 1
+        for sample in self.state.samples.values():
+            sample.mute = False
+            sample.solo = False
+        self.reinforce_state()
+
+        self.on_generate_mml_clicked(False)
+        self.on_generate_spc_clicked(False)
+
+        proj = Path(project)
+        mml_fname = path / "music" / proj.with_suffix(".txt")
+        spc_fname = path / "SPCs" / proj.with_suffix(".spc")
+        sample_path = path / "samples" / project
+
+        zname = str(path / (project + ".zip"))
+        with zipfile.ZipFile(zname, "w") as zobj:
+            zobj.write(mml_fname, mml_fname.name)
+            zobj.write(spc_fname, spc_fname.name)
+            for brr in glob("**/*.brr", root_dir=sample_path, recursive=True):
+                zobj.write(sample_path / brr, arcname=str(proj / brr))
+
+        self.response_generated.emit(
+            False, "Zip Render", f"Zip file {zname} rendered"
+        )
+
+    ###########################################################################
+
+    def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
+        self._update_state(sample_idx=sample_idx)
+
+        inst, sample = sample_idx
+        name = sample or inst
+        self.update_status(f"{name} selected")
 
     ###########################################################################
 
@@ -772,68 +854,88 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             fname = path / (project + ".prj")
             save(fname, self.state)
             self.reinforce_state()
-            self._update_status("Project saved")
+            self.update_status("Project saved")
 
     ###########################################################################
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_inst_state(adsr_mode=state)
-        self._update_status(
+        self._update_sample_state(adsr_mode=state)
+        self.update_status(
             f"Envelope mode set to {'ADSR' if state else 'Gain'}"
         )
 
     ###########################################################################
 
-    def on_solo_changed(self, idx: int, state: bool) -> None:
-        self._update_inst_state(idx=idx, solo=state)
-        inst = self.state.instruments[idx].name
-        self._update_status(f"{inst} solo {_endis(state)}")
+    def on_solomute_changed(
+        self, sample_idx: tuple[str, str], solo: bool, state: bool
+    ) -> None:
+        inst_name, sample_name = sample_idx
+        instruments = deepcopy(self.state.instruments)
+        inst = instruments[inst_name]
 
-    ###########################################################################
+        field = "solo" if solo else "mute"
+        update = {field: state}
 
-    def on_solo_percussion_changed(self, state: bool) -> None:
-        self._update_state(solo_percussion=state)
-        self._update_status(f"Percussion solo {_endis(state)}")
+        if sample_name:
+            msg = f"{inst_name}.{sample_name}"
+            inst.multisamples[sample_name] = replace(
+                inst.multisamples[sample_name], **update
+            )
+            # If a sample's solo/mute is being disabled, disable it in the
+            # instrument as well
+            if not state:
+                inst.sample = replace(inst.sample, **update)
+
+        else:
+            # Apply an instrument mute/solo to all samples
+            msg = f"{inst_name}"
+            inst.sample = replace(inst.sample, **update)
+            for sample_name, sample in inst.multisamples.items():
+                inst.multisamples[sample_name] = replace(sample, **update)
+
+        self._update_state(instruments=instruments)
+
+        self.update_status(f"{msg} {field} {_endis(state)}")
 
     ###########################################################################
 
     def on_start_measure_changed(self, value: int) -> None:
         self._update_state(start_measure=value)
-        self._update_status(f"Start measure set to {value}")
+        self.update_status(f"Start measure set to {value}")
 
     ###########################################################################
 
     def on_subtune_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
-        self._update_inst_state(subtune_setting=setting)
-        self._update_status(f"Subtune set to {setting}")
+        self._update_sample_state(subtune_setting=setting)
+        self.update_status(f"Subtune set to {setting}")
 
     ###########################################################################
 
     def on_superloop_analysis_changed(self, enabled: bool) -> None:
         self._update_state(superloop_analysis=enabled)
-        self._update_status(f"Superloop analysis {_endis(enabled)}")
+        self.update_status(f"Superloop analysis {_endis(enabled)}")
 
     ###########################################################################
 
     def on_sus_level_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_inst_state(sus_level_setting=setting)
-        self._update_status(f"Sustain level set to {setting}")
+        self._update_sample_state(sus_level_setting=setting, adsr_mode=True)
+        self.update_status(f"Sustain level set to {setting}")
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 31)
-        self._update_inst_state(sus_rate_setting=setting)
-        self._update_status(f"Decay rate set to {setting}")
+        self._update_sample_state(sus_rate_setting=setting, adsr_mode=True)
+        self.update_status(f"Decay rate set to {setting}")
 
     ###########################################################################
 
     def on_tune_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
-        self._update_inst_state(tune_setting=setting)
-        self._update_status(f"Tune set to {setting}")
+        self._update_sample_state(tune_setting=setting)
+        self.update_status(f"Tune set to {setting}")
 
     ###########################################################################
 
@@ -841,7 +943,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
             self._signal_state_change()
-            self._update_status("Undo")
+            self.update_status("Undo")
 
     ###########################################################################
     # Private method definitions
@@ -857,9 +959,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _interpolate(self, level: Dynamics, setting: int) -> None:
-        inst = self.state.inst
+        inst = self.state.instrument
+        sample = self.state.sample
         dyns = sorted(inst.dynamics_present)
-        dynamics = dict(inst.dynamics)
+        dynamics = deepcopy(sample.dynamics)
 
         min_dyn = min(dyns)
         max_dyn = max(dyns)
@@ -892,7 +995,30 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             dynamics[dyn] = val
 
-        self._update_inst_state(dynamics=dynamics)
+        self._update_sample_state(force_update=True, dynamics=dynamics)
+
+    ###########################################################################
+
+    def _load_musicxml(self, musicxml: Path, keep_inst_settings: bool) -> None:
+        try:
+            self.song = Song.from_music_xml(str(musicxml))
+        except MusicXmlException as e:
+            self.response_generated.emit(
+                True,
+                "Error loading score",
+                f"Could not open score {musicxml}: {str(e)}",
+            )
+        else:
+            if keep_inst_settings:
+                # Reconcile instrument settings
+                for inst_name, song_inst in self.song.instruments.items():
+                    with suppress(KeyError):
+                        state_inst = self.state.instruments[inst_name]
+                        song_inst.solo = state_inst.solo
+                        song_inst.mute = state_inst.mute
+                        song_inst.samples = state_inst.samples
+
+            self.state.instruments = deepcopy(self.song.instruments)
 
     ###########################################################################
 
@@ -901,43 +1027,35 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             with open(self.prefs_fname, "r", encoding="utf8") as fobj:
                 prefs = yaml.safe_load(fobj)
 
+            prefs_version = prefs.get("version", _CURRENT_PREFS_VERSION)
+
+            if prefs_version > _CURRENT_PREFS_VERSION:
+                raise SmwMusicException(
+                    f"Preferences file version is {prefs_version}, tool "
+                    + f"version only supports up to {_CURRENT_PREFS_VERSION}"
+                )
+
+            self.preferences = PreferencesState()
             self.preferences.amk_fname = Path(prefs["amk"]["path"])
             self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
             self.preferences.sample_pack_dname = Path(
                 prefs["sample_packs"]["path"]
             )
-            self.preferences.advanced_mode = prefs.get("advanced", False)
-            self._load_sample_packs()
+            with suppress(KeyError):
+                self.preferences.advanced_mode = prefs["advanced"]
+            with suppress(KeyError):
+                self.preferences.dark_mode = prefs["dark_mode"]
+            with suppress(KeyError):
+                self.preferences.release_check = prefs["release_check"]
+
+        self._start_watcher()
 
         self.preferences_changed.emit(
             self.preferences.advanced_mode,
             bool(self.preferences.amk_fname.name),
             bool(self.preferences.spcplay_fname.name),
-            self._sample_packs,
+            self.preferences.dark_mode,
         )
-
-    ###########################################################################
-
-    def _load_sample_packs(self) -> None:
-
-        self._sample_packs = {}
-
-        packs = {}
-        root_dir = self.preferences.sample_pack_dname
-        for fname in glob("*.zip", root_dir=root_dir):
-            pack = Path(fname)
-            packs[pack.stem] = root_dir / pack
-
-        for name, path in packs.items():
-            try:
-                self._sample_packs[name] = SamplePack(path)
-
-            except FileNotFoundError:
-                self.response_generated.emit(
-                    True,
-                    "Error loading sample pack",
-                    f"Could not open sample pack {name} at {path}",
-                )
 
     ###########################################################################
 
@@ -956,7 +1074,185 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "tune_setting": params.tuning,
             "subtune_setting": params.subtuning,
         }
-        self._update_inst_state(**new_state)
+        self._update_sample_state(**new_state)
+
+    ###########################################################################
+
+    def _multisample_changed(
+        self, new: bool, name: str, notes: str, notehead: str, output: str
+    ) -> None:
+        state = self.state
+
+        # All the inputs need to be present to continue
+        if not all([name, notes, notehead, output]):
+            return
+
+        # Make sure we've got an instrument selected
+        try:
+            sample = state.sample
+        except NoSample:
+            return
+
+        # Exit if we're trying to change a sample that doesn't exist (this can
+        # happen when tabbing through and entering values before adding it
+        if not new and name not in state.instrument.multisamples:
+            return
+
+        # Parse the input parameters and bail if something went wrong
+        try:
+            if ":" in notes:
+                llim = Pitch(notes.split(":")[0])
+                ulim = Pitch(notes.split(":")[1])
+            else:
+                llim = ulim = Pitch(notes)
+
+            head = NoteHead.from_symbol(notehead)
+            start = Pitch(output)
+        except (PitchException, ValueError) as e:
+            self.response_generated.emit(True, "Multisample error", str(e))
+            return
+
+        if new:
+            sample = InstrumentSample(
+                ulim=ulim, llim=llim, notehead=head, start=start
+            )
+        else:
+            sample = replace(
+                sample,
+                llim=llim,
+                ulim=ulim,
+                start=start,
+                notehead=head,
+            )
+
+        inst, _ = state.sample_idx
+
+        instruments = deepcopy(state.instruments)
+        instruments[inst].multisamples[name] = sample
+        self._update_state(
+            update_instruments=True,
+            instruments=instruments,
+            sample_idx=(inst, name),
+        )
+        if new:
+            msg = f"Added multisample {name} to {inst}"
+        else:
+            msg = f"Updated multisample {name} of {inst}"
+
+        self.update_status(msg)
+
+    ###########################################################################
+
+    def _on_generate_mml_clicked(self, report: bool = True) -> bool:
+        assert self.state.mml_fname is not None
+
+        title = "MML Generation"
+        error = True
+        fname = self.state.mml_fname
+        if self.song is None:
+            msg = "Song not loaded"
+            self.mml_generated.emit("\n".join(ashtley))
+        else:
+            assert self.state.project_name is not None  # nosec: B101
+
+            try:
+                if os.path.exists(fname):
+                    shutil.copy2(fname, f"{fname}.bak")
+
+                self.song.instruments = deepcopy(self.state.instruments)
+
+                self.song.volume = self.state.global_volume
+                if self.state.porter:
+                    self.song.porter = self.state.porter
+                if self.state.game:
+                    self.song.game = self.state.game
+
+                mml = self.song.to_mml_file(
+                    str(fname),
+                    self.state.global_legato,
+                    self.state.loop_analysis,
+                    self.state.superloop_analysis,
+                    self.state.measure_numbers,
+                    True,
+                    self.state.echo if self.state.global_echo_enable else None,
+                    PurePosixPath(self.state.project_name),
+                    self.state.start_measure,
+                )
+                self.mml_generated.emit(mml)
+                self.update_status("MML generated")
+            except MusicXmlException as e:
+                msg = str(e)
+            else:
+                error = False
+                msg = "Done"
+
+        if report or error:
+            self.response_generated.emit(error, title, msg)
+
+        return not error
+
+    ###########################################################################
+
+    def _on_generate_spc_clicked(self, report: bool = True) -> bool:
+        assert self._project_path is not None  # nosec: B101
+        assert self.state.project_name is not None  # nosec: B101
+        assert self.state.mml_fname is not None
+
+        error = False
+        msg = ""
+
+        if not os.path.exists(self.state.mml_fname):
+            error = True
+            msg = "MML not generated"
+        else:
+            samples_path = (
+                self._project_path / "samples" / self.state.project_name
+            )
+
+            shutil.rmtree(samples_path, ignore_errors=True)
+            os.makedirs(samples_path, exist_ok=True)
+
+            for inst in self.state.instruments.values():
+                for sample in inst.samples.values():
+                    if sample.sample_source == SampleSource.BRR:
+                        shutil.copy2(sample.brr_fname, samples_path)
+                    if sample.sample_source == SampleSource.SAMPLEPACK:
+                        pack_name, pack_path = sample.pack_sample
+                        target = samples_path / pack_name / pack_path
+                        os.makedirs(target.parents[0], exist_ok=True)
+                        with open(target, "wb") as fobj:
+                            try:
+                                fobj.write(
+                                    self._sample_packs[pack_name][
+                                        pack_path
+                                    ].data
+                                )
+                            except KeyError:
+                                error = True
+                                msg += (
+                                    f"Could not find sample pack {pack_name}\n"
+                                )
+
+            if not error:
+                try:
+                    msg = subprocess.check_output(  # nosec B603
+                        self.convert,
+                        cwd=self._project_path,
+                        stderr=subprocess.STDOUT,
+                        timeout=15,
+                    ).decode()
+                except subprocess.CalledProcessError as e:
+                    error = True
+                    msg = e.output.decode("utf8")
+                except subprocess.TimeoutExpired:
+                    error = True
+                    msg = "Conversion timed out"
+
+        if report or error:
+            self.response_generated.emit(error, "SPC Generated", msg)
+            self.update_status("SPC generated")
+
+        return not error
 
     ###########################################################################
 
@@ -977,11 +1273,58 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _select_gain(self, state: bool, mode: GainMode, caption: str) -> None:
+        if state:
+            kwargs: dict[str, GainMode | int | bool] = {
+                "gain_mode": mode,
+                "adsr_mode": False,
+            }
+            with suppress(NoSample):
+                kwargs["gain_setting"] = min(
+                    31, self.state.sample.gain_setting
+                )
+
+            self._update_sample_state(**kwargs)
+            self.update_status(f"{caption} envelope selected")
+
+    ###########################################################################
+
     def _signal_state_change(
         self, update_instruments: bool = False, state_change: bool = True
     ) -> None:
-        self.state.unsaved = state_change
+        state = self.state
+
+        state.unsaved = state_change
+        self.state.unmapped = set()
+
+        with suppress(NoSample):
+            if self.song:
+                name = state.sample_idx[0]
+
+                unmapped = self.song.unmapped_notes(
+                    name, state.instruments[name]
+                )
+
+                self.state.unmapped = {
+                    (pitch, str(head)) for pitch, head in unmapped
+                }
         self.state_changed.emit(self.state, update_instruments)
+
+    ###########################################################################
+
+    def _start_watcher(self) -> None:
+        with suppress(AttributeError):
+            if self._sample_watcher.is_alive():
+                self._sample_watcher.stop()
+                self._sample_watcher.join()
+
+        self._sample_watcher = observers.Observer()
+        self._sample_watcher.daemon = True
+
+        self._sample_watcher.schedule(
+            _SamplePackWatcher(self), self.preferences.sample_pack_dname, False
+        )
+        self._sample_watcher.start()
 
     ###########################################################################
 
@@ -999,9 +1342,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_inst_state(
+    def _update_sample_state(
         self,
-        idx: int = -1,
+        force_update: bool = False,
         **kwargs: str
         | int
         | dict[Dynamics, int]
@@ -1014,27 +1357,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | Path
         | GainMode,
     ) -> None:
-        old_inst = (
-            self.state.inst if idx == -1 else self.state.instruments[idx]
-        )
-        try:
-            new_inst = replace(old_inst, **kwargs)
-        except TypeError:
-            new_inst = replace(old_inst)
+        with suppress(NoSample):
+            old_sample = self.state.sample
+            new_sample = replace(old_sample)
             for key, val in kwargs.items():
-                setattr(new_inst, key, val)
+                setattr(new_sample, key, val)
 
-        if new_inst != self.state.inst:
-            self._rollback_undo()
+            if (new_sample != old_sample) or force_update:
+                self._rollback_undo()
 
-            new_state = deepcopy(self.state)
-            if idx == -1:
-                new_state.inst = new_inst
-            else:
-                new_state.instruments[idx] = new_inst
+                new_state = deepcopy(self.state)
+                new_state.sample = new_sample
 
-            self._history.append(new_state)
-            self._signal_state_change()
+                self._history.append(new_state)
+                self._signal_state_change()
 
     ###########################################################################
 
@@ -1044,23 +1380,26 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         **kwargs: str
         | bool
         | InstrumentConfig
-        | list[InstrumentConfig]
+        | dict[str, InstrumentConfig]
         | None
         | EchoConfig
-        | int,
+        | int
+        | tuple[str, str | None]
+        | Path,
     ) -> None:
-        new_state = replace(self.state, **kwargs)
+        if kwargs:
+            new_state = replace(self.state)
+            for key, val in kwargs.items():
+                setattr(new_state, key, val)
+        else:
+            new_state = State()
+
         if new_state != self.state:
             self._rollback_undo()
 
             self._save_backup()
             self._history.append(new_state)
             self._signal_state_change(update_instruments)
-
-    ###########################################################################
-
-    def _update_status(self, msg: str) -> None:
-        self.status_updated.emit(msg)
 
     ###########################################################################
     # API property definitions
