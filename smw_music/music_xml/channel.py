@@ -122,7 +122,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
     # API method definitions
     ###########################################################################
 
-    def check(self) -> list[str]:
+    def check(self, instruments: dict[str, InstrumentConfig]) -> list[str]:
         """
         Confirm that the channel's notes are acceptable.
 
@@ -133,15 +133,25 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             outside octaves 1-6  is used.
         """
         msgs = []
-        percussion = False
         tokens = flatten(self.tokens)
+        percussion = False
+
         for token in filter(lambda x: isinstance(x, Error), tokens):
             msgs.append(cast(Error, token).msg)
-        for token in filter(lambda x: isinstance(x, (Note, Clef)), tokens):
+        for token in filter(
+            lambda x: isinstance(x, (Clef, Instrument, Note)), tokens
+        ):
             if isinstance(token, Clef):
-                percussion = token.percussion
+                percussion = cast(Clef, token).percussion
+            elif isinstance(token, Instrument):
+                inst = instruments[cast(Instrument, token).name]
             else:
-                msgs.extend(cast(Note, token).check(percussion))
+                note = cast(Note, token)
+                _, sample = inst.emit_note(note)
+                octave_shift = (
+                    0 if percussion else inst.samples[sample].octave_shift
+                )
+                msgs.extend(note.check(octave_shift))
         for token in filter(lambda x: isinstance(x, Playable), tokens):
             msgs.extend(cast(Playable, token).duration_check())
         return msgs

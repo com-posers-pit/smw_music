@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 # SPDX-FileCopyrightText: 2023 The SMW Music Python Project Authors
 # <https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst>
 #
@@ -13,7 +11,7 @@
 
 # Standard library imports
 import datetime
-from dataclasses import replace
+import shutil
 from pathlib import Path
 from typing import TypedDict
 
@@ -34,6 +32,7 @@ from smw_music.music_xml.instrument import (
     NoteHead,
     SampleSource,
 )
+from smw_music.ui.old_save import v0
 from smw_music.ui.state import State
 
 ###############################################################################
@@ -264,44 +263,65 @@ def _save_sample(sample: InstrumentSample) -> _SampleDict:
 
 
 ###############################################################################
+
+
+def _upgrade_save(fname: Path) -> tuple[State, Path]:
+    with open(fname, "r", encoding="utf8") as fobj:
+        contents = yaml.safe_load(fobj)
+
+    save_version = contents["save_version"]
+
+    backup = fname.parent / (fname.name + f".v{save_version}")
+    shutil.copy(fname, backup)
+
+    assert save_version == 0
+    state = v0.load(fname)
+
+    return state, backup
+
+
+###############################################################################
 # API function definitions
 ###############################################################################
 
 
-def load(fname: Path) -> State:
+def load(fname: Path) -> tuple[State, Path | None]:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: _SaveDict = yaml.safe_load(fobj)
 
     save_version = contents["save_version"]
-    if contents["save_version"] > _CURRENT_SAVE_VERSION:
+    if save_version > _CURRENT_SAVE_VERSION:
         raise SmwMusicException(
             f"Save file version is {save_version}, tool version only "
             + f"supports up to {_CURRENT_SAVE_VERSION}"
         )
 
-    project = contents["song"]
-    sdict = contents["state"]
-    musicxml = sdict["musicxml_fname"]
-    mml = sdict["mml_fname"]
-    state = State(
-        musicxml_fname=None if musicxml is None else Path(musicxml),
-        mml_fname=None if mml is None else Path(mml),
-        loop_analysis=sdict["loop_analysis"],
-        measure_numbers=sdict["measure_numbers"],
-        global_volume=sdict["global_volume"],
-        global_legato=sdict["global_legato"],
-        global_echo_enable=sdict["global_echo_enable"],
-        echo=_load_echo(sdict["echo"]),
-        instruments={
-            k: _load_instrument(v) for k, v in sdict["instruments"].items()
-        },
-        project_name=project,
-        porter=sdict["porter"],
-        game=sdict["game"],
-        start_measure=sdict.get("start_measure", 1),
-    )
+    if save_version < _CURRENT_SAVE_VERSION:
+        return _upgrade_save(fname)
+    else:
+        project = contents["song"]
+        sdict = contents["state"]
+        musicxml = sdict["musicxml_fname"]
+        mml = sdict["mml_fname"]
+        state = State(
+            musicxml_fname=None if musicxml is None else Path(musicxml),
+            mml_fname=None if mml is None else Path(mml),
+            loop_analysis=sdict["loop_analysis"],
+            measure_numbers=sdict["measure_numbers"],
+            global_volume=sdict["global_volume"],
+            global_legato=sdict["global_legato"],
+            global_echo_enable=sdict["global_echo_enable"],
+            echo=_load_echo(sdict["echo"]),
+            instruments={
+                k: _load_instrument(v) for k, v in sdict["instruments"].items()
+            },
+            project_name=project,
+            porter=sdict["porter"],
+            game=sdict["game"],
+            start_measure=sdict.get("start_measure", 1),
+        )
 
-    return state
+    return state, None
 
 
 ###############################################################################
@@ -309,7 +329,11 @@ def load(fname: Path) -> State:
 
 def save(fname: Path, state: State) -> None:
     musicxml = state.musicxml_fname
+    if musicxml is not None:
+        musicxml = musicxml.resolve()
     mml = state.mml_fname
+    if mml is not None:
+        mml = mml.resolve()
 
     contents = {
         "tool_version": __version__,

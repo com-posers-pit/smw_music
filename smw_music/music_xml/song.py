@@ -543,7 +543,7 @@ class Song:
     def _validate(self) -> None:
         errors = []
         for n, channel in enumerate(self._reduced_channels):
-            msgs = channel.check()
+            msgs = channel.check(self.instruments)
             for msg in msgs:
                 errors.append(f"{msg} in staff {n + 1}")
 

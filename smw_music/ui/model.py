@@ -567,7 +567,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         try:
-            save_state = load(fname)
+            save_state, backup_fname = load(fname)
+            if backup_fname is not None:
+                self.response_generated.emit(
+                    False,
+                    "Old File",
+                    "This project uses an old save file format.  "
+                    "We've tried our best to upgrade, but there might still "
+                    "be some problems.  Your old save file was backed up as "
+                    f"{backup_fname}, you should probably keep a copy until "
+                    "you've confirmed the upgrade was successful.  Or fixed "
+                    "any problems with it, it's all the same to beer.",
+                )
+
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
         except FileNotFoundError:
@@ -706,13 +718,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_pan_invert_changed(self, left: bool, state: bool) -> None:
-        pan_setting = list(self.state.inst.pan_invert)
-        pan_setting[0 if left else 1] = state
+        with suppress(NoSample):
+            pan_setting = list(self.state.sample.pan_invert)
+            pan_setting[0 if left else 1] = state
 
-        self._update_sample_state(pan_invert=(pan_setting[0], pan_setting[1]))
-        self.update_status(
-            f'Pan {"left" if left else "right"} inversion {_endis(state)}'
-        )
+            self._update_sample_state(
+                pan_invert=(pan_setting[0], pan_setting[1])
+            )
+            self.update_status(
+                f'Pan {"left" if left else "right"} inversion {_endis(state)}'
+            )
 
     ###########################################################################
 
@@ -775,6 +790,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
+        assert self.state.musicxml_fname is not None
         self._load_musicxml(self.state.musicxml_fname, True)
 
         self.reinforce_state()
@@ -810,10 +826,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         with zipfile.ZipFile(zname, "w") as zobj:
             zobj.write(mml_fname, mml_fname.name)
             zobj.write(spc_fname, spc_fname.name)
-            for sample in glob(
-                "**/*.brr", root_dir=sample_path, recursive=True
-            ):
-                zobj.write(sample_path / sample, arcname=str(proj / sample))
+            for brr in glob("**/*.brr", root_dir=sample_path, recursive=True):
+                zobj.write(sample_path / brr, arcname=str(proj / brr))
 
         self.response_generated.emit(
             False, "Zip Render", f"Zip file {zname} rendered"
@@ -1130,6 +1144,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_mml_clicked(self, report: bool = True) -> bool:
+        assert self.state.mml_fname is not None
+
         title = "MML Generation"
         error = True
         fname = self.state.mml_fname
@@ -1152,7 +1168,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     self.song.game = self.state.game
 
                 mml = self.song.to_mml_file(
-                    fname,
+                    str(fname),
                     self.state.global_legato,
                     self.state.loop_analysis,
                     self.state.superloop_analysis,
@@ -1180,6 +1196,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _on_generate_spc_clicked(self, report: bool = True) -> bool:
         assert self._project_path is not None  # nosec: B101
         assert self.state.project_name is not None  # nosec: B101
+        assert self.state.mml_fname is not None
 
         error = False
         msg = ""
