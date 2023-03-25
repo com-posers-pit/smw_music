@@ -20,6 +20,7 @@ from typing import Callable, NamedTuple, cast
 
 # Library imports
 import qdarkstyle  # type: ignore
+from music21.pitch import Pitch
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
 from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
@@ -32,6 +33,7 @@ from PyQt6.QtWidgets import (
     QLabel,
     QLineEdit,
     QListWidget,
+    QListWidgetItem,
     QMainWindow,
     QMenu,
     QMessageBox,
@@ -956,10 +958,12 @@ class Dashboard(QWidget):
         item = self._view.multisample_unmapped_list.itemFromIndex(idx)
 
         name = f"TMP{self._view.multisample_unmapped_list.count()}_"
-        note, notehead = item.text().split(":")
+        note, notehead = cast(
+            tuple[Pitch, str], item.data(Qt.ItemDataRole.UserRole)
+        )
 
         self._model.on_multisample_sample_add_clicked(
-            name, note, notehead, note
+            name, str(note), notehead, note
         )
 
     ###########################################################################
@@ -1293,7 +1297,13 @@ class Dashboard(QWidget):
         widget = self._view.multisample_unmapped_list
         widget.clear()
         for pitch, head in state.unmapped:
-            widget.addItem(f"{pitch}:{head}")
+            text = str(pitch).replace("-", "♭")
+            if head != "normal":
+                text += f":{head}"
+
+            item = QListWidgetItem(text)
+            item.setData(Qt.ItemDataRole.UserRole, (pitch, head))
+            widget.addItem(item)
 
     ###########################################################################
     # Private property definitions
