@@ -70,7 +70,7 @@ class State:
     game: str = ""
     start_measure: int = 1
 
-    sample_idx: tuple[str, str] | None = None
+    _sample_idx: tuple[str, str] | None = None
 
     unmapped: set[tuple[Pitch, str]] = field(default_factory=set)
 
@@ -80,21 +80,32 @@ class State:
 
     @property
     def sample(self) -> InstrumentSample:
-        if self.sample_idx is None:
-            raise NoSample()
         return self.samples[self.sample_idx]
 
     ###########################################################################
 
     @sample.setter
     def sample(self, sample: InstrumentSample) -> None:
-        if self.sample_idx is not None:
-            inst_name, sample_name = self.sample_idx
-            inst = self.instruments[inst_name]
-            if sample_name:
-                inst.multisamples[sample_name] = sample
-            else:
-                inst.sample = sample
+        inst_name, sample_name = self.sample_idx
+        inst = self.instruments[inst_name]
+        if sample_name:
+            inst.multisamples[sample_name] = sample
+        else:
+            inst.sample = sample
+
+    ###########################################################################
+
+    @property
+    def sample_idx(self) -> tuple[str, str]:
+        if self._sample_idx is None:
+            raise NoSample()
+        return self._sample_idx
+
+    ###########################################################################
+
+    @sample_idx.setter
+    def sample_idx(self, sample_idx: tuple[str, str]) -> None:
+        self._sample_idx = sample_idx
 
     ###########################################################################
 

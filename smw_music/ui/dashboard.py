@@ -545,14 +545,13 @@ class Dashboard(QWidget):
 
             # Solo/mute settings
             sample_list = self._view.sample_list
-            sample_idx = state.sample_idx
-            if sample_idx is not None:
+            sample_list.clearSelection()
+            with suppress(NoSample):
+                sample_idx = state.sample_idx
                 sample_list.setCurrentItem(
                     self._samples[sample_idx], _TblCol.NAME
                 )
                 self._update_sample_config(state, sample_idx)
-            else:
-                sample_list.clearSelection()
 
             self._update_solomute(state)
             self._update_multisample(state)
@@ -1114,7 +1113,7 @@ class Dashboard(QWidget):
         widget = self._view.sample_list
 
         open_inst = None
-        if state.sample_idx:
+        with suppress(NoSample):
             open_inst = state.sample_idx[0]
 
         with QSignalBlocker(widget):
@@ -1145,7 +1144,8 @@ class Dashboard(QWidget):
         start = ""
         with suppress(NoSample):
             sample = state.sample
-            name = cast(tuple[str, str], state.sample_idx)[1]
+            name = state.sample_idx[1]
+
             if name:
                 notehead = sample.notehead.symbol
                 if sample.llim == sample.ulim:

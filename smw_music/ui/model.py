@@ -573,7 +573,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_interpolate_changed(self, state: bool) -> None:
         with suppress(NoSample):
-            assert self.state.sample_idx is not None
             sample_idx = self.state.sample_idx
             sample_name = sample_idx[1] or sample_idx[0]
 
@@ -646,7 +645,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         )
 
         state = self.state
-        if state.sample_idx is not None:
+        with suppress(NoSample):
             inst, _ = state.sample_idx
 
             instruments = deepcopy(state.instruments)
@@ -677,11 +676,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         start = Pitch(output)
 
         state = self.state
-        if state.sample_idx is not None:
+        with suppress(NoSample):
             inst, old_name = state.sample_idx
 
             sample = replace(
-                cast(InstrumentSample, state.sample),
+                state.sample,
                 llim=llim,
                 ulim=ulim,
                 start=start,
@@ -703,7 +702,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_multisample_sample_remove_clicked(self) -> None:
         state = self.state
-        if state.sample_idx is not None:
+        with suppress(NoSample):
             inst, sample = state.sample_idx
             if sample:
                 instruments = deepcopy(state.instruments)
@@ -1270,14 +1269,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         state = self.state
 
         state.unsaved = state_change
-        if self.song and state.sample_idx:
-            name = state.sample_idx[0]
+        self.state.unmapped = set()
 
-            unmapped = self.song.unmapped_notes(name, state.instruments[name])
+        with suppress(NoSample):
+            if self.song:
+                name = state.sample_idx[0]
 
-            self.state.unmapped = {
-                (pitch.nameWithOctave, str(head)) for pitch, head in unmapped
-            }
+                unmapped = self.song.unmapped_notes(
+                    name, state.instruments[name]
+                )
+
+                self.state.unmapped = {
+                    (pitch.nameWithOctave, str(head))
+                    for pitch, head in unmapped
+                }
         self.state_changed.emit(self.state, update_instruments)
 
     ###########################################################################
@@ -1355,7 +1360,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | tuple[str, str | None],
     ) -> None:
         if kwargs:
-            new_state = replace(self.state, **kwargs)
+            new_state = replace(self.state)
+            for key, val in kwargs.items():
+                setattr(new_state, key, val)
         else:
             new_state = State()
 
