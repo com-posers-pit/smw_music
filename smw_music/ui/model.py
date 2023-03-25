@@ -649,9 +649,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return
 
         # TODO: Error handling
-        if ";" in notes:
+        if ":" in notes:
             llim = Pitch(notes.split(":")[0])
-            ulim = Pitch(notes.split(":")[0])
+            ulim = Pitch(notes.split(":")[1])
         else:
             llim = ulim = Pitch(notes)
 
@@ -1280,8 +1280,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 )
 
                 self.state.unmapped = {
-                    (pitch.nameWithOctave, str(head))
-                    for pitch, head in unmapped
+                    (pitch, str(head)) for pitch, head in unmapped
                 }
         self.state_changed.emit(self.state, update_instruments)
 
