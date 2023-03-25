@@ -12,7 +12,7 @@
 # Standard library imports
 import enum
 from collections import deque
-from contextlib import ExitStack
+from contextlib import ExitStack, suppress
 from functools import cached_property, partial
 from importlib import resources
 from pathlib import Path
@@ -56,7 +56,7 @@ from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
-from smw_music.ui.state import State
+from smw_music.ui.state import NoSample, State
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -557,10 +557,9 @@ class Dashboard(QWidget):
             self._update_solomute(state)
             self._update_multisample(state)
 
-            if (state.sample is None) or (
-                state.sample.sample_source == SampleSource.BUILTIN
-            ):
-                v.sample_pack_list.clearSelection()
+            with suppress(NoSample):
+                if state.sample.sample_source == SampleSource.BUILTIN:
+                    v.sample_pack_list.clearSelection()
 
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
@@ -1144,7 +1143,8 @@ class Dashboard(QWidget):
         notes = ""
         notehead = "normal"
         start = ""
-        if sample := state.sample:
+        with suppress(NoSample):
+            sample = state.sample
             name = cast(tuple[str, str], state.sample_idx)[1]
             if name:
                 notehead = sample.notehead.symbol

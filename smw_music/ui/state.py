@@ -17,11 +17,19 @@ from pathlib import Path
 from music21.pitch import Pitch
 
 # Package imports
+from smw_music import SmwMusicException
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
 
 ###############################################################################
 # API class definitions
+###############################################################################
+
+
+class NoSample(SmwMusicException):
+    pass
+
+
 ###############################################################################
 
 
@@ -71,9 +79,9 @@ class State:
     ###########################################################################
 
     @property
-    def sample(self) -> InstrumentSample | None:
+    def sample(self) -> InstrumentSample:
         if self.sample_idx is None:
-            return None
+            raise NoSample()
         return self.samples[self.sample_idx]
 
     ###########################################################################

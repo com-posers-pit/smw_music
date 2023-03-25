@@ -52,7 +52,7 @@ from smw_music.music_xml.song import Song
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
-from smw_music.ui.state import PreferencesState, State
+from smw_music.ui.state import NoSample, PreferencesState, State
 from smw_music.utils import newest_release
 
 ###############################################################################
@@ -398,7 +398,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_dynamics_changed(self, level: Dynamics, val: int | str) -> None:
         setting = _parse_setting(val)
         state = self.state
-        if state.sample:
+        with suppress(NoSample):
             if state.sample.dyn_interpolate:
                 self._interpolate(level, setting)
             else:
@@ -572,7 +572,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_interpolate_changed(self, state: bool) -> None:
-        if self.state.sample:
+        with suppress(NoSample):
             assert self.state.sample_idx is not None
             sample_idx = self.state.sample_idx
             sample_name = sample_idx[1] or sample_idx[0]
@@ -761,12 +761,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_pack_sample_selected(self, state: bool) -> None:
-        if state and self.state.sample:
-            self._update_sample_state(sample_source=SampleSource.SAMPLEPACK)
-            self.update_status("Sample source set to sample pack")
-            sample = self.state.sample.pack_sample
-            if sample[0]:
-                self._load_sample_settings(sample)
+        with suppress(NoSample):
+            if state:
+                self._update_sample_state(
+                    sample_source=SampleSource.SAMPLEPACK
+                )
+                self.update_status("Sample source set to sample pack")
+                sample = self.state.sample.pack_sample
+                if sample[0]:
+                    self._load_sample_settings(sample)
 
     ###########################################################################
 
@@ -1324,19 +1327,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | GainMode,
     ) -> None:
         old_sample = self.state.sample
-        if old_sample is not None:
-            new_sample = replace(old_sample)
-            for key, val in kwargs.items():
-                setattr(new_sample, key, val)
+        new_sample = replace(old_sample)
+        for key, val in kwargs.items():
+            setattr(new_sample, key, val)
 
-            if new_sample != old_sample:
-                self._rollback_undo()
+        if new_sample != old_sample:
+            self._rollback_undo()
 
-                new_state = deepcopy(self.state)
-                new_state.sample = new_sample
+            new_state = deepcopy(self.state)
+            new_state.sample = new_sample
 
-                self._history.append(new_state)
-                self._signal_state_change()
+            self._history.append(new_state)
+            self._signal_state_change()
 
     ###########################################################################
 
