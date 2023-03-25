@@ -223,6 +223,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
 
+        self._update_state()
         self._update_state(
             project_name=project_name,
             mml_fname=str(
