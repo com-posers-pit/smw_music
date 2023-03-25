@@ -1296,8 +1296,11 @@ class Dashboard(QWidget):
     def _update_unmapped(self, state: State) -> None:
         widget = self._view.multisample_unmapped_list
         widget.clear()
-        for pitch, head in state.unmapped:
-            text = str(pitch).replace("-", "♭")
+
+        for pitch, head in reversed(
+            sorted(state.unmapped, key=lambda x: x[0].ps)
+        ):
+            text = pitch.nameWithOctave.replace("-", "♭")
             if head != "normal":
                 text += f":{head}"
 
