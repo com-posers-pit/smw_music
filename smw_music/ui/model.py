@@ -567,7 +567,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         try:
-            save_state = load(fname)
+            save_state, backup_fname = load(fname)
+            if backup_fname is not None:
+                self.response_generated.emit(
+                    False,
+                    "Old File",
+                    "This project uses an old save file format.  "
+                    "We've tried our best to upgrade, but there might still "
+                    "be some problems.  Your old save file was backed up as "
+                    f"{backup_fname}, you should probably keep a copy until "
+                    "you've confirmed the upgrade was successful.  Or fixed "
+                    "any problems with it, it's all the same to beer.",
+                )
+
         except SmwMusicException as e:
             self.response_generated.emit(True, "Invalid save version", str(e))
         except FileNotFoundError:
