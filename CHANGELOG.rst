@@ -11,7 +11,56 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.5`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.5 - 2023-03-30
+--------------------------
+
+CODENAME: `Cherry Twist`_
+
+That's right
+
+Have more rhythm
+
+Woooo!
+
+`Release 0.3.5`_
+
 `Differences from 0.3.4`_
+
+Purpose
++++++++
+
+Fix new project creation bug
+
+
+Affected Issues
++++++++++++++++
+
+- `#186 Error in saving projects`_
+
+Changed
++++++++
+
+
+Added
++++++
+
+None
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
 
 --------------------------------------------------------------------------------
 
@@ -901,6 +950,7 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#186 Error in saving projects: https://github.com/com-posers-pit/smw_music/issues/186
 .. _#184 Apply fix to bonus ending builtin song: https://github.com/com-posers-pit/smw_music/issues/184
 .. _#182 Update drm file: https://github.com/com-posers-pit/smw_music/issues/182
 .. _#180 Auto-select sample pack when one is picked: https://github.com/com-posers-pit/smw_music/issues/180
@@ -1019,6 +1069,8 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.5: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.5
+.. _Release 0.3.4: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.4
 .. _Release 0.3.4: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.4
 .. _Release 0.3.3: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.3
 .. _Release 0.3.2: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.2
@@ -1032,7 +1084,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.4: https://github.com/com-posers-pit/smw_music/compare/v0.3.4...HEAD
+.. _Differences from 0.3.5: https://github.com/com-posers-pit/smw_music/compare/v0.3.5...HEAD
+.. _Differences from 0.3.4: https://github.com/com-posers-pit/smw_music/compare/v0.3.4...v0.3.5
 .. _Differences from 0.3.3: https://github.com/com-posers-pit/smw_music/compare/v0.3.3...v0.3.4
 .. _Differences from 0.3.2: https://github.com/com-posers-pit/smw_music/compare/v0.3.2...v0.3.3
 .. _Differences from 0.3.1: https://github.com/com-posers-pit/smw_music/compare/v0.3.1...v0.3.2
@@ -1046,4 +1099,5 @@ Affected Issues
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
 
+.. _Cherry Twist: https://www.youtube.com/watch?v=eLkQ2eLrUMs
 .. _I'm Pissed: https://www.youtube.com/watch?v=T6dmMUR9TVI
