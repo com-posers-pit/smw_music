@@ -225,9 +225,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_state()
         self._update_state(
             project_name=project_name,
-            mml_fname=str(
-                self._project_path / "music" / f"{project_name}.txt"
-            ),
+            mml_fname=self._project_path / "music" / f"{project_name}.txt",
         )
 
         # TODO: Unify this project path with what's used in on_save
