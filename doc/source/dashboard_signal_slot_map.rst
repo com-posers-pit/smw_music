@@ -78,7 +78,7 @@ Control Panel
       view.generate_spc.released --> model.on_generate_spc_clicked
       view.play_spc.released --> model.on_play_spc_clicked
       view.generate_and_play.released --> model.on_generate_and_play_clicked
-      view.render_zip.released --> model.on_render_zip_clicked
+      view.render_zip.released --> dashboard._on_render_zip_clicked --> model.on_render_zip_clicked
 
 Instrument Settings
 -------------------
@@ -183,7 +183,7 @@ Sample
       view.subtune_slider.valueChanged --> model.on_subtune_changed
       view.subtune_setting.editingFinished --> model.on_subtune_changed
       view.brr_setting.editingFinished --> model.on_brr_setting_changed
-      view.preview_envelope.released --> self.on_preview_envelope_clicked
+      view.preview_envelope.released --> dashboard.on_preview_envelope_clicked
 
 Multisample
 ~~~~~~~~~~~
@@ -191,13 +191,13 @@ Multisample
 .. mermaid::
 
    flowchart LR
-      view.multisample_sample_add.released --> self.on_multisample_add_clicked --> model.on_multisample_add_clicked
+      view.multisample_sample_add.released --> dashboard.on_multisample_add_clicked --> model.on_multisample_add_clicked
       view.multisample_sample_remove.released --> model.multisample_sample_remove_clicked
-      view.multisample_sample_name.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
-      view.multisample_sample_notes.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
-      view.multisample_sample_notehead.currentIndexChanged --> self.multisample_sample_hanged --> model.on_multisample_changed
-      view.multisample_sample_output.editingFinished --> self.multisample_sample_hanged --> model.on_multisample_changed
-      view.multisample_unmapped_list.doubleClicked --> self._on_multisample_umapped_doubleclicked --> model.on_multisample_add_clicked
+      view.multisample_sample_name.editingFinished --> dashboard.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_notes.editingFinished --> dashboard.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_notehead.currentIndexChanged --> dashboard.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_sample_output.editingFinished --> dashboard.multisample_sample_hanged --> model.on_multisample_changed
+      view.multisample_unmapped_list.doubleClicked --> dashboard._on_multisample_umapped_doubleclicked --> model.on_multisample_add_clicked
 
 Global Settings
 ---------------
@@ -237,8 +237,8 @@ Preferences Signal/Slot Map
 .. mermaid::
 
    flowchart LR
-     dialog.select_amk_fname.released --> self.on_amk_select_clicked
-     dialog.select_sample_pack_fname.released --> self.on_select_sample_pack_fname_clicked
-     dialog.select_spcplay.released --> self.on_select_spcplay_clicked
-     dialog.add_sample_pack.released --> self.on_add_sample_pack_clicked
-     dialog.remove_sample_pack.released --> self.on_remove_sample_pack_clicked
+     dialog.select_amk_fname.released --> dashboard.on_amk_select_clicked
+     dialog.select_sample_pack_fname.released --> dashboard.on_select_sample_pack_fname_clicked
+     dialog.select_spcplay.released --> dashboard.on_select_spcplay_clicked
+     dialog.add_sample_pack.released --> dashboard.on_add_sample_pack_clicked
+     dialog.remove_sample_pack.released --> dashboard.on_remove_sample_pack_clicked

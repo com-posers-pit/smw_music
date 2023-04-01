@@ -41,6 +41,7 @@ class PreferencesState:
     advanced_mode: bool = False
     dark_mode: bool = False
     release_check: bool = True
+    confirm_render: bool = True
 
 
 ###############################################################################

@@ -15,12 +15,12 @@ from pathlib import Path
 
 # Library imports
 from PyQt6 import uic
-from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
 from smw_music.ui.preferences_view import PreferencesView
 from smw_music.ui.state import PreferencesState
+from smw_music.ui.utils import is_checked
 
 ###############################################################################
 # API class definitions
@@ -107,18 +107,16 @@ class Preferences:
         d.advanced_mode.setChecked(preferences.advanced_mode)
         d.dark_mode.setChecked(preferences.dark_mode)
         d.release_check.setChecked(preferences.release_check)
+        d.confirm_render.setChecked(preferences.confirm_render)
 
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
             spcplay_fname = Path(d.spcplay_fname.text())
             pack_dir = Path(d.sample_pack_dirname.text())
-            advanced_mode = (
-                d.advanced_mode.checkState() == Qt.CheckState.Checked
-            )
-            dark_mode = d.dark_mode.checkState() == Qt.CheckState.Checked
-            release_check = (
-                d.release_check.checkState() == Qt.CheckState.Checked
-            )
+            advanced_mode = is_checked(d.advanced_mode)
+            dark_mode = is_checked(d.dark_mode)
+            release_check = is_checked(d.release_check)
+            confirm_render = is_checked(d.confirm_render)
 
             return PreferencesState(
                 amk_fname,
@@ -127,6 +125,7 @@ class Preferences:
                 advanced_mode,
                 dark_mode,
                 release_check,
+                confirm_render,
             )
 
         return None

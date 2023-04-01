@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>347</height>
+    <height>373</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -91,6 +91,16 @@
     <widget class="QCheckBox" name="release_check">
      <property name="text">
       <string>Check for updates on startup</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="confirm_render">
+     <property name="text">
+      <string>Confirm render</string>
      </property>
      <property name="checked">
       <bool>true</bool>
