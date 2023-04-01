@@ -174,10 +174,10 @@ class InstrumentSample:
     dyn_interpolate: bool = False
     artics: dict[Artic, ArticSetting] = field(
         default_factory=lambda: {
-            Artic.DEF: ArticSetting(0x7, 0xA),
-            Artic.STAC: ArticSetting(0x5, 0xA),
+            Artic.DEF: ArticSetting(0x7, 0xE),
+            Artic.STAC: ArticSetting(0x6, 0xE),
             Artic.ACC: ArticSetting(0x7, 0xF),
-            Artic.ACCSTAC: ArticSetting(0x5, 0xF),
+            Artic.ACCSTAC: ArticSetting(0x6, 0xF),
         }
     )
     pan_enabled: bool = False
