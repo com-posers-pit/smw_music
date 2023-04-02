@@ -170,6 +170,8 @@ class DashboardView(QMainWindow):
     instrument_settings_tab: QWidget
     interpolate: QCheckBox
     loop_analysis: QCheckBox
+    main_controls_widget: QWidget
+    main_ui_widget: QWidget
     measure_numbers: QCheckBox
     menuEdit: QAction
     menuFile: QAction
