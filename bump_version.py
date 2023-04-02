@@ -13,6 +13,7 @@
 
 # Standard library imports
 import argparse
+import csv
 import glob
 import re
 import sys
@@ -23,7 +24,7 @@ from itertools import chain
 ###############################################################################
 
 
-def _bump_version(version):
+def _bump_version(version, codename):
     key = "^version = "
     _overwrite("pyproject.toml", key, f'{key}"{version}"')
 
@@ -39,6 +40,9 @@ def _bump_version(version):
         glob.iglob("tests/dst/*.txt"), glob.iglob("tests/dst/ui/*.mml")
     ):
         _overwrite(fname, key, repl)
+
+    with open("smw_music/data/codenames.csv", "a", encoding="utf8") as fobj:
+        csv.writer(fobj).writerow([version, codename])
 
 
 ###############################################################################
@@ -64,10 +68,11 @@ def main(args=None):
         args = sys.argv[1:]
     parser = argparse.ArgumentParser("Version Update Tool")
     parser.add_argument("version", type=str, help="New Version")
+    parser.add_argument("codename", type=str, help="Version codename")
 
     args = parser.parse_args(args)
 
-    _bump_version(args.version)
+    _bump_version(args.version, args.codename)
 
 
 ###############################################################################
