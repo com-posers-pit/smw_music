@@ -1,6 +1,6 @@
 #amk 2
 
-; beer v0.3.5
+; beer v0.3.6
 
 #spc {
     #author  "O.G. Composer"
