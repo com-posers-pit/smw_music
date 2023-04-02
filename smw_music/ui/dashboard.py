@@ -59,6 +59,7 @@ from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
+from smw_music.ui.utils import to_checkstate
 from smw_music.utils import hexb, pct
 
 ###############################################################################
@@ -98,13 +99,6 @@ def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
         + cmargins.left()
         + cmargins.right()
     )
-
-
-###############################################################################
-
-
-def _to_checked(checked: bool) -> Qt.CheckState:
-    return Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked
 
 
 ###############################################################################
@@ -187,7 +181,7 @@ class Dashboard(QWidget):
     _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
-    _pref_dlg: Preferences
+    _preferences: Preferences
     _view: DashboardView
     _dyn_widgets: dict[Dyn, _DynamicsWidgets]
     _artic_widgets: dict[Artic, _ArticWidgets]
@@ -199,6 +193,7 @@ class Dashboard(QWidget):
     _default_tooltips: dict[QWidget | QAction, str]
     _samples: dict[tuple[str, str | None], QTreeWidgetItem]
     _sample_remover: _SampleRemover
+    _confirm_render: bool
 
     ###########################################################################
     # Constructor definitions
@@ -223,6 +218,7 @@ class Dashboard(QWidget):
         self._project_name = None
         self._sample_pack_items = {}
         self._samples = {}
+        self._confirm_render = True
 
         # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
         font = QFont("_")
@@ -678,7 +674,7 @@ class Dashboard(QWidget):
             (v.generate_and_play, m.on_generate_and_play_clicked),
             (v.generate_and_play, self._update_generate_and_play_tooltip),
             (v.reload_musicxml, m.on_reload_musicxml_clicked),
-            (v.render_zip, m.on_render_zip_clicked),
+            (v.render_zip, self._on_render_zip_clicked),
             # Instrument settings
             (v.interpolate, m.on_interpolate_changed),
             # Instrument pan settings
@@ -965,6 +961,21 @@ class Dashboard(QWidget):
         self._model.on_multisample_sample_add_clicked(
             name, str(note), notehead, note
         )
+
+    ###########################################################################
+
+    def _on_render_zip_clicked(self) -> None:
+        if self._confirm_render:
+            do_render = QMessageBox.StandardButton.Yes == QMessageBox.question(
+                self._view,
+                "Render",
+                "Do you want to generate a zip for upload?",
+            )
+        else:
+            do_render = True
+
+        if do_render:
+            self._model.on_render_zip_clicked()
 
     ###########################################################################
 
@@ -1284,8 +1295,8 @@ class Dashboard(QWidget):
 
     def _update_solomute(self, state: State) -> None:
         for key, sample in state.samples.items():
-            solo = _to_checked(sample.solo)
-            mute = _to_checked(sample.mute)
+            solo = to_checkstate(sample.solo)
+            mute = to_checkstate(sample.mute)
 
             item = self._samples[key]
             item.setCheckState(_TblCol.SOLO, solo)

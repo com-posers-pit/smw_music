@@ -20,731 +20,643 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <layout class="QHBoxLayout" name="horizontalLayout">
+   <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QSplitter" name="splitter_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <widget class="QGroupBox" name="control_groupBox">
-       <property name="title">
-        <string>Control Panel</string>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="6" column="0" colspan="3">
-         <widget class="QCheckBox" name="measure_numbers">
-          <property name="text">
-           <string>Measure Numbers</string>
+     <widget class="QWidget" name="main_ui_widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_9">
+       <item>
+        <widget class="QSplitter" name="splitter_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QGroupBox" name="control_groupBox">
+          <property name="title">
+           <string>Control Panel</string>
           </property>
+          <layout class="QGridLayout" name="gridLayout">
+           <item row="0" column="0">
+            <widget class="QPushButton" name="select_musicxml_fname">
+             <property name="text">
+              <string>MusicXML</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0" colspan="2">
+            <widget class="QPushButton" name="open_history">
+             <property name="text">
+              <string>History</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QPushButton" name="select_mml_fname">
+             <property name="text">
+              <string>MML</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QLineEdit" name="musicxml_fname"/>
+           </item>
+           <item row="11" column="0">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLineEdit" name="mml_fname"/>
+           </item>
+           <item row="7" column="0">
+            <spacer name="control_frame_spacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="porter_name_label">
+             <property name="text">
+              <string>Porter:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QLineEdit" name="game_name"/>
+           </item>
+           <item row="12" column="0" colspan="2">
+            <widget class="QPushButton" name="generate_mml">
+             <property name="text">
+              <string>Generate MML</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QLineEdit" name="porter_name"/>
+           </item>
+           <item row="13" column="0" colspan="2">
+            <widget class="QPushButton" name="generate_spc">
+             <property name="text">
+              <string>MML → SPC</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0" colspan="3">
+            <widget class="QCheckBox" name="loop_analysis">
+             <property name="text">
+              <string>Loop Analysis</string>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0" colspan="2">
+            <widget class="QPushButton" name="play_spc">
+             <property name="text">
+              <string>Play SPC</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0" colspan="3">
+            <widget class="QCheckBox" name="superloop_analysis">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Superloop Analysis</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0" colspan="2">
+            <widget class="QPushButton" name="open_quicklook">
+             <property name="text">
+              <string>Open Quicklook</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="game_name_label">
+             <property name="text">
+              <string>Game:</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0" colspan="3">
+            <widget class="QCheckBox" name="measure_numbers">
+             <property name="text">
+              <string>Measure Numbers</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLineEdit" name="musicxml_fname"/>
-        </item>
-        <item row="4" column="0" colspan="3">
-         <widget class="QCheckBox" name="loop_analysis">
-          <property name="text">
-           <string>Loop Analysis</string>
+         <widget class="QTabWidget" name="settings_tab_widget">
+          <property name="currentIndex">
+           <number>0</number>
           </property>
-         </widget>
-        </item>
-        <item row="13" column="0" colspan="2">
-         <widget class="QPushButton" name="generate_mml">
-          <property name="text">
-           <string>Generate MML</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLineEdit" name="porter_name"/>
-        </item>
-        <item row="9" column="0" colspan="2">
-         <widget class="QPushButton" name="reload_musicxml">
-          <property name="text">
-           <string>Reload MusicXML</string>
-          </property>
-         </widget>
-        </item>
-        <item row="15" column="0" colspan="2">
-         <widget class="QPushButton" name="play_spc">
-          <property name="text">
-           <string>Play SPC</string>
-          </property>
-         </widget>
-        </item>
-        <item row="11" column="0" colspan="2">
-         <widget class="QPushButton" name="open_history">
-          <property name="text">
-           <string>History</string>
-          </property>
-         </widget>
-        </item>
-        <item row="12" column="0">
-         <spacer name="verticalSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="8" column="0">
-         <spacer name="control_frame_spacer">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="7" column="1">
-         <widget class="QSpinBox" name="start_measure">
-          <property name="toolTip">
-           <string>Which measure of music you'd like to start with</string>
-          </property>
-          <property name="minimum">
-           <number>1</number>
-          </property>
-          <property name="maximum">
-           <number>999</number>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLineEdit" name="mml_fname"/>
-        </item>
-        <item row="0" column="0">
-         <widget class="QPushButton" name="select_musicxml_fname">
-          <property name="text">
-           <string>MusicXML</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QLabel" name="game_name_label">
-          <property name="text">
-           <string>Game:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="0" colspan="3">
-         <widget class="QCheckBox" name="superloop_analysis">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="text">
-           <string>Superloop Analysis</string>
-          </property>
-         </widget>
-        </item>
-        <item row="7" column="0">
-         <widget class="QLabel" name="start_measure_label">
-          <property name="text">
-           <string>Start Measure</string>
-          </property>
-         </widget>
-        </item>
-        <item row="10" column="0" colspan="2">
-         <widget class="QPushButton" name="open_quicklook">
-          <property name="text">
-           <string>Open Quicklook</string>
-          </property>
-         </widget>
-        </item>
-        <item row="16" column="0" colspan="2">
-         <widget class="QPushButton" name="generate_and_play">
-          <property name="text">
-           <string>Just DO It</string>
-          </property>
-          <property name="shortcut">
-           <string>Ctrl+Space</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="select_mml_fname">
-          <property name="text">
-           <string>MML</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="porter_name_label">
-          <property name="text">
-           <string>Porter:</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLineEdit" name="game_name"/>
-        </item>
-        <item row="14" column="0" colspan="2">
-         <widget class="QPushButton" name="generate_spc">
-          <property name="text">
-           <string>MML → SPC</string>
-          </property>
-         </widget>
-        </item>
-        <item row="17" column="0" colspan="2">
-         <widget class="QPushButton" name="render_zip">
-          <property name="text">
-           <string>Render</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QTabWidget" name="settings_tab_widget">
-       <property name="currentIndex">
-        <number>0</number>
-       </property>
-       <widget class="QWidget" name="instrument_settings_tab">
-        <attribute name="title">
-         <string>Instrument Settings</string>
-        </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="QSplitter" name="splitter_3">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <widget class="QGroupBox" name="sample_list_box">
-            <property name="title">
-             <string>Instruments</string>
-            </property>
-            <layout class="QGridLayout" name="gridLayout_2">
-             <item row="0" column="0" colspan="2">
-              <widget class="QTreeWidget" name="sample_list">
-               <property name="horizontalScrollBarPolicy">
-                <enum>Qt::ScrollBarAlwaysOff</enum>
+          <widget class="QWidget" name="instrument_settings_tab">
+           <attribute name="title">
+            <string>Instrument Settings</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QSplitter" name="splitter_3">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <widget class="QGroupBox" name="sample_list_box">
+               <property name="title">
+                <string>Instruments</string>
                </property>
-               <property name="selectionMode">
-                <enum>QAbstractItemView::SingleSelection</enum>
-               </property>
-               <property name="columnCount">
-                <number>4</number>
-               </property>
-               <attribute name="headerMinimumSectionSize">
-                <number>35</number>
-               </attribute>
-               <attribute name="headerDefaultSectionSize">
-                <number>35</number>
-               </attribute>
-               <column>
-                <property name="text">
-                 <string notr="true">1</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string notr="true">2</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string notr="true">3</string>
-                </property>
-               </column>
-               <column>
-                <property name="text">
-                 <string notr="true">4</string>
-                </property>
-               </column>
+               <layout class="QGridLayout" name="gridLayout_2">
+                <item row="0" column="0" colspan="2">
+                 <widget class="QTreeWidget" name="sample_list">
+                  <property name="horizontalScrollBarPolicy">
+                   <enum>Qt::ScrollBarAlwaysOff</enum>
+                  </property>
+                  <property name="selectionMode">
+                   <enum>QAbstractItemView::SingleSelection</enum>
+                  </property>
+                  <property name="columnCount">
+                   <number>4</number>
+                  </property>
+                  <attribute name="headerMinimumSectionSize">
+                   <number>35</number>
+                  </attribute>
+                  <attribute name="headerDefaultSectionSize">
+                   <number>35</number>
+                  </attribute>
+                  <column>
+                   <property name="text">
+                    <string notr="true">1</string>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string notr="true">2</string>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string notr="true">3</string>
+                   </property>
+                  </column>
+                  <column>
+                   <property name="text">
+                    <string notr="true">4</string>
+                   </property>
+                  </column>
+                 </widget>
+                </item>
+               </layout>
               </widget>
-             </item>
-            </layout>
-           </widget>
-           <widget class="QTabWidget" name="instrument_config_tab">
-            <property name="currentIndex">
-             <number>0</number>
-            </property>
-            <widget class="QWidget" name="instrument_sample_tab">
-             <attribute name="title">
-              <string>Sample</string>
-             </attribute>
-             <layout class="QHBoxLayout" name="horizontalLayout_5">
-              <item>
-               <widget class="QSplitter" name="splitter">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <widget class="QGroupBox" name="instrument_sample_group">
-                 <property name="title">
-                  <string>Sample</string>
-                 </property>
-                 <layout class="QGridLayout" name="gridLayout_5">
-                  <item row="6" column="2">
-                   <widget class="QLineEdit" name="brr_fname"/>
-                  </item>
-                  <item row="3" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_pack_sample">
-                    <property name="text">
-                     <string>Sample Pack Sample</string>
+              <widget class="QTabWidget" name="instrument_config_tab">
+               <property name="currentIndex">
+                <number>0</number>
+               </property>
+               <widget class="QWidget" name="instrument_sample_tab">
+                <attribute name="title">
+                 <string>Sample</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                  <widget class="QSplitter" name="splitter">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <widget class="QGroupBox" name="instrument_sample_group">
+                    <property name="title">
+                     <string>Sample</string>
                     </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="1" colspan="2">
-                   <widget class="QTreeWidget" name="sample_pack_list">
-                    <property name="editTriggers">
-                     <set>QAbstractItemView::NoEditTriggers</set>
-                    </property>
-                    <property name="headerHidden">
-                     <bool>true</bool>
-                    </property>
-                    <column>
-                     <property name="text">
-                      <string notr="true">1</string>
-                     </property>
-                    </column>
-                   </widget>
-                  </item>
-                  <item row="9" column="2">
-                   <widget class="QSpinBox" name="octave_shift">
-                    <property name="minimum">
-                     <number>-6</number>
-                    </property>
-                    <property name="maximum">
-                     <number>6</number>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
-                   <widget class="QLabel" name="octave_shift_label">
-                    <property name="text">
-                     <string>Octave Shift</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_brr_sample">
-                    <property name="text">
-                     <string>Custom Sample</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_multisample_sample">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="text">
-                     <string>Multisample</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1" colspan="2">
-                   <widget class="QRadioButton" name="select_builtin_sample">
-                    <property name="text">
-                     <string>Builtin Sample</string>
-                    </property>
-                    <property name="checked">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="1">
-                   <widget class="QPushButton" name="select_brr_fname">
-                    <property name="text">
-                     <string>brr</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="1" colspan="2">
-                   <widget class="QComboBox" name="builtin_sample">
-                    <item>
-                     <property name="text">
-                      <string>@00 Flute</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@01 String</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@02 Glockenspiel</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@03 Marimba</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@04 Cello</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@05 Acoustic steel guitar</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@06 Trumpet</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@07 Steel Drums</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@08 Acoustic Bass</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@09 Piano</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@10 Snare drum</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@11 String 2</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@12 Bongo</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@13 Electric Piano</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@14 Slap bass</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@15 Orchestra Hit</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@16 Harp</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@17 Distortion Guitar</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@18</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@19</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@20</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@21 Bass Drum</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@22 Light cymbal</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@23 Maracas</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@24 Wood block</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@25 Higher wood block</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@26</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@27</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@28 Generic Drums</string>
-                     </property>
-                    </item>
-                    <item>
-                     <property name="text">
-                      <string>@29 Power Set</string>
-                     </property>
-                    </item>
-                   </widget>
-                  </item>
-                  <item row="8" column="1">
-                   <widget class="QPushButton" name="select_multisample_fname">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                    <property name="text">
-                     <string>brm</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="2">
-                   <widget class="QLineEdit" name="multisample_fname">
-                    <property name="enabled">
-                     <bool>false</bool>
-                    </property>
-                   </widget>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QGroupBox" name="sample_settings_box">
-                 <property name="title">
-                  <string>Settings</string>
-                 </property>
-                 <layout class="QVBoxLayout" name="verticalLayout_6">
-                  <item>
-                   <widget class="QTabWidget" name="sample_settings_tabs">
-                    <property name="currentIndex">
-                     <number>0</number>
-                    </property>
-                    <widget class="QWidget" name="envelope_tab">
-                     <attribute name="title">
-                      <string>Envelope</string>
-                     </attribute>
-                     <layout class="QHBoxLayout" name="horizontalLayout_4">
-                      <item>
-                       <widget class="QSplitter" name="splitter_4">
-                        <property name="orientation">
-                         <enum>Qt::Horizontal</enum>
+                    <layout class="QGridLayout" name="gridLayout_5">
+                     <item row="6" column="2">
+                      <widget class="QLineEdit" name="brr_fname"/>
+                     </item>
+                     <item row="3" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_pack_sample">
+                       <property name="text">
+                        <string>Sample Pack Sample</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1" colspan="2">
+                      <widget class="QTreeWidget" name="sample_pack_list">
+                       <property name="editTriggers">
+                        <set>QAbstractItemView::NoEditTriggers</set>
+                       </property>
+                       <property name="headerHidden">
+                        <bool>true</bool>
+                       </property>
+                       <column>
+                        <property name="text">
+                         <string notr="true">1</string>
                         </property>
-                        <widget class="QFrame" name="adsr_box">
-                         <layout class="QGridLayout" name="gridLayout_6">
-                          <item row="4" column="1">
-                           <widget class="QLabel" name="decay_eu_label">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="3">
-                           <widget class="QLineEdit" name="sus_rate_setting"/>
-                          </item>
-                          <item row="1" column="1">
-                           <widget class="QLabel" name="decay_label">
-                            <property name="text">
-                             <string>Decay</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="3">
-                           <widget class="QLabel" name="sus_rate_label">
-                            <property name="toolTip">
-                             <string>Sustain rate</string>
-                            </property>
-                            <property name="text">
-                             <string>Release</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="2" column="1">
-                           <widget class="QSlider" name="decay_slider">
-                            <property name="maximum">
-                             <number>7</number>
-                            </property>
-                            <property name="orientation">
-                             <enum>Qt::Vertical</enum>
-                            </property>
-                            <property name="invertedAppearance">
-                             <bool>true</bool>
-                            </property>
-                            <property name="invertedControls">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="0">
-                           <widget class="QLineEdit" name="attack_setting"/>
-                          </item>
-                          <item row="2" column="3">
-                           <widget class="QSlider" name="sus_rate_slider">
-                            <property name="maximum">
-                             <number>31</number>
-                            </property>
-                            <property name="orientation">
-                             <enum>Qt::Vertical</enum>
-                            </property>
-                            <property name="invertedAppearance">
-                             <bool>true</bool>
-                            </property>
-                            <property name="invertedControls">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="2">
-                           <widget class="QLineEdit" name="sus_level_setting"/>
-                          </item>
-                          <item row="1" column="2">
-                           <widget class="QLabel" name="sus_level_label">
-                            <property name="toolTip">
-                             <string>Sustain level</string>
-                            </property>
-                            <property name="text">
-                             <string>Sustain</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="3" column="1">
-                           <widget class="QLineEdit" name="decay_setting"/>
-                          </item>
-                          <item row="2" column="0">
-                           <widget class="QSlider" name="attack_slider">
-                            <property name="maximum">
-                             <number>15</number>
-                            </property>
-                            <property name="orientation">
-                             <enum>Qt::Vertical</enum>
-                            </property>
-                            <property name="invertedAppearance">
-                             <bool>true</bool>
-                            </property>
-                            <property name="invertedControls">
-                             <bool>true</bool>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QLabel" name="attack_label">
-                            <property name="text">
-                             <string>Attack</string>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="0" column="0" colspan="2">
-                           <widget class="QRadioButton" name="select_adsr_mode">
-                            <property name="text">
-                             <string>Use ADSR</string>
-                            </property>
-                            <property name="checked">
-                             <bool>true</bool>
-                            </property>
-                            <attribute name="buttonGroup">
-                             <string notr="true">envelope_mode_button_group</string>
-                            </attribute>
-                           </widget>
-                          </item>
-                          <item row="2" column="2">
-                           <widget class="QSlider" name="sus_level_slider">
-                            <property name="maximum">
-                             <number>7</number>
-                            </property>
-                            <property name="orientation">
-                             <enum>Qt::Vertical</enum>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="4" column="2">
-                           <widget class="QLabel" name="sus_level_eu_label">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="4" column="3">
-                           <widget class="QLabel" name="sus_rate_eu_label">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                          <item row="4" column="0">
-                           <widget class="QLabel" name="attack_eu_label">
-                            <property name="text">
-                             <string/>
-                            </property>
-                           </widget>
-                          </item>
-                         </layout>
-                        </widget>
-                        <widget class="QFrame" name="gain_box">
-                         <layout class="QGridLayout" name="gridLayout_11">
-                          <item row="1" column="1">
-                           <widget class="QFrame" name="gain_frame">
-                            <property name="frameShape">
-                             <enum>QFrame::StyledPanel</enum>
-                            </property>
-                            <property name="frameShadow">
-                             <enum>QFrame::Raised</enum>
-                            </property>
-                            <layout class="QVBoxLayout" name="verticalLayout_4">
-                             <item>
-                              <widget class="QLabel" name="gain_label">
+                       </column>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
+                      <widget class="QSpinBox" name="octave_shift">
+                       <property name="minimum">
+                        <number>-6</number>
+                       </property>
+                       <property name="maximum">
+                        <number>6</number>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
+                      <widget class="QLabel" name="octave_shift_label">
+                       <property name="text">
+                        <string>Octave Shift</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_brr_sample">
+                       <property name="text">
+                        <string>Custom Sample</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_multisample_sample">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="text">
+                        <string>Multisample</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_builtin_sample">
+                       <property name="text">
+                        <string>Builtin Sample</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QPushButton" name="select_brr_fname">
+                       <property name="text">
+                        <string>brr</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="1" colspan="2">
+                      <widget class="QComboBox" name="builtin_sample">
+                       <item>
+                        <property name="text">
+                         <string>@00 Flute</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@01 String</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@02 Glockenspiel</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@03 Marimba</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@04 Cello</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@05 Acoustic steel guitar</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@06 Trumpet</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@07 Steel Drums</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@08 Acoustic Bass</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@09 Piano</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@10 Snare drum</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@11 String 2</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@12 Bongo</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@13 Electric Piano</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@14 Slap bass</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@15 Orchestra Hit</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@16 Harp</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@17 Distortion Guitar</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@18</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@19</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@20</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@21 Bass Drum</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@22 Light cymbal</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@23 Maracas</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@24 Wood block</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@25 Higher wood block</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@26</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@27</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@28 Generic Drums</string>
+                        </property>
+                       </item>
+                       <item>
+                        <property name="text">
+                         <string>@29 Power Set</string>
+                        </property>
+                       </item>
+                      </widget>
+                     </item>
+                     <item row="8" column="1">
+                      <widget class="QPushButton" name="select_multisample_fname">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                       <property name="text">
+                        <string>brm</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="2">
+                      <widget class="QLineEdit" name="multisample_fname">
+                       <property name="enabled">
+                        <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                    </layout>
+                   </widget>
+                   <widget class="QGroupBox" name="sample_settings_box">
+                    <property name="title">
+                     <string>Settings</string>
+                    </property>
+                    <layout class="QVBoxLayout" name="verticalLayout_6">
+                     <item>
+                      <widget class="QTabWidget" name="sample_settings_tabs">
+                       <property name="currentIndex">
+                        <number>0</number>
+                       </property>
+                       <widget class="QWidget" name="envelope_tab">
+                        <attribute name="title">
+                         <string>Envelope</string>
+                        </attribute>
+                        <layout class="QHBoxLayout" name="horizontalLayout_4">
+                         <item>
+                          <widget class="QSplitter" name="splitter_4">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <widget class="QFrame" name="adsr_box">
+                            <layout class="QGridLayout" name="gridLayout_6">
+                             <item row="4" column="1">
+                              <widget class="QLabel" name="decay_eu_label">
                                <property name="text">
-                                <string>Gain</string>
+                                <string/>
                                </property>
                               </widget>
                              </item>
-                             <item>
-                              <widget class="QSlider" name="gain_slider">
+                             <item row="3" column="3">
+                              <widget class="QLineEdit" name="sus_rate_setting"/>
+                             </item>
+                             <item row="1" column="1">
+                              <widget class="QLabel" name="decay_label">
+                               <property name="text">
+                                <string>Decay</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="3">
+                              <widget class="QLabel" name="sus_rate_label">
+                               <property name="toolTip">
+                                <string>Sustain rate</string>
+                               </property>
+                               <property name="text">
+                                <string>Release</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="2" column="1">
+                              <widget class="QSlider" name="decay_slider">
                                <property name="maximum">
-                                <number>127</number>
+                                <number>7</number>
+                               </property>
+                               <property name="orientation">
+                                <enum>Qt::Vertical</enum>
+                               </property>
+                               <property name="invertedAppearance">
+                                <bool>true</bool>
+                               </property>
+                               <property name="invertedControls">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="3" column="0">
+                              <widget class="QLineEdit" name="attack_setting"/>
+                             </item>
+                             <item row="2" column="3">
+                              <widget class="QSlider" name="sus_rate_slider">
+                               <property name="maximum">
+                                <number>31</number>
+                               </property>
+                               <property name="orientation">
+                                <enum>Qt::Vertical</enum>
+                               </property>
+                               <property name="invertedAppearance">
+                                <bool>true</bool>
+                               </property>
+                               <property name="invertedControls">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="3" column="2">
+                              <widget class="QLineEdit" name="sus_level_setting"/>
+                             </item>
+                             <item row="1" column="2">
+                              <widget class="QLabel" name="sus_level_label">
+                               <property name="toolTip">
+                                <string>Sustain level</string>
+                               </property>
+                               <property name="text">
+                                <string>Sustain</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="3" column="1">
+                              <widget class="QLineEdit" name="decay_setting"/>
+                             </item>
+                             <item row="2" column="0">
+                              <widget class="QSlider" name="attack_slider">
+                               <property name="maximum">
+                                <number>15</number>
+                               </property>
+                               <property name="orientation">
+                                <enum>Qt::Vertical</enum>
+                               </property>
+                               <property name="invertedAppearance">
+                                <bool>true</bool>
+                               </property>
+                               <property name="invertedControls">
+                                <bool>true</bool>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="1" column="0">
+                              <widget class="QLabel" name="attack_label">
+                               <property name="text">
+                                <string>Attack</string>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="0" column="0" colspan="2">
+                              <widget class="QRadioButton" name="select_adsr_mode">
+                               <property name="text">
+                                <string>Use ADSR</string>
+                               </property>
+                               <property name="checked">
+                                <bool>true</bool>
+                               </property>
+                               <attribute name="buttonGroup">
+                                <string notr="true">envelope_mode_button_group</string>
+                               </attribute>
+                              </widget>
+                             </item>
+                             <item row="2" column="2">
+                              <widget class="QSlider" name="sus_level_slider">
+                               <property name="maximum">
+                                <number>7</number>
                                </property>
                                <property name="orientation">
                                 <enum>Qt::Vertical</enum>
                                </property>
                               </widget>
                              </item>
-                             <item>
-                              <widget class="QLineEdit" name="gain_setting"/>
-                             </item>
-                             <item>
-                              <widget class="QLabel" name="gain_setting_label">
+                             <item row="4" column="2">
+                              <widget class="QLabel" name="sus_level_eu_label">
                                <property name="text">
                                 <string/>
                                </property>
                               </widget>
                              </item>
-                             <item>
-                              <widget class="QLabel" name="gain_eu_label">
+                             <item row="4" column="3">
+                              <widget class="QLabel" name="sus_rate_eu_label">
+                               <property name="text">
+                                <string/>
+                               </property>
+                              </widget>
+                             </item>
+                             <item row="4" column="0">
+                              <widget class="QLabel" name="attack_eu_label">
                                <property name="text">
                                 <string/>
                                </property>
@@ -752,620 +664,998 @@
                              </item>
                             </layout>
                            </widget>
-                          </item>
-                          <item row="1" column="0">
-                           <widget class="QFrame" name="gain_mode_frame">
-                            <property name="frameShape">
-                             <enum>QFrame::StyledPanel</enum>
-                            </property>
-                            <property name="frameShadow">
-                             <enum>QFrame::Raised</enum>
-                            </property>
-                            <layout class="QVBoxLayout" name="verticalLayout_3">
-                             <item>
-                              <widget class="QLabel" name="gain_mode_label">
-                               <property name="text">
-                                <string>Gain Mode</string>
+                           <widget class="QFrame" name="gain_box">
+                            <layout class="QGridLayout" name="gridLayout_11">
+                             <item row="1" column="1">
+                              <widget class="QFrame" name="gain_frame">
+                               <property name="frameShape">
+                                <enum>QFrame::StyledPanel</enum>
                                </property>
+                               <property name="frameShadow">
+                                <enum>QFrame::Raised</enum>
+                               </property>
+                               <layout class="QVBoxLayout" name="verticalLayout_4">
+                                <item>
+                                 <widget class="QLabel" name="gain_label">
+                                  <property name="text">
+                                   <string>Gain</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QSlider" name="gain_slider">
+                                  <property name="maximum">
+                                   <number>127</number>
+                                  </property>
+                                  <property name="orientation">
+                                   <enum>Qt::Vertical</enum>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QLineEdit" name="gain_setting"/>
+                                </item>
+                                <item>
+                                 <widget class="QLabel" name="gain_setting_label">
+                                  <property name="text">
+                                   <string/>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QLabel" name="gain_eu_label">
+                                  <property name="text">
+                                   <string/>
+                                  </property>
+                                 </widget>
+                                </item>
+                               </layout>
                               </widget>
                              </item>
-                             <item>
-                              <widget class="QRadioButton" name="gain_mode_direct">
-                               <property name="text">
-                                <string>Direct</string>
+                             <item row="1" column="0">
+                              <widget class="QFrame" name="gain_mode_frame">
+                               <property name="frameShape">
+                                <enum>QFrame::StyledPanel</enum>
                                </property>
-                               <property name="checked">
-                                <bool>true</bool>
+                               <property name="frameShadow">
+                                <enum>QFrame::Raised</enum>
                                </property>
+                               <layout class="QVBoxLayout" name="verticalLayout_3">
+                                <item>
+                                 <widget class="QLabel" name="gain_mode_label">
+                                  <property name="text">
+                                   <string>Gain Mode</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QRadioButton" name="gain_mode_direct">
+                                  <property name="text">
+                                   <string>Direct</string>
+                                  </property>
+                                  <property name="checked">
+                                   <bool>true</bool>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QRadioButton" name="gain_mode_inclin">
+                                  <property name="text">
+                                   <string>Increasing Linear</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QRadioButton" name="gain_mode_incbent">
+                                  <property name="text">
+                                   <string>Increasing Bent</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QRadioButton" name="gain_mode_declin">
+                                  <property name="toolTip">
+                                   <string>Not supported in sample definitions</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>Decreasing Linear</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <widget class="QRadioButton" name="gain_mode_decexp">
+                                  <property name="toolTip">
+                                   <string>Not supported in sample definitions</string>
+                                  </property>
+                                  <property name="text">
+                                   <string>Decreasing Exponential</string>
+                                  </property>
+                                 </widget>
+                                </item>
+                                <item>
+                                 <spacer name="gain_mode_spacer">
+                                  <property name="orientation">
+                                   <enum>Qt::Vertical</enum>
+                                  </property>
+                                  <property name="sizeHint" stdset="0">
+                                   <size>
+                                    <width>20</width>
+                                    <height>40</height>
+                                   </size>
+                                  </property>
+                                 </spacer>
+                                </item>
+                               </layout>
                               </widget>
                              </item>
-                             <item>
-                              <widget class="QRadioButton" name="gain_mode_inclin">
+                             <item row="0" column="0" colspan="2">
+                              <widget class="QRadioButton" name="select_gain_mode">
                                <property name="text">
-                                <string>Increasing Linear</string>
+                                <string>Use Gain</string>
                                </property>
+                               <attribute name="buttonGroup">
+                                <string notr="true">envelope_mode_button_group</string>
+                               </attribute>
                               </widget>
                              </item>
-                             <item>
-                              <widget class="QRadioButton" name="gain_mode_incbent">
-                               <property name="text">
-                                <string>Increasing Bent</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item>
-                              <widget class="QRadioButton" name="gain_mode_declin">
-                               <property name="toolTip">
-                                <string>Not supported in sample definitions</string>
-                               </property>
-                               <property name="text">
-                                <string>Decreasing Linear</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item>
-                              <widget class="QRadioButton" name="gain_mode_decexp">
-                               <property name="toolTip">
-                                <string>Not supported in sample definitions</string>
-                               </property>
-                               <property name="text">
-                                <string>Decreasing Exponential</string>
-                               </property>
-                              </widget>
-                             </item>
-                             <item>
-                              <spacer name="gain_mode_spacer">
+                             <item row="1" column="2">
+                              <spacer name="horizontalSpacer">
                                <property name="orientation">
-                                <enum>Qt::Vertical</enum>
+                                <enum>Qt::Horizontal</enum>
                                </property>
                                <property name="sizeHint" stdset="0">
                                 <size>
-                                 <width>20</width>
-                                 <height>40</height>
+                                 <width>40</width>
+                                 <height>20</height>
                                 </size>
                                </property>
                               </spacer>
                              </item>
                             </layout>
                            </widget>
-                          </item>
-                          <item row="0" column="0" colspan="2">
-                           <widget class="QRadioButton" name="select_gain_mode">
-                            <property name="text">
-                             <string>Use Gain</string>
-                            </property>
-                            <attribute name="buttonGroup">
-                             <string notr="true">envelope_mode_button_group</string>
-                            </attribute>
-                           </widget>
-                          </item>
-                          <item row="1" column="2">
-                           <spacer name="horizontalSpacer">
-                            <property name="orientation">
-                             <enum>Qt::Horizontal</enum>
-                            </property>
-                            <property name="sizeHint" stdset="0">
-                             <size>
-                              <width>40</width>
-                              <height>20</height>
-                             </size>
-                            </property>
-                           </spacer>
-                          </item>
-                         </layout>
-                        </widget>
+                          </widget>
+                         </item>
+                        </layout>
                        </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                    <widget class="QWidget" name="tuning_tab">
-                     <attribute name="title">
-                      <string>Tuning</string>
-                     </attribute>
-                     <layout class="QGridLayout" name="gridLayout_10">
-                      <item row="2" column="1">
-                       <widget class="QLineEdit" name="subtune_setting"/>
-                      </item>
-                      <item row="1" column="1">
-                       <widget class="QSlider" name="subtune_slider">
-                        <property name="maximum">
-                         <number>255</number>
-                        </property>
-                        <property name="tracking">
-                         <bool>false</bool>
-                        </property>
-                        <property name="orientation">
-                         <enum>Qt::Vertical</enum>
-                        </property>
+                       <widget class="QWidget" name="tuning_tab">
+                        <attribute name="title">
+                         <string>Tuning</string>
+                        </attribute>
+                        <layout class="QGridLayout" name="gridLayout_10">
+                         <item row="2" column="1">
+                          <widget class="QLineEdit" name="subtune_setting"/>
+                         </item>
+                         <item row="1" column="1">
+                          <widget class="QSlider" name="subtune_slider">
+                           <property name="maximum">
+                            <number>255</number>
+                           </property>
+                           <property name="tracking">
+                            <bool>false</bool>
+                           </property>
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="0" column="0">
+                          <widget class="QLabel" name="tune_label">
+                           <property name="text">
+                            <string>Tune</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="3" column="0">
+                          <widget class="QLabel" name="tune_setting_label">
+                           <property name="text">
+                            <string/>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="2" column="0">
+                          <widget class="QLineEdit" name="tune_setting"/>
+                         </item>
+                         <item row="0" column="1">
+                          <widget class="QLabel" name="subtune_label">
+                           <property name="text">
+                            <string>Subtune</string>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="3" column="1">
+                          <widget class="QLabel" name="subtune_setting_label">
+                           <property name="text">
+                            <string/>
+                           </property>
+                          </widget>
+                         </item>
+                         <item row="1" column="0">
+                          <widget class="QSlider" name="tune_slider">
+                           <property name="maximum">
+                            <number>255</number>
+                           </property>
+                           <property name="tracking">
+                            <bool>false</bool>
+                           </property>
+                           <property name="orientation">
+                            <enum>Qt::Vertical</enum>
+                           </property>
+                          </widget>
+                         </item>
+                        </layout>
                        </widget>
-                      </item>
-                      <item row="0" column="0">
-                       <widget class="QLabel" name="tune_label">
-                        <property name="text">
-                         <string>Tune</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="0">
-                       <widget class="QLabel" name="tune_setting_label">
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="2" column="0">
-                       <widget class="QLineEdit" name="tune_setting"/>
-                      </item>
-                      <item row="0" column="1">
-                       <widget class="QLabel" name="subtune_label">
-                        <property name="text">
-                         <string>Subtune</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="3" column="1">
-                       <widget class="QLabel" name="subtune_setting_label">
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item row="1" column="0">
-                       <widget class="QSlider" name="tune_slider">
-                        <property name="maximum">
-                         <number>255</number>
-                        </property>
-                        <property name="tracking">
-                         <bool>false</bool>
-                        </property>
-                        <property name="orientation">
-                         <enum>Qt::Vertical</enum>
-                        </property>
-                       </widget>
-                      </item>
-                     </layout>
-                    </widget>
-                   </widget>
-                  </item>
-                  <item>
-                   <widget class="QWidget" name="sample_settings_widget" native="true">
-                    <layout class="QHBoxLayout" name="horizontalLayout_3">
-                     <item>
-                      <widget class="QLabel" name="brr_setting_label">
-                       <property name="text">
-                        <string>Sample Settings:</string>
-                       </property>
                       </widget>
                      </item>
                      <item>
-                      <widget class="QLineEdit" name="brr_setting"/>
-                     </item>
-                     <item>
-                      <spacer name="sample_settings_spacer">
-                       <property name="orientation">
-                        <enum>Qt::Horizontal</enum>
-                       </property>
-                       <property name="sizeHint" stdset="0">
-                        <size>
-                         <width>40</width>
-                         <height>20</height>
-                        </size>
-                       </property>
-                      </spacer>
-                     </item>
-                     <item>
-                      <widget class="QPushButton" name="preview_envelope">
-                       <property name="text">
-                        <string>Preview Envelope</string>
-                       </property>
+                      <widget class="QWidget" name="sample_settings_widget" native="true">
+                       <layout class="QHBoxLayout" name="horizontalLayout_3">
+                        <item>
+                         <widget class="QLabel" name="brr_setting_label">
+                          <property name="text">
+                           <string>Sample Settings:</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item>
+                         <widget class="QLineEdit" name="brr_setting"/>
+                        </item>
+                        <item>
+                         <spacer name="sample_settings_spacer">
+                          <property name="orientation">
+                           <enum>Qt::Horizontal</enum>
+                          </property>
+                          <property name="sizeHint" stdset="0">
+                           <size>
+                            <width>40</width>
+                            <height>20</height>
+                           </size>
+                          </property>
+                         </spacer>
+                        </item>
+                        <item>
+                         <widget class="QPushButton" name="preview_envelope">
+                          <property name="text">
+                           <string>Preview Envelope</string>
+                          </property>
+                         </widget>
+                        </item>
+                       </layout>
                       </widget>
                      </item>
                     </layout>
                    </widget>
-                  </item>
-                 </layout>
-                </widget>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="instrument_dynamics_tab">
-             <attribute name="title">
-              <string>Dynamics</string>
-             </attribute>
-             <layout class="QHBoxLayout" name="horizontalLayout_6">
-              <item>
-               <widget class="QSplitter" name="splitter_5">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="childrenCollapsible">
-                 <bool>false</bool>
-                </property>
-                <widget class="QWidget" name="dynamics_widget" native="true">
-                 <layout class="QGridLayout" name="gridLayout_15">
-                  <item row="2" column="1">
-                   <widget class="QSlider" name="pp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
+               <widget class="QWidget" name="instrument_dynamics_tab">
+                <attribute name="title">
+                 <string>Dynamics</string>
+                </attribute>
+                <layout class="QHBoxLayout" name="horizontalLayout_6">
+                 <item>
+                  <widget class="QSplitter" name="splitter_5">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="childrenCollapsible">
+                    <bool>false</bool>
+                   </property>
+                   <widget class="QWidget" name="dynamics_widget" native="true">
+                    <layout class="QGridLayout" name="gridLayout_15">
+                     <item row="2" column="1">
+                      <widget class="QSlider" name="pp_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="2">
+                      <widget class="QLineEdit" name="ff_setting"/>
+                     </item>
+                     <item row="4" column="2">
+                      <widget class="QLineEdit" name="mp_setting"/>
+                     </item>
+                     <item row="5" column="2">
+                      <widget class="QLineEdit" name="mf_setting"/>
+                     </item>
+                     <item row="8" column="0">
+                      <widget class="QLabel" name="fff_label">
+                       <property name="text">
+                        <string>FFF</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="3">
+                      <widget class="QLabel" name="f_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="0">
+                      <widget class="QLabel" name="mp_label">
+                       <property name="text">
+                        <string>MP</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="0">
+                      <widget class="QLabel" name="pppp_label">
+                       <property name="text">
+                        <string>PPPP</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="1">
+                      <widget class="QSlider" name="fff_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="3">
+                      <widget class="QLabel" name="ff_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="3">
+                      <widget class="QLabel" name="fff_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QSlider" name="f_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1">
+                      <widget class="QSlider" name="ff_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
+                      <widget class="QLineEdit" name="ffff_setting"/>
+                     </item>
+                     <item row="2" column="3">
+                      <widget class="QLabel" name="pp_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
+                      <widget class="QSlider" name="ffff_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="3">
+                      <widget class="QLabel" name="p_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="8" column="2">
+                      <widget class="QLineEdit" name="fff_setting"/>
+                     </item>
+                     <item row="5" column="1">
+                      <widget class="QSlider" name="mf_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="3">
+                      <widget class="QLabel" name="mf_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="3">
+                      <widget class="QLabel" name="mp_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="5" column="0">
+                      <widget class="QLabel" name="mf_label">
+                       <property name="text">
+                        <string>MF</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="3">
+                      <widget class="QLabel" name="ppp_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="2">
+                      <widget class="QLineEdit" name="f_setting"/>
+                     </item>
+                     <item row="4" column="1">
+                      <widget class="QSlider" name="mp_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="3" column="1">
+                      <widget class="QSlider" name="p_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="2">
+                      <widget class="QLineEdit" name="ppp_setting"/>
+                     </item>
+                     <item row="3" column="0">
+                      <widget class="QLabel" name="p_label">
+                       <property name="text">
+                        <string>P</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="0">
+                      <widget class="QLabel" name="f_label">
+                       <property name="text">
+                        <string>F</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="1">
+                      <widget class="QSlider" name="pppp_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="3">
+                      <widget class="QLabel" name="pppp_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="0" column="2">
+                      <widget class="QLineEdit" name="pppp_setting"/>
+                     </item>
+                     <item row="3" column="2">
+                      <widget class="QLineEdit" name="p_setting"/>
+                     </item>
+                     <item row="9" column="3">
+                      <widget class="QLabel" name="ffff_setting_label">
+                       <property name="text">
+                        <string>1234</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="2">
+                      <widget class="QLineEdit" name="pp_setting"/>
+                     </item>
+                     <item row="7" column="0">
+                      <widget class="QLabel" name="ff_label">
+                       <property name="text">
+                        <string>FF</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="1">
+                      <widget class="QSlider" name="ppp_slider">
+                       <property name="maximum">
+                        <number>255</number>
+                       </property>
+                       <property name="tracking">
+                        <bool>false</bool>
+                       </property>
+                       <property name="orientation">
+                        <enum>Qt::Horizontal</enum>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="10" column="0" colspan="2">
+                      <widget class="QCheckBox" name="interpolate">
+                       <property name="text">
+                        <string>Interpolate</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="0">
+                      <widget class="QLabel" name="ffff_label">
+                       <property name="text">
+                        <string>FFFF</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="1" column="0">
+                      <widget class="QLabel" name="ppp_label">
+                       <property name="text">
+                        <string>PPP</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="2" column="0">
+                      <widget class="QLabel" name="pp_label">
+                       <property name="text">
+                        <string>PP</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="11" column="0">
+                      <spacer name="verticalSpacer_4">
+                       <property name="orientation">
+                        <enum>Qt::Vertical</enum>
+                       </property>
+                       <property name="sizeHint" stdset="0">
+                        <size>
+                         <width>20</width>
+                         <height>40</height>
+                        </size>
+                       </property>
+                      </spacer>
+                     </item>
+                    </layout>
                    </widget>
-                  </item>
-                  <item row="7" column="2">
-                   <widget class="QLineEdit" name="ff_setting"/>
-                  </item>
-                  <item row="4" column="2">
-                   <widget class="QLineEdit" name="mp_setting"/>
-                  </item>
-                  <item row="5" column="2">
-                   <widget class="QLineEdit" name="mf_setting"/>
-                  </item>
-                  <item row="8" column="0">
-                   <widget class="QLabel" name="fff_label">
-                    <property name="text">
-                     <string>FFF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="3">
-                   <widget class="QLabel" name="f_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="0">
-                   <widget class="QLabel" name="mp_label">
-                    <property name="text">
-                     <string>MP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="pppp_label">
-                    <property name="text">
-                     <string>PPPP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="1">
-                   <widget class="QSlider" name="fff_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="3">
-                   <widget class="QLabel" name="ff_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="3">
-                   <widget class="QLabel" name="fff_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="1">
-                   <widget class="QSlider" name="f_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="7" column="1">
-                   <widget class="QSlider" name="ff_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="2">
-                   <widget class="QLineEdit" name="ffff_setting"/>
-                  </item>
-                  <item row="2" column="3">
-                   <widget class="QLabel" name="pp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="1">
-                   <widget class="QSlider" name="ffff_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="3">
-                   <widget class="QLabel" name="p_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="8" column="2">
-                   <widget class="QLineEdit" name="fff_setting"/>
-                  </item>
-                  <item row="5" column="1">
-                   <widget class="QSlider" name="mf_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="3">
-                   <widget class="QLabel" name="mf_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="4" column="3">
-                   <widget class="QLabel" name="mp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="5" column="0">
-                   <widget class="QLabel" name="mf_label">
-                    <property name="text">
-                     <string>MF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="3">
-                   <widget class="QLabel" name="ppp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="2">
-                   <widget class="QLineEdit" name="f_setting"/>
-                  </item>
-                  <item row="4" column="1">
-                   <widget class="QSlider" name="mp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="1">
-                   <widget class="QSlider" name="p_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="2">
-                   <widget class="QLineEdit" name="ppp_setting"/>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QLabel" name="p_label">
-                    <property name="text">
-                     <string>P</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="6" column="0">
-                   <widget class="QLabel" name="f_label">
-                    <property name="text">
-                     <string>F</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QSlider" name="pppp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QLabel" name="pppp_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QLineEdit" name="pppp_setting"/>
-                  </item>
-                  <item row="3" column="2">
-                   <widget class="QLineEdit" name="p_setting"/>
-                  </item>
-                  <item row="9" column="3">
-                   <widget class="QLabel" name="ffff_setting_label">
-                    <property name="text">
-                     <string>1234</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="2">
-                   <widget class="QLineEdit" name="pp_setting"/>
-                  </item>
-                  <item row="7" column="0">
-                   <widget class="QLabel" name="ff_label">
-                    <property name="text">
-                     <string>FF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="1">
-                   <widget class="QSlider" name="ppp_slider">
-                    <property name="maximum">
-                     <number>255</number>
-                    </property>
-                    <property name="tracking">
-                     <bool>false</bool>
-                    </property>
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="10" column="0" colspan="2">
-                   <widget class="QCheckBox" name="interpolate">
-                    <property name="text">
-                     <string>Interpolate</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="9" column="0">
-                   <widget class="QLabel" name="ffff_label">
-                    <property name="text">
-                     <string>FFFF</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0">
-                   <widget class="QLabel" name="ppp_label">
-                    <property name="text">
-                     <string>PPP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="0">
-                   <widget class="QLabel" name="pp_label">
-                    <property name="text">
-                     <string>PP</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="11" column="0">
-                   <spacer name="verticalSpacer_4">
-                    <property name="orientation">
-                     <enum>Qt::Vertical</enum>
-                    </property>
-                    <property name="sizeHint" stdset="0">
-                     <size>
-                      <width>20</width>
-                      <height>40</height>
-                     </size>
-                    </property>
-                   </spacer>
-                  </item>
-                 </layout>
-                </widget>
-                <widget class="QWidget" name="dynamics_spacer" native="true"/>
+                   <widget class="QWidget" name="dynamics_spacer" native="true"/>
+                  </widget>
+                 </item>
+                </layout>
                </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="instrument_articulation_tab">
-             <attribute name="title">
-              <string>Articulations+Pan</string>
-             </attribute>
-             <layout class="QGridLayout" name="gridLayout_4">
-              <item row="1" column="5">
-               <widget class="QGroupBox" name="pan_group">
-                <property name="title">
-                 <string>Pan</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_3">
-                 <item row="2" column="1">
-                  <widget class="QLabel" name="pan_setting_label">
-                   <property name="enabled">
-                    <bool>false</bool>
+               <widget class="QWidget" name="instrument_articulation_tab">
+                <attribute name="title">
+                 <string>Articulations+Pan</string>
+                </attribute>
+                <layout class="QGridLayout" name="gridLayout_4">
+                 <item row="1" column="5">
+                  <widget class="QGroupBox" name="pan_group">
+                   <property name="title">
+                    <string>Pan</string>
                    </property>
+                   <layout class="QGridLayout" name="gridLayout_3">
+                    <item row="2" column="1">
+                     <widget class="QLabel" name="pan_setting_label">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QCheckBox" name="pan_l_invert">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Select either L or R, but not both, to enable &quot;surround&quot;</string>
+                      </property>
+                      <property name="text">
+                       <string>L</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="1">
+                     <widget class="QLabel" name="pan_invert_label">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Select either L or R, but not both, to enable &quot;surround&quot;</string>
+                      </property>
+                      <property name="text">
+                       <string>Invert</string>
+                      </property>
+                      <property name="alignment">
+                       <set>Qt::AlignCenter</set>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="4" column="1">
+                     <spacer name="verticalSpacer_3">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>20</width>
+                        <height>40</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item row="3" column="2">
+                     <widget class="QCheckBox" name="pan_r_invert">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Select either L or R, but not both, to enable &quot;surround&quot;</string>
+                      </property>
+                      <property name="layoutDirection">
+                       <enum>Qt::RightToLeft</enum>
+                      </property>
+                      <property name="text">
+                       <string>R</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0" colspan="3">
+                     <widget class="QDial" name="pan_setting">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="maximum">
+                       <number>20</number>
+                      </property>
+                      <property name="value">
+                       <number>10</number>
+                      </property>
+                      <property name="invertedAppearance">
+                       <bool>true</bool>
+                      </property>
+                      <property name="invertedControls">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0" colspan="3">
+                     <widget class="QCheckBox" name="pan_enable">
+                      <property name="text">
+                       <string>Enabled</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="1" column="1">
+                  <widget class="QGroupBox" name="artic_acc_group">
+                   <property name="title">
+                    <string>Accent</string>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_12">
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="artic_acc_length_label">
+                      <property name="text">
+                       <string>Length</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLineEdit" name="artic_acc_length_setting"/>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="artic_acc_volume_label">
+                      <property name="text">
+                       <string>Volume</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QSlider" name="artic_acc_length_slider">
+                      <property name="maximum">
+                       <number>7</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QSlider" name="artic_acc_volume_slider">
+                      <property name="maximum">
+                       <number>15</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="artic_acc_setting_label">
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QLineEdit" name="artic_acc_volume_setting"/>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="1" column="6">
+                  <spacer name="horizontalSpacer_4">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="1" column="4">
+                  <widget class="QGroupBox" name="artic_accstacc_group">
+                   <property name="title">
+                    <string>Accent+Staccato</string>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_14">
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="artic_accstacc_setting_label">
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QSlider" name="artic_accstacc_length_slider">
+                      <property name="maximum">
+                       <number>7</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QLineEdit" name="artic_accstacc_volume_setting"/>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QSlider" name="artic_accstacc_volume_slider">
+                      <property name="maximum">
+                       <number>15</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QLineEdit" name="artic_accstacc_length_setting"/>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="artic_accstacc_length_label">
+                      <property name="text">
+                       <string>Length</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="artic_accstacc_volume_label">
+                      <property name="text">
+                       <string>Volume</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="1" column="2">
+                  <widget class="QGroupBox" name="artic_stacc_group">
+                   <property name="title">
+                    <string>Staccato</string>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_13">
+                    <item row="2" column="0">
+                     <widget class="QLineEdit" name="artic_stacc_length_setting"/>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="artic_stacc_setting_label">
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QLineEdit" name="artic_stacc_volume_setting"/>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QSlider" name="artic_stacc_length_slider">
+                      <property name="maximum">
+                       <number>7</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QSlider" name="artic_stacc_volume_slider">
+                      <property name="maximum">
+                       <number>15</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="artic_stacc_length_label">
+                      <property name="text">
+                       <string>Length</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="artic_stacc_volume_label">
+                      <property name="text">
+                       <string>Volume</string>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="1" column="0">
+                  <widget class="QGroupBox" name="artic_default_group">
+                   <property name="title">
+                    <string>Default</string>
+                   </property>
+                   <layout class="QGridLayout" name="gridLayout_7">
+                    <item row="2" column="0">
+                     <widget class="QLineEdit" name="artic_default_length_setting"/>
+                    </item>
+                    <item row="1" column="0">
+                     <widget class="QSlider" name="artic_default_length_slider">
+                      <property name="maximum">
+                       <number>7</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="1">
+                     <widget class="QLineEdit" name="artic_default_volume_setting"/>
+                    </item>
+                    <item row="1" column="1">
+                     <widget class="QSlider" name="artic_default_volume_slider">
+                      <property name="maximum">
+                       <number>15</number>
+                      </property>
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="artic_default_length_label">
+                      <property name="text">
+                       <string>Length</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="1">
+                     <widget class="QLabel" name="artic_default_volume_label">
+                      <property name="text">
+                       <string>Volume</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="artic_default_setting_label">
+                      <property name="text">
+                       <string/>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                </layout>
+               </widget>
+               <widget class="QWidget" name="instrument_multisample_tab">
+                <attribute name="title">
+                 <string>Multisample</string>
+                </attribute>
+                <layout class="QGridLayout" name="gridLayout_16">
+                 <item row="9" column="2">
+                  <widget class="QPushButton" name="multisample_sample_add">
                    <property name="text">
-                    <string/>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
+                    <string>Add</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="0">
-                  <widget class="QCheckBox" name="pan_l_invert">
-                   <property name="enabled">
-                    <bool>false</bool>
+                 <item row="1" column="0" rowspan="10">
+                  <widget class="QGroupBox" name="multisample_unmapped_box">
+                   <property name="title">
+                    <string>Unmapped</string>
                    </property>
-                   <property name="toolTip">
-                    <string>Select either L or R, but not both, to enable &quot;surround&quot;</string>
-                   </property>
+                   <layout class="QGridLayout" name="gridLayout_18">
+                    <item row="0" column="0">
+                     <widget class="QListWidget" name="multisample_unmapped_list"/>
+                    </item>
+                   </layout>
+                  </widget>
+                 </item>
+                 <item row="8" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_output"/>
+                 </item>
+                 <item row="9" column="3">
+                  <widget class="QPushButton" name="multisample_sample_remove">
                    <property name="text">
-                    <string>L</string>
+                    <string>Remove</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="3" column="1">
-                  <widget class="QLabel" name="pan_invert_label">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Select either L or R, but not both, to enable &quot;surround&quot;</string>
-                   </property>
-                   <property name="text">
-                    <string>Invert</string>
-                   </property>
-                   <property name="alignment">
-                    <set>Qt::AlignCenter</set>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="4" column="1">
-                  <spacer name="verticalSpacer_3">
+                 <item row="10" column="1">
+                  <spacer name="verticalSpacer_5">
                    <property name="orientation">
                     <enum>Qt::Vertical</enum>
                    </property>
@@ -1377,565 +1667,440 @@
                    </property>
                   </spacer>
                  </item>
-                 <item row="3" column="2">
-                  <widget class="QCheckBox" name="pan_r_invert">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="toolTip">
-                    <string>Select either L or R, but not both, to enable &quot;surround&quot;</string>
-                   </property>
-                   <property name="layoutDirection">
-                    <enum>Qt::RightToLeft</enum>
-                   </property>
-                   <property name="text">
-                    <string>R</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0" colspan="3">
-                  <widget class="QDial" name="pan_setting">
-                   <property name="enabled">
-                    <bool>false</bool>
-                   </property>
-                   <property name="maximum">
-                    <number>20</number>
-                   </property>
-                   <property name="value">
-                    <number>10</number>
-                   </property>
-                   <property name="invertedAppearance">
-                    <bool>true</bool>
-                   </property>
-                   <property name="invertedControls">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0" colspan="3">
-                  <widget class="QCheckBox" name="pan_enable">
-                   <property name="text">
-                    <string>Enabled</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="QGroupBox" name="artic_acc_group">
-                <property name="title">
-                 <string>Accent</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_12">
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="artic_acc_length_label">
-                   <property name="text">
-                    <string>Length</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLineEdit" name="artic_acc_length_setting"/>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="artic_acc_volume_label">
-                   <property name="text">
-                    <string>Volume</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QSlider" name="artic_acc_length_slider">
-                   <property name="maximum">
-                    <number>7</number>
-                   </property>
+                 <item row="1" column="4">
+                  <spacer name="horizontalSpacer_2">
                    <property name="orientation">
-                    <enum>Qt::Vertical</enum>
+                    <enum>Qt::Horizontal</enum>
                    </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="7" column="2" colspan="2">
+                  <widget class="QComboBox" name="multisample_sample_notehead">
+                   <item>
+                    <property name="text">
+                     <string>normal</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>x</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>o</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>+</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>⮾</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>▲</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>▼</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>/</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>◆</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
-                 <item row="1" column="1">
-                  <widget class="QSlider" name="artic_acc_volume_slider">
-                   <property name="maximum">
-                    <number>15</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="artic_acc_setting_label">
+                 <item row="8" column="1">
+                  <widget class="QLabel" name="multisample_sample_output_label">
                    <property name="text">
-                    <string/>
+                    <string>Ouput</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="7" column="1">
+                  <widget class="QLabel" name="multisample_sample_notehead_label">
+                   <property name="text">
+                    <string>Note Head</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="1">
+                  <widget class="QLabel" name="multisample_sample_notes_label">
+                   <property name="text">
+                    <string>Note(s)</string>
                    </property>
                   </widget>
                  </item>
                  <item row="2" column="1">
-                  <widget class="QLineEdit" name="artic_acc_volume_setting"/>
+                  <widget class="QLabel" name="multisample_sample_name_label">
+                   <property name="text">
+                    <string>Name</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="4" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_notes">
+                   <property name="maxLength">
+                    <number>200</number>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="2" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_name"/>
                  </item>
                 </layout>
                </widget>
-              </item>
-              <item row="1" column="6">
-               <spacer name="horizontalSpacer_4">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="4">
-               <widget class="QGroupBox" name="artic_accstacc_group">
-                <property name="title">
-                 <string>Accent+Staccato</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_14">
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="artic_accstacc_setting_label">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QSlider" name="artic_accstacc_length_slider">
-                   <property name="maximum">
-                    <number>7</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="artic_accstacc_volume_setting"/>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QSlider" name="artic_accstacc_volume_slider">
-                   <property name="maximum">
-                    <number>15</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="0">
-                  <widget class="QLineEdit" name="artic_accstacc_length_setting"/>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="artic_accstacc_length_label">
-                   <property name="text">
-                    <string>Length</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="artic_accstacc_volume_label">
-                   <property name="text">
-                    <string>Volume</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="1" column="2">
-               <widget class="QGroupBox" name="artic_stacc_group">
-                <property name="title">
-                 <string>Staccato</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_13">
-                 <item row="2" column="0">
-                  <widget class="QLineEdit" name="artic_stacc_length_setting"/>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="artic_stacc_setting_label">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="artic_stacc_volume_setting"/>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QSlider" name="artic_stacc_length_slider">
-                   <property name="maximum">
-                    <number>7</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QSlider" name="artic_stacc_volume_slider">
-                   <property name="maximum">
-                    <number>15</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="artic_stacc_length_label">
-                   <property name="text">
-                    <string>Length</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="artic_stacc_volume_label">
-                   <property name="text">
-                    <string>Volume</string>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="1" column="0">
-               <widget class="QGroupBox" name="artic_default_group">
-                <property name="title">
-                 <string>Default</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_7">
-                 <item row="2" column="0">
-                  <widget class="QLineEdit" name="artic_default_length_setting"/>
-                 </item>
-                 <item row="1" column="0">
-                  <widget class="QSlider" name="artic_default_length_slider">
-                   <property name="maximum">
-                    <number>7</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="2" column="1">
-                  <widget class="QLineEdit" name="artic_default_volume_setting"/>
-                 </item>
-                 <item row="1" column="1">
-                  <widget class="QSlider" name="artic_default_volume_slider">
-                   <property name="maximum">
-                    <number>15</number>
-                   </property>
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="0">
-                  <widget class="QLabel" name="artic_default_length_label">
-                   <property name="text">
-                    <string>Length</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="0" column="1">
-                  <widget class="QLabel" name="artic_default_volume_label">
-                   <property name="text">
-                    <string>Volume</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="3" column="0">
-                  <widget class="QLabel" name="artic_default_setting_label">
-                   <property name="text">
-                    <string/>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-             </layout>
-            </widget>
-            <widget class="QWidget" name="instrument_multisample_tab">
-             <attribute name="title">
-              <string>Multisample</string>
-             </attribute>
-             <layout class="QGridLayout" name="gridLayout_16">
-              <item row="9" column="2">
-               <widget class="QPushButton" name="multisample_sample_add">
-                <property name="text">
-                 <string>Add</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="0" rowspan="10">
-               <widget class="QGroupBox" name="multisample_unmapped_box">
-                <property name="title">
-                 <string>Unmapped</string>
-                </property>
-                <layout class="QGridLayout" name="gridLayout_18">
-                 <item row="0" column="0">
-                  <widget class="QListWidget" name="multisample_unmapped_list"/>
-                 </item>
-                </layout>
-               </widget>
-              </item>
-              <item row="8" column="2" colspan="2">
-               <widget class="QLineEdit" name="multisample_sample_output"/>
-              </item>
-              <item row="9" column="3">
-               <widget class="QPushButton" name="multisample_sample_remove">
-                <property name="text">
-                 <string>Remove</string>
-                </property>
-               </widget>
-              </item>
-              <item row="10" column="1">
-               <spacer name="verticalSpacer_5">
-                <property name="orientation">
-                 <enum>Qt::Vertical</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>20</width>
-                  <height>40</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="1" column="4">
-               <spacer name="horizontalSpacer_2">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-                <property name="sizeHint" stdset="0">
-                 <size>
-                  <width>40</width>
-                  <height>20</height>
-                 </size>
-                </property>
-               </spacer>
-              </item>
-              <item row="7" column="2" colspan="2">
-               <widget class="QComboBox" name="multisample_sample_notehead">
-                <item>
-                 <property name="text">
-                  <string>normal</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>x</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>o</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>+</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>⮾</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>▲</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>▼</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>/</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>◆</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
-              <item row="8" column="1">
-               <widget class="QLabel" name="multisample_sample_output_label">
-                <property name="text">
-                 <string>Ouput</string>
-                </property>
-               </widget>
-              </item>
-              <item row="7" column="1">
-               <widget class="QLabel" name="multisample_sample_notehead_label">
-                <property name="text">
-                 <string>Note Head</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="1">
-               <widget class="QLabel" name="multisample_sample_notes_label">
-                <property name="text">
-                 <string>Note(s)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="1">
-               <widget class="QLabel" name="multisample_sample_name_label">
-                <property name="text">
-                 <string>Name</string>
-                </property>
-               </widget>
-              </item>
-              <item row="4" column="2" colspan="2">
-               <widget class="QLineEdit" name="multisample_sample_notes">
-                <property name="maxLength">
-                 <number>200</number>
-                </property>
-               </widget>
-              </item>
-              <item row="2" column="2" colspan="2">
-               <widget class="QLineEdit" name="multisample_sample_name"/>
-              </item>
-             </layout>
-            </widget>
-           </widget>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="global_settings_tab">
-        <attribute name="title">
-         <string>Global Settings</string>
-        </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,4,0,0">
-         <item>
-          <widget class="QGroupBox" name="global_volume_box">
-           <property name="title">
-            <string>Global Volume</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_5">
-            <item>
-             <widget class="QSlider" name="global_volume_slider">
-              <property name="maximum">
-               <number>255</number>
-              </property>
-              <property name="tracking">
-               <bool>false</bool>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Vertical</enum>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QLineEdit" name="global_volume_setting"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="global_volume_setting_label">
-              <property name="text">
-               <string/>
-              </property>
+              </widget>
              </widget>
             </item>
            </layout>
           </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="echo_settings_box">
-           <property name="title">
-            <string>Echo Settings</string>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_8">
+          <widget class="QWidget" name="global_settings_tab">
+           <attribute name="title">
+            <string>Global Settings</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_7" stretch="1,4,0,0">
             <item>
-             <widget class="QWidget" name="echo_control_widget" native="true">
-              <layout class="QGridLayout" name="gridLayout_8">
-               <item row="2" column="2">
-                <widget class="QCheckBox" name="echo_ch1">
-                 <property name="text">
-                  <string>1</string>
+             <widget class="QGroupBox" name="global_volume_box">
+              <property name="title">
+               <string>Global Volume</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+               <item>
+                <widget class="QSlider" name="global_volume_slider">
+                 <property name="maximum">
+                  <number>255</number>
+                 </property>
+                 <property name="tracking">
+                  <bool>false</bool>
+                 </property>
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
                  </property>
                 </widget>
                </item>
-               <item row="5" column="1">
-                <widget class="QCheckBox" name="echo_ch6">
+               <item>
+                <widget class="QLineEdit" name="global_volume_setting"/>
+               </item>
+               <item>
+                <widget class="QLabel" name="global_volume_setting_label">
                  <property name="text">
-                  <string>6</string>
+                  <string/>
                  </property>
                 </widget>
                </item>
-               <item row="3" column="2">
-                <widget class="QCheckBox" name="echo_ch3">
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="echo_settings_box">
+              <property name="title">
+               <string>Echo Settings</string>
+              </property>
+              <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <item>
+                <widget class="QWidget" name="echo_control_widget" native="true">
+                 <layout class="QGridLayout" name="gridLayout_8">
+                  <item row="2" column="2">
+                   <widget class="QCheckBox" name="echo_ch1">
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="1">
+                   <widget class="QCheckBox" name="echo_ch6">
+                    <property name="text">
+                     <string>6</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="2">
+                   <widget class="QCheckBox" name="echo_ch3">
+                    <property name="text">
+                     <string>3</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="1">
+                   <widget class="QRadioButton" name="echo_filter_0">
+                    <property name="text">
+                     <string>0</string>
+                    </property>
+                    <property name="checked">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QCheckBox" name="echo_ch2">
+                    <property name="text">
+                     <string>2</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QCheckBox" name="echo_ch4">
+                    <property name="text">
+                     <string>4</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="2">
+                   <widget class="QCheckBox" name="echo_ch5">
+                    <property name="text">
+                     <string>5</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="7" column="2">
+                   <widget class="QRadioButton" name="echo_filter_1">
+                    <property name="text">
+                     <string>1</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QCheckBox" name="echo_ch0">
+                    <property name="text">
+                     <string>0</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="5" column="2">
+                   <widget class="QCheckBox" name="echo_ch7">
+                    <property name="text">
+                     <string>7</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="8" column="1">
+                   <spacer name="echo_control_spacer">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>20</width>
+                      <height>40</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                  <item row="1" column="1" colspan="2">
+                   <widget class="QLabel" name="echo_channels_label">
+                    <property name="text">
+                     <string>Channel Enables</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1" colspan="2">
+                   <widget class="QCheckBox" name="echo_enable">
+                    <property name="text">
+                     <string>Enable</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="6" column="1" colspan="2">
+                   <widget class="QLabel" name="echo_filter_label">
+                    <property name="text">
+                     <string>Filter</string>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="echo_sliders_widget" native="true">
+                 <layout class="QGridLayout" name="gridLayout_9">
+                  <item row="3" column="2">
+                   <widget class="QCheckBox" name="echo_feedback_surround">
+                    <property name="text">
+                     <string>Invert</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="1">
+                   <widget class="QSlider" name="echo_right_slider">
+                    <property name="maximum">
+                     <number>128</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QLineEdit" name="echo_feedback_setting">
+                    <property name="maxLength">
+                     <number>6</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QLabel" name="echo_delay_label">
+                    <property name="text">
+                     <string>Delay</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="0">
+                   <widget class="QSlider" name="echo_left_slider">
+                    <property name="maximum">
+                     <number>128</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QLineEdit" name="echo_right_setting">
+                    <property name="maxLength">
+                     <number>6</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QCheckBox" name="echo_right_surround">
+                    <property name="toolTip">
+                     <string>Select either left or right, but not both, to enable &quot;surround&quot;</string>
+                    </property>
+                    <property name="text">
+                     <string>Invert</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QCheckBox" name="echo_left_surround">
+                    <property name="toolTip">
+                     <string>Select either left or right, but not both, to enable &quot;surround&quot;</string>
+                    </property>
+                    <property name="text">
+                     <string>Invert</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="echo_left_label">
+                    <property name="text">
+                     <string>Left Volume</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="2">
+                   <widget class="QSlider" name="echo_feedback_slider">
+                    <property name="maximum">
+                     <number>128</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QLabel" name="echo_feedback_label">
+                    <property name="text">
+                     <string>Feedback</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLabel" name="echo_right_label">
+                    <property name="text">
+                     <string>Right Volume</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QLineEdit" name="echo_left_setting">
+                    <property name="maxLength">
+                     <number>6</number>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="0">
+                   <widget class="QLabel" name="echo_left_setting_label">
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="1">
+                   <widget class="QLabel" name="echo_right_setting_label">
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="4" column="2">
+                   <widget class="QLabel" name="echo_feedback_setting_label">
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="1" column="3">
+                   <widget class="QSlider" name="echo_delay_slider">
+                    <property name="maximum">
+                     <number>15</number>
+                    </property>
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <widget class="QLineEdit" name="echo_delay_setting"/>
+                  </item>
+                  <item row="4" column="3">
+                   <widget class="QLabel" name="echo_delay_setting_label">
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="other_settings_box">
+              <property name="title">
+               <string>Other Settings</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QCheckBox" name="global_legato">
                  <property name="text">
-                  <string>3</string>
+                  <string>Global Legato</string>
                  </property>
                 </widget>
                </item>
-               <item row="7" column="1">
-                <widget class="QRadioButton" name="echo_filter_0">
-                 <property name="text">
-                  <string>0</string>
-                 </property>
-                 <property name="checked">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QCheckBox" name="echo_ch2">
-                 <property name="text">
-                  <string>2</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QCheckBox" name="echo_ch4">
-                 <property name="text">
-                  <string>4</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QCheckBox" name="echo_ch5">
-                 <property name="text">
-                  <string>5</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="7" column="2">
-                <widget class="QRadioButton" name="echo_filter_1">
-                 <property name="text">
-                  <string>1</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QCheckBox" name="echo_ch0">
-                 <property name="text">
-                  <string>0</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="5" column="2">
-                <widget class="QCheckBox" name="echo_ch7">
-                 <property name="text">
-                  <string>7</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="8" column="1">
-                <spacer name="echo_control_spacer">
+               <item>
+                <spacer name="verticalSpacer">
                  <property name="orientation">
                   <enum>Qt::Vertical</enum>
                  </property>
@@ -1947,242 +2112,123 @@
                  </property>
                 </spacer>
                </item>
-               <item row="1" column="1" colspan="2">
-                <widget class="QLabel" name="echo_channels_label">
-                 <property name="text">
-                  <string>Channel Enables</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1" colspan="2">
-                <widget class="QCheckBox" name="echo_enable">
-                 <property name="text">
-                  <string>Enable</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="6" column="1" colspan="2">
-                <widget class="QLabel" name="echo_filter_label">
-                 <property name="text">
-                  <string>Filter</string>
-                 </property>
-                </widget>
-               </item>
               </layout>
              </widget>
             </item>
             <item>
-             <widget class="QWidget" name="echo_sliders_widget" native="true">
-              <layout class="QGridLayout" name="gridLayout_9">
-               <item row="3" column="2">
-                <widget class="QCheckBox" name="echo_feedback_surround">
-                 <property name="text">
-                  <string>Invert</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="1">
-                <widget class="QSlider" name="echo_right_slider">
-                 <property name="maximum">
-                  <number>128</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="2">
-                <widget class="QLineEdit" name="echo_feedback_setting">
-                 <property name="maxLength">
-                  <number>6</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="3">
-                <widget class="QLabel" name="echo_delay_label">
-                 <property name="text">
-                  <string>Delay</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="0">
-                <widget class="QSlider" name="echo_left_slider">
-                 <property name="maximum">
-                  <number>128</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="1">
-                <widget class="QLineEdit" name="echo_right_setting">
-                 <property name="maxLength">
-                  <number>6</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="1">
-                <widget class="QCheckBox" name="echo_right_surround">
-                 <property name="toolTip">
-                  <string>Select either left or right, but not both, to enable &quot;surround&quot;</string>
-                 </property>
-                 <property name="text">
-                  <string>Invert</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="3" column="0">
-                <widget class="QCheckBox" name="echo_left_surround">
-                 <property name="toolTip">
-                  <string>Select either left or right, but not both, to enable &quot;surround&quot;</string>
-                 </property>
-                 <property name="text">
-                  <string>Invert</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="0">
-                <widget class="QLabel" name="echo_left_label">
-                 <property name="text">
-                  <string>Left Volume</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="2">
-                <widget class="QSlider" name="echo_feedback_slider">
-                 <property name="maximum">
-                  <number>128</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="2">
-                <widget class="QLabel" name="echo_feedback_label">
-                 <property name="text">
-                  <string>Feedback</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="0" column="1">
-                <widget class="QLabel" name="echo_right_label">
-                 <property name="text">
-                  <string>Right Volume</string>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="0">
-                <widget class="QLineEdit" name="echo_left_setting">
-                 <property name="maxLength">
-                  <number>6</number>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="0">
-                <widget class="QLabel" name="echo_left_setting_label">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="1">
-                <widget class="QLabel" name="echo_right_setting_label">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="4" column="2">
-                <widget class="QLabel" name="echo_feedback_setting_label">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-               <item row="1" column="3">
-                <widget class="QSlider" name="echo_delay_slider">
-                 <property name="maximum">
-                  <number>15</number>
-                 </property>
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                </widget>
-               </item>
-               <item row="2" column="3">
-                <widget class="QLineEdit" name="echo_delay_setting"/>
-               </item>
-               <item row="4" column="3">
-                <widget class="QLabel" name="echo_delay_setting_label">
-                 <property name="text">
-                  <string/>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item>
-          <widget class="QGroupBox" name="other_settings_box">
-           <property name="title">
-            <string>Other Settings</string>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_7">
-            <item>
-             <widget class="QCheckBox" name="global_legato">
-              <property name="text">
-               <string>Global Legato</string>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <spacer name="verticalSpacer">
+             <spacer name="echo_settings_spacer">
               <property name="orientation">
-               <enum>Qt::Vertical</enum>
+               <enum>Qt::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>20</width>
-                <height>40</height>
+                <width>40</width>
+                <height>20</height>
                </size>
               </property>
              </spacer>
             </item>
            </layout>
           </widget>
-         </item>
-         <item>
-          <spacer name="echo_settings_spacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-        </layout>
-       </widget>
-      </widget>
+         </widget>
+        </widget>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
-     <spacer name="horizontalSpacer_3">
+     <widget class="QWidget" name="main_controls_widget" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="start_measure_label">
+         <property name="text">
+          <string>Start Measure</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="start_measure">
+         <property name="toolTip">
+          <string>Which measure of music you'd like to start with</string>
+         </property>
+         <property name="minimum">
+          <number>1</number>
+         </property>
+         <property name="maximum">
+          <number>999</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="reload_musicxml">
+         <property name="minimumSize">
+          <size>
+           <width>125</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Reload MusicXML</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+R</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="generate_and_play">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Just DO It</string>
+         </property>
+         <property name="shortcut">
+          <string>Ctrl+Space</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QPushButton" name="render_zip">
+         <property name="minimumSize">
+          <size>
+           <width>100</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Render</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer_6">
       <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+       <enum>Qt::Vertical</enum>
       </property>
       <property name="sizeHint" stdset="0">
        <size>
-        <width>40</width>
-        <height>20</height>
+        <width>20</width>
+        <height>40</height>
        </size>
       </property>
      </spacer>
@@ -2335,14 +2381,11 @@
   <tabstop>loop_analysis</tabstop>
   <tabstop>superloop_analysis</tabstop>
   <tabstop>measure_numbers</tabstop>
-  <tabstop>reload_musicxml</tabstop>
   <tabstop>open_quicklook</tabstop>
   <tabstop>open_history</tabstop>
   <tabstop>generate_mml</tabstop>
   <tabstop>generate_spc</tabstop>
   <tabstop>play_spc</tabstop>
-  <tabstop>generate_and_play</tabstop>
-  <tabstop>render_zip</tabstop>
   <tabstop>settings_tab_widget</tabstop>
   <tabstop>instrument_config_tab</tabstop>
   <tabstop>sample_list</tabstop>
@@ -2443,7 +2486,6 @@
   <tabstop>echo_feedback_surround</tabstop>
   <tabstop>echo_delay_slider</tabstop>
   <tabstop>echo_delay_setting</tabstop>
-  <tabstop>start_measure</tabstop>
   <tabstop>pan_l_invert</tabstop>
   <tabstop>pan_r_invert</tabstop>
   <tabstop>pan_setting</tabstop>
@@ -2455,6 +2497,10 @@
   <tabstop>multisample_sample_notehead</tabstop>
   <tabstop>multisample_sample_output</tabstop>
   <tabstop>multisample_sample_add</tabstop>
+  <tabstop>start_measure</tabstop>
+  <tabstop>reload_musicxml</tabstop>
+  <tabstop>generate_and_play</tabstop>
+  <tabstop>render_zip</tabstop>
  </tabstops>
  <resources/>
  <connections/>

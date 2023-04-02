@@ -123,8 +123,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         State, bool
     )  # arguments=['state', 'update_instruments']
     preferences_changed = pyqtSignal(
-        bool, bool, bool, bool
-    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode']
+        bool, bool, bool, bool, bool
+    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode', 'confirm_render']
     instruments_changed = pyqtSignal(list)
     recent_projects_updated = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
@@ -280,6 +280,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "advanced": preferences.advanced_mode,
             "dark_mode": preferences.dark_mode,
             "release_check": preferences.release_check,
+            "confirm_render": preferences.confirm_render,
             "version": _CURRENT_PREFS_VERSION,
         }
 
@@ -1045,6 +1046,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.preferences.dark_mode = prefs["dark_mode"]
             with suppress(KeyError):
                 self.preferences.release_check = prefs["release_check"]
+            with suppress(KeyError):
+                self.preferences.confirm_render = prefs["confirm_render"]
 
         self._start_watcher()
 
@@ -1053,6 +1056,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             bool(self.preferences.amk_fname.name),
             bool(self.preferences.spcplay_fname.name),
             self.preferences.dark_mode,
+            self.preferences.confirm_render,
         )
 
     ###########################################################################
