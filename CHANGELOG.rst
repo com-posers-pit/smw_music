@@ -11,7 +11,73 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.6`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.6 - 2023-04-01
+--------------------------
+
+CODENAME: `La Forme`_
+
+Inspiration
+
+Expiration
+
+Contraction
+
+Décontraction
+
+La forme
+
+`Release 0.3.6`_
+
 `Differences from 0.3.5`_
+
+Purpose
++++++++
+
+Finally fix broken initial q values
+
+
+Affected Issues
++++++++++++++++
+
+- `#189 Update default q values`_
+
+- `#188 Move start measure`_
+
+- `#187 Prompt "are you sure" on rendering`_
+
+- `#152 Broken initial q values`_
+
+Changed
++++++++
+
+- Start measure, just do it, render, and reload xml moved to below main UI
+
+  - Makes collapsing the control panel easier to do
+
+- Changed default articulation settings
+
+Added
++++++
+
+- Instrument q values are set to default when an instrument is chosen
+
+- Prompt on render option
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
 
 --------------------------------------------------------------------------------
 
@@ -44,6 +110,7 @@ Affected Issues
 Changed
 +++++++
 
+Fixed incorrect type conversion
 
 Added
 +++++
@@ -950,6 +1017,9 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#189 Update default q values: https://github.com/com-posers-pit/smw_music/issues/189
+.. _#188 Move start measure: https://github.com/com-posers-pit/smw_music/issues/188
+.. _#187 Prompt "are you sure" on rendering: https://github.com/com-posers-pit/smw_music/issues/187
 .. _#186 Error in saving projects: https://github.com/com-posers-pit/smw_music/issues/186
 .. _#184 Apply fix to bonus ending builtin song: https://github.com/com-posers-pit/smw_music/issues/184
 .. _#182 Update drm file: https://github.com/com-posers-pit/smw_music/issues/182
@@ -966,6 +1036,7 @@ Affected Issues
 .. _#156 History window has the wrong title: https://github.com/com-posers-pit/smw_music/issues/156
 .. _#154 Add history edit menu item: https://github.com/com-posers-pit/smw_music/issues/154
 .. _#153 Custom sample selections are broken: https://github.com/com-posers-pit/smw_music/issues/153
+.. _#152 Broken initial q values: https://github.com/com-posers-pit/smw_music/issues/152
 .. _#150 Sample folder watching: https://github.com/com-posers-pit/smw_music/issues/150
 .. _#147 Slurs in triplets are broken: https://github.com/com-posers-pit/smw_music/issues/147
 .. _#146 Emit error messages if AMK zip and SPC player are not set: https://github.com/com-posers-pit/smw_music/issues/146
@@ -1069,6 +1140,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.6: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.6
 .. _Release 0.3.5: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.5
 .. _Release 0.3.4: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.4
 .. _Release 0.3.4: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.4
@@ -1084,7 +1156,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.5: https://github.com/com-posers-pit/smw_music/compare/v0.3.5...HEAD
+.. _Differences from 0.3.6: https://github.com/com-posers-pit/smw_music/compare/v0.3.6...HEAD
+.. _Differences from 0.3.5: https://github.com/com-posers-pit/smw_music/compare/v0.3.5...v0.3.6
 .. _Differences from 0.3.4: https://github.com/com-posers-pit/smw_music/compare/v0.3.4...v0.3.5
 .. _Differences from 0.3.3: https://github.com/com-posers-pit/smw_music/compare/v0.3.3...v0.3.4
 .. _Differences from 0.3.2: https://github.com/com-posers-pit/smw_music/compare/v0.3.2...v0.3.3
@@ -1098,6 +1171,6 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
-
+.. _La Forme: https://www.youtube.com/watch?v=-TEL_PPSt4s
 .. _Cherry Twist: https://www.youtube.com/watch?v=eLkQ2eLrUMs
 .. _I'm Pissed: https://www.youtube.com/watch?v=T6dmMUR9TVI
