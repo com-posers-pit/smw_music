@@ -71,10 +71,10 @@ w${song.volume}
         return f' h{sample.transpose}' if do_transpose else ''
 
     def pitched_defn(name):
-        return f'"{name} = {voice(name)} {dyn(name)} {artic(name)} {pan(name)}"'
+        return f'"{name} = {voice(name)} {dyn(name)} {artic(name)} {pan(name)} qDEF"'
 
     def unpitched_defn(name):
-        return f'"{name} = {dyn(name)} {artic(name)} {pan(name)} @{voice(name)} {name}n"'
+        return f'"{name} = {dyn(name)} {artic(name)} {pan(name)} qDEF @{voice(name)} {name}n"'
 
     unpitched_sz = max(list(len(unpitched_defn(k)) for k, v in inst_samples.items() if v.percussion), default=0)
 %>\
