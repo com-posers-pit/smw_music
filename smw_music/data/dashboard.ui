@@ -249,29 +249,14 @@
                      <item row="6" column="2">
                       <widget class="QLineEdit" name="brr_fname"/>
                      </item>
-                     <item row="3" column="1" colspan="2">
-                      <widget class="QRadioButton" name="select_pack_sample">
+                     <item row="5" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_brr_sample">
                        <property name="text">
-                        <string>Sample Pack Sample</string>
+                        <string>Custom Sample</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="4" column="1" colspan="2">
-                      <widget class="QTreeWidget" name="sample_pack_list">
-                       <property name="editTriggers">
-                        <set>QAbstractItemView::NoEditTriggers</set>
-                       </property>
-                       <property name="headerHidden">
-                        <bool>true</bool>
-                       </property>
-                       <column>
-                        <property name="text">
-                         <string notr="true">1</string>
-                        </property>
-                       </column>
-                      </widget>
-                     </item>
-                     <item row="9" column="2">
+                     <item row="10" column="2">
                       <widget class="QSpinBox" name="octave_shift">
                        <property name="minimum">
                         <number>-6</number>
@@ -281,44 +266,20 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="9" column="1">
-                      <widget class="QLabel" name="octave_shift_label">
+                     <item row="3" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_pack_sample">
                        <property name="text">
-                        <string>Octave Shift</string>
+                        <string>Sample Pack Sample</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="1" colspan="2">
-                      <widget class="QRadioButton" name="select_brr_sample">
-                       <property name="text">
-                        <string>Custom Sample</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="7" column="1" colspan="2">
+                     <item row="8" column="1" colspan="2">
                       <widget class="QRadioButton" name="select_multisample_sample">
                        <property name="enabled">
                         <bool>false</bool>
                        </property>
                        <property name="text">
                         <string>Multisample</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1" colspan="2">
-                      <widget class="QRadioButton" name="select_builtin_sample">
-                       <property name="text">
-                        <string>Builtin Sample</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="1">
-                      <widget class="QPushButton" name="select_brr_fname">
-                       <property name="text">
-                        <string>brr</string>
                        </property>
                       </widget>
                      </item>
@@ -476,7 +437,14 @@
                        </item>
                       </widget>
                      </item>
-                     <item row="8" column="1">
+                     <item row="10" column="1">
+                      <widget class="QLabel" name="octave_shift_label">
+                       <property name="text">
+                        <string>Octave Shift</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
                       <widget class="QPushButton" name="select_multisample_fname">
                        <property name="enabled">
                         <bool>false</bool>
@@ -486,10 +454,70 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="8" column="2">
+                     <item row="1" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_builtin_sample">
+                       <property name="text">
+                        <string>Builtin Sample</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QPushButton" name="select_brr_fname">
+                       <property name="text">
+                        <string>brr</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1" colspan="2">
+                      <widget class="QTreeWidget" name="sample_pack_list">
+                       <property name="editTriggers">
+                        <set>QAbstractItemView::NoEditTriggers</set>
+                       </property>
+                       <property name="indentation">
+                        <number>10</number>
+                       </property>
+                       <property name="headerHidden">
+                        <bool>false</bool>
+                       </property>
+                       <property name="columnCount">
+                        <number>2</number>
+                       </property>
+                       <attribute name="headerVisible">
+                        <bool>true</bool>
+                       </attribute>
+                       <column>
+                        <property name="text">
+                         <string notr="true">Sample</string>
+                        </property>
+                       </column>
+                       <column>
+                        <property name="text">
+                         <string notr="true">Size [KB]</string>
+                        </property>
+                       </column>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
                       <widget class="QLineEdit" name="multisample_fname">
                        <property name="enabled">
                         <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1">
+                      <widget class="QLabel" name="brr_size_label">
+                       <property name="text">
+                        <string>Size:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="2">
+                      <widget class="QLabel" name="brr_size">
+                       <property name="text">
+                        <string/>
                        </property>
                       </widget>
                      </item>

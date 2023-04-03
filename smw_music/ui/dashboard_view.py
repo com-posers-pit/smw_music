@@ -73,6 +73,8 @@ class DashboardView(QMainWindow):
     brr_fname: QLineEdit
     brr_setting: QLineEdit
     brr_setting_label: QLabel
+    brr_size: QLabel
+    brr_size_label: QLabel
     builtin_sample: QComboBox
     centralwidget: QWidget
     close_project: QAction

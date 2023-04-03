@@ -15,6 +15,7 @@ from collections import deque
 from contextlib import ExitStack, suppress
 from functools import cached_property, partial
 from importlib import resources
+from os import stat
 from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
@@ -60,7 +61,7 @@ from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utils import to_checkstate
-from smw_music.utils import hexb, pct
+from smw_music.utils import brr_size, hexb, pct
 
 ###############################################################################
 # Private function definitions
@@ -476,7 +477,7 @@ class Dashboard(QWidget):
     ) -> None:
         # sample_packs handling
         self._sample_pack_items = {}
-        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+        tree = self._view.sample_pack_list
 
         tree.clear()
 
@@ -486,6 +487,9 @@ class Dashboard(QWidget):
 
             self._add_sample_pack(top, name, pack)
             tree.addTopLevelItem(top)
+
+        tree.resizeColumnToContents(0)
+        tree.resizeColumnToContents(1)
 
     ###########################################################################
 
@@ -639,7 +643,9 @@ class Dashboard(QWidget):
                     parent_items[path] = item
                     parent = item
 
-            item = QTreeWidgetItem(parent, [sample.path.name])
+            item = QTreeWidgetItem(
+                parent, [sample.path.name, brr_size(len(sample.data))]
+            )
             item_id = (name, sample.path)
             item.setData(0, Qt.ItemDataRole.UserRole, item_id)
             self._sample_pack_items[item_id] = item
@@ -1228,22 +1234,34 @@ class Dashboard(QWidget):
             sel_sample.sample_source == SampleSource.BUILTIN
         )
         v.builtin_sample.setCurrentIndex(sel_sample.builtin_sample_index)
-        v.select_pack_sample.setChecked(
-            sel_sample.sample_source == SampleSource.SAMPLEPACK
-        )
+
+        samplepack = sel_sample.sample_source == SampleSource.SAMPLEPACK
+        v.select_pack_sample.setChecked(samplepack)
+        if samplepack:
+            with suppress(KeyError):
+                v.sample_pack_list.setCurrentItem(
+                    self._sample_pack_items[sel_sample.pack_sample]
+                )
+        else:
+            v.sample_pack_list.clearSelection()
+
         v.sample_settings_box.setEnabled(
             sel_sample.sample_source != SampleSource.BUILTIN
         )
-        with suppress(KeyError):
-            v.sample_pack_list.setCurrentItem(
-                self._sample_pack_items[sel_sample.pack_sample]
-            )
 
         v.select_brr_sample.setChecked(
             sel_sample.sample_source == SampleSource.BRR
         )
-        fname = str(sel_sample.brr_fname) if sel_sample.brr_fname.name else ""
-        v.brr_fname.setText(fname)
+
+        v.brr_fname.setText("")
+        v.brr_size.setText("")
+        if fname := sel_sample.brr_fname.name:
+            v.brr_fname.setText(str(fname))
+            with suppress(FileNotFoundError):
+                # First two bytes are not written into the output file
+                v.brr_size.setText(
+                    brr_size(stat(sel_sample.brr_fname).st_size) + " KB"
+                )
 
         v.octave_shift.setValue(sel_sample.octave_shift)
 
