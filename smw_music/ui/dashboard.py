@@ -1041,14 +1041,10 @@ class Dashboard(QWidget):
 
     def _setup_instrument_table(self) -> None:
         widget = self._view.sample_list
-        header = QTreeWidgetItem(["Instrument", "S", "M"])
-
-        header.setToolTip(_TblCol.SOLO, "Solo Instrument")
-        header.setToolTip(_TblCol.MUTE, "Mute Instrument")
-
-        widget.setHeaderItem(header)
-
         widget.header().moveSection(_TblCol.NAME, len(_TblCol) - 1)
+
+        for n in _TblCol:
+            widget.resizeColumnToContents(n)
 
     ###########################################################################
 
@@ -1154,6 +1150,9 @@ class Dashboard(QWidget):
 
                 if inst_name == open_inst:
                     widget.expand(widget.indexFromItem(parent))
+
+        for n in _TblCol:
+            widget.resizeColumnToContents(n)
 
     ###########################################################################
 

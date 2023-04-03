@@ -195,7 +195,7 @@
                    <enum>QAbstractItemView::SingleSelection</enum>
                   </property>
                   <property name="columnCount">
-                   <number>4</number>
+                   <number>3</number>
                   </property>
                   <attribute name="headerMinimumSectionSize">
                    <number>35</number>
@@ -205,22 +205,23 @@
                   </attribute>
                   <column>
                    <property name="text">
-                    <string notr="true">1</string>
+                    <string notr="true">Instrument</string>
                    </property>
                   </column>
                   <column>
                    <property name="text">
-                    <string notr="true">2</string>
+                    <string notr="true">S</string>
+                   </property>
+                   <property name="toolTip">
+                    <string>Solo Instrument</string>
                    </property>
                   </column>
                   <column>
                    <property name="text">
-                    <string notr="true">3</string>
+                    <string notr="true">M</string>
                    </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">4</string>
+                   <property name="toolTip">
+                    <string>Mute Instrument</string>
                    </property>
                   </column>
                  </widget>
