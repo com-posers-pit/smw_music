@@ -182,6 +182,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "Addmusic_sound effects.txt",
             "asm",
             "samples",
+            "stats",
         ]
 
         with zipfile.ZipFile(str(self.preferences.amk_fname), "r") as zobj:
