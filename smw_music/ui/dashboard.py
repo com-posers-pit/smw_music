@@ -24,7 +24,16 @@ import qdarkstyle  # type: ignore
 from music21.pitch import Pitch
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
+from PyQt6.QtGui import (
+    QAction,
+    QColorConstants,
+    QFont,
+    QIcon,
+    QKeyEvent,
+    QMovie,
+    QPainter,
+    QPixmap,
+)
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -61,6 +70,7 @@ from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utils import to_checkstate
+from smw_music.ui.visualization import Utilization
 from smw_music.utils import brr_size, hexb, pct
 
 ###############################################################################
@@ -212,6 +222,12 @@ class Dashboard(QWidget):
         self._view: DashboardView = uic.loadUi(ui_contents)
         self._view.installEventFilter(self)
         self._view.setWindowTitle(self._window_title)
+
+        self._util = QLabel()
+        self._canvas = QPixmap(256, 20)
+        self._canvas.fill(Qt.GlobalColor.black)
+        self._util.setPixmap(self._canvas)
+        self._view.statusBar().addPermanentWidget(self._util)
 
         self._preferences = Preferences()
         self._model = Model()
@@ -813,6 +829,7 @@ class Dashboard(QWidget):
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
+        m.utilization_updated.connect(self._utilization_updated)
 
     ###########################################################################
 
@@ -1335,6 +1352,52 @@ class Dashboard(QWidget):
             item = QListWidgetItem(text)
             item.setData(Qt.ItemDataRole.UserRole, (pitch, head))
             widget.addItem(item)
+
+    ###########################################################################
+
+    def _utilization_updated(self, util: Utilization) -> None:
+        fixed = util.variables + util.engine
+        song = util.song
+        samples = util.samples + util.sample_table
+        echo = util.echo + util.echo_pad
+        free = util.free
+
+        total = fixed + song + samples + echo + free
+
+        rect = self._canvas.rect()
+        x = rect.x()
+        y = rect.y()
+        w = rect.width()
+        h = rect.height()
+
+        painter = QPainter()
+        painter.begin(self._canvas)
+
+        start, end = x, int(fixed / 65536 * w)
+        painter.fillRect(start, y, end, h, QColorConstants.Blue)
+
+        start, end = end, end + int(song / 65536 * w)
+        painter.fillRect(start, y, end, h, QColorConstants.Red)
+
+        start, end = end, end + int(samples / 65536 * w)
+        painter.fillRect(start, y, end, h, QColorConstants.Yellow)
+
+        start, end = end, end + int(echo / 65536 * w)
+        painter.fillRect(start, y, end, h, QColorConstants.Green)
+
+        start, end = end, w
+        painter.fillRect(start, y, end, h, QColorConstants.Black)
+
+        painter.end()
+
+        self._util.setPixmap(self._canvas)
+        self._util.setToolTip(
+            f"{100*fixed/total:2.0f}% Engine, "
+            + f"{100*song/total:2.0f}% Song, "
+            + f"{100*samples/total:2.0f}% Samples, "
+            + f"{100*echo/total:2.0f}% Echo, "
+            + f"{100*free/total:2.0f}% Free, "
+        )
 
     ###########################################################################
     # Private property definitions

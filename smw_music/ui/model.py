@@ -52,6 +52,8 @@ from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import NoSample, PreferencesState, State
+from smw_music.ui.utils import make_vis_dir
+from smw_music.ui.visualization import Utilization, decode_utilization
 from smw_music.utils import newest_release
 
 ###############################################################################
@@ -134,6 +136,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     response_generated = pyqtSignal(
         bool, str, str
     )  # arguments=["error", "title", "response"]
+    utilization_updated = pyqtSignal(Utilization)
 
     song: Song | None
     preferences: PreferencesState
@@ -197,6 +200,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 shutil.move(path / root / member, path / member)
 
             shutil.rmtree(path / root)
+
+        # Add visualizations directory
+        make_vis_dir(path)
 
         # Apply updates to stock AMK files
         # https://www.smwcentral.net/?p=viewthread&t=98793&page=2&pid=1601787#p1601787
@@ -1255,6 +1261,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.response_generated.emit(error, "SPC Generated", msg)
             self.update_status("SPC generated")
 
+        if not error:
+            self._update_utilization()
+
         return not error
 
     ###########################################################################
@@ -1403,6 +1412,21 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._save_backup()
             self._history.append(new_state)
             self._signal_state_change(update_instruments)
+
+    ###########################################################################
+
+    def _update_utilization(self) -> None:
+        assert self._project_path is not None  # nosec: B101
+
+        # TODO: Unify this with make_vis_dir
+        png = (
+            self._project_path
+            / "Visualizations"
+            / f"{self.state.project_name}.png"
+        )
+
+        util = decode_utilization(png)
+        self.utilization_updated.emit(util)
 
     ###########################################################################
     # API property definitions
