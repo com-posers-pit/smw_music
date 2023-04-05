@@ -26,7 +26,7 @@ from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
 from PyQt6.QtGui import (
     QAction,
-    QColorConstants,
+    QColor,
     QFont,
     QIcon,
     QKeyEvent,
@@ -224,7 +224,7 @@ class Dashboard(QWidget):
         self._view.setWindowTitle(self._window_title)
 
         self._util = QLabel()
-        self._canvas = QPixmap(256, 20)
+        self._canvas = QPixmap(256, 25)
         self._canvas.fill(Qt.GlobalColor.black)
         self._util.setPixmap(self._canvas)
         self._view.statusBar().addPermanentWidget(self._util)
@@ -1374,29 +1374,33 @@ class Dashboard(QWidget):
         painter.begin(self._canvas)
 
         start, end = x, int(fixed / 65536 * w)
-        painter.fillRect(start, y, end, h, QColorConstants.Blue)
+        painter.fillRect(start, y, end, h, QColor("#E1A730"))
 
         start, end = end, end + int(song / 65536 * w)
-        painter.fillRect(start, y, end, h, QColorConstants.Red)
+        painter.fillRect(start, y, end, h, QColor("#E0E3D7"))
 
         start, end = end, end + int(samples / 65536 * w)
-        painter.fillRect(start, y, end, h, QColorConstants.Yellow)
+        painter.fillRect(start, y, end, h, QColor("#2879C0"))
 
         start, end = end, end + int(echo / 65536 * w)
-        painter.fillRect(start, y, end, h, QColorConstants.Green)
+        painter.fillRect(start, y, end, h, QColor("#AB3910"))
 
         start, end = end, w
-        painter.fillRect(start, y, end, h, QColorConstants.Black)
+        painter.fillRect(start, y, end, h, QColor("#000000"))
 
         painter.end()
 
         self._util.setPixmap(self._canvas)
         self._util.setToolTip(
-            f"{100*fixed/total:2.0f}% Engine, "
-            + f"{100*song/total:2.0f}% Song, "
-            + f"{100*samples/total:2.0f}% Samples, "
-            + f"{100*echo/total:2.0f}% Echo, "
-            + f"{100*free/total:2.0f}% Free, "
+            ", ".join(
+                [
+                    f"{100*fixed/total:2.0f}% Engine",
+                    f"{100*song/total:2.0f}% Song",
+                    f"{100*samples/total:2.0f}% Samples",
+                    f"{100*echo/total:2.0f}% Echo",
+                    f"{100*free/total:2.0f}% Free",
+                ]
+            )
         )
 
     ###########################################################################
