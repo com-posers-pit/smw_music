@@ -52,9 +52,13 @@ from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import NoSample, PreferencesState, State
+from smw_music.ui.utilization import (
+    Utilization,
+    decode_utilization,
+    echo_bytes,
+)
 from smw_music.ui.utils import make_vis_dir
-from smw_music.ui.visualization import Utilization, decode_utilization
-from smw_music.utils import newest_release
+from smw_music.utils import brr_size_b, newest_release
 
 ###############################################################################
 # Private constant definitions
@@ -790,7 +794,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
-            self._signal_state_change()
+            self._signal_state_change(update_aram_util=False)
             self.update_status("Redo")
 
     ###########################################################################
@@ -948,7 +952,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
-            self._signal_state_change()
+            self._signal_state_change(update_aram_util=False)
             self.update_status("Undo")
 
     ###########################################################################
@@ -1262,7 +1266,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.update_status("SPC generated")
 
         if not error:
-            self._update_utilization()
+            self._update_utilization_from_amk()
+            self.reinforce_state()
 
         return not error
 
@@ -1302,12 +1307,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _signal_state_change(
-        self, update_instruments: bool = False, state_change: bool = True
+        self,
+        update_instruments: bool = False,
+        state_change: bool = True,
+        update_aram_util: bool = True,
     ) -> None:
         state = self.state
 
         state.unsaved = state_change
         self.state.unmapped = set()
+
+        self._update_aram_util()
 
         with suppress(NoSample):
             if self.song:
@@ -1415,7 +1425,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_utilization(self) -> None:
+    def _update_aram_util(self) -> None:
+        state = self.state
+        aram_util = state.aram_util
+
+        delay = state.echo.delay if state.global_echo_enable else 0
+        aram_util.echo, aram_util.echo_pad = echo_bytes(delay)
+
+        aram_util.samples += self.sample_bytes - state.aram_custom_sample_b
+
+        state.aram_custom_sample_b = self.sample_bytes
+
+    ###########################################################################
+
+    def _update_utilization_from_amk(self) -> None:
         assert self._project_path is not None  # nosec: B101
 
         # TODO: Unify this with make_vis_dir
@@ -1425,8 +1448,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             / f"{self.state.project_name}.png"
         )
 
-        util = decode_utilization(png)
-        self.utilization_updated.emit(util)
+        self.state.aram_util = decode_utilization(png)
+        self.state.aram_custom_sample_b = self.sample_bytes
 
     ###########################################################################
     # API property definitions
@@ -1503,6 +1526,34 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @property
     def recent_projects_fname(self) -> Path:
         return self.config_dir / "projects.yaml"
+
+    ###########################################################################
+
+    @property
+    def sample_bytes(self) -> int:
+        handled: list[tuple[bool, str, Path]] = []
+
+        total_size = 0
+        # TODO: Unify sample size calcs
+        for sample in self.state.samples.values():
+            if sample.sample_source == SampleSource.SAMPLEPACK:
+                is_pack = True
+                pack, path = sample.pack_sample
+                size = brr_size_b(len(self._sample_packs[pack][path].data))
+            else:
+                is_pack = False
+                pack = ""
+                path = sample.brr_fname
+                size = 0
+                with suppress(FileNotFoundError):
+                    size = brr_size_b(os.stat(path).st_size)
+
+            key = (is_pack, pack, path)
+            if key not in handled:
+                handled.append(key)
+                total_size += size
+
+        return total_size
 
     ###########################################################################
 

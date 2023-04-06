@@ -149,6 +149,33 @@ def decode_utilization(png_name: Path) -> Utilization:
 ###############################################################################
 
 
+def default_utilization() -> Utilization:
+    return Utilization(
+        variables=1102,
+        engine=9938,
+        song=127,
+        sample_table=80,
+        samples=25686,
+        echo=4,
+        echo_pad=252,
+    )
+
+
+###############################################################################
+
+
+def echo_bytes(delay: int) -> tuple[int, int]:
+    if delay == 0:
+        rv = (4, 252)
+    else:
+        rv = (2048 * delay, 0)
+
+    return rv
+
+
+###############################################################################
+
+
 def setup_utilization(
     engine: QLabel, song: QLabel, samples: QLabel, echo: QLabel
 ) -> None:
@@ -229,5 +256,7 @@ def paint_utilization(
     util_label.setToolTip(f"{usage_pct}\n{usage_b}")
     free_label.setText(f"{100*free_pct:+3.0f}%")
 
-    free_color = "#ff0000" if free_pct <= 0 else "#00AA00"
+    # There's something not quite right in our ARAM estimates, smells like
+    # alignment, so for now make this red if we're under 1k
+    free_color = "#ff0000" if free_b < 1024 else "#00AA00"
     free_label.setStyleSheet(f"color: {free_color}")

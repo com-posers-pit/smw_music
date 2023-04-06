@@ -527,6 +527,8 @@ class Dashboard(QWidget):
         title += f" - {self._window_title}"
         v.setWindowTitle(title)
 
+        self._utilization_updated(state.aram_util)
+
         with ExitStack() as stack:
             for child in self._view_widgets:
                 stack.enter_context(QSignalBlocker(child))
@@ -829,7 +831,6 @@ class Dashboard(QWidget):
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
-        m.utilization_updated.connect(self._utilization_updated)
 
     ###########################################################################
 
@@ -1291,7 +1292,6 @@ class Dashboard(QWidget):
         if fname := sel_sample.brr_fname.name:
             v.brr_fname.setText(str(fname))
             with suppress(FileNotFoundError):
-                # First two bytes are not written into the output file
                 v.brr_size.setText(
                     brr_size(stat(sel_sample.brr_fname).st_size) + " KB"
                 )
