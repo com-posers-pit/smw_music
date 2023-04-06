@@ -1539,15 +1539,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         total_size = 0
         # TODO: Unify sample size calcs
         for sample in self.state.samples.values():
+            size = 0
             if sample.sample_source == SampleSource.SAMPLEPACK:
                 is_pack = True
                 pack, path = sample.pack_sample
-                size = brr_size_b(len(self._sample_packs[pack][path].data))
+                if pack:
+                    size = brr_size_b(len(self._sample_packs[pack][path].data))
             else:
                 is_pack = False
                 pack = ""
                 path = sample.brr_fname
-                size = 0
                 with suppress(FileNotFoundError):
                     size = brr_size_b(os.stat(path).st_size)
 
