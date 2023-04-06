@@ -1030,6 +1030,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             self.state.instruments = deepcopy(self.song.instruments)
 
+            if self._on_generate_mml_clicked(False):
+                self._on_generate_spc_clicked(False)
+
     ###########################################################################
 
     def _load_prefs(self) -> None:
