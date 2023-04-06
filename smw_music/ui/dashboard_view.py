@@ -73,6 +73,8 @@ class DashboardView(QMainWindow):
     brr_fname: QLineEdit
     brr_setting: QLineEdit
     brr_setting_label: QLabel
+    brr_size: QLabel
+    brr_size_label: QLabel
     builtin_sample: QComboBox
     centralwidget: QWidget
     close_project: QAction
@@ -287,4 +289,11 @@ class DashboardView(QMainWindow):
     tune_slider: QSlider
     tuning_tab: QWidget
     undo: QAction
+    utilization: QLabel
+    utilization_echo: QLabel
+    utilization_engine: QLabel
+    utilization_frame: QFrame
+    utilization_pct_free: QLabel
+    utilization_samples: QLabel
+    utilization_song: QLabel
     view_history: QAction

@@ -13,9 +13,30 @@
 import urllib.error
 import urllib.request
 from contextlib import suppress
+from math import isclose
 
 ###############################################################################
 # API function definitions
+###############################################################################
+
+
+def brr_size(fsize: int) -> str:
+    rounding = 5
+    rounded_size_kb = rounding * round(
+        (brr_size_b(fsize) / 1024) / rounding, 1
+    )
+    if isclose(0, rounded_size_kb):
+        return "< 0.5"
+    return f"{rounded_size_kb:.1f}"
+
+
+###############################################################################
+
+
+def brr_size_b(fsize: int) -> int:
+    return fsize - 2
+
+
 ###############################################################################
 
 

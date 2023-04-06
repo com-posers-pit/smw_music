@@ -20,7 +20,7 @@
 #path "${sample_path}"
 
 #samples {
-    #optimized ;Don't touch/delete this line, just replace the sample brr files below
+    #optimized
 %for sample in set(x[0] for x in custom_samples):
     "${sample}"
 %endfor
@@ -30,6 +30,11 @@
 %for sample, settings, idx in custom_samples:
     "${sample}"${' '*(max(len(x[0]) for x in custom_samples) - len(sample))}          ${settings} ; @${idx}
 %endfor
+}
+%else:
+
+#samples {
+    #optimized
 }
 %endif
 

@@ -15,6 +15,7 @@ from collections import deque
 from contextlib import ExitStack, suppress
 from functools import cached_property, partial
 from importlib import resources
+from os import stat
 from pathlib import Path
 from typing import Callable, NamedTuple, cast
 
@@ -23,7 +24,16 @@ import qdarkstyle  # type: ignore
 from music21.pitch import Pitch
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie
+from PyQt6.QtGui import (
+    QAction,
+    QColor,
+    QFont,
+    QIcon,
+    QKeyEvent,
+    QMovie,
+    QPainter,
+    QPixmap,
+)
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -59,8 +69,13 @@ from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
+from smw_music.ui.utilization import (
+    Utilization,
+    paint_utilization,
+    setup_utilization,
+)
 from smw_music.ui.utils import to_checkstate
-from smw_music.utils import hexb, pct
+from smw_music.utils import brr_size, hexb, pct
 
 ###############################################################################
 # Private function definitions
@@ -410,6 +425,7 @@ class Dashboard(QWidget):
 
         sheet = qdarkstyle.load_stylesheet(qt_api="pyqt6") if dark_mode else ""
         cast(QApplication, QApplication.instance()).setStyleSheet(sheet)
+        self._setup_utilization(dark_mode)
 
         # advance_enabled handling
         v.generate_mml.setVisible(advanced_enabled)
@@ -476,7 +492,7 @@ class Dashboard(QWidget):
     ) -> None:
         # sample_packs handling
         self._sample_pack_items = {}
-        tree = self._view.sample_pack_list  # pylint: disable=invalid-name
+        tree = self._view.sample_pack_list
 
         tree.clear()
 
@@ -486,6 +502,9 @@ class Dashboard(QWidget):
 
             self._add_sample_pack(top, name, pack)
             tree.addTopLevelItem(top)
+
+        tree.resizeColumnToContents(0)
+        tree.resizeColumnToContents(1)
 
     ###########################################################################
 
@@ -506,6 +525,8 @@ class Dashboard(QWidget):
 
         title += f" - {self._window_title}"
         v.setWindowTitle(title)
+
+        self._utilization_updated(state.aram_util)
 
         with ExitStack() as stack:
             for child in self._view_widgets:
@@ -639,7 +660,9 @@ class Dashboard(QWidget):
                     parent_items[path] = item
                     parent = item
 
-            item = QTreeWidgetItem(parent, [sample.path.name])
+            item = QTreeWidgetItem(
+                parent, [sample.path.name, brr_size(len(sample.data))]
+            )
             item_id = (name, sample.path)
             item.setData(0, Qt.ItemDataRole.UserRole, item_id)
             self._sample_pack_items[item_id] = item
@@ -1035,14 +1058,10 @@ class Dashboard(QWidget):
 
     def _setup_instrument_table(self) -> None:
         widget = self._view.sample_list
-        header = QTreeWidgetItem(["Instrument", "S", "M"])
-
-        header.setToolTip(_TblCol.SOLO, "Solo Instrument")
-        header.setToolTip(_TblCol.MUTE, "Mute Instrument")
-
-        widget.setHeaderItem(header)
-
         widget.header().moveSection(_TblCol.NAME, len(_TblCol) - 1)
+
+        for n in _TblCol:
+            widget.resizeColumnToContents(n)
 
     ###########################################################################
 
@@ -1063,6 +1082,24 @@ class Dashboard(QWidget):
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)
+
+    ###########################################################################
+
+    def _setup_utilization(self, dark: bool) -> None:
+        v = self._view
+        util = v.utilization
+
+        canvas = QPixmap(util.width(), util.height())
+        canvas.fill(Qt.GlobalColor.black)
+        util.setPixmap(canvas)
+
+        setup_utilization(
+            dark,
+            v.utilization_engine,
+            v.utilization_song,
+            v.utilization_samples,
+            v.utilization_echo,
+        )
 
     ###########################################################################
 
@@ -1149,6 +1186,9 @@ class Dashboard(QWidget):
                 if inst_name == open_inst:
                     widget.expand(widget.indexFromItem(parent))
 
+        for n in _TblCol:
+            widget.resizeColumnToContents(n)
+
     ###########################################################################
 
     def _update_multisample(self, state: State) -> None:
@@ -1228,22 +1268,33 @@ class Dashboard(QWidget):
             sel_sample.sample_source == SampleSource.BUILTIN
         )
         v.builtin_sample.setCurrentIndex(sel_sample.builtin_sample_index)
-        v.select_pack_sample.setChecked(
-            sel_sample.sample_source == SampleSource.SAMPLEPACK
-        )
+
+        samplepack = sel_sample.sample_source == SampleSource.SAMPLEPACK
+        v.select_pack_sample.setChecked(samplepack)
+        if samplepack:
+            with suppress(KeyError):
+                v.sample_pack_list.setCurrentItem(
+                    self._sample_pack_items[sel_sample.pack_sample]
+                )
+        else:
+            v.sample_pack_list.clearSelection()
+
         v.sample_settings_box.setEnabled(
             sel_sample.sample_source != SampleSource.BUILTIN
         )
-        with suppress(KeyError):
-            v.sample_pack_list.setCurrentItem(
-                self._sample_pack_items[sel_sample.pack_sample]
-            )
 
         v.select_brr_sample.setChecked(
             sel_sample.sample_source == SampleSource.BRR
         )
-        fname = str(sel_sample.brr_fname) if sel_sample.brr_fname.name else ""
-        v.brr_fname.setText(fname)
+
+        v.brr_fname.setText("")
+        v.brr_size.setText("")
+        if fname := sel_sample.brr_fname.name:
+            v.brr_fname.setText(str(fname))
+            with suppress(FileNotFoundError):
+                v.brr_size.setText(
+                    brr_size(stat(sel_sample.brr_fname).st_size) + " KB"
+                )
 
         v.octave_shift.setValue(sel_sample.octave_shift)
 
@@ -1318,6 +1369,13 @@ class Dashboard(QWidget):
             item = QListWidgetItem(text)
             item.setData(Qt.ItemDataRole.UserRole, (pitch, head))
             widget.addItem(item)
+
+    ###########################################################################
+
+    def _utilization_updated(self, util: Utilization) -> None:
+        paint_utilization(
+            util, self._view.utilization, self._view.utilization_pct_free
+        )
 
     ###########################################################################
     # Private property definitions

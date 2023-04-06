@@ -34,6 +34,7 @@ from smw_music.music_xml.instrument import (
 )
 from smw_music.ui.old_save import v0
 from smw_music.ui.state import State
+from smw_music.ui.utils import make_vis_dir
 
 ###############################################################################
 # Private constant definitions
@@ -286,6 +287,8 @@ def _upgrade_save(fname: Path) -> tuple[State, Path]:
 
 
 def load(fname: Path) -> tuple[State, Path | None]:
+    rv: tuple[State, Path | None]
+
     with open(fname, "r", encoding="utf8") as fobj:
         contents: _SaveDict = yaml.safe_load(fobj)
 
@@ -296,8 +299,13 @@ def load(fname: Path) -> tuple[State, Path | None]:
             + f"supports up to {_CURRENT_SAVE_VERSION}"
         )
 
+    # Visualization support added in the middle of support for v1 version
+    # files, so we should try to add it
+    if save_version <= 1:
+        make_vis_dir(fname.parent)
+
     if save_version < _CURRENT_SAVE_VERSION:
-        return _upgrade_save(fname)
+        rv = _upgrade_save(fname)
     else:
         project = contents["song"]
         sdict = contents["state"]
@@ -320,8 +328,9 @@ def load(fname: Path) -> tuple[State, Path | None]:
             game=sdict["game"],
             start_measure=sdict.get("start_measure", 1),
         )
+        rv = state, None
 
-    return state, None
+    return rv
 
 
 ###############################################################################

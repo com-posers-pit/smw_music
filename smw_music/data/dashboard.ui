@@ -7,13 +7,13 @@
     <x>0</x>
     <y>0</y>
     <width>1400</width>
-    <height>600</height>
+    <height>800</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>800</width>
-    <height>600</height>
+    <width>1200</width>
+    <height>800</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -195,7 +195,7 @@
                    <enum>QAbstractItemView::SingleSelection</enum>
                   </property>
                   <property name="columnCount">
-                   <number>4</number>
+                   <number>3</number>
                   </property>
                   <attribute name="headerMinimumSectionSize">
                    <number>35</number>
@@ -205,22 +205,23 @@
                   </attribute>
                   <column>
                    <property name="text">
-                    <string notr="true">1</string>
+                    <string notr="true">Instrument</string>
                    </property>
                   </column>
                   <column>
                    <property name="text">
-                    <string notr="true">2</string>
+                    <string notr="true">S</string>
+                   </property>
+                   <property name="toolTip">
+                    <string>Solo Instrument</string>
                    </property>
                   </column>
                   <column>
                    <property name="text">
-                    <string notr="true">3</string>
+                    <string notr="true">M</string>
                    </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string notr="true">4</string>
+                   <property name="toolTip">
+                    <string>Mute Instrument</string>
                    </property>
                   </column>
                  </widget>
@@ -249,29 +250,14 @@
                      <item row="6" column="2">
                       <widget class="QLineEdit" name="brr_fname"/>
                      </item>
-                     <item row="3" column="1" colspan="2">
-                      <widget class="QRadioButton" name="select_pack_sample">
+                     <item row="5" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_brr_sample">
                        <property name="text">
-                        <string>Sample Pack Sample</string>
+                        <string>Custom Sample</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="4" column="1" colspan="2">
-                      <widget class="QTreeWidget" name="sample_pack_list">
-                       <property name="editTriggers">
-                        <set>QAbstractItemView::NoEditTriggers</set>
-                       </property>
-                       <property name="headerHidden">
-                        <bool>true</bool>
-                       </property>
-                       <column>
-                        <property name="text">
-                         <string notr="true">1</string>
-                        </property>
-                       </column>
-                      </widget>
-                     </item>
-                     <item row="9" column="2">
+                     <item row="10" column="2">
                       <widget class="QSpinBox" name="octave_shift">
                        <property name="minimum">
                         <number>-6</number>
@@ -281,44 +267,20 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="9" column="1">
-                      <widget class="QLabel" name="octave_shift_label">
+                     <item row="3" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_pack_sample">
                        <property name="text">
-                        <string>Octave Shift</string>
+                        <string>Sample Pack Sample</string>
                        </property>
                       </widget>
                      </item>
-                     <item row="5" column="1" colspan="2">
-                      <widget class="QRadioButton" name="select_brr_sample">
-                       <property name="text">
-                        <string>Custom Sample</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="7" column="1" colspan="2">
+                     <item row="8" column="1" colspan="2">
                       <widget class="QRadioButton" name="select_multisample_sample">
                        <property name="enabled">
                         <bool>false</bool>
                        </property>
                        <property name="text">
                         <string>Multisample</string>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="1" column="1" colspan="2">
-                      <widget class="QRadioButton" name="select_builtin_sample">
-                       <property name="text">
-                        <string>Builtin Sample</string>
-                       </property>
-                       <property name="checked">
-                        <bool>true</bool>
-                       </property>
-                      </widget>
-                     </item>
-                     <item row="6" column="1">
-                      <widget class="QPushButton" name="select_brr_fname">
-                       <property name="text">
-                        <string>brr</string>
                        </property>
                       </widget>
                      </item>
@@ -476,7 +438,14 @@
                        </item>
                       </widget>
                      </item>
-                     <item row="8" column="1">
+                     <item row="10" column="1">
+                      <widget class="QLabel" name="octave_shift_label">
+                       <property name="text">
+                        <string>Octave Shift</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="9" column="1">
                       <widget class="QPushButton" name="select_multisample_fname">
                        <property name="enabled">
                         <bool>false</bool>
@@ -486,10 +455,70 @@
                        </property>
                       </widget>
                      </item>
-                     <item row="8" column="2">
+                     <item row="1" column="1" colspan="2">
+                      <widget class="QRadioButton" name="select_builtin_sample">
+                       <property name="text">
+                        <string>Builtin Sample</string>
+                       </property>
+                       <property name="checked">
+                        <bool>true</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="6" column="1">
+                      <widget class="QPushButton" name="select_brr_fname">
+                       <property name="text">
+                        <string>brr</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="4" column="1" colspan="2">
+                      <widget class="QTreeWidget" name="sample_pack_list">
+                       <property name="editTriggers">
+                        <set>QAbstractItemView::NoEditTriggers</set>
+                       </property>
+                       <property name="indentation">
+                        <number>10</number>
+                       </property>
+                       <property name="headerHidden">
+                        <bool>false</bool>
+                       </property>
+                       <property name="columnCount">
+                        <number>2</number>
+                       </property>
+                       <attribute name="headerVisible">
+                        <bool>true</bool>
+                       </attribute>
+                       <column>
+                        <property name="text">
+                         <string notr="true">Sample</string>
+                        </property>
+                       </column>
+                       <column>
+                        <property name="text">
+                         <string notr="true">Size [KB]</string>
+                        </property>
+                       </column>
+                      </widget>
+                     </item>
+                     <item row="9" column="2">
                       <widget class="QLineEdit" name="multisample_fname">
                        <property name="enabled">
                         <bool>false</bool>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="1">
+                      <widget class="QLabel" name="brr_size_label">
+                       <property name="text">
+                        <string>Size:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item row="7" column="2">
+                      <widget class="QLabel" name="brr_size">
+                       <property name="text">
+                        <string/>
                        </property>
                       </widget>
                      </item>
@@ -2202,6 +2231,9 @@
          <property name="text">
           <string>Render</string>
          </property>
+         <property name="shortcut">
+          <string>Ctrl+R</string>
+         </property>
         </widget>
        </item>
        <item>
@@ -2216,6 +2248,72 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item>
+        <widget class="QFrame" name="utilization_frame">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_17">
+          <item row="2" column="2">
+           <widget class="QLabel" name="utilization_samples">
+            <property name="text">
+             <string>Samples</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QLabel" name="utilization_song">
+            <property name="text">
+             <string>Song</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="utilization_engine">
+            <property name="text">
+             <string>Engine</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="3">
+           <widget class="QLabel" name="utilization_echo">
+            <property name="text">
+             <string>Echo</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="4">
+           <widget class="QLabel" name="utilization">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="utilization_pct_free">
+            <property name="minimumSize">
+             <size>
+              <width>50</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
      </widget>
