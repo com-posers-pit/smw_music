@@ -69,8 +69,12 @@ from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
+from smw_music.ui.utilization import (
+    Utilization,
+    paint_utilization,
+    setup_utilization,
+)
 from smw_music.ui.utils import to_checkstate
-from smw_music.ui.visualization import Utilization
 from smw_music.utils import brr_size, hexb, pct
 
 ###############################################################################
@@ -223,11 +227,7 @@ class Dashboard(QWidget):
         self._view.installEventFilter(self)
         self._view.setWindowTitle(self._window_title)
 
-        self._util = QLabel()
-        self._canvas = QPixmap(256, 25)
-        self._canvas.fill(Qt.GlobalColor.black)
-        self._util.setPixmap(self._canvas)
-        self._view.statusBar().addPermanentWidget(self._util)
+        self._setup_utilization()
 
         self._preferences = Preferences()
         self._model = Model()
@@ -1085,6 +1085,23 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def _setup_utilization(self) -> None:
+        v = self._view
+        util = v.utilization
+
+        canvas = QPixmap(util.width(), util.height())
+        canvas.fill(Qt.GlobalColor.black)
+        util.setPixmap(canvas)
+
+        setup_utilization(
+            v.utilization_engine,
+            v.utilization_song,
+            v.utilization_samples,
+            v.utilization_echo,
+        )
+
+    ###########################################################################
+
     def _update_envelope(  # pylint: disable=too-many-arguments
         self,
         adsr_mode: bool,
@@ -1356,51 +1373,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _utilization_updated(self, util: Utilization) -> None:
-        fixed = util.variables + util.engine
-        song = util.song
-        samples = util.samples + util.sample_table
-        echo = util.echo + util.echo_pad
-        free = util.free
-
-        total = fixed + song + samples + echo + free
-
-        rect = self._canvas.rect()
-        x = rect.x()
-        y = rect.y()
-        w = rect.width()
-        h = rect.height()
-
-        painter = QPainter()
-        painter.begin(self._canvas)
-
-        start, end = x, int(fixed / 65536 * w)
-        painter.fillRect(start, y, end, h, QColor("#E1A730"))
-
-        start, end = end, end + int(song / 65536 * w)
-        painter.fillRect(start, y, end, h, QColor("#E0E3D7"))
-
-        start, end = end, end + int(samples / 65536 * w)
-        painter.fillRect(start, y, end, h, QColor("#2879C0"))
-
-        start, end = end, end + int(echo / 65536 * w)
-        painter.fillRect(start, y, end, h, QColor("#AB3910"))
-
-        start, end = end, w
-        painter.fillRect(start, y, end, h, QColor("#000000"))
-
-        painter.end()
-
-        self._util.setPixmap(self._canvas)
-        self._util.setToolTip(
-            ", ".join(
-                [
-                    f"{100*fixed/total:2.0f}% Engine",
-                    f"{100*song/total:2.0f}% Song",
-                    f"{100*samples/total:2.0f}% Samples",
-                    f"{100*echo/total:2.0f}% Echo",
-                    f"{100*free/total:2.0f}% Free",
-                ]
-            )
+        paint_utilization(
+            util, self._view.utilization, self._view.utilization_pct_free
         )
 
     ###########################################################################

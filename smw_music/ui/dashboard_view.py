@@ -289,4 +289,11 @@ class DashboardView(QMainWindow):
     tune_slider: QSlider
     tuning_tab: QWidget
     undo: QAction
+    utilization: QLabel
+    utilization_echo: QLabel
+    utilization_engine: QLabel
+    utilization_frame: QFrame
+    utilization_pct_free: QLabel
+    utilization_samples: QLabel
+    utilization_song: QLabel
     view_history: QAction

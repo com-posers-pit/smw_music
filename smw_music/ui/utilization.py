@@ -37,6 +37,13 @@ class _Colors(Enum):
     HOT_PINK = QColor("#D95980")
     BLACK = QColor("#000000")
 
+    # Aliases for what we use in the UI
+    ENGINE = GOLD
+    SONG = IVORY
+    SAMPLES = BLUE_GROTTO
+    ECHO = CHILI_PEPPER
+    FREE = BLACK
+
 
 ###############################################################################
 
@@ -142,7 +149,21 @@ def decode_utilization(png_name: Path) -> Utilization:
 ###############################################################################
 
 
-def paint_utilization(util: Utilization, label: QLabel) -> None:
+def setup_utilization(
+    engine: QLabel, song: QLabel, samples: QLabel, echo: QLabel
+) -> None:
+    engine.setStyleSheet(f"color: {_Colors.ENGINE.value.name()}")
+    song.setStyleSheet(f"color: {_Colors.SONG.value.name()}")
+    samples.setStyleSheet(f"color: {_Colors.SAMPLES.value.name()}")
+    echo.setStyleSheet(f"color: {_Colors.ECHO.value.name()}")
+
+
+###############################################################################
+
+
+def paint_utilization(
+    util: Utilization, util_label: QLabel, free_label: QLabel
+) -> None:
     fixed_b = util.variables + util.engine
     song_b = util.song
     samples_b = util.samples + util.sample_table
@@ -156,7 +177,7 @@ def paint_utilization(util: Utilization, label: QLabel) -> None:
     echo_pct = echo_b / total_b
     free_pct = free_b / total_b
 
-    canvas = label.pixmap()
+    canvas = util_label.pixmap()
 
     rect = canvas.rect()
     start_x = rect.x()
@@ -168,31 +189,45 @@ def paint_utilization(util: Utilization, label: QLabel) -> None:
     painter.begin(canvas)
 
     start, end = start_x, int(fixed_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.GOLD.value)
+    painter.fillRect(start, start_y, end, height, _Colors.ENGINE.value)
 
     start, end = end, end + int(song_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.IVORY.value)
+    painter.fillRect(start, start_y, end, height, _Colors.SONG.value)
 
     start, end = end, end + int(samples_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.BLUE_GROTTO.value)
+    painter.fillRect(start, start_y, end, height, _Colors.SAMPLES.value)
 
     start, end = end, end + int(echo_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.CHILI_PEPPER.value)
+    painter.fillRect(start, start_y, end, height, _Colors.ECHO.value)
 
     start, end = end, width
-    painter.fillRect(start, start_y, end, height, _Colors.BLACK.value)
+    painter.fillRect(start, start_y, end, height, _Colors.FREE.value)
 
     painter.end()
 
-    label.setPixmap(canvas)
-    label.setToolTip(
-        ", ".join(
-            [
-                f"{100*fixed_pct:2.0f}% Engine",
-                f"{100*song_pct:2.0f}% Song",
-                f"{100*samples_pct:2.0f}% Samples",
-                f"{100*echo_pct:2.0f}% Echo",
-                f"{100*free_pct:2.0f}% Free",
-            ]
-        )
+    util_label.setPixmap(canvas)
+
+    usage_b = ", ".join(
+        [
+            f"{fixed_b}B Engine",
+            f"{song_b}B Song",
+            f"{samples_b}B Samples",
+            f"{echo_b}B Echo",
+            f"{free_b}B Free",
+        ]
     )
+    usage_pct = ", ".join(
+        [
+            f"{100*fixed_pct:2.0f}% Engine",
+            f"{100*song_pct:2.0f}% Song",
+            f"{100*samples_pct:2.0f}% Samples",
+            f"{100*echo_pct:2.0f}% Echo",
+            f"{100*free_pct:2.0f}% Free",
+        ]
+    )
+
+    util_label.setToolTip(f"{usage_pct}\n{usage_b}")
+    free_label.setText(f"{100*free_pct:+3.0f}%")
+
+    free_color = "#ff0000" if free_pct <= 0 else "#00AA00"
+    free_label.setStyleSheet(f"color: {free_color}")
