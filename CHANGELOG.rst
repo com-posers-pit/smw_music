@@ -11,7 +11,67 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.7`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.7 - 2023-04-06
+--------------------------
+
+CODENAME: `Sabotage`_
+
+Oh my God, it's a mirage
+
+I'm tellin' y'all, it's a sabotage
+
+`Release 0.3.7`_
+
 `Differences from 0.3.6`_
+
+Purpose
++++++++
+
+Add ARAM estimation logic
+
+
+Affected Issues
++++++++++++++++
+
+- `#199 Add BRR file size display`_
+
+- `#198 Add ARAM calculation`_
+
+- `#190 Validate musicxml on load`_
+
+Changed
++++++++
+
+- All projects get #optimized, even if there are no custom samples
+
+Added
++++++
+
+- ARAM utilization graph in bottom right
+
+- MML and SPC generation steps are run at MusicXML load time
+
+  - Gives you an initial idea of your utilization and any glaring errors
+
+- BRR file/sample sizes are displayed in UI
+
+- Ctrl+R as a shortcut for render
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
 
 --------------------------------------------------------------------------------
 
@@ -1017,6 +1077,9 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#199 Add BRR file size display: https://github.com/com-posers-pit/smw_music/issues/199
+.. _#198 Add ARAM calculation: https://github.com/com-posers-pit/smw_music/issues/198
+.. _#190 Validate musicxml on load: https://github.com/com-posers-pit/smw_music/issues/190
 .. _#189 Update default q values: https://github.com/com-posers-pit/smw_music/issues/189
 .. _#188 Move start measure: https://github.com/com-posers-pit/smw_music/issues/188
 .. _#187 Prompt "are you sure" on rendering: https://github.com/com-posers-pit/smw_music/issues/187
@@ -1140,6 +1203,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.7: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.7
 .. _Release 0.3.6: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.6
 .. _Release 0.3.5: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.5
 .. _Release 0.3.4: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.4
@@ -1156,7 +1220,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.6: https://github.com/com-posers-pit/smw_music/compare/v0.3.6...HEAD
+.. _Differences from 0.3.7: https://github.com/com-posers-pit/smw_music/compare/v0.3.7...HEAD
+.. _Differences from 0.3.6: https://github.com/com-posers-pit/smw_music/compare/v0.3.6...v0.3.7
 .. _Differences from 0.3.5: https://github.com/com-posers-pit/smw_music/compare/v0.3.5...v0.3.6
 .. _Differences from 0.3.4: https://github.com/com-posers-pit/smw_music/compare/v0.3.4...v0.3.5
 .. _Differences from 0.3.3: https://github.com/com-posers-pit/smw_music/compare/v0.3.3...v0.3.4
@@ -1171,6 +1236,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _Sabotage: https://www.youtube.com/watch?v=z5rRZdiu1UE
 .. _La Forme: https://www.youtube.com/watch?v=-TEL_PPSt4s
 .. _Cherry Twist: https://www.youtube.com/watch?v=eLkQ2eLrUMs
 .. _I'm Pissed: https://www.youtube.com/watch?v=T6dmMUR9TVI
