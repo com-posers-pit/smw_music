@@ -153,9 +153,9 @@ def default_utilization() -> Utilization:
     return Utilization(
         variables=1102,
         engine=9938,
-        song=127,
+        song=119,
         sample_table=80,
-        samples=25686,
+        samples=12815,
         echo=4,
         echo_pad=252,
     )
