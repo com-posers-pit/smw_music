@@ -26,23 +26,18 @@ from PyQt6.QtWidgets import QLabel
 
 
 # https://www.oberlo.com/blog/color-combinations-cheat-sheet
-class _Colors(Enum):
+class _Color(Enum):
+    BLACK = QColor("#000000")
+
     GOLD = QColor("#E1A730")
     IVORY = QColor("#E0E3D7")
     BLUE_GROTTO = QColor("#2879C0")
     CHILI_PEPPER = QColor("#AB3910")
+
     MIDNIGHT_BLUE = QColor("#284E60")
     ORANGE = QColor("#F99845")
     BLUE_GRAY = QColor("#63AAC0")
     HOT_PINK = QColor("#D95980")
-    BLACK = QColor("#000000")
-
-    # Aliases for what we use in the UI
-    ENGINE = GOLD
-    SONG = IVORY
-    SAMPLES = BLUE_GROTTO
-    ECHO = CHILI_PEPPER
-    FREE = BLACK
 
 
 ###############################################################################
@@ -67,6 +62,32 @@ def _count_matches(arr: npt.NDArray[np.uint8], val: _UsageType) -> int:
     (matches,) = np.where((arr == val.value).all(axis=1))
     return len(matches)
 
+
+###############################################################################
+# Private variable Definitions
+###############################################################################
+
+_DARK_MODE = {
+    "ENGINE": _Color.GOLD,
+    "SONG": _Color.IVORY,
+    "SAMPLES": _Color.BLUE_GROTTO,
+    "ECHO": _Color.CHILI_PEPPER,
+    "FREE": _Color.BLACK,
+}
+
+###############################################################################
+
+_LIGHT_MODE = {
+    "ENGINE": _Color.MIDNIGHT_BLUE,
+    "SONG": _Color.ORANGE,
+    "SAMPLES": _Color.BLUE_GRAY,
+    "ECHO": _Color.HOT_PINK,
+    "FREE": _Color.IVORY,
+}
+
+###############################################################################
+
+_colors = _DARK_MODE
 
 ###############################################################################
 # API Class Definitions
@@ -176,18 +197,6 @@ def echo_bytes(delay: int) -> tuple[int, int]:
 ###############################################################################
 
 
-def setup_utilization(
-    engine: QLabel, song: QLabel, samples: QLabel, echo: QLabel
-) -> None:
-    engine.setStyleSheet(f"color: {_Colors.ENGINE.value.name()}")
-    song.setStyleSheet(f"color: {_Colors.SONG.value.name()}")
-    samples.setStyleSheet(f"color: {_Colors.SAMPLES.value.name()}")
-    echo.setStyleSheet(f"color: {_Colors.ECHO.value.name()}")
-
-
-###############################################################################
-
-
 def paint_utilization(
     util: Utilization, util_label: QLabel, free_label: QLabel
 ) -> None:
@@ -216,19 +225,19 @@ def paint_utilization(
     painter.begin(canvas)
 
     start, end = start_x, int(fixed_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.ENGINE.value)
+    painter.fillRect(start, start_y, end, height, _colors["ENGINE"].value)
 
     start, end = end, end + int(song_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.SONG.value)
+    painter.fillRect(start, start_y, end, height, _colors["SONG"].value)
 
     start, end = end, end + int(samples_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.SAMPLES.value)
+    painter.fillRect(start, start_y, end, height, _colors["SAMPLES"].value)
 
     start, end = end, end + int(echo_pct * width)
-    painter.fillRect(start, start_y, end, height, _Colors.ECHO.value)
+    painter.fillRect(start, start_y, end, height, _colors["ECHO"].value)
 
     start, end = end, width
-    painter.fillRect(start, start_y, end, height, _Colors.FREE.value)
+    painter.fillRect(start, start_y, end, height, _colors["FREE"].value)
 
     painter.end()
 
@@ -260,3 +269,20 @@ def paint_utilization(
     # alignment, so for now make this red if we're under 1k
     free_color = "#ff0000" if free_b < 1024 else "#00AA00"
     free_label.setStyleSheet(f"color: {free_color}")
+
+
+###############################################################################
+
+
+# TODO: This is hiding state in the module, kinda gross and suggests a class
+def setup_utilization(
+    dark: bool, engine: QLabel, song: QLabel, samples: QLabel, echo: QLabel
+) -> None:
+
+    global _colors
+    _colors = _DARK_MODE if dark else _LIGHT_MODE
+
+    engine.setStyleSheet(f"color: {_colors['ENGINE'].value.name()}")
+    song.setStyleSheet(f"color: {_colors['SONG'].value.name()}")
+    samples.setStyleSheet(f"color: {_colors['SAMPLES'].value.name()}")
+    echo.setStyleSheet(f"color: {_colors['ECHO'].value.name()}")

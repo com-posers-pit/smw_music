@@ -1072,6 +1072,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.preferences.dark_mode,
             self.preferences.confirm_render,
         )
+        self.reinforce_state()
 
     ###########################################################################
 

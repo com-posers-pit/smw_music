@@ -227,8 +227,6 @@ class Dashboard(QWidget):
         self._view.installEventFilter(self)
         self._view.setWindowTitle(self._window_title)
 
-        self._setup_utilization()
-
         self._preferences = Preferences()
         self._model = Model()
         self._unsaved = False
@@ -427,6 +425,7 @@ class Dashboard(QWidget):
 
         sheet = qdarkstyle.load_stylesheet(qt_api="pyqt6") if dark_mode else ""
         cast(QApplication, QApplication.instance()).setStyleSheet(sheet)
+        self._setup_utilization(dark_mode)
 
         # advance_enabled handling
         v.generate_mml.setVisible(advanced_enabled)
@@ -1086,7 +1085,7 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _setup_utilization(self) -> None:
+    def _setup_utilization(self, dark: bool) -> None:
         v = self._view
         util = v.utilization
 
@@ -1095,6 +1094,7 @@ class Dashboard(QWidget):
         util.setPixmap(canvas)
 
         setup_utilization(
+            dark,
             v.utilization_engine,
             v.utilization_song,
             v.utilization_samples,
