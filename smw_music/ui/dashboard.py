@@ -136,6 +136,10 @@ _KONAMI = deque(
 )
 
 ###############################################################################
+
+_REV_KONAMI = deque(reversed(_KONAMI))
+
+###############################################################################
 # Private class definitions
 ###############################################################################
 
@@ -193,6 +197,7 @@ class Dashboard(QWidget):
     _history: QMainWindow
     _quicklook: QMainWindow
     _checkitout: QMainWindow
+    _camelitout: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
@@ -256,6 +261,15 @@ class Dashboard(QWidget):
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
+
+        self._camelitout = QMainWindow(parent=self)
+        self._camelitout.setWindowTitle("Camel by camel")
+        label = QLabel(self)
+        movie = QMovie(parent=self)
+        movie.setFileName(str(data_lib / "ankha.gif"))
+        label.setMovie(movie)
+        movie.start()
+        self._camelitout.setCentralWidget(label)
 
         self._history = QMainWindow(parent=self)
         self._history.setWindowTitle("Action history")
@@ -329,6 +343,8 @@ class Dashboard(QWidget):
                 self._keyhist.append(cast(QKeyEvent, event).key())
                 if self._keyhist == _KONAMI:
                     self._checkitout.show()
+                elif self._keyhist == _REV_KONAMI:
+                    self._camelitout.show()
 
         return super().eventFilter(obj, event)
 
