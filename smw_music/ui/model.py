@@ -334,6 +334,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     # API slot definitions
     ###########################################################################
 
+    def on_apply_suggested_tune_clicked(self) -> None:
+        setting = self.state.calculated_tune[1][0]
+        tune, subtune = divmod(setting, 256)
+        self._update_sample_state(tune_setting=tune, subtune_setting=subtune)
+        self.update_status(f"Tune setting set to {tune}.{subtune}")
+
+    ###########################################################################
+
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
         max_len = 7
         with suppress(NoSample):
@@ -943,6 +951,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_target_pitch_changed(self, pitch_class: int, octave: int) -> None:
+        pitch = Pitch(octave=octave, pitchClass=pitch_class)
+        self._update_state(target_pitch=pitch)
+        self.update_status(f"Target pitch set to {pitch.nameWithOctave}")
+
+    ###########################################################################
+
     def on_tune_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
         self._update_sample_state(tune_setting=setting)
@@ -1329,8 +1344,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             sample = self.state.sample
             if sample.sample_source == SampleSource.SAMPLEPACK:
                 pack, path = sample.pack_sample
-                data = self._sample_packs[pack][path].data
-                brr = Brr.from_binary(data)
+                brr = self._sample_packs[pack][path].brr
 
             else:
 
@@ -1340,10 +1354,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if brr is not None:
             self.state.calculated_tune = (
                 brr.fundamental,
-                brr.recommended_tune,
+                brr.recommended_tune(self.state.target_pitch.frequency),
             )
         else:
-            self.state.calculated_tune = (0, 0)
+            self.state.calculated_tune = (0, (0, 0))
 
         with suppress(NoSample):
             if self.song:

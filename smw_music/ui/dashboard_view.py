@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
 class DashboardView(QMainWindow):
     actionClearRecentProjects: QAction
     adsr_box: QFrame
+    apply_suggested_tune: QPushButton
     artic_acc_group: QGroupBox
     artic_acc_length_label: QLabel
     artic_acc_length_setting: QLineEdit
@@ -138,7 +139,6 @@ class DashboardView(QMainWindow):
     ffff_setting: QLineEdit
     ffff_setting_label: QLabel
     ffff_slider: QSlider
-    frame: QFrame
     gain_box: QFrame
     gain_eu_label: QLabel
     gain_frame: QFrame
@@ -164,6 +164,9 @@ class DashboardView(QMainWindow):
     global_volume_setting: QLineEdit
     global_volume_setting_label: QLabel
     global_volume_slider: QSlider
+    goal_frequency: QLabel
+    goal_frequency_label: QLabel
+    groupBox: QGroupBox
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
@@ -275,6 +278,8 @@ class DashboardView(QMainWindow):
     subtune_setting: QLineEdit
     subtune_setting_label: QLabel
     subtune_slider: QSlider
+    suggested_tune_pitch: QLabel
+    suggested_tune_pitch_label: QLabel
     superloop_analysis: QCheckBox
     sus_level_eu_label: QLabel
     sus_level_label: QLabel

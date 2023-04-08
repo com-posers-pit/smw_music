@@ -32,7 +32,6 @@ import wave
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Optional
 
 # Library imports
 import numpy as np
@@ -79,9 +78,9 @@ class BrrException(SmwMusicException):
 @dataclass
 class Brr:
     blocks: npt.NDArray[np.uint8]
-    loop_point: Optional[int] = None
-    _waveform_cache: Dict[int, npt.NDArray[np.int16]] = field(
-        init=False, repr=False, compare=False
+    loop_point: int | None = None
+    _waveform_cache: dict[int, npt.NDArray[np.int16]] = field(
+        init=False, repr=False, compare=False, default_factory=dict
     )
 
     ###########################################################################
@@ -155,7 +154,16 @@ class Brr:
 
     ###########################################################################
 
-    def to_wav(self, fname: str, loops: int = 0, framerate: int = 8000):
+    def recommended_tune(self, target: float) -> tuple[int, float]:
+        scale = 2**12
+        fundamental = self.fundamental
+        setting = round(target / fundamental * scale)
+        actual = setting / scale * fundamental
+        return (setting, actual)
+
+    ###########################################################################
+
+    def to_wav(self, fname: str, loops: int = 0, framerate: int = 32000):
         with wave.open(fname, "wb") as fobj:
             fobj.setnchannels(1)  # pylint: disable=no-member
             fobj.setsampwidth(2)  # pylint: disable=no-member
@@ -201,16 +209,17 @@ class Brr:
     @cached_property
     def fundamental(self) -> float:
         nyquist = 16000  # SPC700 samples (normally) at 32kHz
-        waveform = self.generate_waveform(20)
-        spec = abs(np.fft.rfft(waveform))
+        waveform = self.generate_waveform(10)
+        nsamples = len(waveform)  # 2 ** (int(np.log2(0.9 * len(waveform))))
+        spec = abs(np.fft.rfft(waveform[-nsamples:]))
         spec = spec / spec.max()
-        peak, *_ = find_peaks(abs(spec), prominence=0.1)[0]
+        peak, *_ = find_peaks(abs(spec), prominence=0.2)[0]
         return nyquist * peak / len(spec)
 
     ###########################################################################
 
     @cached_property
-    def filters(self) -> List[int]:
+    def filters(self) -> list[int]:
         return list(0x3 & (self.blocks[:, 0] >> 2))
 
     ###########################################################################
@@ -228,17 +237,8 @@ class Brr:
     ###########################################################################
 
     @cached_property
-    def ranges(self) -> List[int]:
+    def ranges(self) -> list[int]:
         return list(0xF & (self.blocks[:, 0] >> 4))
-
-    ###########################################################################
-
-    @cached_property
-    def recommended_tune(self) -> int:
-        middle_c = 261.625565
-        scale = 2**12
-        freq = self.fundamental
-        return int(middle_c / freq * scale)
 
     ###########################################################################
 
@@ -270,7 +270,3 @@ class Brr:
 
             if not (valid_len and valid_block):
                 raise BrrException(f"Invalid loop point: {self.loop_point}")
-
-        self._waveform_cache = {}
-
-    ###########################################################################

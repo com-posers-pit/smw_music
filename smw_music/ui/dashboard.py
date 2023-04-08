@@ -638,11 +638,16 @@ class Dashboard(QWidget):
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
 
-            freq, recc = state.calculated_tune
-            v.tuning_fundamental_freq.setText(f"{freq:.1f}Hz")
-            v.tuning_recommendation.setText(
-                f"${recc >> 8:02x} ${recc & 0xff:02x}"
-            )
+            v.tune_note.setCurrentIndex(state.target_pitch.pitchClass)
+            v.tune_octave.setValue(state.target_pitch.octave)
+
+            freq, (setting, actual) = state.calculated_tune
+            v.tuning_fundamental_freq.setText(f"{freq:.2f}Hz")
+            freq = state.target_pitch.frequency
+            v.goal_frequency.setText(f"{freq:.2f}Hz")
+            tune, subtune = divmod(setting, 256)
+            v.tuning_recommendation.setText(f"${tune:02x} ${subtune:02x}")
+            v.suggested_tune_pitch.setText(f"{actual:.2f}Hz")
 
     ###########################################################################
 
@@ -764,6 +769,9 @@ class Dashboard(QWidget):
             (v.sus_level_setting, m.on_sus_level_changed),
             (v.sus_rate_slider, m.on_sus_rate_changed),
             (v.sus_rate_setting, m.on_sus_rate_changed),
+            (v.tune_note, self._on_tune_note_changed),
+            (v.tune_octave, self._on_tune_octave_changed),
+            (v.apply_suggested_tune, m.on_apply_suggested_tune_clicked),
             (v.tune_slider, m.on_tune_changed),
             (v.tune_setting, m.on_tune_changed),
             (v.subtune_slider, m.on_subtune_changed),
@@ -1039,6 +1047,18 @@ class Dashboard(QWidget):
 
         solo = col == _TblCol.SOLO
         self._model.on_solomute_changed(sample, solo, checked)
+
+    ###########################################################################
+
+    def _on_tune_note_changed(self, pitch_class: int) -> None:
+        octave = self._view.tune_octave.value()
+        self._model.on_target_pitch_changed(pitch_class, octave)
+
+    ###########################################################################
+
+    def _on_tune_octave_changed(self, octave: int) -> None:
+        pitch_class = self._view.tune_note.currentIndex()
+        self._model.on_target_pitch_changed(pitch_class, octave)
 
     ###########################################################################
 
