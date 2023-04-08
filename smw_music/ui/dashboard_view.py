@@ -138,6 +138,7 @@ class DashboardView(QMainWindow):
     ffff_setting: QLineEdit
     ffff_setting_label: QLabel
     ffff_slider: QSlider
+    frame: QFrame
     gain_box: QFrame
     gain_eu_label: QLabel
     gain_frame: QFrame
@@ -283,10 +284,18 @@ class DashboardView(QMainWindow):
     sus_rate_label: QLabel
     sus_rate_setting: QLineEdit
     sus_rate_slider: QSlider
+    tune_control_box: QWidget
     tune_label: QLabel
+    tune_note: QComboBox
+    tune_note_label: QLabel
+    tune_octave: QSpinBox
     tune_setting: QLineEdit
     tune_setting_label: QLabel
     tune_slider: QSlider
+    tuning_fundamental_freq: QLabel
+    tuning_fundamental_freq_label: QLabel
+    tuning_recommendation: QLabel
+    tuning_recommendation_label: QLabel
     tuning_tab: QWidget
     undo: QAction
     utilization: QLabel

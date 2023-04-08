@@ -35,6 +35,7 @@ from watchdog import events, observers
 
 # Package imports
 from smw_music import SmwMusicException, __version__
+from smw_music.brr import Brr
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
@@ -1322,6 +1323,27 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.state.unmapped = set()
 
         self._update_aram_util()
+
+        brr: Brr | None = None
+        with suppress(NoSample):
+            sample = self.state.sample
+            if sample.sample_source == SampleSource.SAMPLEPACK:
+                pack, path = sample.pack_sample
+                data = self._sample_packs[pack][path].data
+                brr = Brr.from_binary(data)
+
+            else:
+
+                with suppress(FileNotFoundError):
+                    brr = Brr.from_file(sample.brr_fname)
+
+        if brr is not None:
+            self.state.calculated_tune = (
+                brr.fundamental,
+                brr.recommended_tune,
+            )
+        else:
+            self.state.calculated_tune = (0, 0)
 
         with suppress(NoSample):
             if self.song:

@@ -638,6 +638,12 @@ class Dashboard(QWidget):
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
 
+            freq, recc = state.calculated_tune
+            v.tuning_fundamental_freq.setText(f"{freq:.1f}Hz")
+            v.tuning_recommendation.setText(
+                f"${recc >> 8:02x} ${recc & 0xff:02x}"
+            )
+
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
