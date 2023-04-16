@@ -3,6 +3,7 @@
 #
 # SPDX-License-Identifier: AGPL-3.0-only
 
+# Line 2469 in main.asm
 _PITCH_TABLE = [
     0x085F,
     0x08DE,
@@ -112,4 +113,8 @@ def set_pitch(
     #     +
     #         ret
 
-    return 0
+
+c4 = 0xA4
+assert set_pitch(0, 0x7F & c4, 0, 0x2, 0xF4) == 0x62B
+assert set_pitch(0, 0x7F & (c4 + 12), 0, 0x2, 0xF4) == 0xC5A
+assert set_pitch(0, 0x7F & (c4), 0, 0x3, 0xF4) == 0x842
