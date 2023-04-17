@@ -34,7 +34,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music import SmwMusicException, __version__, nspc
 from smw_music.brr import Brr
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
@@ -1352,9 +1352,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     brr = Brr.from_file(sample.brr_fname)
 
         if brr is not None:
+            pitch = self.state.target_pitch
             self.state.calculated_tune = (
                 brr.fundamental,
-                brr.recommended_tune(self.state.target_pitch.frequency),
+                brr.recommended_tune(
+                    nspc.midi_to_nspc(pitch.midi), pitch.frequency
+                ),
             )
         else:
             self.state.calculated_tune = (0, (0, 0))

@@ -39,7 +39,7 @@ import numpy.typing as npt
 from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 
 # Package imports
-from smw_music import SmwMusicException
+from smw_music import SmwMusicException, nspc
 
 ###############################################################################
 # Private constant definitions
@@ -154,12 +154,8 @@ class Brr:
 
     ###########################################################################
 
-    def recommended_tune(self, target: float) -> tuple[int, float]:
-        scale = 2**12
-        fundamental = self.fundamental
-        setting = round(target / fundamental * scale)
-        actual = setting / scale * fundamental
-        return (setting, actual)
+    def recommended_tune(self, note: int, target: float) -> tuple[int, float]:
+        return nspc.calc_tune(self.fundamental, note, target)
 
     ###########################################################################
 
@@ -210,7 +206,7 @@ class Brr:
     def fundamental(self) -> float:
         nyquist = 16000  # SPC700 samples (normally) at 32kHz
         waveform = self.generate_waveform(10)
-        nsamples = len(waveform)  # 2 ** (int(np.log2(0.9 * len(waveform))))
+        nsamples = len(waveform)
         spec = abs(np.fft.rfft(waveform[-nsamples:]))
         spec = spec / spec.max()
         peak, *_ = find_peaks(abs(spec), prominence=0.2)[0]

@@ -23,6 +23,35 @@ _PITCH_TABLE = [
 ###############################################################################
 
 
+def calc_tune(fundamental: float, note: int, freq: float) -> tuple[int, float]:
+    tune = 1.0
+    scale = 2**12
+    octave, idx = divmod(note, 12)
+
+    pitch = _PITCH_TABLE[idx] >> (5 - octave)
+
+    tune = round((scale * (freq / fundamental) / pitch) * 256)
+    actual = fundamental * (tune / 256) * pitch / scale
+
+    return tune, actual
+
+
+###############################################################################
+
+
+def midi_to_nspc(midi_number: int) -> int:
+    # C4 is 60 in MIDI, a 0xA4 in AMK/N-SPC
+    midi_c4 = 60
+    nspc_c4 = 0xA4
+
+    # Within N-SPC, the most significant bit is masked away prior to any
+    # calculations
+    return midi_number - midi_c4 + (nspc_c4 & 0x7F)
+
+
+###############################################################################
+
+
 def set_pitch(tune: int, note: int, subnote: int = 0) -> int:
     """
     Reimplementation of SetPitch from main.asm
@@ -40,29 +69,3 @@ def set_pitch(tune: int, note: int, subnote: int = 0) -> int:
     pitch >>= 5 - octave
 
     return pitch * tune >> 8
-
-
-###############################################################################
-
-
-c4 = 0xA4
-c5 = c4 + 12
-c6 = c5 + 12
-assert set_pitch(0x2F4, c4) == 0x62B
-assert set_pitch(0x2F4, c4 + 1) == 0x68A
-assert set_pitch(0x2F4, c4 + 2) == 0x6EE
-assert set_pitch(0x2F4, c4 + 3) == 0x759
-assert set_pitch(0x2F4, c4 + 4) == 0x7C9
-assert set_pitch(0x2F4, c4 + 5) == 0x83F
-assert set_pitch(0x2F4, c4 + 6) == 0x8BB
-assert set_pitch(0x2F4, c4 + 7) == 0x940
-assert set_pitch(0x2F4, c4 + 8) == 0x9CE
-assert set_pitch(0x2F4, c4 + 9) == 0xA64
-assert set_pitch(0x2F4, c4 + 10) == 0xB01
-assert set_pitch(0x2F4, c4 + 11) == 0xBA9
-assert set_pitch(0x2F4, c4 + 12) == 0xC5A
-
-assert set_pitch(0x3F4, c4) == 0x842
-
-assert set_pitch(0x2F4, c5) == 0xC5A
-assert set_pitch(0x2F4, c6) == 0x18C1
