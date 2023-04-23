@@ -1426,7 +1426,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if brr is not None:
             tuning = self.state.sample.tuning
             scale = SAMPLE_FREQ / tuning.sample_freq
-            match tuning.source:
+            source = tuning.source
+
+            # When not in advanced mode, always use auto tuning
+            if not self.preferences.advanced_mode:
+                source = TuneSource.AUTO
+
+            match source:
                 case TuneSource.AUTO:
                     fundamental = brr.fundamental
                     fundamental /= 2 ** (tuning.semitone_shift / 12)

@@ -439,6 +439,20 @@ class Dashboard(QWidget):
         v.generate_spc.setVisible(advanced_enabled)
         v.play_spc.setVisible(advanced_enabled)
         v.other_settings_box.setVisible(advanced_enabled)
+        v.tuning_use_auto_freq.setVisible(advanced_enabled)
+        v.tuning_use_manual_note.setVisible(advanced_enabled)
+        v.tuning_manual_note_label.setVisible(advanced_enabled)
+        v.tuning_manual_note.setVisible(advanced_enabled)
+        v.tuning_manual_octave.setVisible(advanced_enabled)
+        v.tuning_use_manual_freq.setVisible(advanced_enabled)
+        v.tuning_manual_freq_label.setVisible(advanced_enabled)
+        v.tuning_manual_freq.setVisible(advanced_enabled)
+        v.tuning_sample_freq_label.setVisible(advanced_enabled)
+        v.tuning_sample_freq.setVisible(advanced_enabled)
+        v.tuning_output_note.setVisible(advanced_enabled)
+        v.tuning_output_note_label.setText(
+            "Note" if advanced_enabled else "Octave"
+        )
 
         # amk_valid handling
         for action in [
