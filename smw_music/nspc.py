@@ -24,6 +24,9 @@ _PITCH_TABLE = [
 
 
 def calc_tune(fundamental: float, note: int, freq: float) -> tuple[int, float]:
+    # "fundamental" is from the "Fundamental" input
+    # "note" is from the "SNES Note" input
+    # "freq" is from the "Output Note" input
     tune = 1.0
     scale = 2**12
     octave, idx = divmod(note, 12)

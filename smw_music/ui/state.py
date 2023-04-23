@@ -77,7 +77,6 @@ class State:
     unmapped: set[tuple[Pitch, str]] = field(default_factory=set)
     aram_util: Utilization = field(default_factory=default_utilization)
     aram_custom_sample_b: int = 0
-    target_pitch: Pitch = field(default_factory=lambda: Pitch("C4"))
     calculated_tune: tuple[float, tuple[int, float]] = (0, (0, 0))
 
     ###########################################################################

@@ -854,29 +854,6 @@
                          <item row="1" column="1">
                           <widget class="QWidget" name="tune_control_box" native="true">
                            <layout class="QGridLayout" name="gridLayout_19">
-                            <item row="1" column="0">
-                             <widget class="QSlider" name="tune_slider">
-                              <property name="maximum">
-                               <number>63</number>
-                              </property>
-                              <property name="tracking">
-                               <bool>false</bool>
-                              </property>
-                              <property name="orientation">
-                               <enum>Qt::Vertical</enum>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="0" column="0">
-                             <widget class="QLabel" name="tune_label">
-                              <property name="text">
-                               <string>Tune</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="2" column="0">
-                             <widget class="QLineEdit" name="tune_setting"/>
-                            </item>
                             <item row="0" column="1">
                              <widget class="QLabel" name="subtune_label">
                               <property name="text">
@@ -897,8 +874,31 @@
                               </property>
                              </widget>
                             </item>
+                            <item row="0" column="0">
+                             <widget class="QLabel" name="tune_label">
+                              <property name="text">
+                               <string>Tune</string>
+                              </property>
+                             </widget>
+                            </item>
+                            <item row="1" column="0">
+                             <widget class="QSlider" name="tune_slider">
+                              <property name="maximum">
+                               <number>255</number>
+                              </property>
+                              <property name="tracking">
+                               <bool>false</bool>
+                              </property>
+                              <property name="orientation">
+                               <enum>Qt::Vertical</enum>
+                              </property>
+                             </widget>
+                            </item>
                             <item row="2" column="1">
                              <widget class="QLineEdit" name="subtune_setting"/>
+                            </item>
+                            <item row="2" column="0">
+                             <widget class="QLineEdit" name="tune_setting"/>
                             </item>
                            </layout>
                           </widget>
@@ -918,145 +918,197 @@
                           </widget>
                          </item>
                          <item row="1" column="0">
-                          <widget class="QGroupBox" name="groupBox">
+                          <widget class="QGroupBox" name="tuning_box">
                            <property name="title">
-                            <string>Experimental</string>
+                            <string>Experimental Autotune</string>
                            </property>
                            <layout class="QGridLayout" name="gridLayout_20">
-                            <item row="1" column="2">
-                             <widget class="QSpinBox" name="tune_octave">
-                              <property name="maximum">
-                               <number>8</number>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="1" column="0">
-                             <widget class="QLabel" name="tune_note_label">
-                              <property name="text">
-                               <string>Tune Note</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="4" column="1" colspan="2">
-                             <widget class="QLabel" name="tuning_recommendation">
-                              <property name="sizePolicy">
-                               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                               </sizepolicy>
-                              </property>
-                              <property name="minimumSize">
-                               <size>
-                                <width>70</width>
-                                <height>0</height>
-                               </size>
-                              </property>
-                              <property name="text">
-                               <string/>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="0" column="0">
-                             <widget class="QLabel" name="tuning_fundamental_freq_label">
-                              <property name="text">
+                            <item row="0" column="0" colspan="3">
+                             <widget class="QGroupBox" name="tuning_input_box">
+                              <property name="title">
                                <string>Fundamental</string>
                               </property>
+                              <layout class="QGridLayout" name="gridLayout_21">
+                               <item row="2" column="2">
+                                <widget class="QComboBox" name="tuning_manual_note">
+                                 <item>
+                                  <property name="text">
+                                   <string>C</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>C#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>D</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>D#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>E</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>F</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>F#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>G</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>G#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>A</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>A#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>B</string>
+                                  </property>
+                                 </item>
+                                </widget>
+                               </item>
+                               <item row="3" column="0">
+                                <widget class="QRadioButton" name="tuning_use_manual_freq">
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                 <property name="checkable">
+                                  <bool>true</bool>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="2" column="1">
+                                <widget class="QLabel" name="tuning_manual_note_label">
+                                 <property name="text">
+                                  <string>Note</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="2" column="0">
+                                <widget class="QRadioButton" name="tuning_use_manual_note">
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="3" column="1">
+                                <widget class="QLabel" name="tuning_manual_freq_label">
+                                 <property name="text">
+                                  <string>Frequency</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="2" column="3">
+                                <widget class="QSpinBox" name="tuning_manual_octave">
+                                 <property name="value">
+                                  <number>4</number>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="0" column="0">
+                                <widget class="QRadioButton" name="tuning_use_auto_freq">
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                 <property name="checked">
+                                  <bool>true</bool>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="4" column="2" colspan="2">
+                                <widget class="QLineEdit" name="tuning_sample_freq">
+                                 <property name="text">
+                                  <string>32000</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="3" column="2" colspan="2">
+                                <widget class="QLineEdit" name="tuning_manual_freq"/>
+                               </item>
+                               <item row="0" column="1">
+                                <widget class="QLabel" name="tuning_auto_label">
+                                 <property name="text">
+                                  <string>Auto</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="0" column="2" colspan="2">
+                                <widget class="QLabel" name="tuning_auto_freq">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>70</width>
+                                   <height>0</height>
+                                  </size>
+                                 </property>
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="4" column="1">
+                                <widget class="QLabel" name="tuning_sample_freq_label">
+                                 <property name="text">
+                                  <string>Sample Freq.</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="2" colspan="2">
+                                <widget class="QSpinBox" name="tuning_semitone_shift">
+                                 <property name="minimum">
+                                  <number>-99</number>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="1">
+                                <widget class="QLabel" name="tuning_semitone_shift_label">
+                                 <property name="text">
+                                  <string>Semitone Shift</string>
+                                 </property>
+                                </widget>
+                               </item>
+                              </layout>
                              </widget>
                             </item>
-                            <item row="0" column="1" colspan="2">
-                             <widget class="QLabel" name="tuning_fundamental_freq">
-                              <property name="sizePolicy">
-                               <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                                <horstretch>0</horstretch>
-                                <verstretch>0</verstretch>
-                               </sizepolicy>
-                              </property>
-                              <property name="minimumSize">
-                               <size>
-                                <width>70</width>
-                                <height>0</height>
-                               </size>
-                              </property>
+                            <item row="7" column="0">
+                             <widget class="QPushButton" name="apply_suggested_tune">
                               <property name="text">
-                               <string/>
+                               <string>Apply</string>
                               </property>
                              </widget>
                             </item>
-                            <item row="3" column="0">
-                             <widget class="QLabel" name="suggested_tune_pitch_label">
-                              <property name="text">
-                               <string>Actual</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="1" column="1">
-                             <widget class="QComboBox" name="tune_note">
-                              <property name="currentText">
-                               <string>C</string>
-                              </property>
-                              <item>
-                               <property name="text">
-                                <string>C</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>C#</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>D</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>D#</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>E</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>F</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>F#</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>G</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>G#</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>A</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>A#</string>
-                               </property>
-                              </item>
-                              <item>
-                               <property name="text">
-                                <string>B</string>
-                               </property>
-                              </item>
-                             </widget>
-                            </item>
-                            <item row="5" column="0">
+                            <item row="6" column="0">
                              <spacer name="verticalSpacer_7">
                               <property name="orientation">
                                <enum>Qt::Vertical</enum>
@@ -1069,39 +1121,154 @@
                               </property>
                              </spacer>
                             </item>
-                            <item row="3" column="1" colspan="2">
-                             <widget class="QLabel" name="suggested_tune_pitch">
-                              <property name="text">
-                               <string/>
+                            <item row="1" column="0" colspan="3">
+                             <widget class="QGroupBox" name="tuning_output_box">
+                              <property name="title">
+                               <string>Output</string>
                               </property>
-                             </widget>
-                            </item>
-                            <item row="6" column="0">
-                             <widget class="QPushButton" name="apply_suggested_tune">
-                              <property name="text">
-                               <string>Apply</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="4" column="0">
-                             <widget class="QLabel" name="tuning_recommendation_label">
-                              <property name="text">
-                               <string>Suggested Tune</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="2" column="0">
-                             <widget class="QLabel" name="goal_frequency_label">
-                              <property name="text">
-                               <string>Goal</string>
-                              </property>
-                             </widget>
-                            </item>
-                            <item row="2" column="1" colspan="2">
-                             <widget class="QLabel" name="goal_frequency">
-                              <property name="text">
-                               <string/>
-                              </property>
+                              <layout class="QGridLayout" name="gridLayout_22">
+                               <item row="1" column="0">
+                                <widget class="QLabel" name="tuning_goal_freq_label">
+                                 <property name="text">
+                                  <string>Goal</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="2" column="0">
+                                <widget class="QLabel" name="tuning_recommended_pitch_label">
+                                 <property name="text">
+                                  <string>Actual</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="0" column="0">
+                                <widget class="QLabel" name="tuning_output_note_label">
+                                 <property name="toolTip">
+                                  <string>Note that plays when an MML C4 is played</string>
+                                 </property>
+                                 <property name="text">
+                                  <string>Note</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="2" column="1" colspan="2">
+                                <widget class="QLabel" name="tuning_recommended_pitch">
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="3" column="1" colspan="2">
+                                <widget class="QLabel" name="tuning_recommendation">
+                                 <property name="sizePolicy">
+                                  <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+                                   <horstretch>0</horstretch>
+                                   <verstretch>0</verstretch>
+                                  </sizepolicy>
+                                 </property>
+                                 <property name="minimumSize">
+                                  <size>
+                                   <width>70</width>
+                                   <height>0</height>
+                                  </size>
+                                 </property>
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="3" column="0">
+                                <widget class="QLabel" name="tuning_recommendation_label">
+                                 <property name="text">
+                                  <string>Tune</string>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="1" column="1" colspan="2">
+                                <widget class="QLabel" name="tuning_goal_freq">
+                                 <property name="text">
+                                  <string/>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="0" column="2">
+                                <widget class="QSpinBox" name="tuning_output_octave">
+                                 <property name="minimum">
+                                  <number>0</number>
+                                 </property>
+                                 <property name="maximum">
+                                  <number>99</number>
+                                 </property>
+                                 <property name="value">
+                                  <number>4</number>
+                                 </property>
+                                </widget>
+                               </item>
+                               <item row="0" column="1">
+                                <widget class="QComboBox" name="tuning_output_note">
+                                 <item>
+                                  <property name="text">
+                                   <string>C</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>C#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>D</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>D#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>E</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>F</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>F#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>G</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>G#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>A</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>A#</string>
+                                  </property>
+                                 </item>
+                                 <item>
+                                  <property name="text">
+                                   <string>B</string>
+                                  </property>
+                                 </item>
+                                </widget>
+                               </item>
+                              </layout>
                              </widget>
                             </item>
                            </layout>
@@ -2714,8 +2881,6 @@
   <tabstop>gain_setting</tabstop>
   <tabstop>brr_setting</tabstop>
   <tabstop>preview_envelope</tabstop>
-  <tabstop>tune_note</tabstop>
-  <tabstop>tune_octave</tabstop>
   <tabstop>tune_slider</tabstop>
   <tabstop>tune_setting</tabstop>
   <tabstop>subtune_slider</tabstop>

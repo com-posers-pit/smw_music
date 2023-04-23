@@ -164,9 +164,6 @@ class DashboardView(QMainWindow):
     global_volume_setting: QLineEdit
     global_volume_setting_label: QLabel
     global_volume_slider: QSlider
-    goal_frequency: QLabel
-    goal_frequency_label: QLabel
-    groupBox: QGroupBox
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
@@ -278,8 +275,6 @@ class DashboardView(QMainWindow):
     subtune_setting: QLineEdit
     subtune_setting_label: QLabel
     subtune_slider: QSlider
-    suggested_tune_pitch: QLabel
-    suggested_tune_pitch_label: QLabel
     superloop_analysis: QCheckBox
     sus_level_eu_label: QLabel
     sus_level_label: QLabel
@@ -291,17 +286,36 @@ class DashboardView(QMainWindow):
     sus_rate_slider: QSlider
     tune_control_box: QWidget
     tune_label: QLabel
-    tune_note: QComboBox
-    tune_note_label: QLabel
-    tune_octave: QSpinBox
     tune_setting: QLineEdit
     tune_setting_label: QLabel
     tune_slider: QSlider
-    tuning_fundamental_freq: QLabel
-    tuning_fundamental_freq_label: QLabel
+    tuning_auto_freq: QLabel
+    tuning_auto_label: QLabel
+    tuning_box: QGroupBox
+    tuning_goal_freq: QLabel
+    tuning_goal_freq_label: QLabel
+    tuning_input_box: QGroupBox
+    tuning_manual_freq: QLineEdit
+    tuning_manual_freq_label: QLabel
+    tuning_manual_note: QComboBox
+    tuning_manual_note_label: QLabel
+    tuning_manual_octave: QSpinBox
+    tuning_output_box: QGroupBox
+    tuning_output_note: QComboBox
+    tuning_output_note_label: QLabel
+    tuning_output_octave: QSpinBox
     tuning_recommendation: QLabel
     tuning_recommendation_label: QLabel
+    tuning_recommended_pitch: QLabel
+    tuning_recommended_pitch_label: QLabel
+    tuning_sample_freq: QLineEdit
+    tuning_sample_freq_label: QLabel
+    tuning_semitone_shift: QSpinBox
+    tuning_semitone_shift_label: QLabel
     tuning_tab: QWidget
+    tuning_use_auto_freq: QRadioButton
+    tuning_use_manual_freq: QRadioButton
+    tuning_use_manual_note: QRadioButton
     undo: QAction
     utilization: QLabel
     utilization_echo: QLabel

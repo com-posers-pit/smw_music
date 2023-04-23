@@ -24,16 +24,7 @@ import qdarkstyle  # type: ignore
 from music21.pitch import Pitch
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import (
-    QAction,
-    QColor,
-    QFont,
-    QIcon,
-    QKeyEvent,
-    QMovie,
-    QPainter,
-    QPixmap,
-)
+from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie, QPixmap
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -61,7 +52,7 @@ from smw_music import __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
-from smw_music.music_xml.instrument import GainMode, SampleSource
+from smw_music.music_xml.instrument import GainMode, SampleSource, TuneSource
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -594,6 +585,29 @@ class Dashboard(QWidget):
             with suppress(NoSample):
                 if state.sample.sample_source == SampleSource.BUILTIN:
                     v.sample_pack_list.clearSelection()
+                tuning = state.sample.tuning
+                v.tuning_use_auto_freq.setChecked(
+                    tuning.source == TuneSource.AUTO
+                )
+                v.tuning_use_manual_freq.setChecked(
+                    tuning.source == TuneSource.MANUAL_FREQ
+                )
+                v.tuning_use_manual_note.setChecked(
+                    tuning.source == TuneSource.MANUAL_NOTE
+                )
+                v.tuning_semitone_shift.setValue(tuning.semitone_shift)
+                v.tuning_manual_note.setCurrentIndex(tuning.pitch.pitchClass)
+                v.tuning_manual_octave.setValue(tuning.pitch.octave)
+                v.tuning_manual_freq.setText(f"{tuning.frequency:.2f}")
+                v.tuning_sample_freq.setText(f"{tuning.sample_freq:.2f}")
+
+                freq, (setting, actual) = state.calculated_tune
+                v.tuning_auto_freq.setText(f"{freq:.2f}Hz")
+                freq = tuning.output.frequency
+                v.tuning_goal_freq.setText(f"{freq:.2f}Hz")
+                tune, subtune = divmod(setting, 256)
+                v.tuning_recommended_pitch.setText(f"{actual:.2f}Hz")
+                v.tuning_recommendation.setText(f"${tune:02x} ${subtune:02x}")
 
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
@@ -637,17 +651,6 @@ class Dashboard(QWidget):
 
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
-
-            v.tune_note.setCurrentIndex(state.target_pitch.pitchClass)
-            v.tune_octave.setValue(state.target_pitch.octave)
-
-            freq, (setting, actual) = state.calculated_tune
-            v.tuning_fundamental_freq.setText(f"{freq:.2f}Hz")
-            freq = state.target_pitch.frequency
-            v.goal_frequency.setText(f"{freq:.2f}Hz")
-            tune, subtune = divmod(setting, 256)
-            v.tuning_recommendation.setText(f"${tune:02x} ${subtune:02x}")
-            v.suggested_tune_pitch.setText(f"{actual:.2f}Hz")
 
     ###########################################################################
 
@@ -769,8 +772,16 @@ class Dashboard(QWidget):
             (v.sus_level_setting, m.on_sus_level_changed),
             (v.sus_rate_slider, m.on_sus_rate_changed),
             (v.sus_rate_setting, m.on_sus_rate_changed),
-            (v.tune_note, self._on_tune_note_changed),
-            (v.tune_octave, self._on_tune_octave_changed),
+            (v.tuning_use_auto_freq, m.on_tuning_use_auto_freq_selected),
+            (v.tuning_use_manual_freq, m.on_tuning_use_manual_freq_selected),
+            (v.tuning_use_manual_note, m.on_tuning_use_manual_note_selected),
+            (v.tuning_semitone_shift, m.on_tuning_semitone_shift_changed),
+            (v.tuning_manual_freq, m.on_tuning_manual_freq_changed),
+            (v.tuning_manual_note, self._on_tuning_manual_note_changed),
+            (v.tuning_manual_octave, self._on_tuning_manual_octave_changed),
+            (v.tuning_sample_freq, m.on_tuning_sample_freq_changed),
+            (v.tuning_output_note, self._on_tuning_output_note_changed),
+            (v.tuning_output_octave, self._on_tuning_output_octave_changed),
             (v.apply_suggested_tune, m.on_apply_suggested_tune_clicked),
             (v.tune_slider, m.on_tune_changed),
             (v.tune_setting, m.on_tune_changed),
@@ -1050,15 +1061,27 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _on_tune_note_changed(self, pitch_class: int) -> None:
-        octave = self._view.tune_octave.value()
-        self._model.on_target_pitch_changed(pitch_class, octave)
+    def _on_tuning_manual_note_changed(self, pitch_class: int) -> None:
+        octave = self._view.tuning_manual_octave.value()
+        self._model.on_tuning_manual_note_changed(pitch_class, octave)
 
     ###########################################################################
 
-    def _on_tune_octave_changed(self, octave: int) -> None:
-        pitch_class = self._view.tune_note.currentIndex()
-        self._model.on_target_pitch_changed(pitch_class, octave)
+    def _on_tuning_manual_octave_changed(self, octave: int) -> None:
+        pitch_class = self._view.tuning_manual_note.currentIndex()
+        self._model.on_tuning_manual_note_changed(pitch_class, octave)
+
+    ###########################################################################
+
+    def _on_tuning_output_note_changed(self, pitch_class: int) -> None:
+        octave = self._view.tuning_output_octave.value()
+        self._model.on_tuning_output_note_changed(pitch_class, octave)
+
+    ###########################################################################
+
+    def _on_tuning_output_octave_changed(self, octave: int) -> None:
+        pitch_class = self._view.tuning_output_note.currentIndex()
+        self._model.on_tuning_output_note_changed(pitch_class, octave)
 
     ###########################################################################
 

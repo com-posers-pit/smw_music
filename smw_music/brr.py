@@ -28,6 +28,7 @@ File loop headers are discussed in [2]_.
 ###############################################################################
 
 # Standard library imports
+import math
 import wave
 from dataclasses import dataclass, field
 from functools import cached_property
@@ -40,6 +41,14 @@ from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 
 # Package imports
 from smw_music import SmwMusicException, nspc
+
+###############################################################################
+# API constant definitions
+###############################################################################
+
+SAMPLE_FREQ = 32000
+
+SAMPLES_PER_BLOCK = 16
 
 ###############################################################################
 # Private constant definitions
@@ -125,8 +134,8 @@ class Brr:
 
         # Variable initialization
         nblocks = self.nblocks + (loops - 1) * (self.nblocks - self.loop_block)
-        rv = np.empty((nblocks, 16), dtype=np.int16)
-        proc = np.zeros(16)
+        rv = np.empty((nblocks, SAMPLES_PER_BLOCK), dtype=np.int16)
+        proc = np.zeros(SAMPLES_PER_BLOCK)
         rv_idx = 0
 
         # Loop the requested number of times, starting at block 0 the first
@@ -154,11 +163,6 @@ class Brr:
 
     ###########################################################################
 
-    def recommended_tune(self, note: int, target: float) -> tuple[int, float]:
-        return nspc.calc_tune(self.fundamental, note, target)
-
-    ###########################################################################
-
     def to_wav(self, fname: str, loops: int = 0, framerate: int = 32000):
         with wave.open(fname, "wb") as fobj:
             fobj.setnchannels(1)  # pylint: disable=no-member
@@ -167,6 +171,15 @@ class Brr:
             fobj.writeframesraw(  # pylint: disable=no-member
                 self.generate_waveform(loops).tobytes()
             )
+
+    ###########################################################################
+
+    def tune(
+        self, note: int, target: float, fundamental: float = -1
+    ) -> tuple[int, float]:
+        if fundamental < 0:
+            fundamental = self.fundamental
+        return nspc.calc_tune(fundamental, note, target)
 
     ###########################################################################
     # API property definitions
@@ -204,12 +217,16 @@ class Brr:
 
     @cached_property
     def fundamental(self) -> float:
-        nyquist = 16000  # SPC700 samples (normally) at 32kHz
-        waveform = self.generate_waveform(10)
-        nsamples = len(waveform)
-        spec = abs(np.fft.rfft(waveform[-nsamples:]))
-        spec = spec / spec.max()
-        peak, *_ = find_peaks(abs(spec), prominence=0.2)[0]
+        samples_per_loop = SAMPLES_PER_BLOCK * (self.nblocks - self.loop_block)
+        target_samples = 64000
+        loops = math.ceil(target_samples / samples_per_loop)
+
+        nyquist = SAMPLE_FREQ / 2
+        waveform = self.generate_waveform(loops)
+        start = self.loop_block * SAMPLES_PER_BLOCK
+        spec = np.abs(np.fft.rfft(waveform[start:]))
+        spec /= spec.max()
+        peak, *_ = find_peaks(spec, height=0.25)[0]
         return nyquist * peak / len(spec)
 
     ###########################################################################
