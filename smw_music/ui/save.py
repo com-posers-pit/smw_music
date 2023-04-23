@@ -282,6 +282,24 @@ def _upgrade_save(fname: Path) -> tuple[State, Path]:
 
 
 ###############################################################################
+
+
+def _update_convert_scripts(dirname: Path) -> None:
+    for fname in ["convert.bat", "convert.sh"]:
+        fpath = dirname / fname
+
+        with open(fpath, "r", encoding="utf8") as fobj:
+            lines = fobj.readlines()
+
+        if "-visualize" not in lines[-1]:
+            split = lines[-1].split('"')
+            split[0] += "-visualize "
+            lines[-1] = '"'.join(split)
+            with open(fpath, "w", encoding="utf8") as fobj:
+                fobj.write("".join(lines))
+
+
+###############################################################################
 # API function definitions
 ###############################################################################
 
@@ -303,6 +321,7 @@ def load(fname: Path) -> tuple[State, Path | None]:
     # files, so we should try to add it
     if save_version <= 1:
         make_vis_dir(fname.parent)
+        _update_convert_scripts(fname.parent)
 
     if save_version < _CURRENT_SAVE_VERSION:
         rv = _upgrade_save(fname)
