@@ -11,6 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass
+from functools import cached_property
 from glob import glob
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -18,6 +19,7 @@ from typing import TextIO
 from zipfile import ZipFile
 
 # Package imports
+from smw_music.brr import Brr
 from smw_music.music_xml.instrument import GainMode
 
 ###############################################################################
@@ -30,6 +32,12 @@ class Sample:
     path: Path
     params: "SampleParams"
     data: bytes
+
+    ###########################################################################
+
+    @cached_property
+    def brr(self) -> Brr:
+        return Brr.from_binary(self.data)
 
 
 ###############################################################################

@@ -18,6 +18,7 @@ from pathlib import Path
 from music21.pitch import Pitch
 
 # Package imports
+from smw_music.brr import SAMPLE_FREQ
 from smw_music.music_xml.tokens import Note
 from smw_music.utils import hexb
 
@@ -153,6 +154,28 @@ class SampleSource(IntEnum):
 ###############################################################################
 
 
+class TuneSource(IntEnum):
+    AUTO = auto()
+    MANUAL_NOTE = auto()
+    MANUAL_FREQ = auto()
+
+
+###############################################################################
+
+
+@dataclass
+class Tuning:
+    source: TuneSource = TuneSource.AUTO
+    semitone_shift: int = 0
+    pitch: Pitch = field(default_factory=lambda: Pitch("C", octave=4))
+    frequency: float = Pitch("C", octave=4).frequency
+    sample_freq: float = SAMPLE_FREQ
+    output: Pitch = field(default_factory=lambda: Pitch("C", octave=4))
+
+
+###############################################################################
+
+
 @dataclass
 class InstrumentSample:
     default_octave: int = 3
@@ -203,6 +226,7 @@ class InstrumentSample:
     ulim: Pitch = field(default_factory=lambda: Pitch("C", octave=7))
     notehead: NoteHead = NoteHead.NORMAL
     start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
+    tuning: Tuning = field(default_factory=Tuning)
 
     _instrument_idx: int = field(default=0, init=False)
 

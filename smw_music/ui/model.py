@@ -34,7 +34,8 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music import SmwMusicException, __version__, nspc
+from smw_music.brr import SAMPLE_FREQ, Brr
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
@@ -46,6 +47,8 @@ from smw_music.music_xml.instrument import (
     InstrumentSample,
     NoteHead,
     SampleSource,
+    TuneSource,
+    Tuning,
 )
 from smw_music.music_xml.song import Song
 from smw_music.ui.quotes import ashtley, quotes
@@ -331,6 +334,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
     # API slot definitions
+    ###########################################################################
+
+    def on_apply_suggested_tune_clicked(self) -> None:
+        setting = self.state.calculated_tune[1][0]
+        tune, subtune = divmod(setting, 256)
+        self._update_sample_state(tune_setting=tune, subtune_setting=subtune)
+        self.update_status(f"Tune setting set to {tune}.{subtune}")
+
     ###########################################################################
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
@@ -949,6 +960,87 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_tuning_sample_freq_changed(self, setting: str) -> None:
+        with suppress(ValueError, NoSample):
+            freq = float(setting)
+            tuning = replace(self.state.sample.tuning, sample_freq=freq)
+            self._update_sample_state(tuning=tuning)
+            self.update_status(f"Using sampling frequency {freq}Hz")
+
+    ###########################################################################
+
+    def on_tuning_manual_freq_changed(self, setting: str) -> None:
+        with suppress(ValueError, NoSample):
+            freq = float(setting)
+            tuning = replace(self.state.sample.tuning, frequency=freq)
+            self._update_sample_state(tuning=tuning)
+            self.update_status(f"Using manual tuning frequency {freq}Hz")
+
+    ###########################################################################
+
+    def on_tuning_manual_note_changed(
+        self, pitch_class: int, octave: int
+    ) -> None:
+        with suppress(NoSample):
+            pitch = Pitch(octave=octave, pitchClass=pitch_class)
+            tuning = replace(self.state.sample.tuning, pitch=pitch)
+            self._update_sample_state(tuning=tuning)
+            self.update_status(f"Target pitch set to {pitch.nameWithOctave}")
+
+    ###########################################################################
+
+    def on_tuning_output_note_changed(
+        self, pitch_class: int, octave: int
+    ) -> None:
+        with suppress(NoSample):
+            pitch = Pitch(octave=octave, pitchClass=pitch_class)
+            tuning = replace(self.state.sample.tuning, output=pitch)
+            self._update_sample_state(tuning=tuning)
+            self.update_status(f"Target output set to {pitch.nameWithOctave}")
+
+    ###########################################################################
+
+    def on_tuning_semitone_shift_changed(self, shift: int) -> None:
+        with suppress(NoSample):
+            tuning = replace(self.state.sample.tuning, semitone_shift=shift)
+            self._update_sample_state(tuning=tuning)
+            self.update_status(f"Set semitone shift to {shift}")
+
+    ###########################################################################
+
+    def on_tuning_use_auto_freq_selected(self, state: bool) -> None:
+        with suppress(NoSample):
+            if state:
+                tuning = replace(
+                    self.state.sample.tuning, source=TuneSource.AUTO
+                )
+                self._update_sample_state(tuning=tuning)
+                self.update_status("Using auto frequency tuning")
+
+    ###########################################################################
+
+    def on_tuning_use_manual_freq_selected(self, state: bool) -> None:
+        with suppress(NoSample):
+            if state:
+                tuning = replace(
+                    self.state.sample.tuning, source=TuneSource.MANUAL_FREQ
+                )
+                self._update_sample_state(tuning=tuning)
+                self.update_status("Using manual frequency tuning")
+
+    ###########################################################################
+
+    def on_tuning_use_manual_note_selected(self, state: bool) -> None:
+        with suppress(NoSample):
+            if state:
+                tuning = replace(
+                    self.state.sample.tuning, source=TuneSource.MANUAL_NOTE
+                )
+                self._update_sample_state(tuning=tuning)
+                self.update_status("Using manual note tuning")
+
+    ###########################################################################
+
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
@@ -1105,10 +1197,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return
 
         # Make sure we've got an instrument selected
-        try:
+        with suppress(NoSample):
             sample = state.sample
-        except NoSample:
-            return
 
         # Exit if we're trying to change a sample that doesn't exist (this can
         # happen when tabbing through and entering values before adding it
@@ -1323,6 +1413,47 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self._update_aram_util()
 
+        brr: Brr | None = None
+        with suppress(NoSample):
+            sample = self.state.sample
+            if sample.sample_source == SampleSource.SAMPLEPACK:
+                pack, path = sample.pack_sample
+                brr = self._sample_packs[pack][path].brr
+
+            else:
+
+                with suppress(FileNotFoundError):
+                    brr = Brr.from_file(sample.brr_fname)
+
+        if brr is not None:
+            tuning = self.state.sample.tuning
+            scale = SAMPLE_FREQ / tuning.sample_freq
+            source = tuning.source
+
+            # When not in advanced mode, always use auto tuning
+            if not self.preferences.advanced_mode:
+                source = TuneSource.AUTO
+
+            match source:
+                case TuneSource.AUTO:
+                    fundamental = brr.fundamental
+                    fundamental /= 2 ** (tuning.semitone_shift / 12)
+                case TuneSource.MANUAL_NOTE:
+                    fundamental = tuning.pitch.frequency * scale
+                case TuneSource.MANUAL_FREQ:
+                    fundamental = tuning.frequency * scale
+
+            self.state.calculated_tune = (
+                brr.fundamental,
+                brr.tune(
+                    nspc.midi_to_nspc(Pitch("C", octave=4).midi),
+                    tuning.output.frequency,
+                    fundamental,
+                ),
+            )
+        else:
+            self.state.calculated_tune = (0, (0, 0))
+
         with suppress(NoSample):
             if self.song:
                 name = state.sample_idx[0]
@@ -1381,7 +1512,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | tuple[str, Path]
         | tuple[bool, bool]
         | Path
-        | GainMode,
+        | GainMode
+        | Tuning,
     ) -> None:
         with suppress(NoSample):
             old_sample = self.state.sample
@@ -1565,3 +1697,5 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @property
     def state(self) -> State:
         return self._history[-1 - self._undo_level]
+
+    ###########################################################################

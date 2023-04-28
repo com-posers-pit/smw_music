@@ -178,6 +178,9 @@ Sample
       view.sus_level_setting.valueChanged --> model.on_sus_level_changed
       view.sus_rate_slider.valueChanged --> model.on_sus_rate_changed
       view.sus_rate_setting.valueChanged --> model.on_sus_rate_changed
+      view.tune_note.currentIndexChanged --> dashboard._on_tune_note_changed --> model.on_target_pitch_changed
+      view.tune_octave.valueChanged --> dashboard._on_tune_note_changed --> model.on_target_pitch_changed
+      view.apply_suggested_tune.released --> model.on_apply_suggested_tune_clicked
       view.tune_slider.valueChanged --> model.on_tune_changed
       view.tune_setting.editingFinished --> model.on_tune_changed
       view.subtune_slider.valueChanged --> model.on_subtune_changed

@@ -24,16 +24,7 @@ import qdarkstyle  # type: ignore
 from music21.pitch import Pitch
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QModelIndex, QObject, QSignalBlocker, Qt
-from PyQt6.QtGui import (
-    QAction,
-    QColor,
-    QFont,
-    QIcon,
-    QKeyEvent,
-    QMovie,
-    QPainter,
-    QPixmap,
-)
+from PyQt6.QtGui import QAction, QFont, QIcon, QKeyEvent, QMovie, QPixmap
 from PyQt6.QtWidgets import (
     QAbstractSlider,
     QApplication,
@@ -61,7 +52,7 @@ from smw_music import __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
-from smw_music.music_xml.instrument import GainMode, SampleSource
+from smw_music.music_xml.instrument import GainMode, SampleSource, TuneSource
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
@@ -136,6 +127,10 @@ _KONAMI = deque(
 )
 
 ###############################################################################
+
+_REV_KONAMI = deque(reversed(_KONAMI))
+
+###############################################################################
 # Private class definitions
 ###############################################################################
 
@@ -193,6 +188,7 @@ class Dashboard(QWidget):
     _history: QMainWindow
     _quicklook: QMainWindow
     _checkitout: QMainWindow
+    _camelitout: QMainWindow
     _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
@@ -256,6 +252,15 @@ class Dashboard(QWidget):
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
+
+        self._camelitout = QMainWindow(parent=self)
+        self._camelitout.setWindowTitle("Camel by camel")
+        label = QLabel(self)
+        movie = QMovie(parent=self)
+        movie.setFileName(str(data_lib / "ankha.gif"))
+        label.setMovie(movie)
+        movie.start()
+        self._camelitout.setCentralWidget(label)
 
         self._history = QMainWindow(parent=self)
         self._history.setWindowTitle("Action history")
@@ -329,6 +334,8 @@ class Dashboard(QWidget):
                 self._keyhist.append(cast(QKeyEvent, event).key())
                 if self._keyhist == _KONAMI:
                     self._checkitout.show()
+                elif self._keyhist == _REV_KONAMI:
+                    self._camelitout.show()
 
         return super().eventFilter(obj, event)
 
@@ -432,6 +439,20 @@ class Dashboard(QWidget):
         v.generate_spc.setVisible(advanced_enabled)
         v.play_spc.setVisible(advanced_enabled)
         v.other_settings_box.setVisible(advanced_enabled)
+        v.tuning_use_auto_freq.setVisible(advanced_enabled)
+        v.tuning_use_manual_note.setVisible(advanced_enabled)
+        v.tuning_manual_note_label.setVisible(advanced_enabled)
+        v.tuning_manual_note.setVisible(advanced_enabled)
+        v.tuning_manual_octave.setVisible(advanced_enabled)
+        v.tuning_use_manual_freq.setVisible(advanced_enabled)
+        v.tuning_manual_freq_label.setVisible(advanced_enabled)
+        v.tuning_manual_freq.setVisible(advanced_enabled)
+        v.tuning_sample_freq_label.setVisible(advanced_enabled)
+        v.tuning_sample_freq.setVisible(advanced_enabled)
+        v.tuning_output_note.setVisible(advanced_enabled)
+        v.tuning_output_note_label.setText(
+            "Note" if advanced_enabled else "Octave"
+        )
 
         # amk_valid handling
         for action in [
@@ -578,6 +599,29 @@ class Dashboard(QWidget):
             with suppress(NoSample):
                 if state.sample.sample_source == SampleSource.BUILTIN:
                     v.sample_pack_list.clearSelection()
+                tuning = state.sample.tuning
+                v.tuning_use_auto_freq.setChecked(
+                    tuning.source == TuneSource.AUTO
+                )
+                v.tuning_use_manual_freq.setChecked(
+                    tuning.source == TuneSource.MANUAL_FREQ
+                )
+                v.tuning_use_manual_note.setChecked(
+                    tuning.source == TuneSource.MANUAL_NOTE
+                )
+                v.tuning_semitone_shift.setValue(tuning.semitone_shift)
+                v.tuning_manual_note.setCurrentIndex(tuning.pitch.pitchClass)
+                v.tuning_manual_octave.setValue(tuning.pitch.octave)
+                v.tuning_manual_freq.setText(f"{tuning.frequency:.2f}")
+                v.tuning_sample_freq.setText(f"{tuning.sample_freq:.2f}")
+
+                freq, (setting, actual) = state.calculated_tune
+                v.tuning_auto_freq.setText(f"{freq:.2f}Hz")
+                freq = tuning.output.frequency
+                v.tuning_goal_freq.setText(f"{freq:.2f}Hz")
+                tune, subtune = divmod(setting, 256)
+                v.tuning_recommended_pitch.setText(f"{actual:.2f}Hz")
+                v.tuning_recommendation.setText(f"${tune:02x} ${subtune:02x}")
 
             # Global settings
             v.global_volume_slider.setValue(state.global_volume)
@@ -742,6 +786,17 @@ class Dashboard(QWidget):
             (v.sus_level_setting, m.on_sus_level_changed),
             (v.sus_rate_slider, m.on_sus_rate_changed),
             (v.sus_rate_setting, m.on_sus_rate_changed),
+            (v.tuning_use_auto_freq, m.on_tuning_use_auto_freq_selected),
+            (v.tuning_use_manual_freq, m.on_tuning_use_manual_freq_selected),
+            (v.tuning_use_manual_note, m.on_tuning_use_manual_note_selected),
+            (v.tuning_semitone_shift, m.on_tuning_semitone_shift_changed),
+            (v.tuning_manual_freq, m.on_tuning_manual_freq_changed),
+            (v.tuning_manual_note, self._on_tuning_manual_note_changed),
+            (v.tuning_manual_octave, self._on_tuning_manual_octave_changed),
+            (v.tuning_sample_freq, m.on_tuning_sample_freq_changed),
+            (v.tuning_output_note, self._on_tuning_output_note_changed),
+            (v.tuning_output_octave, self._on_tuning_output_octave_changed),
+            (v.apply_suggested_tune, m.on_apply_suggested_tune_clicked),
             (v.tune_slider, m.on_tune_changed),
             (v.tune_setting, m.on_tune_changed),
             (v.subtune_slider, m.on_subtune_changed),
@@ -1017,6 +1072,30 @@ class Dashboard(QWidget):
 
         solo = col == _TblCol.SOLO
         self._model.on_solomute_changed(sample, solo, checked)
+
+    ###########################################################################
+
+    def _on_tuning_manual_note_changed(self, pitch_class: int) -> None:
+        octave = self._view.tuning_manual_octave.value()
+        self._model.on_tuning_manual_note_changed(pitch_class, octave)
+
+    ###########################################################################
+
+    def _on_tuning_manual_octave_changed(self, octave: int) -> None:
+        pitch_class = self._view.tuning_manual_note.currentIndex()
+        self._model.on_tuning_manual_note_changed(pitch_class, octave)
+
+    ###########################################################################
+
+    def _on_tuning_output_note_changed(self, pitch_class: int) -> None:
+        octave = self._view.tuning_output_octave.value()
+        self._model.on_tuning_output_note_changed(pitch_class, octave)
+
+    ###########################################################################
+
+    def _on_tuning_output_octave_changed(self, octave: int) -> None:
+        pitch_class = self._view.tuning_output_note.currentIndex()
+        self._model.on_tuning_output_note_changed(pitch_class, octave)
 
     ###########################################################################
 

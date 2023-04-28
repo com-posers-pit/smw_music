@@ -34,6 +34,7 @@ from PyQt6.QtWidgets import (
 class DashboardView(QMainWindow):
     actionClearRecentProjects: QAction
     adsr_box: QFrame
+    apply_suggested_tune: QPushButton
     artic_acc_group: QGroupBox
     artic_acc_length_label: QLabel
     artic_acc_length_setting: QLineEdit
@@ -283,11 +284,38 @@ class DashboardView(QMainWindow):
     sus_rate_label: QLabel
     sus_rate_setting: QLineEdit
     sus_rate_slider: QSlider
+    tune_control_box: QWidget
     tune_label: QLabel
     tune_setting: QLineEdit
     tune_setting_label: QLabel
     tune_slider: QSlider
+    tuning_auto_freq: QLabel
+    tuning_auto_label: QLabel
+    tuning_box: QGroupBox
+    tuning_goal_freq: QLabel
+    tuning_goal_freq_label: QLabel
+    tuning_input_box: QGroupBox
+    tuning_manual_freq: QLineEdit
+    tuning_manual_freq_label: QLabel
+    tuning_manual_note: QComboBox
+    tuning_manual_note_label: QLabel
+    tuning_manual_octave: QSpinBox
+    tuning_output_box: QGroupBox
+    tuning_output_note: QComboBox
+    tuning_output_note_label: QLabel
+    tuning_output_octave: QSpinBox
+    tuning_recommendation: QLabel
+    tuning_recommendation_label: QLabel
+    tuning_recommended_pitch: QLabel
+    tuning_recommended_pitch_label: QLabel
+    tuning_sample_freq: QLineEdit
+    tuning_sample_freq_label: QLabel
+    tuning_semitone_shift: QSpinBox
+    tuning_semitone_shift_label: QLabel
     tuning_tab: QWidget
+    tuning_use_auto_freq: QRadioButton
+    tuning_use_manual_freq: QRadioButton
+    tuning_use_manual_note: QRadioButton
     undo: QAction
     utilization: QLabel
     utilization_echo: QLabel
