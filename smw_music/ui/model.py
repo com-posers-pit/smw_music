@@ -628,6 +628,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_state(loop_analysis=enabled)
         self.update_status(f"Loop analysis {_endis(enabled)}")
 
+    ###########################################################################
+
     def on_measure_numbers_changed(self, enabled: bool) -> None:
         self._update_state(measure_numbers=enabled)
         self.update_status(f"Measure # reporting {_endis(enabled)}")

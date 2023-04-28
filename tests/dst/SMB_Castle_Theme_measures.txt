@@ -1,6 +1,6 @@
 #amk 2
 
-; beer v0.3.7
+; beer v0.3.8
 
 #spc {
     #author  "Koji Kondo"
