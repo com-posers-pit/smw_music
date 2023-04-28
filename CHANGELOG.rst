@@ -11,7 +11,57 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.8`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.8 - 2023-04-27
+--------------------------
+
+CODENAME: `DiscoVision`_
+
+You found me again, welcome back
+
+`Release 0.3.8`_
+
 `Differences from 0.3.7`_
+
+Purpose
++++++++
+
+Add autotune logic
+
+
+Affected Issues
++++++++++++++++
+
+- `#205 Add logic to suggest tuning parameters`_
+
+- `#201 Add missing visualization conversion update`_
+
+Changed
++++++++
+
+- ``-visualize`` added to old project files
+
+Added
++++++
+
+- brr handling logic
+
+- autotune support
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
 
 --------------------------------------------------------------------------------
 
@@ -1077,6 +1127,8 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#205 Add logic to suggest tuning parameters: https://github.com/com-posers-pit/smw_music/issues/205
+.. _#201 Add missing visualization conversion update: https://github.com/com-posers-pit/smw_music/issues/201
 .. _#199 Add BRR file size display: https://github.com/com-posers-pit/smw_music/issues/199
 .. _#198 Add ARAM calculation: https://github.com/com-posers-pit/smw_music/issues/198
 .. _#190 Validate musicxml on load: https://github.com/com-posers-pit/smw_music/issues/190
@@ -1203,6 +1255,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.8: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.8
 .. _Release 0.3.7: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.7
 .. _Release 0.3.6: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.6
 .. _Release 0.3.5: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.5
@@ -1220,7 +1273,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.7: https://github.com/com-posers-pit/smw_music/compare/v0.3.7...HEAD
+.. _Differences from 0.3.8: https://github.com/com-posers-pit/smw_music/compare/v0.3.8...HEAD
+.. _Differences from 0.3.7: https://github.com/com-posers-pit/smw_music/compare/v0.3.7...v0.3.8
 .. _Differences from 0.3.6: https://github.com/com-posers-pit/smw_music/compare/v0.3.6...v0.3.7
 .. _Differences from 0.3.5: https://github.com/com-posers-pit/smw_music/compare/v0.3.5...v0.3.6
 .. _Differences from 0.3.4: https://github.com/com-posers-pit/smw_music/compare/v0.3.4...v0.3.5
@@ -1236,6 +1290,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _DiscoVision: https://www.youtube.com/watch?v=Azsk21MpbUk
 .. _Sabotage: https://www.youtube.com/watch?v=z5rRZdiu1UE
 .. _La Forme: https://www.youtube.com/watch?v=-TEL_PPSt4s
 .. _Cherry Twist: https://www.youtube.com/watch?v=eLkQ2eLrUMs
