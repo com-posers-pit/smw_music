@@ -1052,6 +1052,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _append_recent_project(self, fname: Path) -> None:
+        fname = fname.resolve()
         history = self.recent_projects
         if fname in history:
             history.remove(fname)
@@ -1643,7 +1644,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if projects is None:
             projects = []
 
-        return [Path(project) for project in projects]
+        return [Path(project).resolve() for project in projects]
 
     ###########################################################################
 
@@ -1653,7 +1654,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         projects = projects[-project_limit:]
 
         with open(self.recent_projects_fname, "w", encoding="utf8") as fobj:
-            yaml.safe_dump([str(project) for project in projects], fobj)
+            yaml.safe_dump(
+                [str(project.resolve()) for project in projects], fobj
+            )
 
         self.recent_projects_updated.emit(projects)
 
