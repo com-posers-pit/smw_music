@@ -1417,14 +1417,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         brr: Brr | None = None
         with suppress(NoSample):
             sample = self.state.sample
-            if sample.sample_source == SampleSource.SAMPLEPACK:
-                pack, path = sample.pack_sample
-                brr = self._sample_packs[pack][path].brr
-
-            else:
-
-                with suppress(FileNotFoundError):
-                    brr = Brr.from_file(sample.brr_fname)
+            match sample.sample_source:
+                case SampleSource.SAMPLEPACK:
+                    pack, path = sample.pack_sample
+                    brr = self._sample_packs[pack][path].brr
+                case SampleSource.BRR:
+                    with suppress(FileNotFoundError):
+                        brr = Brr.from_file(sample.brr_fname)
 
         if brr is not None:
             tuning = self.state.sample.tuning
