@@ -1061,6 +1061,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _check_bad_tune(self) -> list[tuple[str, str]]:
+        bad_samples = []
+        for inst_name, inst in self.state.instruments.items():
+            for sample_name, sample in inst.samples.items():
+                if (sample.tune_setting, sample.subtune_setting) == (0, 0):
+                    bad_samples.append((inst_name, sample_name))
+
+        return bad_samples
+
+    ###########################################################################
+
     def _interpolate(self, level: Dynamics, setting: int) -> None:
         inst = self.state.instrument
         sample = self.state.sample
@@ -1291,8 +1302,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             except MusicXmlException as e:
                 msg = str(e)
             else:
-                error = False
-                msg = "Done"
+                bad_samples = self._check_bad_tune()
+                if bad_samples:
+                    msg = "\n".join(
+                        f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
+                        for inst, samp in bad_samples
+                    )
+                else:
+                    error = False
+                    msg = "Done"
 
         if report or error:
             self.response_generated.emit(error, title, msg)
