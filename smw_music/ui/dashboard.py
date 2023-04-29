@@ -10,6 +10,7 @@
 ###############################################################################
 
 # Standard library imports
+import csv
 import enum
 from collections import deque
 from contextlib import ExitStack, suppress
@@ -677,8 +678,13 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _about(self) -> None:
+        data_lib = resources.files("smw_music.data")
+        with open(data_lib / "codenames.csv") as fobj:
+            for row in csv.reader(fobj):
+                codename = row[-1]
+
         title = "About MusicXML -> MML"
-        text = f"Version: {__version__}"
+        text = f"Version: {__version__} ({codename})"
         text += "\nCopyright Ⓒ 2023 The SMW Music Python Project Authors"
         text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
 

@@ -11,7 +11,7 @@ a = Analysis(
     ['smw_music/scripts/dashboard.py'],
     pathex=[],
     binaries=[],
-    datas=[('smw_music/data/mml.txt', 'smw_music/data'), ('smw_music/data/dashboard.ui', 'smw_music/data'), ('smw_music/data/ashtley.gif', 'smw_music/data'), ('smw_music/data/maestro.svg', 'smw_music/data'), ('smw_music/data/convert.bat', 'smw_music/data'), ('smw_music/data/convert.sh', 'smw_music/data'), ('smw_music/data/preferences.ui', 'smw_music/data')],
+    datas=[('smw_music/data/codenames.csv', 'smw_music/data'), ('smw_music/data/mml.txt', 'smw_music/data'), ('smw_music/data/dashboard.ui', 'smw_music/data'), ('smw_music/data/ankha.gif', 'smw_music/data'), ('smw_music/data/ashtley.gif', 'smw_music/data'), ('smw_music/data/maestro.svg', 'smw_music/data'), ('smw_music/data/convert.bat', 'smw_music/data'), ('smw_music/data/convert.sh', 'smw_music/data'), ('smw_music/data/preferences.ui', 'smw_music/data')],
     hiddenimports=['music21.alpha', 'music21.audioSearch', 'music21.configure', 'qdarkstyle'],
     hookspath=[],
     hooksconfig={},
