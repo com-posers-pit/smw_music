@@ -805,7 +805,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
-            self._signal_state_change(update_aram_util=False)
+            self._signal_state_change()
             self.update_status("Redo")
 
     ###########################################################################
@@ -1044,7 +1044,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
-            self._signal_state_change(update_aram_util=False)
+            self._signal_state_change()
             self.update_status("Undo")
 
     ###########################################################################
@@ -1405,7 +1405,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self,
         update_instruments: bool = False,
         state_change: bool = True,
-        update_aram_util: bool = True,
     ) -> None:
         state = self.state
 
