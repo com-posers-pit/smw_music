@@ -291,12 +291,15 @@ def _update_convert_scripts(dirname: Path) -> None:
         with open(fpath, "r", encoding="utf8") as fobj:
             lines = fobj.readlines()
 
-        if "-visualize" not in lines[-1]:
-            split = lines[-1].split('"')
-            split[0] += "-visualize "
-            lines[-1] = '"'.join(split)
-            with open(fpath, "w", encoding="utf8") as fobj:
-                fobj.write("".join(lines))
+        for n, line in enumerate(lines):
+            if "AddmusicK" in line and "-visualize" not in line:
+                split = line.split('"')
+                split[0] += "-visualize "
+                line = '"'.join(split)
+                lines[n] = line
+
+        with open(fpath, "w", encoding="utf8") as fobj:
+            fobj.write("".join(lines))
 
 
 ###############################################################################
