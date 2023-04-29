@@ -12,7 +12,7 @@
 # Standard library imports
 from dataclasses import dataclass
 from functools import cached_property
-from glob import glob
+from glob import iglob
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import TextIO
@@ -82,7 +82,7 @@ class SamplePack:
                 # Stupid case insensitive file systems.  Build a map between
                 # the lower-case version of file name in the directory and its
                 brr_data = {}
-                for fname in glob("*.brr", root_dir=parent_dir):
+                for fname in iglob("*.brr", root_dir=parent_dir):
                     with open(parent_dir / fname, "rb") as fobj:
                         brr_data[fname.lower()] = fobj.read()
 
@@ -96,6 +96,16 @@ class SamplePack:
                     except KeyError:
                         # If a file in the pattern file is missing, skip it
                         continue
+
+            # Add brr files that aren't in the !patterns.txt file
+            default_params = SampleParams.from_regs([0, 0, 0x7F, 0x10, 0])
+            for fname in iglob("**/*.brr", root_dir=tdir, recursive=True):
+                path = Path(fname)
+                if path not in samples:
+                    with open(Path(tdir) / fname, "rb") as fobj:
+                        data = fobj.read()
+
+                    samples[path] = Sample(path, default_params, data)
 
         self._samples = samples
 
