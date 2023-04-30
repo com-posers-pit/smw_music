@@ -259,15 +259,15 @@ class InstrumentSample:
 
         match self.gain_mode:
             case GainMode.DIRECT:
-                vxgain = 0x80 | self.gain_setting
+                vxgain = self.gain_setting
             case GainMode.INCLIN:
-                vxgain = 0x40 | self.gain_setting
+                vxgain = 0xC0 | self.gain_setting
             case GainMode.INCBENT:
-                vxgain = 0x60 | self.gain_setting
+                vxgain = 0xE0 | self.gain_setting
             case GainMode.DECLIN:
-                vxgain = 0x00 | self.gain_setting
+                vxgain = 0x80 | self.gain_setting
             case GainMode.DECEXP:
-                vxgain = 0x20 | self.gain_setting
+                vxgain = 0xA0 | self.gain_setting
 
         return (
             vxadsr1,

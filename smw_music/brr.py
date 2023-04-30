@@ -219,11 +219,16 @@ class Brr:
     def fundamental(self) -> float:
         samples_per_loop = SAMPLES_PER_BLOCK * (self.nblocks - self.loop_block)
         target_samples = 64000
-        loops = math.ceil(target_samples / samples_per_loop)
+        try:
+            loops = math.ceil(target_samples / samples_per_loop)
+            start = self.loop_block * SAMPLES_PER_BLOCK
+        except ZeroDivisionError:
+            # Non-looping brr samples will use this branch
+            loops = 1
+            start = 0
 
         nyquist = SAMPLE_FREQ / 2
         waveform = self.generate_waveform(loops)
-        start = self.loop_block * SAMPLES_PER_BLOCK
         spec = np.abs(np.fft.rfft(waveform[start:]))
         spec /= spec.max()
         peak, *_ = find_peaks(spec, height=0.25)[0]

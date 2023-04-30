@@ -805,7 +805,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_redo_clicked(self) -> None:
         if self._undo_level > 0:
             self._undo_level -= 1
-            self._signal_state_change(update_aram_util=False)
+            self._signal_state_change()
             self.update_status("Redo")
 
     ###########################################################################
@@ -1044,7 +1044,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_undo_clicked(self) -> None:
         if self._undo_level < len(self._history) - 1:
             self._undo_level += 1
-            self._signal_state_change(update_aram_util=False)
+            self._signal_state_change()
             self.update_status("Undo")
 
     ###########################################################################
@@ -1052,11 +1052,23 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _append_recent_project(self, fname: Path) -> None:
+        fname = fname.resolve()
         history = self.recent_projects
         if fname in history:
             history.remove(fname)
         history.append(fname)
         self.recent_projects = history
+
+    ###########################################################################
+
+    def _check_bad_tune(self) -> list[tuple[str, str]]:
+        bad_samples = []
+        for inst_name, inst in self.state.instruments.items():
+            for sample_name, sample in inst.samples.items():
+                if (sample.tune_setting, sample.subtune_setting) == (0, 0):
+                    bad_samples.append((inst_name, sample_name))
+
+        return bad_samples
 
     ###########################################################################
 
@@ -1290,8 +1302,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             except MusicXmlException as e:
                 msg = str(e)
             else:
-                error = False
-                msg = "Done"
+                bad_samples = self._check_bad_tune()
+                if bad_samples:
+                    msg = "\n".join(
+                        f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
+                        for inst, samp in bad_samples
+                    )
+                else:
+                    error = False
+                    msg = "Done"
 
         if report or error:
             self.response_generated.emit(error, title, msg)
@@ -1404,7 +1423,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self,
         update_instruments: bool = False,
         state_change: bool = True,
-        update_aram_util: bool = True,
     ) -> None:
         state = self.state
 
@@ -1416,14 +1434,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         brr: Brr | None = None
         with suppress(NoSample):
             sample = self.state.sample
-            if sample.sample_source == SampleSource.SAMPLEPACK:
-                pack, path = sample.pack_sample
-                brr = self._sample_packs[pack][path].brr
-
-            else:
-
-                with suppress(FileNotFoundError):
-                    brr = Brr.from_file(sample.brr_fname)
+            match sample.sample_source:
+                case SampleSource.SAMPLEPACK:
+                    pack, path = sample.pack_sample
+                    brr = self._sample_packs[pack][path].brr
+                case SampleSource.BRR:
+                    with suppress(FileNotFoundError):
+                        brr = Brr.from_file(sample.brr_fname)
 
         if brr is not None:
             tuning = self.state.sample.tuning
@@ -1643,7 +1660,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if projects is None:
             projects = []
 
-        return [Path(project) for project in projects]
+        return [Path(project).resolve() for project in projects]
 
     ###########################################################################
 
@@ -1653,7 +1670,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         projects = projects[-project_limit:]
 
         with open(self.recent_projects_fname, "w", encoding="utf8") as fobj:
-            yaml.safe_dump([str(project) for project in projects], fobj)
+            yaml.safe_dump(
+                [str(project.resolve()) for project in projects], fobj
+            )
 
         self.recent_projects_updated.emit(projects)
 
