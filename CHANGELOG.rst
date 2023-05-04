@@ -11,7 +11,55 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.10`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.10 - 2023-05-03
+--------------------------
+
+CODENAME: `Weapon of Choice`_
+
+Don't be shocked by the tone of my voice
+
+Check out my new weapon, weapon of choice
+
+`Release 0.3.10`_
+
 `Differences from 0.3.9`_
+
+Purpose
++++++++
+
+Fix overly aggressive nil tune detection
+
+
+Affected Issues
++++++++++++++++
+
+- `#215 Tune 0.0 detection is too aggressive`_
+
+Changed
++++++++
+
+- Only error on 0 tune for non-builtin samples
+
+Added
++++++
+
+None
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
 
 --------------------------------------------------------------------------------
 
@@ -1205,6 +1253,7 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
+.. _#215 Tune 0.0 detection is too aggressive: https://github.com/com-posers-pit/smw_usic/issues/215
 .. _#214 Generated ono-ADSR outputs are wrong: https://github.com/com-posers-pit/smw_usic/issues/214
 .. _#212 Add a check for 0 tuning: https://github.com/com-posers-pit/smw_usic/issues/212
 .. _#211 Convert recent projects to absolute paths: https://github.com/com-posers-pit/smw_usic/issues/211
@@ -1340,6 +1389,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.10: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.10
 .. _Release 0.3.9: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.9
 .. _Release 0.3.8: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.8
 .. _Release 0.3.7: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.7
@@ -1359,7 +1409,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.9: https://github.com/com-posers-pit/smw_music/compare/v0.3.9...HEAD
+.. _Differences from 0.3.10: https://github.com/com-posers-pit/smw_music/compare/v0.3.10...HEAD
+.. _Differences from 0.3.9: https://github.com/com-posers-pit/smw_music/compare/v0.3.9...v0.3.10
 .. _Differences from 0.3.8: https://github.com/com-posers-pit/smw_music/compare/v0.3.8...v0.3.9
 .. _Differences from 0.3.7: https://github.com/com-posers-pit/smw_music/compare/v0.3.7...v0.3.8
 .. _Differences from 0.3.6: https://github.com/com-posers-pit/smw_music/compare/v0.3.6...v0.3.7
@@ -1377,6 +1428,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _Weapon of Choice: https://www.youtube.com/watch?v=wCDIYvFmgW8
 .. _Rock Me Amadeus: https://www.youtube.com/watch?v=9qExmU6F22s
 .. _DiscoVision: https://www.youtube.com/watch?v=Azsk21MpbUk
 .. _Sabotage: https://www.youtube.com/watch?v=z5rRZdiu1UE
