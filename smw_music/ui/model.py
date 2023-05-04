@@ -1065,7 +1065,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         bad_samples = []
         for inst_name, inst in self.state.instruments.items():
             for sample_name, sample in inst.samples.items():
-                if (sample.tune_setting, sample.subtune_setting) == (0, 0):
+                check_tune = sample.sample_source in [
+                    SampleSource.BRR,
+                    SampleSource.SAMPLEPACK,
+                ]
+                zero_tune = (sample.tune_setting, sample.subtune_setting) == (
+                    0,
+                    0,
+                )
+                if zero_tune and check_tune:
                     bad_samples.append((inst_name, sample_name))
 
         return bad_samples
