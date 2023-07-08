@@ -38,6 +38,7 @@ def _symbol_map() -> dict[str, "NoteHead"]:
         "▲": NoteHead.TRIUP,
         "▼": NoteHead.TRIDOWN,
         "/": NoteHead.SLASH,
+        "\\": NoteHead.BACKSLASH,
         "◆": NoteHead.DIAMOND,
     }
 
@@ -123,9 +124,10 @@ class NoteHead(StrEnum):
     O = "o"
     PLUS = "cross"
     TENSOR = "circle-x"
-    TRIUP = "arrow up"
-    TRIDOWN = "arrow down"
-    SLASH = "slash"
+    TRIUP = "triangle"
+    TRIDOWN = "inverted triangle"
+    SLASH = "slashed"
+    BACKSLASH = "back slashed"
     DIAMOND = "diamond"
 
     ###########################################################################
