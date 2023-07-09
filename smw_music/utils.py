@@ -47,13 +47,13 @@ def hexb(val: int) -> str:
 ###############################################################################
 
 
-def newest_release() -> tuple[str, str] | None:
+def newest_release() -> tuple[str, tuple[int, int, int]] | None:
     req = urllib.request.Request(
         "https://github.com/com-posers-pit/smw_music/releases/latest"
     )
     with suppress(urllib.error.HTTPError), urllib.request.urlopen(req) as resp:
         url = resp.geturl()
-        return (url, url.split("/")[-1].lstrip("v"))
+        return (url, version_tuple(url.split("/")[-1].lstrip("v")))
     return None
 
 
@@ -62,3 +62,10 @@ def newest_release() -> tuple[str, str] | None:
 
 def pct(val: float, lim: float = 255) -> str:
     return f"{100*val/lim:3.1f}%"
+
+
+###############################################################################
+
+
+def version_tuple(version: str) -> tuple[int, int, int]:
+    return tuple(int(x) for x in version.split("."))
