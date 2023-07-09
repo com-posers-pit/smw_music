@@ -13,7 +13,6 @@
 import copy
 import pkgutil
 from datetime import datetime
-from itertools import chain
 from pathlib import PurePosixPath
 
 # Library imports
