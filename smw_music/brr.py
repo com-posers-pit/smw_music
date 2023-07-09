@@ -221,11 +221,10 @@ class Brr:
     def fundamental(self) -> float:
         samples_per_loop = SAMPLES_PER_BLOCK * (self.nblocks - self.loop_block)
         target_samples = 64000
-        try:
+        if self.sample_loops and samples_per_loop > 0:
             loops = math.ceil(target_samples / samples_per_loop)
             start = self.loop_block * SAMPLES_PER_BLOCK
-        except ZeroDivisionError:
-            # Non-looping brr samples will use this branch
+        else:
             loops = 1
             start = 0
 
