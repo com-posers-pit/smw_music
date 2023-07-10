@@ -497,3 +497,24 @@ class InstrumentConfig:
     def samples(self, value: dict[str, InstrumentSample]) -> None:
         self.multisamples = dict(value)
         self.sample = self.multisamples.pop("")
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def dedupe_notes(
+    notes: list[tuple[Pitch, NoteHead]]
+) -> list[tuple[Pitch, NoteHead]]:
+    rv = []
+    for in_note in notes:
+        in_pitch, in_head = in_note
+        for out_note in rv:
+            out_pitch, out_head = out_note
+            if in_pitch.isEnharmonic(out_pitch) and in_head == out_head:
+                break
+        else:
+            rv.append(in_note)
+
+    return rv

@@ -29,6 +29,7 @@ from smw_music.music_xml.instrument import (
     InstrumentSample,
     NoteHead,
     SampleSource,
+    dedupe_notes,
 )
 from smw_music.music_xml.reduction import reduce, remove_unused_instruments
 from smw_music.music_xml.shared import CRLF, MusicXmlException
@@ -750,11 +751,11 @@ class Song:
 
     def unmapped_notes(
         self, inst_name: str, inst: InstrumentConfig
-    ) -> set[tuple[music21.pitch.Pitch, NoteHead]]:
-        rv = set()
+    ) -> list[tuple[music21.pitch.Pitch, NoteHead]]:
+        rv = list()
 
         instrument = inst if inst.multisample else None
         for channel in self.channels:
-            rv |= channel.unmapped(inst_name, instrument)
+            rv.extend(channel.unmapped(inst_name, instrument))
 
-        return rv
+        return dedupe_notes(rv)
