@@ -239,13 +239,22 @@ class InstrumentSample:
     def emit(
         self, note: Pitch, notehead: NoteHead | None = None
     ) -> Pitch | None:
-        match = True
-        match &= self.llim <= note <= self.ulim
+        # This is a check to see if llim <= note <= ulim.
+        # Equality tests don't check for enharmonic equivalence (i.e.
+        # "F3 natural" != "F3").  So we need to test the ends separately from
+        # testing inside the interval
+        llim_match = self.llim.isEnharmonic(note)
+        ulim_match = self.ulim.isEnharmonic(note)
+        between = self.llim < note < self.ulim
+
+        match = llim_match or between or ulim_match
+
         if notehead is not None:
             match &= self.notehead == notehead
 
         if match:
             return Pitch(note.ps - self.llim.ps + self.start.ps)
+
         return None
 
     ###########################################################################
