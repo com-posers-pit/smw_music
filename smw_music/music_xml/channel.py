@@ -19,7 +19,11 @@ from typing import Iterable, TypeVar, cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml.instrument import InstrumentConfig, NoteHead
+from smw_music.music_xml.instrument import (
+    InstrumentConfig,
+    NoteHead,
+    dedupe_notes,
+)
 from smw_music.music_xml.mml import MmlExporter
 from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.music_xml.tokens import (
@@ -193,14 +197,14 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def unmapped(
         self, inst_name: str, inst: InstrumentConfig | None
-    ) -> set[tuple[Pitch, NoteHead]]:
+    ) -> list[tuple[Pitch, NoteHead]]:
         last_inst = ""
-        rv = set()
+        notes = list()
         for token in self.tokens:
             if isinstance(token, Instrument):
                 last_inst = token.name
             if isinstance(token, Note) and (last_inst == inst_name):
                 if (inst is None) or (not inst.emit_note(token)[1]):
-                    rv.add((token.pitch, NoteHead(token.head)))
+                    notes.append((token.pitch, NoteHead(token.head)))
 
-        return rv
+        return dedupe_notes(notes)

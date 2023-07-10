@@ -46,6 +46,8 @@ from smw_music import SmwMusicException, nspc
 # API constant definitions
 ###############################################################################
 
+BLOCK_SIZE = 9
+
 SAMPLE_FREQ = 32000
 
 SAMPLES_PER_BLOCK = 16
@@ -99,15 +101,15 @@ class Brr:
     @classmethod
     def from_binary(cls, raw: bytes) -> "Brr":
         data = np.frombuffer(raw, np.uint8)
-        if data.size % 9 == 0:
+        if data.size % BLOCK_SIZE == 0:
             start = 0
             loop_point = None
-        elif (data.size - 2) % 9 == 0:
+        elif (data.size - 2) % BLOCK_SIZE == 0:
             start = 2
             # Little endian per [2] above
             loop_point = int.from_bytes(raw[:2], "little")
 
-        data = data[start:].reshape((-1, 9))
+        data = data[start:].reshape((-1, BLOCK_SIZE))
         return cls(data, loop_point)
 
     ###########################################################################
@@ -219,11 +221,10 @@ class Brr:
     def fundamental(self) -> float:
         samples_per_loop = SAMPLES_PER_BLOCK * (self.nblocks - self.loop_block)
         target_samples = 64000
-        try:
+        if self.sample_loops and samples_per_loop > 0:
             loops = math.ceil(target_samples / samples_per_loop)
             start = self.loop_block * SAMPLES_PER_BLOCK
-        except ZeroDivisionError:
-            # Non-looping brr samples will use this branch
+        else:
             loops = 1
             start = 0
 
@@ -244,7 +245,7 @@ class Brr:
 
     @cached_property
     def loop_block(self) -> int:
-        return 0 if self.loop_point is None else self.loop_point // 9
+        return 0 if self.loop_point is None else self.loop_point // BLOCK_SIZE
 
     ###########################################################################
 
@@ -283,7 +284,7 @@ class Brr:
 
     def __post_init__(self):
         if self.sample_loops and self.loop_point is not None:
-            valid_len = self.loop_point % 9 == 0
+            valid_len = self.loop_point % BLOCK_SIZE == 0
             valid_block = 0 <= self.loop_point < self.blocks.size
 
             if not (valid_len and valid_block):

@@ -61,7 +61,7 @@ from smw_music.ui.utilization import (
     echo_bytes,
 )
 from smw_music.ui.utils import make_vis_dir
-from smw_music.utils import brr_size_b, newest_release
+from smw_music.utils import brr_size_b, newest_release, version_tuple
 
 ###############################################################################
 # Private constant definitions
@@ -265,7 +265,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._load_prefs()
         if self.preferences.release_check:
             release = newest_release()
-            if release is not None and release[1] != __version__:
+            if release is not None and release[1] > version_tuple(__version__):
                 url, version = release
                 self.response_generated.emit(
                     False,
