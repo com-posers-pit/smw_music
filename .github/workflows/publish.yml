@@ -82,7 +82,7 @@ jobs:
       - name: Build misc artifacts
         run: |
           mkdir musescore
-          cp -r "misc/*.drm" musescore
+          cp -r "misc/*.drm" "misc/SMW_Porting.mpal" musescore
           zip -r musescore.zip musescore
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
