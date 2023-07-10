@@ -11,6 +11,83 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.11`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.11 - 2023-07-09
+--------------------------
+
+CODENAME: `Domino Dancing`_
+
+All day, all day
+
+Watch them all fall down
+
+All day, all day
+
+Domino dancing
+
+`Release 0.3.11`_
+
+`Differences from 0.3.10`_
+
+Purpose
++++++++
+
+Fix issues with auto-tuned non-looping samples and subtle multi-sample bugs
+
+
+Affected Issues
++++++++++++++++
+
+- `#231 Multisample broken with enharmonic equivalence`_
+
+- `#229 Not all notehead detection is correct`_
+
+- `#222 Duplicate unused samples show up in multisample list`_
+
+- `#220 Non-looping samples that are auto-tuned break playback`_
+
+Changed
++++++++
+
+- Non-looping samples are treated as "loop count == 1" for fundamental frequency
+  detection
+
+- Multisample limit checking is done more carefully
+
+- Unmapped note detection is handled manually
+
+- Multisample notehead detection bugs fixed
+
+- All drum instruments in drm files use voice 0
+
+- "New version" detection only fires when a *newer* version is found
+
+Added
++++++
+
+- Custom MuseScore palette for SMW porting
+
+- AST printer script
+
+- Musescore artifact upload GH action
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
+
+--------------------------------------------------------------------------------
+
 `Differences from 0.3.10`_
 
 --------------------------------------------------------------------------------
@@ -1253,14 +1330,19 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
-.. _#215 Tune 0.0 detection is too aggressive: https://github.com/com-posers-pit/smw_usic/issues/215
-.. _#214 Generated ono-ADSR outputs are wrong: https://github.com/com-posers-pit/smw_usic/issues/214
-.. _#212 Add a check for 0 tuning: https://github.com/com-posers-pit/smw_usic/issues/212
-.. _#211 Convert recent projects to absolute paths: https://github.com/com-posers-pit/smw_usic/issues/211
-.. _#210 Handle sample packs with missing !patterns.txt files: https://github.com/com-posers-pit/smw_usic/issues/210
-.. _#209 Disable tuning logic when using builtin samples: https://github.com/com-posers-pit/smw_usic/issues/209
-.. _#207 Handle non-looping sample autotuning better: https://github.com/com-posers-pit/smw_usic/issues/207
-.. _#206 An extra "-visualize" is added when opening on windows: https://github.com/com-posers-pit/smw_usic/issues/206
+
+.. _#231 Multisample broken with enharmonic equivalence: http://github.com/com-posers-pit/smw_music/issues/231
+.. _#229 Not all notehead detection is correct: http://github.com/com-posers-pit/smw_music/issues/229
+.. _#222 Duplicate unused samples show up in multisample list: http://github.com/com-posers-pit/smw_music/issues/222
+.. _#220 Non-looping samples that are auto-tuned break playback: http://github.com/com-posers-pit/smw_music/issues/220
+.. _#215 Tune 0.0 detection is too aggressive: https://github.com/com-posers-pit/smw_music/issues/215
+.. _#214 Generated ono-ADSR outputs are wrong: https://github.com/com-posers-pit/smw_music/issues/214
+.. _#212 Add a check for 0 tuning: https://github.com/com-posers-pit/smw_music/issues/212
+.. _#211 Convert recent projects to absolute paths: https://github.com/com-posers-pit/smw_music/issues/211
+.. _#210 Handle sample packs with missing !patterns.txt files: https://github.com/com-posers-pit/smw_music/issues/210
+.. _#209 Disable tuning logic when using builtin samples: https://github.com/com-posers-pit/smw_music/issues/209
+.. _#207 Handle non-looping sample autotuning better: https://github.com/com-posers-pit/smw_music/issues/207
+.. _#206 An extra "-visualize" is added when opening on windows: https://github.com/com-posers-pit/smw_music/issues/206
 .. _#205 Add logic to suggest tuning parameters: https://github.com/com-posers-pit/smw_music/issues/205
 .. _#201 Add missing visualization conversion update: https://github.com/com-posers-pit/smw_music/issues/201
 .. _#199 Add BRR file size display: https://github.com/com-posers-pit/smw_music/issues/199
@@ -1389,6 +1471,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.11: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.11
 .. _Release 0.3.10: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.10
 .. _Release 0.3.9: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.9
 .. _Release 0.3.8: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.8
@@ -1409,7 +1492,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.10: https://github.com/com-posers-pit/smw_music/compare/v0.3.10...HEAD
+.. _Differences from 0.3.11: https://github.com/com-posers-pit/smw_music/compare/v0.3.11...HEAD
+.. _Differences from 0.3.10: https://github.com/com-posers-pit/smw_music/compare/v0.3.10...v0.3.11
 .. _Differences from 0.3.9: https://github.com/com-posers-pit/smw_music/compare/v0.3.9...v0.3.10
 .. _Differences from 0.3.8: https://github.com/com-posers-pit/smw_music/compare/v0.3.8...v0.3.9
 .. _Differences from 0.3.7: https://github.com/com-posers-pit/smw_music/compare/v0.3.7...v0.3.8
@@ -1428,6 +1512,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _Domino Dancing: https://www.youtube.com/watch?v=ik2YF05iX2w
 .. _Weapon of Choice: https://www.youtube.com/watch?v=wCDIYvFmgW8
 .. _Rock Me Amadeus: https://www.youtube.com/watch?v=9qExmU6F22s
 .. _DiscoVision: https://www.youtube.com/watch?v=Azsk21MpbUk
