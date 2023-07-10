@@ -38,6 +38,7 @@ def _symbol_map() -> dict[str, "NoteHead"]:
         "▲": NoteHead.TRIUP,
         "▼": NoteHead.TRIDOWN,
         "/": NoteHead.SLASH,
+        "\\": NoteHead.BACKSLASH,
         "◆": NoteHead.DIAMOND,
     }
 
@@ -123,9 +124,10 @@ class NoteHead(StrEnum):
     O = "o"
     PLUS = "cross"
     TENSOR = "circle-x"
-    TRIUP = "arrow up"
-    TRIDOWN = "arrow down"
-    SLASH = "slash"
+    TRIUP = "triangle"
+    TRIDOWN = "inverted triangle"
+    SLASH = "slashed"
+    BACKSLASH = "back slashed"
     DIAMOND = "diamond"
 
     ###########################################################################
@@ -237,13 +239,22 @@ class InstrumentSample:
     def emit(
         self, note: Pitch, notehead: NoteHead | None = None
     ) -> Pitch | None:
-        match = True
-        match &= self.llim <= note <= self.ulim
+        # This is a check to see if llim <= note <= ulim.
+        # Equality tests don't check for enharmonic equivalence (i.e.
+        # "F3 natural" != "F3").  So we need to test the ends separately from
+        # testing inside the interval
+        llim_match = self.llim.isEnharmonic(note)
+        ulim_match = self.ulim.isEnharmonic(note)
+        between = self.llim < note < self.ulim
+
+        match = llim_match or between or ulim_match
+
         if notehead is not None:
             match &= self.notehead == notehead
 
         if match:
             return Pitch(note.ps - self.llim.ps + self.start.ps)
+
         return None
 
     ###########################################################################
@@ -486,3 +497,24 @@ class InstrumentConfig:
     def samples(self, value: dict[str, InstrumentSample]) -> None:
         self.multisamples = dict(value)
         self.sample = self.multisamples.pop("")
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def dedupe_notes(
+    notes: list[tuple[Pitch, NoteHead]]
+) -> list[tuple[Pitch, NoteHead]]:
+    rv = []
+    for in_note in notes:
+        in_pitch, in_head = in_note
+        for out_note in rv:
+            out_pitch, out_head = out_note
+            if in_pitch.isEnharmonic(out_pitch) and in_head == out_head:
+                break
+        else:
+            rv.append(in_note)
+
+    return rv

@@ -3,7 +3,7 @@
   <Drum pitch="36">
     <head>normal</head>
     <line>7</line>
-    <voice>1</voice>
+    <voice>0</voice>
     <name>Bass Drum 1</name>
     <stem>2</stem>
     <shortcut>B</shortcut>
@@ -11,7 +11,7 @@
   <Drum pitch="40">
     <head>normal</head>
     <line>3</line>
-    <voice>1</voice>
+    <voice>0</voice>
     <name>Electric Snare</name>
     <stem>1</stem>
     <shortcut>A</shortcut>
@@ -19,7 +19,7 @@
   <Drum pitch="41">
     <head>normal</head>
     <line>5</line>
-    <voice>1</voice>
+    <voice>0</voice>
     <name>Low Tom</name>
     <stem>1</stem>
     </Drum>
@@ -34,7 +34,7 @@
   <Drum pitch="45">
     <head>normal</head>
     <line>2</line>
-    <voice>1</voice>
+    <voice>0</voice>
     <name>Mid Tom</name>
     <stem>1</stem>
     </Drum>
@@ -48,7 +48,7 @@
   <Drum pitch="47">
     <head>normal</head>
     <line>1</line>
-    <voice>1</voice>
+    <voice>0</voice>
     <name>High Tom</name>
     <stem>1</stem>
     </Drum>
