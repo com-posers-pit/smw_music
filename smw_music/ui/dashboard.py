@@ -66,7 +66,7 @@ from smw_music.ui.utilization import (
     paint_utilization,
     setup_utilization,
 )
-from smw_music.ui.utils import to_checkstate
+from smw_music.ui.utils import is_checked, to_checkstate
 from smw_music.utils import brr_size, hexb, pct
 
 ###############################################################################
@@ -93,6 +93,7 @@ def _mark_unselectable(item: QTreeWidgetItem) -> None:
 
 
 ###############################################################################
+
 
 # h/t: https://stackoverflow.com/questions/47285303
 def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
@@ -376,6 +377,7 @@ class Dashboard(QWidget):
             v.multisample_sample_notes.text(),
             v.multisample_sample_notehead.currentText(),
             v.multisample_sample_output.text(),
+            is_checked(v.multisample_sample_track),
         )
 
     ###########################################################################
@@ -388,6 +390,7 @@ class Dashboard(QWidget):
             v.multisample_sample_notes.text(),
             v.multisample_sample_notehead.currentText(),
             v.multisample_sample_output.text(),
+            is_checked(v.multisample_sample_track),
         )
 
     ###########################################################################
@@ -767,6 +770,7 @@ class Dashboard(QWidget):
                 self.on_multisample_sample_changed,
             ),
             (v.multisample_sample_output, self.on_multisample_sample_changed),
+            (v.multisample_sample_track, self.on_multisample_sample_changed),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
@@ -1025,7 +1029,7 @@ class Dashboard(QWidget):
 
         return item
 
-    ###############################################################################
+    ###########################################################################
 
     def _on_close_project_clicked(self) -> None:
         close = self._prompt_to_save()
@@ -1035,7 +1039,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_multisample_unmapped_doubleclicked(self, idx: QModelIndex) -> None:
-        item = self._view.multisample_unmapped_list.itemFromIndex(idx)
+        v = self._view
+        item = v.multisample_unmapped_list.itemFromIndex(idx)
 
         name = f"TMP{self._view.multisample_unmapped_list.count()}_"
         note, notehead = cast(
@@ -1043,7 +1048,11 @@ class Dashboard(QWidget):
         )
 
         self._model.on_multisample_sample_add_clicked(
-            name, str(note), notehead, note
+            name,
+            str(note),
+            notehead,
+            note,
+            is_checked(v.multisample_sample_track),
         )
 
     ###########################################################################
@@ -1258,7 +1267,6 @@ class Dashboard(QWidget):
             self._samples.clear()
 
             for inst_name, inst in state.instruments.items():
-
                 parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 

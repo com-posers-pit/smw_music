@@ -229,6 +229,7 @@ class InstrumentSample:
     notehead: NoteHead = NoteHead.NORMAL
     start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
     tuning: Tuning = field(default_factory=Tuning)
+    track: bool = False
 
     _instrument_idx: int = field(default=0, init=False)
 
@@ -256,6 +257,18 @@ class InstrumentSample:
             return Pitch(note.ps - self.llim.ps + self.start.ps)
 
         return None
+
+    ###########################################################################
+
+    def track_settings(self, other: "InstrumentSample") -> None:
+        if self.track:
+            print("tracking")
+            self.dynamics = other.dynamics.copy()
+            self.dyn_interpolate = other.dyn_interpolate
+            self.artics = other.artics.copy()
+            self.pan_enabled = other.pan_enabled
+            self.pan_setting = other.pan_setting
+            self.pan_invert = other.pan_invert
 
     ###########################################################################
     # Property definitions

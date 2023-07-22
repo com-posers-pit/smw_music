@@ -2017,14 +2017,7 @@
                  <string>Multisample</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_16">
-                 <item row="9" column="2">
-                  <widget class="QPushButton" name="multisample_sample_add">
-                   <property name="text">
-                    <string>Add</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0" rowspan="10">
+                 <item row="1" column="0" rowspan="11">
                   <widget class="QGroupBox" name="multisample_unmapped_box">
                    <property name="title">
                     <string>Unmapped</string>
@@ -2036,41 +2029,12 @@
                    </layout>
                   </widget>
                  </item>
-                 <item row="8" column="2" colspan="2">
-                  <widget class="QLineEdit" name="multisample_sample_output"/>
-                 </item>
-                 <item row="9" column="3">
-                  <widget class="QPushButton" name="multisample_sample_remove">
+                 <item row="2" column="1">
+                  <widget class="QLabel" name="multisample_sample_name_label">
                    <property name="text">
-                    <string>Remove</string>
+                    <string>Name</string>
                    </property>
                   </widget>
-                 </item>
-                 <item row="10" column="1">
-                  <spacer name="verticalSpacer_5">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item row="1" column="4">
-                  <spacer name="horizontalSpacer_2">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                  <item row="7" column="2" colspan="2">
                   <widget class="QComboBox" name="multisample_sample_notehead">
@@ -2121,10 +2085,56 @@
                    </item>
                   </widget>
                  </item>
+                 <item row="1" column="4">
+                  <spacer name="horizontalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
                  <item row="8" column="1">
                   <widget class="QLabel" name="multisample_sample_output_label">
                    <property name="text">
                     <string>Ouput</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_output"/>
+                 </item>
+                 <item row="2" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_name"/>
+                 </item>
+                 <item row="10" column="3">
+                  <widget class="QPushButton" name="multisample_sample_remove">
+                   <property name="text">
+                    <string>Remove</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="11" column="1">
+                  <spacer name="verticalSpacer_5">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="4" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_notes">
+                   <property name="maxLength">
+                    <number>200</number>
                    </property>
                   </widget>
                  </item>
@@ -2135,6 +2145,13 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="10" column="2">
+                  <widget class="QPushButton" name="multisample_sample_add">
+                   <property name="text">
+                    <string>Add</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="4" column="1">
                   <widget class="QLabel" name="multisample_sample_notes_label">
                    <property name="text">
@@ -2142,22 +2159,19 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="1">
-                  <widget class="QLabel" name="multisample_sample_name_label">
+                 <item row="9" column="1">
+                  <widget class="QLabel" name="multisample_sample_track_label">
                    <property name="text">
-                    <string>Name</string>
+                    <string>Track</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="2" colspan="2">
-                  <widget class="QLineEdit" name="multisample_sample_notes">
-                   <property name="maxLength">
-                    <number>200</number>
+                 <item row="9" column="2">
+                  <widget class="QCheckBox" name="multisample_sample_track">
+                   <property name="text">
+                    <string/>
                    </property>
                   </widget>
-                 </item>
-                 <item row="2" column="2" colspan="2">
-                  <widget class="QLineEdit" name="multisample_sample_name"/>
                  </item>
                 </layout>
                </widget>
@@ -2702,7 +2716,7 @@
      <x>0</x>
      <y>0</y>
      <width>1400</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

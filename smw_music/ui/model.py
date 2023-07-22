@@ -270,7 +270,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.response_generated.emit(
                     False,
                     "New Version",
-                    f"beer <a href={url}>v{version}</a> is available "
+                    f"SPaCeMusicW <a href={url}>v{version}</a> is available "
                     + "for download<br />Version checking can be disabled "
                     + "in preferences",
                 )
@@ -598,7 +598,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     "be some problems.  Your old save file was backed up as "
                     f"{backup_fname}, you should probably keep a copy until "
                     "you've confirmed the upgrade was successful.  Or fixed "
-                    "any problems with it, it's all the same to beer.",
+                    "any problems with it, it's all the same to SPaCeMusicW.",
                 )
 
         except SmwMusicException as e:
@@ -643,16 +643,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_multisample_sample_add_clicked(
-        self, name: str, notes: str, notehead: str, output: str
+        self, name: str, notes: str, notehead: str, output: str, track: bool
     ) -> None:
-        self._multisample_changed(True, name, notes, notehead, output)
+        self._multisample_changed(True, name, notes, notehead, output, track)
 
     ###########################################################################
 
     def on_multisample_sample_changed(
-        self, name: str, notes: str, notehead: str, output: str
+        self, name: str, notes: str, notehead: str, output: str, track: bool
     ) -> None:
-        self._multisample_changed(False, name, notes, notehead, output)
+        self._multisample_changed(False, name, notes, notehead, output, track)
 
     ###########################################################################
 
@@ -1208,7 +1208,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _multisample_changed(
-        self, new: bool, name: str, notes: str, notehead: str, output: str
+        self,
+        new: bool,
+        name: str,
+        notes: str,
+        notehead: str,
+        output: str,
+        track: bool,
     ) -> None:
         state = self.state
 
@@ -1241,7 +1247,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if new:
             sample = InstrumentSample(
-                ulim=ulim, llim=llim, notehead=head, start=start
+                ulim=ulim, llim=llim, notehead=head, start=start, track=track
             )
         else:
             sample = replace(
@@ -1250,6 +1256,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 ulim=ulim,
                 start=start,
                 notehead=head,
+                track=track,
             )
 
         inst, _ = state.sample_idx
@@ -1576,6 +1583,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 setattr(new_state, key, val)
         else:
             new_state = State()
+
+        for inst in new_state.instruments.values():
+            for sample in inst.multisamples.values():
+                sample.track_settings(inst.sample)
 
         if new_state != self.state:
             self._rollback_undo()
