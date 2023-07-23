@@ -40,7 +40,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard.exe
-          asset_name: beer-windows-$tag.exe
+          asset_name: SPaCeMusicW-windows-$tag.exe
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -71,7 +71,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard
-          asset_name: beer-${{ matrix.os }}-$tag
+          asset_name: SPaCeMusicW-${{ matrix.os }}-$tag
           tag: ${{ github.ref }}
           overwrite: true
 

@@ -60,10 +60,10 @@ mido = "^1.2.10"
 python-rtmidi = {git = "https://github.com/SpotlightKid/python-rtmidi.git", rev = "eb16ab3268b29b94cd2baa6bfc777f5cf5f908ba"}
 
 [tool.poetry.scripts]
-beer = "smw_music.scripts.dashboard:main"
+spcmw = "smw_music.scripts.dashboard:main"
 spcmw_ast = "smw_music.scripts.dump_ast:main"
-smw_music_filttool = "smw_music.scripts.filttool:main"
-smw_music_xml_to_mml = "smw_music.scripts.convert:main"
+spcmw_filttool = "smw_music.scripts.filttool:main"
+spcmw_to_mml = "smw_music.scripts.convert:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/com-posers-pit/smw_music/issues"

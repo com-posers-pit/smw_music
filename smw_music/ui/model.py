@@ -287,7 +287,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def update_preferences(self, preferences: PreferencesState) -> None:
         prefs_dict = {
-            "beer": __version__,
+            "spacemusicw": __version__,
             "amk": {"path": str(preferences.amk_fname)},
             "spcplay": {"path": str(preferences.spcplay_fname)},
             "sample_packs": {"path": str(preferences.sample_pack_dname)},

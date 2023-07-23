@@ -216,7 +216,7 @@ class Dashboard(QWidget):
         super().__init__()
         data_lib = resources.files("smw_music.data")
 
-        self._window_title = f"beer v{__version__}"
+        self._window_title = f"SPaCeMusicW v{__version__}"
 
         self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = data_lib / "dashboard.ui"

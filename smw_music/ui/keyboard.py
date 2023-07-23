@@ -281,7 +281,7 @@ def convert(ival: int) -> tuple[str, int]:
 
 def poll(keyboard: Keyboard) -> None:
     in_fname = ""
-    out_fname = "beer"
+    out_fname = "SPaCeMusicW"
 
     with mido.open_input(in_fname) as inport, mido.open_output(
         out_fname, virtual=True
