@@ -213,10 +213,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         # Apply updates to stock AMK files
         # https://www.smwcentral.net/?p=viewthread&t=98793&page=2&pid=1601787#p1601787
+        expected_md5 = "7e9d4bd864cfc1e82272fb0a9379e318"
         fname = path / "music/originals/09 Bonus End.txt"
         with open(fname, "rb") as fobj:
             data = fobj.read()
-        if hashlib.md5(data).hexdigest() == "7e9d4bd864cfc1e82272fb0a9379e318":
+        actual_md5 = hashlib.md5(data).hexdigest()  # nosec: B324
+        if actual_md5 == expected_md5:
             contents = data.split(b"\n")
             contents = contents[:15] + contents[16:]
             data = b"\n".join(contents)
@@ -811,7 +813,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        assert self.state.musicxml_fname is not None
+        assert self.state.musicxml_fname is not None  # nosec: B101
         self._load_musicxml(self.state.musicxml_fname, True)
 
         self.reinforce_state()
@@ -1278,7 +1280,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_mml_clicked(self, report: bool = True) -> bool:
-        assert self.state.mml_fname is not None
+        assert self.state.mml_fname is not None  # nosec: B101
 
         title = "MML Generation"
         error = True
@@ -1337,7 +1339,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _on_generate_spc_clicked(self, report: bool = True) -> bool:
         assert self._project_path is not None  # nosec: B101
         assert self.state.project_name is not None  # nosec: B101
-        assert self.state.mml_fname is not None
+        assert self.state.mml_fname is not None  # nosec: B101
 
         error = False
         msg = ""

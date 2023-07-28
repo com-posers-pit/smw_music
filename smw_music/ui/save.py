@@ -278,7 +278,7 @@ def _upgrade_save(fname: Path) -> tuple[State, Path]:
     backup = fname.parent / (fname.name + f".v{save_version}")
     shutil.copy(fname, backup)
 
-    assert save_version == 0
+    assert save_version == 0  # nosec: B101
     state = v0.load(fname)
 
     return state, backup

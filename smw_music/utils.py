@@ -51,7 +51,9 @@ def newest_release() -> tuple[str, tuple[int, int, int]] | None:
     req = urllib.request.Request(
         "https://github.com/com-posers-pit/smw_music/releases/latest"
     )
-    with suppress(urllib.error.HTTPError), urllib.request.urlopen(req) as resp:
+    with suppress(urllib.error.HTTPError), urllib.request.urlopen(
+        req
+    ) as resp:  # nosec: B310
         url = resp.geturl()
         return (url, version_tuple(url.split("/")[-1].lstrip("v")))
     return None
