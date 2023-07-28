@@ -1735,5 +1735,3 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @property
     def state(self) -> State:
         return self._history[-1 - self._undo_level]
-
-    ###########################################################################

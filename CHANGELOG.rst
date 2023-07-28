@@ -16,7 +16,7 @@ Unreleased
 --------------------------------------------------------------------------------
 
 Release 0.3.11 - 2023-07-09
---------------------------
+---------------------------
 
 CODENAME: `Domino Dancing`_
 
@@ -52,8 +52,8 @@ Affected Issues
 Changed
 +++++++
 
-- Non-looping samples are treated as "loop count == 1" for fundamental frequency
-  detection
+- Non-looping samples are treated as "loop count == 1" for fundamental
+  frequency detection
 
 - Multisample limit checking is done more carefully
 
@@ -89,7 +89,7 @@ Idiosyncrasies
 --------------------------------------------------------------------------------
 
 Release 0.3.10 - 2023-05-03
---------------------------
+---------------------------
 
 CODENAME: `Weapon of Choice`_
 
