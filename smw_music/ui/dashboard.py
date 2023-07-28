@@ -1327,6 +1327,8 @@ class Dashboard(QWidget):
         for dkey, dval in sel_sample.dynamics.items():
             dwidgets = self._dyn_widgets[dkey]
             enable = dkey in sel_inst.dynamics_present
+            if not enable:
+                dval = 0
 
             dwidgets.slider.setValue(dval)
             dwidgets.slider.setEnabled(enable)
