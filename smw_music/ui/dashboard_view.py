@@ -176,10 +176,10 @@ class DashboardView(QMainWindow):
     main_controls_widget: QWidget
     main_ui_widget: QWidget
     measure_numbers: QCheckBox
-    menuEdit: QAction
-    menuFile: QAction
-    menuHelp: QAction
-    menuRecent_Projects: QAction
+    menuEdit: QMenu
+    menuFile: QMenu
+    menuHelp: QMenu
+    menuRecent_Projects: QMenu
     menubar: QMenuBar
     mf_label: QLabel
     mf_setting: QLineEdit
@@ -261,7 +261,6 @@ class DashboardView(QMainWindow):
     select_multisample_sample: QRadioButton
     select_musicxml_fname: QPushButton
     select_pack_sample: QRadioButton
-    separator: QAction
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction

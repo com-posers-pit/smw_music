@@ -121,7 +121,7 @@ class GainMode(IntEnum):
 class NoteHead(StrEnum):
     NORMAL = "normal"
     X = "x"
-    O = "o"
+    O = "o"  # noqa: E741
     PLUS = "cross"
     TENSOR = "circle-x"
     TRIUP = "triangle"

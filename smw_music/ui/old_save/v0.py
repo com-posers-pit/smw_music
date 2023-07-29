@@ -17,7 +17,7 @@ from typing import TypedDict
 import yaml
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music import SmwMusicException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,

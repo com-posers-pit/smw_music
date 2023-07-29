@@ -128,12 +128,14 @@ class _SamplePackWatcher(events.FileSystemEventHandler):
 
 
 class Model(QObject):  # pylint: disable=too-many-public-methods
-    state_changed = pyqtSignal(
-        State, bool
-    )  # arguments=['state', 'update_instruments']
+    state_changed = pyqtSignal(State, bool)  # state  # update_instruments
     preferences_changed = pyqtSignal(
-        bool, bool, bool, bool, bool
-    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode', 'confirm_render']
+        bool,  # advanced_enabled
+        bool,  # amk_valid
+        bool,  # spcplayer_valid
+        bool,  # dark_mode
+        bool,  # confirm_render
+    )
     instruments_changed = pyqtSignal(list)
     recent_projects_updated = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
@@ -141,8 +143,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     status_updated = pyqtSignal(str)  # arguments=['message']
     response_generated = pyqtSignal(
-        bool, str, str
-    )  # arguments=["error", "title", "response"]
+        bool,  # error
+        str,  # title
+        str,  # response
+    )
     utilization_updated = pyqtSignal(Utilization)
 
     song: Song | None

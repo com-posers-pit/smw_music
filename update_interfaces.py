@@ -37,7 +37,7 @@ for ui_fname, py_fname, module in uis:
         widget_class = cast(str, widget.get("class"))
         widgets[widget_name] = widget_class
 
-    for action in top.findall(".//addaction"):
+    for action in top.findall(".//action"):
         actions.append(cast(str, action.get("name")))
 
     widget_set = set(widgets.values())

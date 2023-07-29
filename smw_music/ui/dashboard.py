@@ -233,7 +233,7 @@ class Dashboard(QWidget):
         self._samples = {}
         self._confirm_render = True
 
-        # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
+        # h/t: https://forum.qt.io/topic/35999
         font = QFont("_")
         font.setStyleHint(QFont.StyleHint.Monospace)
         quicklook_edit = QTextEdit()
