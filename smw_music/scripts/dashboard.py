@@ -28,6 +28,7 @@ from smw_music.ui.dashboard import Dashboard
 
 
 def main() -> None:
+    """Entrypoint for Interactive GUI."""
     parser = argparse.ArgumentParser("UI")
     parser.add_argument("-v", action="count", default=0, help="Verbosity")
     parser.add_argument("project", default=None, type=Path, nargs="?")
