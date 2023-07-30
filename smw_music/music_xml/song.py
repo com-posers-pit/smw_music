@@ -387,7 +387,7 @@ class Song:
             if isinstance(subpart, music21.instrument.Instrument):
                 # This used to be .instrumentName, but that behaves...
                 # unintuitively... on percussion channels
-                name = subpart.partName
+                name = subpart.partName or ""
                 name = name.replace("\u266d", "b")  # Replace flats
                 name = name.replace(" ", "")  # Replace spaces
 

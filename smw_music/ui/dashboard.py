@@ -18,7 +18,7 @@ from functools import cached_property, partial
 from importlib import resources
 from os import stat
 from pathlib import Path
-from typing import Callable, NamedTuple, cast
+from typing import Any, Callable, NamedTuple, cast
 
 # Library imports
 import qdarkstyle  # type: ignore
@@ -382,7 +382,7 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_multisample_sample_changed(self, _) -> None:
+    def on_multisample_sample_changed(self, _: Any) -> None:
         v = self._view
 
         self._model.on_multisample_sample_changed(
@@ -459,14 +459,14 @@ class Dashboard(QWidget):
         )
 
         # amk_valid handling
-        for action in [
+        enable = amk_valid and spcplayer_valid
+        widgets: list[QAction | QMenu] = [
             v.new_project,
             v.open_project,
             v.save_project,
             v.menuRecent_Projects,
-        ]:
-            enable = amk_valid and spcplayer_valid
-
+        ]
+        for action in widgets:
             tooltip = (
                 "Define AMK zip file and spcplayer executable in "
                 "preferences to enable this"
@@ -486,7 +486,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_recent_projects_updated(self, projects: list[Path]) -> None:
-        menu = cast(QMenu, self._view.menuRecent_Projects)
+        menu = self._view.menuRecent_Projects
         clear = self._view.actionClearRecentProjects
         menu.clear()
 
@@ -615,7 +615,7 @@ class Dashboard(QWidget):
                 )
                 v.tuning_semitone_shift.setValue(tuning.semitone_shift)
                 v.tuning_manual_note.setCurrentIndex(tuning.pitch.pitchClass)
-                v.tuning_manual_octave.setValue(tuning.pitch.octave)
+                v.tuning_manual_octave.setValue(tuning.pitch.implicitOctave)
                 v.tuning_manual_freq.setText(f"{tuning.frequency:.2f}")
                 v.tuning_sample_freq.setText(f"{tuning.sample_freq:.2f}")
 
@@ -682,7 +682,7 @@ class Dashboard(QWidget):
 
     def _about(self) -> None:
         data_lib = resources.files("smw_music.data")
-        with open(data_lib / "codenames.csv") as fobj:
+        with (data_lib / "codenames.csv").open() as fobj:
             for row in csv.reader(fobj):
                 codename = row[-1]
 
@@ -1051,7 +1051,7 @@ class Dashboard(QWidget):
             name,
             str(note),
             notehead,
-            note,
+            note.nameWithOctave,
             is_checked(v.multisample_sample_track),
         )
 

@@ -70,4 +70,5 @@ def pct(val: float, lim: float = 255) -> str:
 
 
 def version_tuple(version: str) -> tuple[int, int, int]:
-    return tuple(int(x) for x in version.split("."))
+    major, minor, patch, *_ = tuple(int(x) for x in version.split("."))
+    return (major, minor, patch)

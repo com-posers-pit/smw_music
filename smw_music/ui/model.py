@@ -1198,18 +1198,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         pack, sample_path = item_id
         params = self._sample_packs[pack][sample_path].params
 
-        new_state = {
-            "attack_setting": params.attack,
-            "decay_setting": params.decay,
-            "sus_level_setting": params.sustain_level,
-            "sus_rate_setting": params.sustain_rate,
-            "adsr_mode": params.adsr_mode,
-            "gain_mode": params.gain_mode,
-            "gain_setting": params.gain,
-            "tune_setting": params.tuning,
-            "subtune_setting": params.subtuning,
-        }
-        self._update_sample_state(**new_state)
+        self._update_sample_state(
+            attack_setting=params.attack,
+            decay_setting=params.decay,
+            sus_level_setting=params.sustain_level,
+            sus_rate_setting=params.sustain_rate,
+            adsr_mode=params.adsr_mode,
+            gain_mode=params.gain_mode,
+            gain_setting=params.gain,
+            tune_setting=params.tuning,
+            subtune_setting=params.subtuning,
+        )
 
     ###########################################################################
 
@@ -1435,7 +1434,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     31, self.state.sample.gain_setting
                 )
 
-            self._update_sample_state(**kwargs)
+            # TODO: address this mypy error
+            self._update_sample_state(**kwargs)  # type: ignore
             self.update_status(f"{caption} envelope selected")
 
     ###########################################################################
