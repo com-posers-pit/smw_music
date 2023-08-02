@@ -670,6 +670,14 @@ class Dashboard(QWidget):
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
 
+            v.start_section.setSizeAdjustPolicy(
+                QComboBox.SizeAdjustPolicy.AdjustToContents
+            )
+
+            v.start_section.clear()
+            v.start_section.addItems(state.section_names)
+            v.start_section.setCurrentIndex(state.start_section_idx)
+
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
@@ -742,6 +750,7 @@ class Dashboard(QWidget):
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
             (v.start_measure, m.on_start_measure_changed),
+            (v.start_section, m.on_start_section_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
             (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),

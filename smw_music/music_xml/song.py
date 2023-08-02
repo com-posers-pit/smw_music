@@ -759,3 +759,20 @@ class Song:
             rv.extend(channel.unmapped(inst_name, instrument))
 
         return dedupe_notes(rv)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def rehearsal_marks(self) -> dict[str, int]:
+        """A dictionary mapping rehearsal marks to measure numbers"""
+
+        rv: dict[int, str] = {}
+        for token in self.channels[0]:
+            if isinstance(token, Measure):
+                measure = token.number
+            if isinstance(token, RehearsalMark):
+                rv[token.mark] = measure
+
+        return rv

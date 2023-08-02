@@ -2546,71 +2546,87 @@
      <widget class="QWidget" name="main_controls_widget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLabel" name="start_measure_label">
-         <property name="text">
-          <string>Start Measure</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="start_measure">
-         <property name="toolTip">
-          <string>Which measure of music you'd like to start with</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="reload_musicxml">
-         <property name="minimumSize">
-          <size>
-           <width>125</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Reload MusicXML</string>
-         </property>
-         <property name="shortcut">
-          <string>Ctrl+R</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="generate_and_play">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Just DO It</string>
-         </property>
-         <property name="shortcut">
-          <string>Ctrl+Space</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="render_zip">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Render</string>
-         </property>
-         <property name="shortcut">
-          <string>Ctrl+R</string>
-         </property>
+        <widget class="QWidget" name="lower_control_widget" native="true">
+         <layout class="QGridLayout" name="gridLayout_23">
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="start_measure">
+            <property name="toolTip">
+             <string>Which measure of music you'd like to start with</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QPushButton" name="render_zip">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Render</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="reload_musicxml">
+            <property name="minimumSize">
+             <size>
+              <width>125</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Reload MusicXML</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QPushButton" name="generate_and_play">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Just DO It</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Space</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="start_measure_label">
+            <property name="text">
+             <string>Start Measure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="start_section_label">
+            <property name="text">
+             <string>Start Section</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="start_section"/>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -2972,10 +2988,6 @@
   <tabstop>echo_delay_slider</tabstop>
   <tabstop>echo_delay_setting</tabstop>
   <tabstop>global_legato</tabstop>
-  <tabstop>start_measure</tabstop>
-  <tabstop>reload_musicxml</tabstop>
-  <tabstop>generate_and_play</tabstop>
-  <tabstop>render_zip</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -173,6 +173,7 @@ class DashboardView(QMainWindow):
     instrument_settings_tab: QWidget
     interpolate: QCheckBox
     loop_analysis: QCheckBox
+    lower_control_widget: QWidget
     main_controls_widget: QWidget
     main_ui_widget: QWidget
     measure_numbers: QCheckBox
@@ -271,6 +272,8 @@ class DashboardView(QMainWindow):
     splitter_5: QSplitter
     start_measure: QSpinBox
     start_measure_label: QLabel
+    start_section: QComboBox
+    start_section_label: QLabel
     statusbar: QStatusBar
     subtune_label: QLabel
     subtune_setting: QLineEdit

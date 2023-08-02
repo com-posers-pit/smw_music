@@ -932,6 +932,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_start_section_changed(self, section_idx: int) -> None:
+        name = self.state.section_names[section_idx]
+
+        if section_idx == 0:
+            measure = 1
+        else:
+            measures = list(self.song.rehearsal_marks.values())
+            measure = measures[section_idx - 1]
+
+        self._update_state(
+            start_measure=measure, start_section_idx=section_idx
+        )
+        self.update_status(f"Start section set to {name}")
+
+    ###########################################################################
+
     def on_subtune_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
         self._update_sample_state(subtune_setting=setting)
@@ -1147,6 +1163,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         song_inst.samples = state_inst.samples
 
             self.state.instruments = deepcopy(self.song.instruments)
+
+            self.state.start_section_idx = 0
+            self.state.section_names = ["Capo"] + list(
+                self.song.rehearsal_marks.keys()
+            )
 
             if self._on_generate_mml_clicked(False):
                 self._on_generate_spc_clicked(False)

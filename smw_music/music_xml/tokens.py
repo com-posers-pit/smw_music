@@ -12,7 +12,6 @@
 # Standard library imports
 from dataclasses import dataclass
 from enum import Enum, auto
-from typing import cast
 
 # Library imports
 import music21
