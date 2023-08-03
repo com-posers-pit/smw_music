@@ -929,12 +929,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_start_measure_changed(self, value: int) -> None:
-        self._update_state(start_measure=value)
+        section_idx = 0
+        for idx, sec_measure in enumerate(self.song.rehearsal_marks.values()):
+            if sec_measure <= value:
+                # Plus one because there's a default first section which the
+                # enumeration doesn't account for
+                section_idx = idx + 1
+
+        self._update_state(start_measure=value, start_section_idx=section_idx)
         self.update_status(f"Start measure set to {value}")
 
     ###########################################################################
 
-    def on_start_section_changed(self, section_idx: int) -> None:
+    def on_start_section_activated(self, section_idx: int) -> None:
         name = self.state.section_names[section_idx]
 
         if section_idx == 0:

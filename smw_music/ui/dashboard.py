@@ -750,7 +750,6 @@ class Dashboard(QWidget):
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
             (v.start_measure, m.on_start_measure_changed),
-            (v.start_section, m.on_start_section_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
             (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
@@ -892,6 +891,8 @@ class Dashboard(QWidget):
         v.multisample_unmapped_list.doubleClicked.connect(
             self._on_multisample_unmapped_doubleclicked
         )
+
+        v.start_section.activated.connect(m.on_start_section_activated)
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
