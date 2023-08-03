@@ -20,17 +20,19 @@ jobs:
           pypi_token: ${{ secrets.PYPI_TOKEN }}
 
   windows:
+    defaults:
+      run:
+        shell: bash
     runs-on: windows-latest
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-      - name: Install Poetry
-        run: pipx install poetry==1.3.2
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11.0'
-          cache: 'poetry'
+      - name: Install poetry
+        uses: snok/install-poetry@v1
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
@@ -40,7 +42,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard.exe
-          asset_name: beer-windows-$tag.exe
+          asset_name: SPaCeMusicW-windows-$tag.exe
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -55,13 +57,12 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v3
-      - name: Install Poetry
-        run: pipx install poetry==1.3.2
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11.0'
-          cache: 'poetry'
+      - name: Install poetry
+        uses: snok/install-poetry@v1
       - name: Install library
         run: poetry install --no-interaction
       - name: Run pyinstaller
@@ -71,7 +72,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: dist/dashboard
-          asset_name: beer-${{ matrix.os }}-$tag
+          asset_name: SPaCeMusicW-${{ matrix.os }}-$tag
           tag: ${{ github.ref }}
           overwrite: true
 
@@ -82,7 +83,7 @@ jobs:
       - name: Build misc artifacts
         run: |
           mkdir musescore
-          cp -r "misc/*.drm" "misc/SMW_Porting.mpal" musescore
+          cp -r ${{ github.workspace }}/misc/*.drm ${{ github.workspace }}/misc/SMW_Porting.mpal musescore
           zip -r musescore.zip musescore
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2

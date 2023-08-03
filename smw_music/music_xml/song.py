@@ -387,7 +387,7 @@ class Song:
             if isinstance(subpart, music21.instrument.Instrument):
                 # This used to be .instrumentName, but that behaves...
                 # unintuitively... on percussion channels
-                name = subpart.partName
+                name = subpart.partName or ""
                 name = name.replace("\u266d", "b")  # Replace flats
                 name = name.replace(" ", "")  # Replace spaces
 
@@ -759,3 +759,20 @@ class Song:
             rv.extend(channel.unmapped(inst_name, instrument))
 
         return dedupe_notes(rv)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def rehearsal_marks(self) -> dict[str, int]:
+        """A dictionary mapping rehearsal marks to measure numbers"""
+
+        rv: dict[str, int] = {}
+        for token in self.channels[0]:
+            if isinstance(token, Measure):
+                measure = token.range[0]
+            if isinstance(token, RehearsalMark):
+                rv[token.mark] = measure
+
+        return rv

@@ -13,7 +13,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import Iterable, TypeVar, cast
+from typing import Iterable, Iterator, TypeVar, cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -105,6 +105,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         return self.tokens[n]
 
     ###########################################################################
+
+    def __iter__(self) -> Iterator[Token]:
+        return iter(self.tokens)
+
+    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -146,9 +151,9 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             lambda x: isinstance(x, (Clef, Instrument, Note)), tokens
         ):
             if isinstance(token, Clef):
-                percussion = cast(Clef, token).percussion
+                percussion = token.percussion
             elif isinstance(token, Instrument):
-                inst = instruments[cast(Instrument, token).name]
+                inst = instruments[token.name]
             else:
                 note = cast(Note, token)
                 _, sample = inst.emit_note(note)

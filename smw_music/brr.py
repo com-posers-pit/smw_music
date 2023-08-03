@@ -165,7 +165,9 @@ class Brr:
 
     ###########################################################################
 
-    def to_wav(self, fname: str, loops: int = 0, framerate: int = 32000):
+    def to_wav(
+        self, fname: str, loops: int = 0, framerate: int = 32000
+    ) -> None:
         with wave.open(fname, "wb") as fobj:
             fobj.setnchannels(1)  # pylint: disable=no-member
             fobj.setsampwidth(2)  # pylint: disable=no-member
@@ -232,6 +234,7 @@ class Brr:
         waveform = self.generate_waveform(loops)
         spec = np.abs(np.fft.rfft(waveform[start:]))
         spec /= spec.max()
+        peak: float
         peak, *_ = find_peaks(spec, height=0.25)[0]
         return nyquist * peak / len(spec)
 
@@ -272,7 +275,7 @@ class Brr:
         evens = 0xF & (self.blocks[:, 1:] >> 4)
         odds = 0xF & (self.blocks[:, 1:])
 
-        rv = np.empty((evens.shape[0], 16), dtype=np.int8)
+        rv = np.empty((evens.shape[0], 16), dtype=np.uint8)
         rv[:, ::2] = evens
         rv[:, 1::2] = odds
 
@@ -282,7 +285,7 @@ class Brr:
     # Data model methods
     ###########################################################################
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.sample_loops and self.loop_point is not None:
             valid_len = self.loop_point % BLOCK_SIZE == 0
             valid_block = 0 <= self.loop_point < self.blocks.size

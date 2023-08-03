@@ -2017,14 +2017,7 @@
                  <string>Multisample</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_16">
-                 <item row="9" column="2">
-                  <widget class="QPushButton" name="multisample_sample_add">
-                   <property name="text">
-                    <string>Add</string>
-                   </property>
-                  </widget>
-                 </item>
-                 <item row="1" column="0" rowspan="10">
+                 <item row="1" column="0" rowspan="11">
                   <widget class="QGroupBox" name="multisample_unmapped_box">
                    <property name="title">
                     <string>Unmapped</string>
@@ -2036,41 +2029,12 @@
                    </layout>
                   </widget>
                  </item>
-                 <item row="8" column="2" colspan="2">
-                  <widget class="QLineEdit" name="multisample_sample_output"/>
-                 </item>
-                 <item row="9" column="3">
-                  <widget class="QPushButton" name="multisample_sample_remove">
+                 <item row="2" column="1">
+                  <widget class="QLabel" name="multisample_sample_name_label">
                    <property name="text">
-                    <string>Remove</string>
+                    <string>Name</string>
                    </property>
                   </widget>
-                 </item>
-                 <item row="10" column="1">
-                  <spacer name="verticalSpacer_5">
-                   <property name="orientation">
-                    <enum>Qt::Vertical</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>20</width>
-                     <height>40</height>
-                    </size>
-                   </property>
-                  </spacer>
-                 </item>
-                 <item row="1" column="4">
-                  <spacer name="horizontalSpacer_2">
-                   <property name="orientation">
-                    <enum>Qt::Horizontal</enum>
-                   </property>
-                   <property name="sizeHint" stdset="0">
-                    <size>
-                     <width>40</width>
-                     <height>20</height>
-                    </size>
-                   </property>
-                  </spacer>
                  </item>
                  <item row="7" column="2" colspan="2">
                   <widget class="QComboBox" name="multisample_sample_notehead">
@@ -2121,10 +2085,56 @@
                    </item>
                   </widget>
                  </item>
+                 <item row="1" column="4">
+                  <spacer name="horizontalSpacer_2">
+                   <property name="orientation">
+                    <enum>Qt::Horizontal</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>40</width>
+                     <height>20</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
                  <item row="8" column="1">
                   <widget class="QLabel" name="multisample_sample_output_label">
                    <property name="text">
                     <string>Ouput</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="8" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_output"/>
+                 </item>
+                 <item row="2" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_name"/>
+                 </item>
+                 <item row="10" column="3">
+                  <widget class="QPushButton" name="multisample_sample_remove">
+                   <property name="text">
+                    <string>Remove</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="11" column="1">
+                  <spacer name="verticalSpacer_5">
+                   <property name="orientation">
+                    <enum>Qt::Vertical</enum>
+                   </property>
+                   <property name="sizeHint" stdset="0">
+                    <size>
+                     <width>20</width>
+                     <height>40</height>
+                    </size>
+                   </property>
+                  </spacer>
+                 </item>
+                 <item row="4" column="2" colspan="2">
+                  <widget class="QLineEdit" name="multisample_sample_notes">
+                   <property name="maxLength">
+                    <number>200</number>
                    </property>
                   </widget>
                  </item>
@@ -2135,6 +2145,13 @@
                    </property>
                   </widget>
                  </item>
+                 <item row="10" column="2">
+                  <widget class="QPushButton" name="multisample_sample_add">
+                   <property name="text">
+                    <string>Add</string>
+                   </property>
+                  </widget>
+                 </item>
                  <item row="4" column="1">
                   <widget class="QLabel" name="multisample_sample_notes_label">
                    <property name="text">
@@ -2142,22 +2159,19 @@
                    </property>
                   </widget>
                  </item>
-                 <item row="2" column="1">
-                  <widget class="QLabel" name="multisample_sample_name_label">
+                 <item row="9" column="1">
+                  <widget class="QLabel" name="multisample_sample_track_label">
                    <property name="text">
-                    <string>Name</string>
+                    <string>Track</string>
                    </property>
                   </widget>
                  </item>
-                 <item row="4" column="2" colspan="2">
-                  <widget class="QLineEdit" name="multisample_sample_notes">
-                   <property name="maxLength">
-                    <number>200</number>
+                 <item row="9" column="2">
+                  <widget class="QCheckBox" name="multisample_sample_track">
+                   <property name="text">
+                    <string/>
                    </property>
                   </widget>
-                 </item>
-                 <item row="2" column="2" colspan="2">
-                  <widget class="QLineEdit" name="multisample_sample_name"/>
                  </item>
                 </layout>
                </widget>
@@ -2532,71 +2546,87 @@
      <widget class="QWidget" name="main_controls_widget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
-        <widget class="QLabel" name="start_measure_label">
-         <property name="text">
-          <string>Start Measure</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QSpinBox" name="start_measure">
-         <property name="toolTip">
-          <string>Which measure of music you'd like to start with</string>
-         </property>
-         <property name="minimum">
-          <number>1</number>
-         </property>
-         <property name="maximum">
-          <number>999</number>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="reload_musicxml">
-         <property name="minimumSize">
-          <size>
-           <width>125</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Reload MusicXML</string>
-         </property>
-         <property name="shortcut">
-          <string>Ctrl+R</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="generate_and_play">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Just DO It</string>
-         </property>
-         <property name="shortcut">
-          <string>Ctrl+Space</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="render_zip">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Render</string>
-         </property>
-         <property name="shortcut">
-          <string>Ctrl+R</string>
-         </property>
+        <widget class="QWidget" name="lower_control_widget" native="true">
+         <layout class="QGridLayout" name="gridLayout_23">
+          <item row="0" column="1">
+           <widget class="QSpinBox" name="start_measure">
+            <property name="toolTip">
+             <string>Which measure of music you'd like to start with</string>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>999</number>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QPushButton" name="render_zip">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Render</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="reload_musicxml">
+            <property name="minimumSize">
+             <size>
+              <width>125</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Reload MusicXML</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QPushButton" name="generate_and_play">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Just DO It</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+Space</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="start_measure_label">
+            <property name="text">
+             <string>Start Measure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="start_section_label">
+            <property name="text">
+             <string>Start Section</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="start_section"/>
+          </item>
+         </layout>
         </widget>
        </item>
        <item>
@@ -2702,7 +2732,7 @@
      <x>0</x>
      <y>0</y>
      <width>1400</width>
-     <height>19</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -2958,10 +2988,6 @@
   <tabstop>echo_delay_slider</tabstop>
   <tabstop>echo_delay_setting</tabstop>
   <tabstop>global_legato</tabstop>
-  <tabstop>start_measure</tabstop>
-  <tabstop>reload_musicxml</tabstop>
-  <tabstop>generate_and_play</tabstop>
-  <tabstop>render_zip</tabstop>
  </tabstops>
  <resources/>
  <connections/>

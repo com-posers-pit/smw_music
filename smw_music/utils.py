@@ -14,6 +14,8 @@ import urllib.error
 import urllib.request
 from contextlib import suppress
 from math import isclose
+from pathlib import Path
+from zipfile import ZipFile
 
 ###############################################################################
 # API function definitions
@@ -51,7 +53,9 @@ def newest_release() -> tuple[str, tuple[int, int, int]] | None:
     req = urllib.request.Request(
         "https://github.com/com-posers-pit/smw_music/releases/latest"
     )
-    with suppress(urllib.error.HTTPError), urllib.request.urlopen(req) as resp:
+    with suppress(urllib.error.HTTPError), urllib.request.urlopen(
+        req
+    ) as resp:  # nosec: B310
         url = resp.geturl()
         return (url, version_tuple(url.split("/")[-1].lstrip("v")))
     return None
@@ -68,4 +72,18 @@ def pct(val: float, lim: float = 255) -> str:
 
 
 def version_tuple(version: str) -> tuple[int, int, int]:
-    return tuple(int(x) for x in version.split("."))
+    major, minor, patch, *_ = tuple(int(x) for x in version.split("."))
+    return (major, minor, patch)
+
+
+###############################################################################
+
+
+def zip_top(zobj: ZipFile) -> Path:
+    names = zobj.namelist()
+    shortest = sorted(names, key=len)[0]
+    root = ""
+    if all(x.startswith(shortest) for x in names):
+        root = shortest
+
+    return Path(root)

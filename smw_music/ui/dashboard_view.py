@@ -173,13 +173,14 @@ class DashboardView(QMainWindow):
     instrument_settings_tab: QWidget
     interpolate: QCheckBox
     loop_analysis: QCheckBox
+    lower_control_widget: QWidget
     main_controls_widget: QWidget
     main_ui_widget: QWidget
     measure_numbers: QCheckBox
-    menuEdit: QAction
-    menuFile: QAction
-    menuHelp: QAction
-    menuRecent_Projects: QAction
+    menuEdit: QMenu
+    menuFile: QMenu
+    menuHelp: QMenu
+    menuRecent_Projects: QMenu
     menubar: QMenuBar
     mf_label: QLabel
     mf_setting: QLineEdit
@@ -201,6 +202,8 @@ class DashboardView(QMainWindow):
     multisample_sample_output: QLineEdit
     multisample_sample_output_label: QLabel
     multisample_sample_remove: QPushButton
+    multisample_sample_track: QCheckBox
+    multisample_sample_track_label: QLabel
     multisample_unmapped_box: QGroupBox
     multisample_unmapped_list: QListWidget
     musicxml_fname: QLineEdit
@@ -259,7 +262,6 @@ class DashboardView(QMainWindow):
     select_multisample_sample: QRadioButton
     select_musicxml_fname: QPushButton
     select_pack_sample: QRadioButton
-    separator: QAction
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
@@ -270,6 +272,8 @@ class DashboardView(QMainWindow):
     splitter_5: QSplitter
     start_measure: QSpinBox
     start_measure_label: QLabel
+    start_section: QComboBox
+    start_section_label: QLabel
     statusbar: QStatusBar
     subtune_label: QLabel
     subtune_setting: QLineEdit

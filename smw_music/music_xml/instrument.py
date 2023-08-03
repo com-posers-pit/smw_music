@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from enum import IntEnum, StrEnum, auto
 from functools import cache
 from pathlib import Path
+from typing import cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -121,7 +122,7 @@ class GainMode(IntEnum):
 class NoteHead(StrEnum):
     NORMAL = "normal"
     X = "x"
-    O = "o"
+    O = "o"  # noqa: E741
     PLUS = "cross"
     TENSOR = "circle-x"
     TRIUP = "triangle"
@@ -229,6 +230,7 @@ class InstrumentSample:
     notehead: NoteHead = NoteHead.NORMAL
     start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
     tuning: Tuning = field(default_factory=Tuning)
+    track: bool = False
 
     _instrument_idx: int = field(default=0, init=False)
 
@@ -256,6 +258,17 @@ class InstrumentSample:
             return Pitch(note.ps - self.llim.ps + self.start.ps)
 
         return None
+
+    ###########################################################################
+
+    def track_settings(self, other: "InstrumentSample") -> None:
+        if self.track:
+            self.dynamics = other.dynamics.copy()
+            self.dyn_interpolate = other.dyn_interpolate
+            self.artics = other.artics.copy()
+            self.pan_enabled = other.pan_enabled
+            self.pan_setting = other.pan_setting
+            self.pan_invert = other.pan_invert
 
     ###########################################################################
     # Property definitions
@@ -368,19 +381,19 @@ class InstrumentSample:
 
     @property
     def percussion(self) -> bool:
-        return self.ulim == self.llim
+        return self.ulim.isEnharmonic(self.llim)
 
     ###########################################################################
 
     @property
-    def percussion_note(self) -> int:
+    def percussion_note(self) -> str:
         return self.start.name.lower().replace("#", "-")
 
     ###########################################################################
 
     @property
     def percussion_octave(self) -> int:
-        return self.start.octave
+        return self.start.implicitOctave
 
 
 ###############################################################################
@@ -439,7 +452,8 @@ class InstrumentConfig:
                 for name, pitch, notehead, idx in sample_defs
             }
 
-            inst = cls(multisamples=multisamples, **kwargs)
+            # TODO: address this mypy error
+            inst = cls(multisamples=multisamples, **kwargs)  # type: ignore
         else:
             # Default instrument mapping, from Wakana's tutorial
             inst_map = {
@@ -455,7 +469,8 @@ class InstrumentConfig:
                 "electricguitar": 17,
             }
 
-            inst = cls(**kwargs)
+            # TODO: address this mypy error
+            inst = cls(**kwargs)  # type: ignore
             inst.sample.builtin_sample_index = inst_map.get(name, 0)
 
         return inst
@@ -473,7 +488,9 @@ class InstrumentConfig:
                 if sample_out is not None:
                     return (sample_out, name)
 
-        return (self.sample.emit(note.pitch, None), "")
+        # Parent instrument is guaranteed to have the pitch
+        pitch = cast(Pitch, self.sample.emit(note.pitch, None))
+        return (pitch, "")
 
     ###########################################################################
     # API property definitions
@@ -507,7 +524,7 @@ class InstrumentConfig:
 def dedupe_notes(
     notes: list[tuple[Pitch, NoteHead]]
 ) -> list[tuple[Pitch, NoteHead]]:
-    rv = []
+    rv: list[tuple[Pitch, NoteHead]] = []
     for in_note in notes:
         in_pitch, in_head = in_note
         for out_note in rv:

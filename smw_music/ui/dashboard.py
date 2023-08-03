@@ -18,7 +18,7 @@ from functools import cached_property, partial
 from importlib import resources
 from os import stat
 from pathlib import Path
-from typing import Callable, NamedTuple, cast
+from typing import Any, Callable, NamedTuple, cast
 
 # Library imports
 import qdarkstyle  # type: ignore
@@ -66,7 +66,7 @@ from smw_music.ui.utilization import (
     paint_utilization,
     setup_utilization,
 )
-from smw_music.ui.utils import to_checkstate
+from smw_music.ui.utils import is_checked, to_checkstate
 from smw_music.utils import brr_size, hexb, pct
 
 ###############################################################################
@@ -93,6 +93,7 @@ def _mark_unselectable(item: QTreeWidgetItem) -> None:
 
 
 ###############################################################################
+
 
 # h/t: https://stackoverflow.com/questions/47285303
 def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
@@ -215,7 +216,7 @@ class Dashboard(QWidget):
         super().__init__()
         data_lib = resources.files("smw_music.data")
 
-        self._window_title = f"beer v{__version__}"
+        self._window_title = f"SPaCeMusicW v{__version__}"
 
         self._keyhist = deque(maxlen=len(_KONAMI))
         ui_contents = data_lib / "dashboard.ui"
@@ -232,7 +233,7 @@ class Dashboard(QWidget):
         self._samples = {}
         self._confirm_render = True
 
-        # h/t: https://forum.qt.io/topic/35999/solved-qplaintextedit-how-to-change-the-font-to-be-monospaced/4
+        # h/t: https://forum.qt.io/topic/35999
         font = QFont("_")
         font.setStyleHint(QFont.StyleHint.Monospace)
         quicklook_edit = QTextEdit()
@@ -376,11 +377,12 @@ class Dashboard(QWidget):
             v.multisample_sample_notes.text(),
             v.multisample_sample_notehead.currentText(),
             v.multisample_sample_output.text(),
+            is_checked(v.multisample_sample_track),
         )
 
     ###########################################################################
 
-    def on_multisample_sample_changed(self, _) -> None:
+    def on_multisample_sample_changed(self, _: Any) -> None:
         v = self._view
 
         self._model.on_multisample_sample_changed(
@@ -388,6 +390,7 @@ class Dashboard(QWidget):
             v.multisample_sample_notes.text(),
             v.multisample_sample_notehead.currentText(),
             v.multisample_sample_output.text(),
+            is_checked(v.multisample_sample_track),
         )
 
     ###########################################################################
@@ -456,14 +459,14 @@ class Dashboard(QWidget):
         )
 
         # amk_valid handling
-        for action in [
+        enable = amk_valid and spcplayer_valid
+        widgets: list[QAction | QMenu] = [
             v.new_project,
             v.open_project,
             v.save_project,
             v.menuRecent_Projects,
-        ]:
-            enable = amk_valid and spcplayer_valid
-
+        ]
+        for action in widgets:
             tooltip = (
                 "Define AMK zip file and spcplayer executable in "
                 "preferences to enable this"
@@ -483,7 +486,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_recent_projects_updated(self, projects: list[Path]) -> None:
-        menu = cast(QMenu, self._view.menuRecent_Projects)
+        menu = self._view.menuRecent_Projects
         clear = self._view.actionClearRecentProjects
         menu.clear()
 
@@ -612,7 +615,7 @@ class Dashboard(QWidget):
                 )
                 v.tuning_semitone_shift.setValue(tuning.semitone_shift)
                 v.tuning_manual_note.setCurrentIndex(tuning.pitch.pitchClass)
-                v.tuning_manual_octave.setValue(tuning.pitch.octave)
+                v.tuning_manual_octave.setValue(tuning.pitch.implicitOctave)
                 v.tuning_manual_freq.setText(f"{tuning.frequency:.2f}")
                 v.tuning_sample_freq.setText(f"{tuning.sample_freq:.2f}")
 
@@ -667,6 +670,14 @@ class Dashboard(QWidget):
             for widget in self._echo_widgets:
                 widget.setEnabled(state.global_echo_enable)
 
+            v.start_section.setSizeAdjustPolicy(
+                QComboBox.SizeAdjustPolicy.AdjustToContents
+            )
+
+            v.start_section.clear()
+            v.start_section.addItems(state.section_names)
+            v.start_section.setCurrentIndex(state.start_section_idx)
+
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
@@ -679,7 +690,7 @@ class Dashboard(QWidget):
 
     def _about(self) -> None:
         data_lib = resources.files("smw_music.data")
-        with open(data_lib / "codenames.csv") as fobj:
+        with (data_lib / "codenames.csv").open() as fobj:
             for row in csv.reader(fobj):
                 codename = row[-1]
 
@@ -767,6 +778,7 @@ class Dashboard(QWidget):
                 self.on_multisample_sample_changed,
             ),
             (v.multisample_sample_output, self.on_multisample_sample_changed),
+            (v.multisample_sample_track, self.on_multisample_sample_changed),
             # Instrument sample
             (v.select_builtin_sample, m.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
@@ -879,6 +891,8 @@ class Dashboard(QWidget):
         v.multisample_unmapped_list.doubleClicked.connect(
             self._on_multisample_unmapped_doubleclicked
         )
+
+        v.start_section.activated.connect(m.on_start_section_activated)
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
@@ -1025,7 +1039,7 @@ class Dashboard(QWidget):
 
         return item
 
-    ###############################################################################
+    ###########################################################################
 
     def _on_close_project_clicked(self) -> None:
         close = self._prompt_to_save()
@@ -1035,7 +1049,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_multisample_unmapped_doubleclicked(self, idx: QModelIndex) -> None:
-        item = self._view.multisample_unmapped_list.itemFromIndex(idx)
+        v = self._view
+        item = v.multisample_unmapped_list.itemFromIndex(idx)
 
         name = f"TMP{self._view.multisample_unmapped_list.count()}_"
         note, notehead = cast(
@@ -1043,7 +1058,11 @@ class Dashboard(QWidget):
         )
 
         self._model.on_multisample_sample_add_clicked(
-            name, str(note), notehead, note
+            name,
+            str(note),
+            notehead,
+            note.nameWithOctave,
+            is_checked(v.multisample_sample_track),
         )
 
     ###########################################################################
@@ -1258,7 +1277,6 @@ class Dashboard(QWidget):
             self._samples.clear()
 
             for inst_name, inst in state.instruments.items():
-
                 parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 
@@ -1282,6 +1300,7 @@ class Dashboard(QWidget):
         notes = ""
         notehead = "normal"
         start = ""
+        track = False
         with suppress(NoSample):
             sample = state.sample
             name = state.sample_idx[1]
@@ -1295,11 +1314,13 @@ class Dashboard(QWidget):
                         x.nameWithOctave for x in [sample.llim, sample.ulim]
                     )
                 start = sample.start.nameWithOctave
+                track = sample.track
 
         v.multisample_sample_name.setText(name)
         v.multisample_sample_notehead.setCurrentText(notehead)
         v.multisample_sample_notes.setText(notes)
         v.multisample_sample_output.setText(start)
+        v.multisample_sample_track.setChecked(track)
 
         self._update_unmapped(state)
 
@@ -1319,6 +1340,8 @@ class Dashboard(QWidget):
         for dkey, dval in sel_sample.dynamics.items():
             dwidgets = self._dyn_widgets[dkey]
             enable = dkey in sel_inst.dynamics_present
+            if not enable:
+                dval = 0
 
             dwidgets.slider.setValue(dval)
             dwidgets.slider.setEnabled(enable)
@@ -1414,6 +1437,11 @@ class Dashboard(QWidget):
         v.subtune_setting.setText(hexb(sel_sample.subtune_setting))
 
         v.brr_setting.setText(sel_sample.brr_str)
+
+        # Enable dynamics and articulations only when it's not a tracking
+        # sample
+        v.instrument_articulation_tab.setEnabled(not sel_sample.track)
+        v.instrument_dynamics_tab.setEnabled(not sel_sample.track)
 
         # Apply the more interesting UI updates
         self._update_gain_limits(sel_sample.gain_mode == GainMode.DIRECT)

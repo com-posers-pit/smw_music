@@ -97,6 +97,7 @@ class _SampleDict(TypedDict):
     ulim: str
     notehead: str
     start: str
+    track: bool
 
 
 ###############################################################################
@@ -197,6 +198,7 @@ def _load_sample(inst: _SampleDict) -> InstrumentSample:
         llim=Pitch(inst["llim"]),
         notehead=NoteHead(inst["notehead"]),
         start=Pitch(inst["start"]),
+        track=bool(inst.get("track", False)),
     )
 
 
@@ -260,6 +262,7 @@ def _save_sample(sample: InstrumentSample) -> _SampleDict:
         "llim": str(sample.llim),
         "notehead": str(sample.notehead),
         "start": str(sample.start),
+        "track": bool(sample.track),
     }
 
 
@@ -275,7 +278,7 @@ def _upgrade_save(fname: Path) -> tuple[State, Path]:
     backup = fname.parent / (fname.name + f".v{save_version}")
     shutil.copy(fname, backup)
 
-    assert save_version == 0
+    assert save_version == 0  # nosec: B101
     state = v0.load(fname)
 
     return state, backup

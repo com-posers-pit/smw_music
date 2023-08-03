@@ -382,7 +382,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     def _emit_octave(self, pitch: Pitch) -> None:
         cur_octave = self.octave
-        octave = pitch.octave + self._active_sample.octave_shift
+        octave = pitch.implicitOctave + self._active_sample.octave_shift
         octave_diff = octave - cur_octave
 
         directive = ""

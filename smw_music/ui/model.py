@@ -61,7 +61,7 @@ from smw_music.ui.utilization import (
     echo_bytes,
 )
 from smw_music.ui.utils import make_vis_dir
-from smw_music.utils import brr_size_b, newest_release, version_tuple
+from smw_music.utils import brr_size_b, newest_release, version_tuple, zip_top
 
 ###############################################################################
 # Private constant definitions
@@ -128,12 +128,14 @@ class _SamplePackWatcher(events.FileSystemEventHandler):
 
 
 class Model(QObject):  # pylint: disable=too-many-public-methods
-    state_changed = pyqtSignal(
-        State, bool
-    )  # arguments=['state', 'update_instruments']
+    state_changed = pyqtSignal(State, bool)  # state  # update_instruments
     preferences_changed = pyqtSignal(
-        bool, bool, bool, bool, bool
-    )  # arguments = ['advanced_enabled', 'amk_valid', 'spcplayer_valid', 'dark_mode', 'confirm_render']
+        bool,  # advanced_enabled
+        bool,  # amk_valid
+        bool,  # spcplayer_valid
+        bool,  # dark_mode
+        bool,  # confirm_render
+    )
     instruments_changed = pyqtSignal(list)
     recent_projects_updated = pyqtSignal(list)
     sample_packs_changed = pyqtSignal(dict)
@@ -141,8 +143,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     mml_generated = pyqtSignal(str)  # arguments=['mml']
     status_updated = pyqtSignal(str)  # arguments=['message']
     response_generated = pyqtSignal(
-        bool, str, str
-    )  # arguments=["error", "title", "response"]
+        bool,  # error
+        str,  # title
+        str,  # response
+    )
     utilization_updated = pyqtSignal(Utilization)
 
     song: Song | None
@@ -195,28 +199,32 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "stats",
         ]
 
+        extract_dir = path / "unzip"
         with zipfile.ZipFile(str(self.preferences.amk_fname), "r") as zobj:
             # Extract all the files
-            zobj.extractall(path=path)
+            zobj.extractall(path=extract_dir)
 
-            names = zobj.namelist()
-            root = sorted(names, key=len)[0]
+            # Some AMK releases have a top-level folder in the zip file, some
+            # don't.  This figures out what that is, if it's there
+            root = zip_top(zobj)
 
             # Move them up a directory and delete the rest
             for member in members:
-                shutil.move(path / root / member, path / member)
+                shutil.move(extract_dir / root / member, path / member)
 
-            shutil.rmtree(path / root)
+            shutil.rmtree(extract_dir)
 
         # Add visualizations directory
         make_vis_dir(path)
 
         # Apply updates to stock AMK files
         # https://www.smwcentral.net/?p=viewthread&t=98793&page=2&pid=1601787#p1601787
+        expected_md5 = "7e9d4bd864cfc1e82272fb0a9379e318"
         fname = path / "music/originals/09 Bonus End.txt"
         with open(fname, "rb") as fobj:
             data = fobj.read()
-        if hashlib.md5(data).hexdigest() == "7e9d4bd864cfc1e82272fb0a9379e318":
+        actual_md5 = hashlib.md5(data).hexdigest()  # nosec: B324
+        if actual_md5 == expected_md5:
             contents = data.split(b"\n")
             contents = contents[:15] + contents[16:]
             data = b"\n".join(contents)
@@ -270,7 +278,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.response_generated.emit(
                     False,
                     "New Version",
-                    f"beer <a href={url}>v{version}</a> is available "
+                    f"SPaCeMusicW <a href={url}>v{version}</a> is available "
                     + "for download<br />Version checking can be disabled "
                     + "in preferences",
                 )
@@ -287,7 +295,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def update_preferences(self, preferences: PreferencesState) -> None:
         prefs_dict = {
-            "beer": __version__,
+            "spacemusicw": __version__,
             "amk": {"path": str(preferences.amk_fname)},
             "spcplay": {"path": str(preferences.spcplay_fname)},
             "sample_packs": {"path": str(preferences.sample_pack_dname)},
@@ -598,7 +606,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     "be some problems.  Your old save file was backed up as "
                     f"{backup_fname}, you should probably keep a copy until "
                     "you've confirmed the upgrade was successful.  Or fixed "
-                    "any problems with it, it's all the same to beer.",
+                    "any problems with it, it's all the same to SPaCeMusicW.",
                 )
 
         except SmwMusicException as e:
@@ -643,16 +651,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_multisample_sample_add_clicked(
-        self, name: str, notes: str, notehead: str, output: str
+        self, name: str, notes: str, notehead: str, output: str, track: bool
     ) -> None:
-        self._multisample_changed(True, name, notes, notehead, output)
+        self._multisample_changed(True, name, notes, notehead, output, track)
 
     ###########################################################################
 
     def on_multisample_sample_changed(
-        self, name: str, notes: str, notehead: str, output: str
+        self, name: str, notes: str, notehead: str, output: str, track: bool
     ) -> None:
-        self._multisample_changed(False, name, notes, notehead, output)
+        self._multisample_changed(False, name, notes, notehead, output, track)
 
     ###########################################################################
 
@@ -811,7 +819,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        assert self.state.musicxml_fname is not None
+        assert self.state.musicxml_fname is not None  # nosec: B101
         self._load_musicxml(self.state.musicxml_fname, True)
 
         self.reinforce_state()
@@ -921,8 +929,39 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_start_measure_changed(self, value: int) -> None:
-        self._update_state(start_measure=value)
+        # TODO: This early-return can probably be handled better
+        if self.song is None:
+            return
+
+        section_idx = 0
+        for idx, sec_measure in enumerate(self.song.rehearsal_marks.values()):
+            if sec_measure <= value:
+                # Plus one because there's a default first section which the
+                # enumeration doesn't account for
+                section_idx = idx + 1
+
+        self._update_state(start_measure=value, start_section_idx=section_idx)
         self.update_status(f"Start measure set to {value}")
+
+    ###########################################################################
+
+    def on_start_section_activated(self, section_idx: int) -> None:
+        # TODO: This early-return can probably be handled better
+        if self.song is None:
+            return
+
+        name = self.state.section_names[section_idx]
+
+        if section_idx == 0:
+            measure = 1
+        else:
+            measures = list(self.song.rehearsal_marks.values())
+            measure = measures[section_idx - 1]
+
+        self._update_state(
+            start_measure=measure, start_section_idx=section_idx
+        )
+        self.update_status(f"Start section set to {name}")
 
     ###########################################################################
 
@@ -1142,6 +1181,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             self.state.instruments = deepcopy(self.song.instruments)
 
+            self.state.start_section_idx = 0
+            self.state.section_names = ["Capo"] + list(
+                self.song.rehearsal_marks.keys()
+            )
+
             if self._on_generate_mml_clicked(False):
                 self._on_generate_spc_clicked(False)
 
@@ -1192,23 +1236,28 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         pack, sample_path = item_id
         params = self._sample_packs[pack][sample_path].params
 
-        new_state = {
-            "attack_setting": params.attack,
-            "decay_setting": params.decay,
-            "sus_level_setting": params.sustain_level,
-            "sus_rate_setting": params.sustain_rate,
-            "adsr_mode": params.adsr_mode,
-            "gain_mode": params.gain_mode,
-            "gain_setting": params.gain,
-            "tune_setting": params.tuning,
-            "subtune_setting": params.subtuning,
-        }
-        self._update_sample_state(**new_state)
+        self._update_sample_state(
+            attack_setting=params.attack,
+            decay_setting=params.decay,
+            sus_level_setting=params.sustain_level,
+            sus_rate_setting=params.sustain_rate,
+            adsr_mode=params.adsr_mode,
+            gain_mode=params.gain_mode,
+            gain_setting=params.gain,
+            tune_setting=params.tuning,
+            subtune_setting=params.subtuning,
+        )
 
     ###########################################################################
 
     def _multisample_changed(
-        self, new: bool, name: str, notes: str, notehead: str, output: str
+        self,
+        new: bool,
+        name: str,
+        notes: str,
+        notehead: str,
+        output: str,
+        track: bool,
     ) -> None:
         state = self.state
 
@@ -1241,7 +1290,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if new:
             sample = InstrumentSample(
-                ulim=ulim, llim=llim, notehead=head, start=start
+                ulim=ulim, llim=llim, notehead=head, start=start, track=track
             )
         else:
             sample = replace(
@@ -1250,6 +1299,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 ulim=ulim,
                 start=start,
                 notehead=head,
+                track=track,
             )
 
         inst, _ = state.sample_idx
@@ -1271,7 +1321,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_mml_clicked(self, report: bool = True) -> bool:
-        assert self.state.mml_fname is not None
+        assert self.state.mml_fname is not None  # nosec: B101
 
         title = "MML Generation"
         error = True
@@ -1330,7 +1380,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _on_generate_spc_clicked(self, report: bool = True) -> bool:
         assert self._project_path is not None  # nosec: B101
         assert self.state.project_name is not None  # nosec: B101
-        assert self.state.mml_fname is not None
+        assert self.state.mml_fname is not None  # nosec: B101
 
         error = False
         msg = ""
@@ -1422,7 +1472,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     31, self.state.sample.gain_setting
                 )
 
-            self._update_sample_state(**kwargs)
+            # TODO: address this mypy error
+            self._update_sample_state(**kwargs)  # type: ignore
             self.update_status(f"{caption} envelope selected")
 
     ###########################################################################
@@ -1577,6 +1628,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             new_state = State()
 
+        for inst in new_state.instruments.values():
+            for sample in inst.multisamples.values():
+                sample.track_settings(inst.sample)
+
         if new_state != self.state:
             self._rollback_undo()
 
@@ -1724,5 +1779,3 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @property
     def state(self) -> State:
         return self._history[-1 - self._undo_level]
-
-    ###########################################################################

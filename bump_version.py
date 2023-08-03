@@ -34,7 +34,7 @@ def _bump_version(version, codename):
     key = "assert __version__ == "
     _overwrite("tests/test_smw_music.py", key, f'{key}"{version}"')
 
-    key = "; beer v"
+    key = "; SPaCeMusicW v"
     repl = f"{key}{version}\r"
     for fname in chain(
         glob.iglob("tests/dst/*.txt"), glob.iglob("tests/dst/ui/*.mml")

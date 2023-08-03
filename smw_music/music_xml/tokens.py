@@ -557,7 +557,7 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
 
         note = self.note_num
         measure = self.measure_num
-        octave = self.pitch.octave + octave_shift
+        octave = self.pitch.implicitOctave + octave_shift
         name = self.pitch.name.lower()
         bad = octave < 1
         bad |= octave > 6

@@ -11,12 +11,89 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.12`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.12 - 2023-08-02
+---------------------------
+
+CODENAME: `Big Enough`_
+
+AAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHH
+
+AAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHH
+
+AAAAAAAAAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHH
+
+AAAAAHHHEEEEEEEHHHHAAAAAAAHHHHHEEEEEEEHHHAAAAAAAHHHHHH
+
+YYYYYYYYYYAAAAAAAAAAHHHHHHHHHHHHHHHHHHHHHHHHHHH
+
+AAAAAAAAAAAAHHHHHHHHHHHHHHHHHHHH
+
+`Release 0.3.12`_
+
 `Differences from 0.3.11`_
+
+Purpose
++++++++
+
+Fix compatibility problem with AMK v1.0.9
+
+
+Affected Issues
++++++++++++++++
+
+- `#240 Support AddMusicK 1.0.9`_
+
+- `#239 Set unused volume sliders to left`_
+
+- `#237 Add "jump to rehearsal marks" like the "jump to measure"`_
+
+- `#232 Musescore artifact publisher is broken`_
+
+- `#230 Add option in multisample to track articulations and dynamics`_
+
+Changed
++++++++
+
+- Renamed UI tool to SPaCeMusicW
+
+- Unused dynamics are set to 0 and sliders are driven to the far left
+
+- AMK is unzipped to a subfolder in the project during project creation (not
+  noticeable to users)
+
+- Fixed GH action that publishes Musescore artifacts (not noticeable to users)
+
+- Addressed mypy, lint, and bandit warnings
+
+Added
++++++
+
+- UI control for starting at rehearsal marks
+
+- Multisample instrument setting tracking
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
+
+- Broken on python 3.10
 
 --------------------------------------------------------------------------------
 
 Release 0.3.11 - 2023-07-09
---------------------------
+---------------------------
 
 CODENAME: `Domino Dancing`_
 
@@ -52,8 +129,8 @@ Affected Issues
 Changed
 +++++++
 
-- Non-looping samples are treated as "loop count == 1" for fundamental frequency
-  detection
+- Non-looping samples are treated as "loop count == 1" for fundamental
+  frequency detection
 
 - Multisample limit checking is done more carefully
 
@@ -88,12 +165,8 @@ Idiosyncrasies
 
 --------------------------------------------------------------------------------
 
-`Differences from 0.3.10`_
-
---------------------------------------------------------------------------------
-
 Release 0.3.10 - 2023-05-03
---------------------------
+---------------------------
 
 CODENAME: `Weapon of Choice`_
 
@@ -1330,8 +1403,12 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
-
+.. _#240 Support AddMusicK 1.0.9: http://github.com/com-posers-pit/smw_music/issues/231
+.. _#239 Set unused volume sliders to left: http://github.com/com-posers-pit/smw_music/issues/231
+.. _#237 Add "jump to rehearsal marks" like the "jump to measure": http://github.com/com-posers-pit/smw_music/issues/231
+.. _#232 Musescore artifact publisher is broken: http://github.com/com-posers-pit/smw_music/issues/231
 .. _#231 Multisample broken with enharmonic equivalence: http://github.com/com-posers-pit/smw_music/issues/231
+.. _#230 Add option in multisample to track articulations and dynamics: http://github.com/com-posers-pit/smw_music/issues/230
 .. _#229 Not all notehead detection is correct: http://github.com/com-posers-pit/smw_music/issues/229
 .. _#222 Duplicate unused samples show up in multisample list: http://github.com/com-posers-pit/smw_music/issues/222
 .. _#220 Non-looping samples that are auto-tuned break playback: http://github.com/com-posers-pit/smw_music/issues/220
@@ -1471,6 +1548,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.12: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.12
 .. _Release 0.3.11: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.11
 .. _Release 0.3.10: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.10
 .. _Release 0.3.9: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.9
@@ -1492,7 +1570,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.11: https://github.com/com-posers-pit/smw_music/compare/v0.3.11...HEAD
+.. _Differences from 0.3.12: https://github.com/com-posers-pit/smw_music/compare/v0.3.12...HEAD
+.. _Differences from 0.3.11: https://github.com/com-posers-pit/smw_music/compare/v0.3.11...v0.3.12
 .. _Differences from 0.3.10: https://github.com/com-posers-pit/smw_music/compare/v0.3.10...v0.3.11
 .. _Differences from 0.3.9: https://github.com/com-posers-pit/smw_music/compare/v0.3.9...v0.3.10
 .. _Differences from 0.3.8: https://github.com/com-posers-pit/smw_music/compare/v0.3.8...v0.3.9
@@ -1512,6 +1591,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _Big Enough: https://youtube.com/watch?v=rvrZJ5C_Nwg
 .. _Domino Dancing: https://www.youtube.com/watch?v=ik2YF05iX2w
 .. _Weapon of Choice: https://www.youtube.com/watch?v=wCDIYvFmgW8
 .. _Rock Me Amadeus: https://www.youtube.com/watch?v=9qExmU6F22s
