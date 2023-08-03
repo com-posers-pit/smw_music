@@ -929,6 +929,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_start_measure_changed(self, value: int) -> None:
+        # TODO: This early-return can probably be handled better
+        if self.song is None:
+            return
+
         section_idx = 0
         for idx, sec_measure in enumerate(self.song.rehearsal_marks.values()):
             if sec_measure <= value:
@@ -942,6 +946,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_start_section_activated(self, section_idx: int) -> None:
+        # TODO: This early-return can probably be handled better
+        if self.song is None:
+            return
+
         name = self.state.section_names[section_idx]
 
         if section_idx == 0:
