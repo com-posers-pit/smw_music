@@ -14,6 +14,8 @@ import urllib.error
 import urllib.request
 from contextlib import suppress
 from math import isclose
+from pathlib import Path
+from zipfile import ZipFile
 
 ###############################################################################
 # API function definitions
@@ -72,3 +74,16 @@ def pct(val: float, lim: float = 255) -> str:
 def version_tuple(version: str) -> tuple[int, int, int]:
     major, minor, patch, *_ = tuple(int(x) for x in version.split("."))
     return (major, minor, patch)
+
+
+###############################################################################
+
+
+def zip_top(zobj: ZipFile) -> Path:
+    names = zobj.namelist()
+    shortest = sorted(names, key=len)[0]
+    root = ""
+    if all(x.startswith(shortest) for x in names):
+        root = shortest
+
+    return Path(root)

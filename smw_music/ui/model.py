@@ -61,7 +61,7 @@ from smw_music.ui.utilization import (
     echo_bytes,
 )
 from smw_music.ui.utils import make_vis_dir
-from smw_music.utils import brr_size_b, newest_release, version_tuple
+from smw_music.utils import brr_size_b, newest_release, version_tuple, zip_top
 
 ###############################################################################
 # Private constant definitions
@@ -199,18 +199,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "stats",
         ]
 
+        extract_dir = path / "unzip"
         with zipfile.ZipFile(str(self.preferences.amk_fname), "r") as zobj:
             # Extract all the files
-            zobj.extractall(path=path)
+            zobj.extractall(path=extract_dir)
 
-            names = zobj.namelist()
-            root = sorted(names, key=len)[0]
+            # Some AMK releases have a top-level folder in the zip file, some
+            # don't.  This figures out what that is, if it's there
+            root = zip_top(zobj)
 
             # Move them up a directory and delete the rest
             for member in members:
-                shutil.move(path / root / member, path / member)
+                shutil.move(extract_dir / root / member, path / member)
 
-            shutil.rmtree(path / root)
+            shutil.rmtree(extract_dir)
 
         # Add visualizations directory
         make_vis_dir(path)
