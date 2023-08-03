@@ -20,6 +20,9 @@ jobs:
           pypi_token: ${{ secrets.PYPI_TOKEN }}
 
   windows:
+    defaults:
+      run:
+        shell: bash
     runs-on: windows-latest
     steps:
       - name: Check out repository
@@ -80,7 +83,7 @@ jobs:
       - name: Build misc artifacts
         run: |
           mkdir musescore
-          cp -r "misc/*.drm" "misc/SMW_Porting.mpal" musescore
+          cp -r ${{ github.workspace }}/misc/*.drm ${{ github.workspace }}/misc/SMW_Porting.mpal musescore
           zip -r musescore.zip musescore
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2

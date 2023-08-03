@@ -263,7 +263,6 @@ class InstrumentSample:
 
     def track_settings(self, other: "InstrumentSample") -> None:
         if self.track:
-            print("tracking")
             self.dynamics = other.dynamics.copy()
             self.dyn_interpolate = other.dyn_interpolate
             self.artics = other.artics.copy()

@@ -768,10 +768,10 @@ class Song:
     def rehearsal_marks(self) -> dict[str, int]:
         """A dictionary mapping rehearsal marks to measure numbers"""
 
-        rv: dict[int, str] = {}
+        rv: dict[str, int] = {}
         for token in self.channels[0]:
             if isinstance(token, Measure):
-                measure = token.number
+                measure = token.range[0]
             if isinstance(token, RehearsalMark):
                 rv[token.mark] = measure
 

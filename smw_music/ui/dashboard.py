@@ -750,7 +750,6 @@ class Dashboard(QWidget):
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
             (v.start_measure, m.on_start_measure_changed),
-            (v.start_section, m.on_start_section_changed),
             (v.open_quicklook, self.on_open_quicklook_clicked),
             (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
@@ -892,6 +891,8 @@ class Dashboard(QWidget):
         v.multisample_unmapped_list.doubleClicked.connect(
             self._on_multisample_unmapped_doubleclicked
         )
+
+        v.start_section.activated.connect(m.on_start_section_activated)
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
@@ -1299,6 +1300,7 @@ class Dashboard(QWidget):
         notes = ""
         notehead = "normal"
         start = ""
+        track = False
         with suppress(NoSample):
             sample = state.sample
             name = state.sample_idx[1]
@@ -1312,11 +1314,13 @@ class Dashboard(QWidget):
                         x.nameWithOctave for x in [sample.llim, sample.ulim]
                     )
                 start = sample.start.nameWithOctave
+                track = sample.track
 
         v.multisample_sample_name.setText(name)
         v.multisample_sample_notehead.setCurrentText(notehead)
         v.multisample_sample_notes.setText(notes)
         v.multisample_sample_output.setText(start)
+        v.multisample_sample_track.setChecked(track)
 
         self._update_unmapped(state)
 
@@ -1433,6 +1437,11 @@ class Dashboard(QWidget):
         v.subtune_setting.setText(hexb(sel_sample.subtune_setting))
 
         v.brr_setting.setText(sel_sample.brr_str)
+
+        # Enable dynamics and articulations only when it's not a tracking
+        # sample
+        v.instrument_articulation_tab.setEnabled(not sel_sample.track)
+        v.instrument_dynamics_tab.setEnabled(not sel_sample.track)
 
         # Apply the more interesting UI updates
         self._update_gain_limits(sel_sample.gain_mode == GainMode.DIRECT)

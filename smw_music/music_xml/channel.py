@@ -13,7 +13,7 @@
 from collections import Counter
 from dataclasses import dataclass, field
 from itertools import takewhile
-from typing import Iterable, TypeVar, cast
+from typing import Iterable, Iterator, TypeVar, cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -103,6 +103,11 @@ class Channel:  # pylint: disable=too-many-instance-attributes
 
     def __getitem__(self, n: int) -> Token:
         return self.tokens[n]
+
+    ###########################################################################
+
+    def __iter__(self) -> Iterator[Token]:
+        return iter(self.tokens)
 
     ###########################################################################
     # Private method definitions
