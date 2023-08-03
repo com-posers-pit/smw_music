@@ -1438,6 +1438,11 @@ class Dashboard(QWidget):
 
         v.brr_setting.setText(sel_sample.brr_str)
 
+        # Enable dynamics and articulations only when it's not a tracking
+        # sample
+        v.instrument_articulation_tab.setEnabled(not sel_sample.track)
+        v.instrument_dynamics_tab.setEnabled(not sel_sample.track)
+
         # Apply the more interesting UI updates
         self._update_gain_limits(sel_sample.gain_mode == GainMode.DIRECT)
         self._update_envelope(
