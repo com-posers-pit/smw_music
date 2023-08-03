@@ -1300,6 +1300,7 @@ class Dashboard(QWidget):
         notes = ""
         notehead = "normal"
         start = ""
+        track = False
         with suppress(NoSample):
             sample = state.sample
             name = state.sample_idx[1]
@@ -1313,11 +1314,13 @@ class Dashboard(QWidget):
                         x.nameWithOctave for x in [sample.llim, sample.ulim]
                     )
                 start = sample.start.nameWithOctave
+                track = sample.track
 
         v.multisample_sample_name.setText(name)
         v.multisample_sample_notehead.setCurrentText(notehead)
         v.multisample_sample_notes.setText(notes)
         v.multisample_sample_output.setText(start)
+        v.multisample_sample_track.setChecked(track)
 
         self._update_unmapped(state)
 
