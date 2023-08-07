@@ -15,7 +15,6 @@ import enum
 from collections import deque
 from contextlib import ExitStack, suppress
 from functools import cached_property, partial
-from importlib import resources
 from os import stat
 from pathlib import Path
 from typing import Any, Callable, NamedTuple, cast
@@ -49,7 +48,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Package imports
-from smw_music import __version__
+from smw_music import RESOURCES, __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
@@ -214,12 +213,11 @@ class Dashboard(QWidget):
 
     def __init__(self, prj_file: Path | None = None) -> None:
         super().__init__()
-        data_lib = resources.files("smw_music.data")
 
         self._window_title = f"SPaCeMusicW v{__version__}"
 
         self._keyhist = deque(maxlen=len(_KONAMI))
-        ui_contents = data_lib / "dashboard.ui"
+        ui_contents = RESOURCES / "dashboard.ui"
 
         self._view: DashboardView = uic.loadUi(ui_contents)
         self._view.installEventFilter(self)
@@ -250,7 +248,7 @@ class Dashboard(QWidget):
         )
         label = QLabel(self)
         movie = QMovie(parent=self)
-        movie.setFileName(str(data_lib / "ashtley.gif"))
+        movie.setFileName(str(RESOURCES / "ashtley.gif"))
         label.setMovie(movie)
         movie.start()
         self._checkitout.setCentralWidget(label)
@@ -259,7 +257,7 @@ class Dashboard(QWidget):
         self._camelitout.setWindowTitle("Camel by camel")
         label = QLabel(self)
         movie = QMovie(parent=self)
-        movie.setFileName(str(data_lib / "ankha.gif"))
+        movie.setFileName(str(RESOURCES / "ankha.gif"))
         label.setMovie(movie)
         movie.start()
         self._camelitout.setCentralWidget(label)
@@ -290,7 +288,7 @@ class Dashboard(QWidget):
             self._checkitout,
             self._envelope_preview,
         ]:
-            widget.setWindowIcon(QIcon(str(data_lib / "maestro.svg")))
+            widget.setWindowIcon(QIcon(str(RESOURCES / "maestro.svg")))
 
         self._sample_remover = _SampleRemover(self._model)
         self._view.sample_list.installEventFilter(self._sample_remover)
@@ -689,8 +687,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _about(self) -> None:
-        data_lib = resources.files("smw_music.data")
-        with (data_lib / "codenames.csv").open() as fobj:
+        with (RESOURCES / "codenames.csv").open() as fobj:
             for row in csv.reader(fobj):
                 codename = row[-1]
 
