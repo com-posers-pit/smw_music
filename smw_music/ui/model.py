@@ -54,7 +54,13 @@ from smw_music.music_xml.song import Song
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
-from smw_music.ui.state import NoSample, PreferencesState, State
+from smw_music.ui.state import (
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    NoSample,
+    PreferencesState,
+    State,
+)
 from smw_music.ui.utilization import (
     Utilization,
     decode_utilization,
@@ -879,6 +885,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_sample_opt_selected(self, group: BuiltinSampleGroup) -> None:
+        self._update_state(builtin_sample_group=group)
+        self.update_status(f"Builtin group set to {group}")
+
+    ###########################################################################
+
+    def on_sample_opt_source_changed(
+        self, idx: int, source: BuiltinSampleSource
+    ) -> None:
+        sources = self.state.builtin_sample_sources.copy()
+        sources[idx] = source
+        self._update_state(builtin_sample_source=sources)
+        self.update_status(f"Builtin sample {idx:02x} set to {source}")
+
+    ###########################################################################
+
     def on_save(self) -> None:
         self._save_backup()
 
@@ -1625,7 +1647,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | EchoConfig
         | int
         | tuple[str, str | None]
-        | Path,
+        | Path
+        | BuiltinSampleGroup
+        | list[BuiltinSampleSource],
     ) -> None:
         if kwargs:
             new_state = replace(self.state)

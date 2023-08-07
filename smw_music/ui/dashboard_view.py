@@ -287,10 +287,11 @@ class DashboardView(QMainWindow):
     sample_opt_12_label: QLabel
     sample_opt_13: QComboBox
     sample_opt_13_label: QLabel
-    sample_opt_common: QPushButton
-    sample_opt_default: QPushButton
-    sample_opt_nothunder: QPushButton
-    sample_opt_optimized: QPushButton
+    sample_opt_custom: QRadioButton
+    sample_opt_default: QRadioButton
+    sample_opt_optimized: QRadioButton
+    sample_opt_redux1: QRadioButton
+    sample_opt_redux2: QRadioButton
     sample_optimization_box: QGroupBox
     sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox

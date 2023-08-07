@@ -11,6 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
+from enum import Enum, auto
 from pathlib import Path
 
 # Library imports
@@ -23,7 +24,33 @@ from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
 from smw_music.ui.utilization import Utilization, default_utilization
 
 ###############################################################################
+# API constant definitions
+###############################################################################
+
+N_BUILTIN_SAMPLES = 20
+
+###############################################################################
 # API class definitions
+###############################################################################
+
+
+class BuiltinSampleGroup(Enum):
+    DEFAULT = auto()
+    OPTIMIZED = auto()
+    REDUX1 = auto()
+    REDUX2 = auto()
+    CUSTOM = auto()
+
+
+###############################################################################
+
+
+class BuiltinSampleSource(Enum):
+    DEFAULT = auto()
+    OPTIMIZED = auto()
+    EMPTY = auto()
+
+
 ###############################################################################
 
 
@@ -80,6 +107,11 @@ class State:
     aram_util: Utilization = field(default_factory=default_utilization)
     aram_custom_sample_b: int = 0
     calculated_tune: tuple[float, tuple[int, float]] = (0, (0, 0))
+    builtin_sample_group: BuiltinSampleGroup = BuiltinSampleGroup.OPTIMIZED
+    builtin_sample_sources: list[BuiltinSampleSource] = field(
+        default_factory=lambda: N_BUILTIN_SAMPLES
+        * [BuiltinSampleSource.OPTIMIZED]
+    )
 
     ###########################################################################
     # API method definitions
@@ -87,6 +119,7 @@ class State:
 
     def normalize(self) -> None:
         self._normalize_followers()
+        self._normalize_sample_sources()
 
     ###########################################################################
     # Property definitions
@@ -147,3 +180,27 @@ class State:
         for inst in self.instruments.values():
             for sample in inst.multisamples.values():
                 sample.track_settings(inst.sample)
+
+    ###########################################################################
+
+    def _normalize_sample_sources(self) -> None:
+        # Use a short alias to the state variable
+        sources = self.builtin_sample_sources
+        nelem = len(self.builtin_sample_sources)
+
+        match self.builtin_sample_group:
+            case BuiltinSampleGroup.DEFAULT:
+                sources[:] = nelem * [BuiltinSampleSource.DEFAULT]
+            case BuiltinSampleGroup.OPTIMIZED:
+                sources[:] = nelem * [BuiltinSampleSource.OPTIMIZED]
+            case BuiltinSampleGroup.REDUX1:
+                sources[:] = nelem * [BuiltinSampleSource.OPTIMIZED]
+                sources[0x0D] = BuiltinSampleSource.EMPTY
+                sources[0x0F] = BuiltinSampleSource.EMPTY
+                sources[0x11] = BuiltinSampleSource.EMPTY
+            case BuiltinSampleGroup.REDUX2:
+                sources[:] = nelem * [BuiltinSampleSource.OPTIMIZED]
+                sources[0x0D] = BuiltinSampleSource.EMPTY
+                sources[0x0F] = BuiltinSampleSource.EMPTY
+                sources[0x11] = BuiltinSampleSource.EMPTY
+                sources[0x13] = BuiltinSampleSource.EMPTY

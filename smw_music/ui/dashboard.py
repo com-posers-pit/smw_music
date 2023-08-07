@@ -53,13 +53,19 @@ from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
 from smw_music.music_xml.instrument import GainMode, SampleSource, TuneSource
+from smw_music.ui.dashboard_ui import update_sample_opt
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
-from smw_music.ui.state import NoSample, State
+from smw_music.ui.state import (
+    N_BUILTIN_SAMPLES,
+    BuiltinSampleGroup,
+    NoSample,
+    State,
+)
 from smw_music.ui.utilization import (
     Utilization,
     paint_utilization,
@@ -676,6 +682,8 @@ class Dashboard(QWidget):
             v.start_section.addItems(state.section_names)
             v.start_section.setCurrentIndex(state.start_section_idx)
 
+            update_sample_opt(v, state)
+
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
@@ -843,7 +851,34 @@ class Dashboard(QWidget):
             (v.echo_feedback_surround, m.on_echo_feedback_surround_changed),
             (v.echo_delay_slider, m.on_echo_delay_changed),
             (v.echo_delay_setting, m.on_echo_delay_changed),
+            # Builtin sample selection
+            (
+                v.sample_opt_default,
+                partial(m.on_sample_opt_selected, BuiltinSampleGroup.DEFAULT),
+            ),
+            (
+                v.sample_opt_optimized,
+                partial(
+                    m.on_sample_opt_selected, BuiltinSampleGroup.OPTIMIZED
+                ),
+            ),
+            (
+                v.sample_opt_redux1,
+                partial(m.on_sample_opt_selected, BuiltinSampleGroup.REDUX1),
+            ),
+            (
+                v.sample_opt_redux2,
+                partial(m.on_sample_opt_selected, BuiltinSampleGroup.REDUX2),
+            ),
+            (
+                v.sample_opt_custom,
+                partial(m.on_sample_opt_selected, BuiltinSampleGroup.CUSTOM),
+            ),
         ]
+
+        for n in range(N_BUILTIN_SAMPLES):
+            # TODO: Hook up signals
+            pass
 
         # Instrument dynamics settings
         for dkey, dwidgets in self._dyn_widgets.items():
