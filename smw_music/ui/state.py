@@ -82,6 +82,13 @@ class State:
     calculated_tune: tuple[float, tuple[int, float]] = (0, (0, 0))
 
     ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def normalize(self) -> None:
+        self._normalize_followers()
+
+    ###########################################################################
     # Property definitions
     ###########################################################################
 
@@ -131,3 +138,12 @@ class State:
                 samples[(inst_name, sample_name)] = sample
 
         return samples
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _normalize_followers(self) -> None:
+        for inst in self.instruments.values():
+            for sample in inst.multisamples.values():
+                sample.track_settings(inst.sample)

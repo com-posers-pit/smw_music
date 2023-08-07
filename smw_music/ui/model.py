@@ -1628,9 +1628,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             new_state = State()
 
-        for inst in new_state.instruments.values():
-            for sample in inst.multisamples.values():
-                sample.track_settings(inst.sample)
+        new_state.normalize()
 
         if new_state != self.state:
             self._rollback_undo()
