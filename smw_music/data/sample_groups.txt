@@ -1,0 +1,49 @@
+
+
+#redux1
+{
+	"optimized/00 SMW @0.brr"!
+	"optimized/01 SMW @1.brr"!
+	"optimized/02 SMW @2.brr"!
+	"optimized/03 SMW @3.brr"!
+	"optimized/04 SMW @4.brr"!
+	"optimized/05 SMW @8.brr"!
+	"optimized/06 SMW @22.brr"!
+	"optimized/07 SMW @5.brr"!
+	"optimized/08 SMW @6.brr"!
+	"optimized/09 SMW @7.brr"!
+	"optimized/0A SMW @9.brr"!
+	"optimized/0B SMW @10.brr"!
+	"optimized/0C SMW @13.brr"!
+	"EMPTY.brr"!
+	"optimized/0E SMW @29.brr"!
+	"EMPTY.brr"!
+	"optimized/10 SMW @12.brr"!
+	"EMPTY.brr"!
+	"optimized/12 SMW @15.brr"!
+	"optimized/13 SMW Thunder.brr"!
+}
+
+#redux2
+{
+	"optimized/00 SMW @0.brr"!
+	"optimized/01 SMW @1.brr"!
+	"optimized/02 SMW @2.brr"!
+	"optimized/03 SMW @3.brr"!
+	"optimized/04 SMW @4.brr"!
+	"optimized/05 SMW @8.brr"!
+	"optimized/06 SMW @22.brr"!
+	"optimized/07 SMW @5.brr"!
+	"optimized/08 SMW @6.brr"!
+	"optimized/09 SMW @7.brr"!
+	"optimized/0A SMW @9.brr"!
+	"optimized/0B SMW @10.brr"!
+	"optimized/0C SMW @13.brr"!
+	"EMPTY.brr"!
+	"optimized/0E SMW @29.brr"!
+	"EMPTY.brr"!
+	"optimized/10 SMW @12.brr"!
+	"EMPTY.brr"!
+	"optimized/12 SMW @15.brr"!
+	"EMPTY.brr"!
+}

@@ -8,15 +8,31 @@ block_cipher = None
 
 
 a = Analysis(
-    ['smw_music/scripts/dashboard.py'],
+    ["smw_music/scripts/dashboard.py"],
     pathex=[],
     binaries=[],
-    datas=[('smw_music/data/codenames.csv', 'smw_music/data'), ('smw_music/data/mml.txt', 'smw_music/data'), ('smw_music/data/dashboard.ui', 'smw_music/data'), ('smw_music/data/ankha.gif', 'smw_music/data'), ('smw_music/data/ashtley.gif', 'smw_music/data'), ('smw_music/data/maestro.svg', 'smw_music/data'), ('smw_music/data/convert.bat', 'smw_music/data'), ('smw_music/data/convert.sh', 'smw_music/data'), ('smw_music/data/preferences.ui', 'smw_music/data')],
-    hiddenimports=['music21.alpha', 'music21.audioSearch', 'music21.configure', 'qdarkstyle'],
+    datas=[
+        ("smw_music/data/ankha.gif", "smw_music/data"),
+        ("smw_music/data/ashtley.gif", "smw_music/data"),
+        ("smw_music/data/codenames.csv", "smw_music/data"),
+        ("smw_music/data/convert.bat", "smw_music/data"),
+        ("smw_music/data/convert.sh", "smw_music/data"),
+        ("smw_music/data/dashboard.ui", "smw_music/data"),
+        ("smw_music/data/maestro.svg", "smw_music/data"),
+        ("smw_music/data/mml.txt", "smw_music/data"),
+        ("smw_music/data/preferences.ui", "smw_music/data"),
+        ("smw_music/data/sample_groups.txt", "smw_music/data"),
+    ],
+    hiddenimports=[
+        "music21.alpha",
+        "music21.audioSearch",
+        "music21.configure",
+        "qdarkstyle",
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
-    excludes=['tk', 'matplotlib'],
+    excludes=["tk", "matplotlib"],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
@@ -31,7 +47,7 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='dashboard',
+    name="dashboard",
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -44,5 +60,5 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/maestro.ico'
+    icon="resources/maestro.ico",
 )

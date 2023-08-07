@@ -34,7 +34,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import SmwMusicException, __version__, nspc
+from smw_music import RESOURCES, SmwMusicException, __version__, nspc
 from smw_music.brr import SAMPLE_FREQ, Brr
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
@@ -213,6 +213,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 shutil.move(extract_dir / root / member, path / member)
 
             shutil.rmtree(extract_dir)
+
+        # Append new sample groups
+        with (RESOURCES / "sample_groups.txt").open("rb") as fobj_in, open(
+            path / "Addmusic_sample groups.txt", "ab"
+        ) as fobj_out:
+            fobj_out.write(fobj_in.read())
 
         # Add visualizations directory
         make_vis_dir(path)
