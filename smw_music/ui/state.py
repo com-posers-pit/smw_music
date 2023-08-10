@@ -101,8 +101,6 @@ class State:
     section_names: list[str] = field(default_factory=list)
     start_section_idx: int = 0
 
-    _sample_idx: tuple[str, str] | None = None
-
     unmapped: set[tuple[Pitch, str]] = field(default_factory=set)
     aram_util: Utilization = field(default_factory=default_utilization)
     aram_custom_sample_b: int = 0
@@ -113,11 +111,13 @@ class State:
         * [BuiltinSampleSource.OPTIMIZED]
     )
 
+    _sample_idx: tuple[str, str] | None = None
+
     ###########################################################################
-    # API method definitions
+    # Data model method definitions
     ###########################################################################
 
-    def normalize(self) -> None:
+    def __post_init__(self) -> None:
         self._normalize_followers()
         self._normalize_sample_sources()
 

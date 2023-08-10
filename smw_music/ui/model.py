@@ -1658,8 +1658,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             new_state = State()
 
-        new_state.normalize()
-
         if new_state != self.state:
             self._rollback_undo()
 
