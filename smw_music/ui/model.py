@@ -153,7 +153,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         str,  # title
         str,  # response
     )
-    utilization_updated = pyqtSignal(Utilization)
 
     song: Song | None
     preferences: PreferencesState
@@ -177,6 +176,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._project_path = None
 
         os.makedirs(self.config_dir, exist_ok=True)
+
         self._start_watcher()
 
     ###########################################################################
@@ -282,26 +282,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def start(self) -> None:
+        self._check_first_use()
         self._load_prefs()
-        if self.preferences.release_check:
-            release = newest_release()
-            if release is not None and release[1] > version_tuple(__version__):
-                url, version = release
-                self.response_generated.emit(
-                    False,
-                    "New Version",
-                    f"SPaCeMusicW <a href={url}>v{version}</a> is available "
-                    + "for download<br />Version checking can be disabled "
-                    + "in preferences",
-                )
-
+        self._check_for_updates()
         self.update_sample_packs()
 
         self.recent_projects_updated.emit(self.recent_projects)
-        self.reinforce_state()
 
-        quote: tuple[str, str] = choice(quotes)  # nosec: B311
-        self.update_status(f"{quote[1]}: {quote[0]}")
+        self.reinforce_state()
+        self._emit_quote()
 
     ###########################################################################
 
@@ -1144,6 +1133,40 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     bad_samples.append((inst_name, sample_name))
 
         return bad_samples
+
+    ###########################################################################
+
+    def _check_first_use(self) -> None:
+        if not self.prefs_fname.exists():
+            msg = "Welcome, and thank you for trying SPaCeMusicW."
+            msg += "\n\nIt looks like this is your first time using the tool."
+            msg += "\nWe recommend reading through our getting started guide."
+            msg += "\nIt's short, we promise."
+
+            self.response_generated.emit(
+                False, "It's dangerous to go alone!  Take this.", msg
+            )
+
+    ###########################################################################
+
+    def _check_for_updates(self) -> None:
+        if self.preferences.release_check:
+            release = newest_release()
+            if release is not None and release[1] > version_tuple(__version__):
+                url, version = release
+                self.response_generated.emit(
+                    False,
+                    "New Version",
+                    f"SPaCeMusicW <a href={url}>v{version}</a> is available "
+                    + "for download<br />Version checking can be disabled "
+                    + "in preferences",
+                )
+
+    ###########################################################################
+
+    def _emit_quote(self) -> None:
+        quote: tuple[str, str] = choice(quotes)  # nosec: B311
+        self.update_status(f"{quote[1]}: {quote[0]}")
 
     ###########################################################################
 
