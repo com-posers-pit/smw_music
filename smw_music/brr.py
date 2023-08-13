@@ -30,6 +30,7 @@ File loop headers are discussed in [2]_.
 # Standard library imports
 import math
 import wave
+from collections.abc import Iterator
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
@@ -123,6 +124,58 @@ class Brr:
     # API method definitions
     ###########################################################################
 
+    def generate(
+        self, tune: int, note: int, subnote: int
+    ) -> Iterator[npt.NDArray[np.int16]]:
+        # Variable initialization
+        proc = np.zeros(SAMPLES_PER_BLOCK)
+        chunk_size = 4 * 1024 / SAMPLES_PER_BLOCK
+
+        pitch_reg = nspc.set_pitch(tune, note, subnote)
+        dt = pitch_reg / 2**12
+
+        # Loop the requested number of times, starting at block 0 the first
+        # time and at the loop block all other times
+        start_block = 0
+        idx = 0
+
+        nblocks = int(np.ceil(chunk_size * dt))
+        frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
+        frame = np.zeros(frame_size)
+        xp = [0]
+        ts = [-dt]
+
+        while True:
+            for n in range(start_block, self.nblocks):
+                if idx == 0:
+                    frame[0] = frame[-1]
+                    xp = xp[-1] + np.arange(len(frame))
+                    ts = np.arange(ts[-1] + dt, xp[-1], dt)
+
+                # Get the filter coefficients
+                a_coeffs = _FILTERS[self.filters[n]]
+                b_coeffs = [2 ** self.ranges[n]]
+
+                # Run the IIR filter
+                init = lfiltic(b_coeffs, a_coeffs, [proc[-1], proc[-2]])
+                proc, _ = lfilter(b_coeffs, a_coeffs, self.samples[n], zi=init)
+
+                frame[
+                    1
+                    + idx * SAMPLES_PER_BLOCK : 1
+                    + (idx + 1) * SAMPLES_PER_BLOCK
+                ] = proc
+
+                idx += 1
+
+                if idx == nblocks:
+                    idx = 0
+                    yield np.round(np.interp(ts, xp, frame)).astype(np.int16)
+
+            start_block = self.loop_block
+
+    ###########################################################################
+
     def generate_waveform(self, loops: int = 1) -> npt.NDArray[np.int16]:
         # Cache lookup
         try:
@@ -166,7 +219,7 @@ class Brr:
     ###########################################################################
 
     def to_wav(
-        self, fname: str, loops: int = 0, framerate: int = 32000
+        self, fname: str, loops: int = 0, framerate: int = SAMPLE_FREQ
     ) -> None:
         with wave.open(fname, "wb") as fobj:
             fobj.setnchannels(1)  # pylint: disable=no-member
