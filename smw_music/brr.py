@@ -145,6 +145,9 @@ class Brr:
         xp = [0]
         ts = [-dt]
 
+        one_shot = not self.sample_loops
+
+        # TODO: refactor with generate_waveform
         while True:
             for n in range(start_block, self.nblocks):
                 if idx == 0:
@@ -168,9 +171,19 @@ class Brr:
 
                 idx += 1
 
+                emit = False
+                if (n == self.nblocks - 1) and one_shot:
+                    frame[1 + idx * SAMPLES_PER_BLOCK :] = 0
+                    emit = True
+
                 if idx == nblocks:
                     idx = 0
+                    emit = True
+
+                if emit:
                     yield np.round(np.interp(ts, xp, frame)).astype(np.int16)
+                    if one_shot:
+                        return
 
             start_block = self.loop_block
 
