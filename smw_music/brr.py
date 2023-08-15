@@ -138,7 +138,7 @@ class Brr:
         nblocks = int(np.ceil(chunk_size * dt))
         frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
         frame = np.zeros(frame_size)
-        xp = [0]
+        xp = [-1]
         ts = [-dt]
 
         one_shot = not self.sample_loops
