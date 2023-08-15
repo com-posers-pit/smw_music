@@ -126,7 +126,7 @@ class Brr:
     def generate(self, pitch_reg: int) -> Iterator[npt.NDArray[np.int16]]:
         # Variable initialization
         proc = np.zeros(SAMPLES_PER_BLOCK)
-        chunk_size = 4 * 1024 / SAMPLES_PER_BLOCK
+        chunk_size = self.BYTES_PER_FRAME / SAMPLES_PER_BLOCK
 
         dt = pitch_reg / PITCH_REG_SCALE
 
@@ -261,6 +261,11 @@ class Brr:
 
     ###########################################################################
 
+    @property
+    def BYTES_PER_FRAME(self) -> int:
+        return 1024
+
+    ###########################################################################
     @property
     def csv(self) -> str:
         rv = [
