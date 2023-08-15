@@ -24,7 +24,7 @@ File loop headers are discussed in [2]_.
 """
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
 # Standard library imports
@@ -42,14 +42,13 @@ from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 
 # Package imports
 from smw_music import SmwMusicException, nspc
+from smw_music.spc700 import PITCH_REG_SCALE, SAMPLE_FREQ
 
 ###############################################################################
 # API constant definitions
 ###############################################################################
 
 BLOCK_SIZE = 9
-
-SAMPLE_FREQ = 32000
 
 SAMPLES_PER_BLOCK = 16
 
@@ -124,15 +123,12 @@ class Brr:
     # API method definitions
     ###########################################################################
 
-    def generate(
-        self, tune: int, note: int, subnote: int
-    ) -> Iterator[npt.NDArray[np.int16]]:
+    def generate(self, pitch_reg: int) -> Iterator[npt.NDArray[np.int16]]:
         # Variable initialization
         proc = np.zeros(SAMPLES_PER_BLOCK)
         chunk_size = 4 * 1024 / SAMPLES_PER_BLOCK
 
-        pitch_reg = nspc.set_pitch(tune, note, subnote)
-        dt = pitch_reg / 2**12
+        dt = pitch_reg / PITCH_REG_SCALE
 
         # Loop the requested number of times, starting at block 0 the first
         # time and at the loop block all other times

@@ -7,6 +7,17 @@
 Logic related to the N-SPC SPC700 music engine
 """
 
+###############################################################################
+# Imports
+###############################################################################
+
+# Package imports
+from smw_music.spc700 import PITCH_REG_SCALE
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
 # Line 2469 in main.asm
 _PITCH_TABLE = [
     0x085F,
@@ -56,7 +67,7 @@ def calc_tune(fundamental: float, note: int, freq: float) -> tuple[int, float]:
     # "fundamental" is from the "Fundamental" input
     # "note" is from the "SNES Note" input
     # "freq" is from the "Output Note" input
-    scale = 2**12
+    scale = PITCH_REG_SCALE
 
     # This is how N-SPC calculates a pitch register setting (see set_pitch)
     octave, idx = divmod(note, 12)
