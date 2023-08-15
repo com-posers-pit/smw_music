@@ -13,9 +13,8 @@ Tools for playing brr samples
 
 # Standard library imports
 from collections import deque
-from contextlib import closing, suppress
+from contextlib import closing
 from pathlib import Path
-from threading import Thread
 
 # Library imports
 import pyaudio
@@ -67,33 +66,40 @@ class SamplePlayer:
         self._frames.clear()
 
         pitch_reg = set_pitch(tune, note, subnote)
-        th = Thread(target=self._play_frames, daemon=True)
 
-        started = False
-        for frame in brr.generate(pitch_reg):
-            self._frames.append(frame)
-            while len(self._frames) > 1000:
-                if not self._running:
-                    break
-            if not self._running:
-                break
-            if not started:
-                started = True
-                th.start()
-
-    ###########################################################################
-
-    def _play_frames(self) -> None:
         with closing(
             pyaudio.PyAudio().open(
                 format=pyaudio.paInt16,
                 channels=1,
                 rate=SAMPLE_FREQ,
                 output=True,
+                frames_per_buffer=brr.BYTES_PER_FRAME,
+                stream_callback=self._stream_cb,
             )
-        ) as stream:
-            with suppress(IndexError):
-                while True:
-                    stream.write(self._frames.popleft())
+        ):
+            for frame in brr.generate(pitch_reg):
+                self._frames.append(frame)
+                while len(self._frames) > 10:
                     if not self._running:
                         break
+                if not self._running:
+                    break
+
+    ###########################################################################
+
+    def _stream_cb(
+        self,
+        in_data: bytes,
+        frame_count: int,
+        time_info: dict,
+        status_flags: int,
+    ) -> tuple[bytes, int]:
+        while not len(self._frames):
+            if self._running:
+                pass
+
+        if self._running:
+            frame = self._frames.popleft()
+            return (frame, pyaudio.paContinue)
+        else:
+            return (b"", pyaudio.paAbort)
