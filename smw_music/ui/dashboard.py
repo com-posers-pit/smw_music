@@ -56,6 +56,7 @@ from smw_music.music_xml.instrument import GainMode, SampleSource, TuneSource
 from smw_music.ui.dashboard_ui import update_sample_opt
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
+from smw_music.ui.keyboard import Keyboard
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
@@ -193,6 +194,7 @@ class _TblCol(enum.IntEnum):
 
 class Dashboard(QWidget):
     _history: QMainWindow
+    _keyboard: QMainWindow
     _quicklook: QMainWindow
     _checkitout: QMainWindow
     _camelitout: QMainWindow
@@ -276,6 +278,13 @@ class Dashboard(QWidget):
         self._envelope_preview = EnvelopePreview(self)
         self._history.setWindowTitle("History")
 
+        self._keyboard = QMainWindow(parent=self)
+        self._keyboard.setWindowTitle("Keyboard")
+        self._keyboard.setMinimumSize(800, 600)
+        self._kbd = Keyboard()
+        self._keyboard.setCentralWidget(self._kbd)
+        self._keyboard.setFixedSize(self._kbd.size())
+
         self._setup_menus()
         self._fix_edit_widths()
         self._combine_widgets()
@@ -347,6 +356,11 @@ class Dashboard(QWidget):
 
     ###########################################################################
     # API slot definitions
+    ###########################################################################
+
+    def on_audition_sample_clicked(self) -> None:
+        self._keyboard.show()
+
     ###########################################################################
 
     def on_brr_clicked(self) -> None:
@@ -826,6 +840,7 @@ class Dashboard(QWidget):
             (v.subtune_setting, m.on_subtune_changed),
             (v.brr_setting, m.on_brr_setting_changed),
             (v.preview_envelope, self.on_preview_envelope_clicked),
+            (v.audition_sample, self.on_audition_sample_clicked),
             # Global settings
             (v.global_volume_slider, m.on_global_volume_changed),
             (v.global_volume_setting, m.on_global_volume_changed),
@@ -926,8 +941,8 @@ class Dashboard(QWidget):
 
         v.start_section.activated.connect(m.on_start_section_activated)
 
-        v.audition_sample.pressed.connect(self._on_audition_start)
-        v.audition_sample.released.connect(m.on_audition_stop)
+        self._kbd.key_on.connect(self._on_audition_start)
+        self._kbd.key_off.connect(lambda x, y: m.on_audition_stop())
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
@@ -1076,8 +1091,8 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _on_audition_start(self) -> None:
-        self._model.on_audition_start(self._view.audition_note.currentText())
+    def _on_audition_start(self, note: str, octave: int) -> None:
+        self._model.on_audition_start(f"{note}{octave}")
 
     ###########################################################################
 

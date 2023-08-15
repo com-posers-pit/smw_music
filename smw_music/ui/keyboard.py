@@ -10,16 +10,12 @@
 ###############################################################################
 
 # Standard library imports
-import sys
-import threading
 from contextlib import suppress
 
 # Library imports
-import mido  # type: ignore
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QKeyEvent, QPen
 from PyQt6.QtWidgets import (
-    QApplication,
     QGraphicsRectItem,
     QGraphicsScene,
     QGraphicsSceneDragDropEvent,
@@ -32,11 +28,13 @@ from PyQt6.QtWidgets import (
 
 class Key(QGraphicsRectItem):
     def __init__(
-        self, x0: int, y0: int, x1: int, y1: int, white: bool
+        self, x0: int, y0: int, x1: int, y1: int, white: bool, key_on, key_off
     ) -> None:
         super().__init__(x0, y0, x1, y1)
         self.white = white
         self._brush = QBrush(self.color)
+        self._key_on = key_on
+        self._key_off = key_off
         self.pressed = QBrush(Qt.GlobalColor.magenta)
         self.setBrush(self._brush)
         self.setAcceptDrops(True)
@@ -63,10 +61,12 @@ class Key(QGraphicsRectItem):
 
     def activate(self) -> None:
         self.setBrush(self.pressed)
+        self._key_on()
         self.update()
 
     def deactivate(self) -> None:
         self.setBrush(self._brush)
+        self._key_off()
         self.update()
 
     @property
@@ -127,6 +127,8 @@ class Keyboard(QGraphicsView):
     keys: dict[str, Key]
     _active: bool
     _octave: int
+    key_on = pyqtSignal(str, int)
+    key_off = pyqtSignal(str, int)
 
     ###########################################################################
 
@@ -134,27 +136,41 @@ class Keyboard(QGraphicsView):
         super().__init__()
 
         self._setup_graphics()
-        self.octave = 3
+        self.octave = 2
         self._active = False
         self.show()
 
     ###########################################################################
 
     def _setup_graphics(self) -> None:
-        scene = QGraphicsScene(0, 0, 1500, 200)
+        white_keys = 36
+        key_width = 16
+        key_height = 50
+
+        scene = QGraphicsScene(0, 0, 30 + white_keys * key_width, key_height)
         self.setScene(scene)
 
         self.pen = QPen(Qt.GlobalColor.black)
         self.pen.setWidth(1)
 
-        key_width = 16
-
         self.keys = {}
         letter = "c"
         octave = 0
-        for n in range(75):
-            key = Key(0, 0, key_width, 50, True)
-            key.setPos(n * key_width, 0)
+        for n in range(white_keys):
+            key = Key(
+                0,
+                0,
+                key_width,
+                key_height,
+                True,
+                lambda letter=letter, octave=octave: self.key_on.emit(
+                    letter, octave
+                ),
+                lambda letter=letter, octave=octave: self.key_off.emit(
+                    letter, octave
+                ),
+            )
+            key.setPos(5 + n * key_width, 0)
             key.setPen(self.pen)
 
             scene.addItem(key)
@@ -168,12 +184,24 @@ class Keyboard(QGraphicsView):
         offset = 0
         letter = "c"
         octave = 0
-        for n in range(74):
+        for n in range(white_keys - 1):
             offset += key_width
 
             if (n % 7) not in [2, 6]:
-                key = Key(-key_width // 4, 0, key_width // 2, 30, False)
-                key.setPos(offset, 0)
+                key = Key(
+                    -key_width // 4,
+                    0,
+                    key_width // 2,
+                    key_height * 3 // 5,
+                    False,
+                    lambda letter=letter, octave=octave: self.key_on.emit(
+                        letter, octave
+                    ),
+                    lambda letter=letter, octave=octave: self.key_off.emit(
+                        letter, octave
+                    ),
+                )
+                key.setPos(5 + offset, 0)
                 key.setPen(self.pen)
 
                 scene.addItem(key)
@@ -251,50 +279,4 @@ class Keyboard(QGraphicsView):
 
     @octave.setter
     def octave(self, val: int) -> None:
-        self._octave = max(min(val, 10), 0)
-
-
-###############################################################################
-
-app = QApplication(sys.argv)
-keyboard = Keyboard()
-
-
-def convert(ival: int) -> tuple[str, int]:
-    octave, key = divmod(ival, 12)
-    keyname = [
-        "c",
-        "c#",
-        "d",
-        "d#",
-        "e",
-        "f",
-        "f#",
-        "g",
-        "g#",
-        "a",
-        "a#",
-        "b",
-    ][key]
-    return keyname, octave
-
-
-def poll(keyboard: Keyboard) -> None:
-    in_fname = ""
-    out_fname = "SPaCeMusicW"
-
-    with mido.open_input(in_fname) as inport, mido.open_output(
-        out_fname, virtual=True
-    ) as outport:
-        for msg in inport:
-            outport.send(msg)
-            if msg.type == "note_on":
-                keyboard.press_key(*convert(msg.note))
-            elif msg.type == "note_off":
-                keyboard.release_key(*convert(msg.note))
-
-
-thread = threading.Thread(target=poll, args=(keyboard,), daemon=True)
-# thread.start()
-
-app.exec()
+        self._octave = max(min(val, 6), 0)
