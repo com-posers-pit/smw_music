@@ -71,6 +71,8 @@ class DashboardView(QMainWindow):
     attack_label: QLabel
     attack_setting: QLineEdit
     attack_slider: QSlider
+    audition_note: QComboBox
+    audition_sample: QPushButton
     brr_fname: QLineEdit
     brr_setting: QLineEdit
     brr_setting_label: QLabel

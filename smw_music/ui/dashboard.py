@@ -926,6 +926,9 @@ class Dashboard(QWidget):
 
         v.start_section.activated.connect(m.on_start_section_activated)
 
+        v.audition_sample.pressed.connect(self._on_audition_start)
+        v.audition_sample.released.connect(m.on_audition_stop)
+
         # Return signals
         m.state_changed.connect(self.on_state_changed)
         m.mml_generated.connect(self.on_mml_generated)
@@ -1070,6 +1073,11 @@ class Dashboard(QWidget):
         item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
 
         return item
+
+    ###########################################################################
+
+    def _on_audition_start(self) -> None:
+        self._model.on_audition_start(self._view.audition_note.currentText())
 
     ###########################################################################
 

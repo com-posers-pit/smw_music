@@ -51,6 +51,7 @@ from smw_music.music_xml.instrument import (
     Tuning,
 )
 from smw_music.music_xml.song import Song
+from smw_music.sample_player import SamplePlayer
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
@@ -61,11 +62,7 @@ from smw_music.ui.state import (
     PreferencesState,
     State,
 )
-from smw_music.ui.utilization import (
-    Utilization,
-    decode_utilization,
-    echo_bytes,
-)
+from smw_music.ui.utilization import decode_utilization, echo_bytes
 from smw_music.ui.utils import make_vis_dir
 from smw_music.utils import brr_size_b, newest_release, version_tuple, zip_top
 
@@ -161,6 +158,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _sample_packs: dict[str, SamplePack]
     _project_path: Path | None
     _sample_watcher: observers.Observer
+    _sample_player: SamplePlayer
 
     ###########################################################################
     # Constructor definitions
@@ -174,6 +172,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._undo_level = 0
         self._sample_packs = {}
         self._project_path = None
+        self._sample_player = SamplePlayer()
 
         os.makedirs(self.config_dir, exist_ok=True)
 
@@ -377,6 +376,24 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         setting = _parse_setting(val, 15)
         self._update_sample_state(attack_setting=setting, adsr_mode=True)
         self.update_status(f"Attack set to {setting}")
+
+    ###########################################################################
+
+    def on_audition_start(self, audition_note: str) -> None:
+        sample = self.state.sample
+        tune = 256 * sample.tune_setting + sample.subtune_setting
+        note = nspc.midi_to_nspc(Pitch(audition_note).midi)
+
+        self._sample_player_th = threading.Thread(
+            target=self._sample_player.play_file,
+            args=(sample.brr_fname, tune, note, 0),
+        )
+        self._sample_player_th.start()
+
+    ###########################################################################
+
+    def on_audition_stop(self) -> None:
+        self._sample_player.stop()
 
     ###########################################################################
 
