@@ -71,6 +71,8 @@ class SamplePlayer:
         self._running = True
         self._frames.clear()
 
+        fpb = brr.SAMPLES_PER_FRAME
+        bpb = 2 * fpb
         pitch_reg = set_pitch(tune, note, subnote)
 
         with closing(
@@ -79,12 +81,18 @@ class SamplePlayer:
                 channels=1,
                 rate=SAMPLE_FREQ,
                 output=True,
-                frames_per_buffer=brr.BYTES_PER_FRAME,
+                frames_per_buffer=fpb,
                 stream_callback=self._stream_cb,
             )
         ):
+            working_frame = bytearray()
             for frame in brr.generate(pitch_reg):
-                self._frames.append(bytes(frame))
+                working_frame.extend(bytes(frame))
+
+                while len(working_frame) > bpb:
+                    self._frames.append(bytes(working_frame[:bpb]))
+                    working_frame = working_frame[bpb:]
+
                 while len(self._frames) > 10:
                     if not self._running:
                         break
