@@ -11,6 +11,8 @@
 
 # Standard library imports
 from contextlib import suppress
+from functools import partial
+from typing import Callable
 
 # Library imports
 from PyQt6.QtCore import Qt, pyqtSignal
@@ -28,46 +30,64 @@ from PyQt6.QtWidgets import (
 
 class Key(QGraphicsRectItem):
     def __init__(
-        self, x0: int, y0: int, x1: int, y1: int, white: bool, key_on, key_off
+        self,
+        x0: int,
+        y0: int,
+        x1: int,
+        y1: int,
+        white: bool,
+        key_on: Callable[[], None],
+        key_off: Callable[[], None],
     ) -> None:
         super().__init__(x0, y0, x1, y1)
         self.white = white
         self._brush = QBrush(self.color)
         self._key_on = key_on
         self._key_off = key_off
-        self.pressed = QBrush(Qt.GlobalColor.magenta)
+        self.pressed = QBrush(Qt.GlobalColor.cyan)
         self.setBrush(self._brush)
         self.setAcceptDrops(True)
 
+    ###########################################################################
+
     def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        print(f"{self} drag enter")
         self.activate()
+
+    ###########################################################################
 
     def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        print(f"{self} drag leave")
         self.deactivate()
+
+    ###########################################################################
 
     def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        print(f"{self} drag move")
         self.deactivate()
+
+    ###########################################################################
 
     def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        print(f"{self} mouse press")
         self.activate()
 
+    ###########################################################################
+
     def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        print(f"{self} mouse release")
         self.deactivate()
+
+    ###########################################################################
 
     def activate(self) -> None:
         self.setBrush(self.pressed)
         self._key_on()
         self.update()
 
+    ###########################################################################
+
     def deactivate(self) -> None:
         self.setBrush(self._brush)
         self._key_off()
         self.update()
+
+    ###########################################################################
 
     @property
     def color(self) -> Qt.GlobalColor:
@@ -124,11 +144,15 @@ KEY_TABLE: dict[Qt.Key, tuple[str, int]] = {
 
 
 class Keyboard(QGraphicsView):
-    keys: dict[str, Key]
-    _active: bool
-    _octave: int
     key_on = pyqtSignal(str, int)
     key_off = pyqtSignal(str, int)
+
+    keys: dict[str, Key]
+
+    _active: bool
+    _bg = QGraphicsRectItem
+    _octave: int
+    _pen: QPen
 
     ###########################################################################
 
@@ -136,9 +160,29 @@ class Keyboard(QGraphicsView):
         super().__init__()
 
         self._setup_graphics()
+
         self.octave = 2
-        self._active = False
+        self.active = False
+
         self.show()
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _setup_bg(self) -> None:
+        white_keys = 36
+        key_width = 16
+        key_height = 50
+
+        bg_pen = QPen(Qt.GlobalColor.red)
+        bg_pen.setWidth(5)
+
+        self._bg = QGraphicsRectItem(
+            2, 0, 5 + white_keys * key_width, key_height
+        )
+        self._bg.setPen(bg_pen)
+        self.scene().addItem(self._bg)
 
     ###########################################################################
 
@@ -150,28 +194,20 @@ class Keyboard(QGraphicsView):
         scene = QGraphicsScene(0, 0, 30 + white_keys * key_width, key_height)
         self.setScene(scene)
 
-        self.pen = QPen(Qt.GlobalColor.black)
-        self.pen.setWidth(1)
+        self._setup_bg()
+
+        self._pen = QPen(Qt.GlobalColor.black)
+        self._pen.setWidth(1)
 
         self.keys = {}
         letter = "c"
         octave = 0
         for n in range(white_keys):
-            key = Key(
-                0,
-                0,
-                key_width,
-                key_height,
-                True,
-                lambda letter=letter, octave=octave: self.key_on.emit(
-                    letter, octave
-                ),
-                lambda letter=letter, octave=octave: self.key_off.emit(
-                    letter, octave
-                ),
-            )
+            key_on = partial(self.key_on.emit, letter, octave)
+            key_off = partial(self.key_off.emit, letter, octave)
+            key = Key(0, 0, key_width, key_height, True, key_on, key_off)
             key.setPos(5 + n * key_width, 0)
-            key.setPen(self.pen)
+            key.setPen(self._pen)
 
             scene.addItem(key)
             self.keys[f"{letter}{octave}"] = key
@@ -188,21 +224,15 @@ class Keyboard(QGraphicsView):
             offset += key_width
 
             if (n % 7) not in [2, 6]:
-                key = Key(
-                    -key_width // 4,
-                    0,
-                    key_width // 2,
-                    key_height * 3 // 5,
-                    False,
-                    lambda letter=letter, octave=octave: self.key_on.emit(
-                        letter, octave
-                    ),
-                    lambda letter=letter, octave=octave: self.key_off.emit(
-                        letter, octave
-                    ),
-                )
+                left = -key_width // 4
+                width = key_width // 2
+                height = 3 * key_height // 5
+                key_on = partial(self.key_on.emit, letter, octave)
+                key_off = partial(self.key_off.emit, letter, octave)
+
+                key = Key(left, 0, width, height, False, key_on, key_off)
                 key.setPos(5 + offset, 0)
-                key.setPen(self.pen)
+                key.setPen(self._pen)
 
                 scene.addItem(key)
                 self.keys[f"{letter}#{octave}"] = key
@@ -216,6 +246,9 @@ class Keyboard(QGraphicsView):
     ###########################################################################
 
     def keyPressEvent(self, evt: QKeyEvent) -> None:
+        if evt.isAutoRepeat():
+            return
+
         keyval = evt.key()
 
         if keyval == Qt.Key.Key_Escape:
@@ -224,9 +257,9 @@ class Keyboard(QGraphicsView):
         if self.active:
             if evt.modifiers() & Qt.KeyboardModifier.KeypadModifier:
                 if keyval == Qt.Key.Key_Asterisk:
-                    self.octave = min(self.octave + 1, 10)
+                    self.octave += 1
                 if keyval == Qt.Key.Key_Slash:
-                    self.octave = max(self.octave - 1, 0)
+                    self.octave -= 1
             else:
                 with suppress(KeyError):
                     key, offset = KEY_TABLE[Qt.Key(keyval)]
@@ -235,6 +268,9 @@ class Keyboard(QGraphicsView):
     ###########################################################################
 
     def keyReleaseEvent(self, evt: QKeyEvent) -> None:
+        if evt.isAutoRepeat():
+            return
+
         if self.active:
             if not (evt.modifiers() & Qt.KeyboardModifier.KeypadModifier):
                 with suppress(KeyError):
@@ -258,6 +294,8 @@ class Keyboard(QGraphicsView):
             self.keys[f"{letter}{octave}"].deactivate()
 
     ###########################################################################
+    # API property definitions
+    ###########################################################################
 
     @property
     def active(self) -> bool:
@@ -268,6 +306,7 @@ class Keyboard(QGraphicsView):
     @active.setter
     def active(self, val: bool) -> None:
         self._active = val
+        self._bg.setVisible(val)
 
     ###########################################################################
 
