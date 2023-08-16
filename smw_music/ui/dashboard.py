@@ -280,7 +280,6 @@ class Dashboard(QWidget):
 
         self._keyboard = QMainWindow(parent=self)
         self._keyboard.setWindowTitle("Keyboard")
-        self._keyboard.setMinimumSize(800, 600)
         self._kbd = Keyboard()
         self._keyboard.setCentralWidget(self._kbd)
         self._keyboard.setFixedSize(self._kbd.size())
