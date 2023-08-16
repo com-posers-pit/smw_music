@@ -26,77 +26,10 @@ from PyQt6.QtWidgets import (
 )
 
 ###############################################################################
-
-
-class Key(QGraphicsRectItem):
-    def __init__(
-        self,
-        x0: int,
-        y0: int,
-        x1: int,
-        y1: int,
-        white: bool,
-        key_on: Callable[[], None],
-        key_off: Callable[[], None],
-    ) -> None:
-        super().__init__(x0, y0, x1, y1)
-        self.white = white
-        self._brush = QBrush(self.color)
-        self._key_on = key_on
-        self._key_off = key_off
-        self.pressed = QBrush(Qt.GlobalColor.cyan)
-        self.setBrush(self._brush)
-        self.setAcceptDrops(True)
-
-    ###########################################################################
-
-    def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        self.activate()
-
-    ###########################################################################
-
-    def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        self.deactivate()
-
-    ###########################################################################
-
-    def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        self.deactivate()
-
-    ###########################################################################
-
-    def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        self.activate()
-
-    ###########################################################################
-
-    def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        self.deactivate()
-
-    ###########################################################################
-
-    def activate(self) -> None:
-        self.setBrush(self.pressed)
-        self._key_on()
-        self.update()
-
-    ###########################################################################
-
-    def deactivate(self) -> None:
-        self.setBrush(self._brush)
-        self._key_off()
-        self.update()
-
-    ###########################################################################
-
-    @property
-    def color(self) -> Qt.GlobalColor:
-        return Qt.GlobalColor.white if self.white else Qt.GlobalColor.black
-
-
+# Private constant definitions
 ###############################################################################
 
-KEY_TABLE: dict[Qt.Key, tuple[str, int]] = {
+_KEY_TABLE = {
     Qt.Key.Key_Z: ("c", 0),
     Qt.Key.Key_S: ("c#", 0),
     Qt.Key.Key_X: ("d", 0),
@@ -141,13 +74,92 @@ KEY_TABLE: dict[Qt.Key, tuple[str, int]] = {
 
 
 ###############################################################################
+# Private class definitions
+###############################################################################
+
+
+class _Key(QGraphicsRectItem):
+    def __init__(
+        self,
+        x0: int,
+        y0: int,
+        x1: int,
+        y1: int,
+        white: bool,
+        key_on: Callable[[], None],
+        key_off: Callable[[], None],
+    ) -> None:
+        super().__init__(x0, y0, x1, y1)
+        self.white = white
+        self._brush = QBrush(self.color)
+        self._key_on = key_on
+        self._key_off = key_off
+        self.pressed = QBrush(Qt.GlobalColor.cyan)
+        self.setBrush(self._brush)
+        self.setAcceptDrops(True)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def activate(self) -> None:
+        self.setBrush(self.pressed)
+        self._key_on()
+        self.update()
+
+    ###########################################################################
+
+    def deactivate(self) -> None:
+        self.setBrush(self._brush)
+        self._key_off()
+        self.update()
+
+    ###########################################################################
+    # Event handler definitions
+    ###########################################################################
+
+    def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
+        self.activate()
+
+    ###########################################################################
+
+    def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
+        self.deactivate()
+
+    ###########################################################################
+
+    def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
+        self.deactivate()
+
+    ###########################################################################
+
+    def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
+        self.activate()
+
+    ###########################################################################
+
+    def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
+        self.deactivate()
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def color(self) -> Qt.GlobalColor:
+        return Qt.GlobalColor.white if self.white else Qt.GlobalColor.black
+
+
+###############################################################################
+# API class definitions
+###############################################################################
 
 
 class Keyboard(QGraphicsView):
     key_on = pyqtSignal(str, int)
     key_off = pyqtSignal(str, int)
 
-    keys: dict[str, Key]
+    keys: dict[str, _Key]
 
     _active: bool
     _bg = QGraphicsRectItem
@@ -165,6 +177,60 @@ class Keyboard(QGraphicsView):
         self.active = False
 
         self.show()
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def press_key(self, letter: str, octave: int, offset: int = 0) -> None:
+        octave = max(min(octave + offset, 10), 0)
+
+        with suppress(KeyError):
+            self.keys[f"{letter}{octave}"].activate()
+
+    ###########################################################################
+
+    def release_key(self, letter: str, octave: int, offset: int = 0) -> None:
+        octave = max(min(octave + offset, 10), 0)
+
+        with suppress(KeyError):
+            self.keys[f"{letter}{octave}"].deactivate()
+
+    ###########################################################################
+    # Event handler definitions
+    ###########################################################################
+
+    def keyPressEvent(self, evt: QKeyEvent) -> None:
+        if evt.isAutoRepeat():
+            return
+
+        keyval = evt.key()
+
+        if keyval == Qt.Key.Key_Escape:
+            self.active = not self.active
+
+        if self.active:
+            if evt.modifiers() & Qt.KeyboardModifier.KeypadModifier:
+                if keyval == Qt.Key.Key_Asterisk:
+                    self.octave += 1
+                if keyval == Qt.Key.Key_Slash:
+                    self.octave -= 1
+            else:
+                with suppress(KeyError):
+                    key, offset = _KEY_TABLE[Qt.Key(keyval)]
+                    self.press_key(key, self.octave, offset)
+
+    ###########################################################################
+
+    def keyReleaseEvent(self, evt: QKeyEvent) -> None:
+        if evt.isAutoRepeat():
+            return
+
+        if self.active:
+            if not (evt.modifiers() & Qt.KeyboardModifier.KeypadModifier):
+                with suppress(KeyError):
+                    key, offset = _KEY_TABLE[Qt.Key(evt.key())]
+                    self.release_key(key, self.octave, offset)
 
     ###########################################################################
     # Private method definitions
@@ -205,7 +271,7 @@ class Keyboard(QGraphicsView):
         for n in range(white_keys):
             key_on = partial(self.key_on.emit, letter, octave)
             key_off = partial(self.key_off.emit, letter, octave)
-            key = Key(0, 0, key_width, key_height, True, key_on, key_off)
+            key = _Key(0, 0, key_width, key_height, True, key_on, key_off)
             key.setPos(5 + n * key_width, 0)
             key.setPen(self._pen)
 
@@ -230,7 +296,7 @@ class Keyboard(QGraphicsView):
                 key_on = partial(self.key_on.emit, letter, octave)
                 key_off = partial(self.key_off.emit, letter, octave)
 
-                key = Key(left, 0, width, height, False, key_on, key_off)
+                key = _Key(left, 0, width, height, False, key_on, key_off)
                 key.setPos(5 + offset, 0)
                 key.setPen(self._pen)
 
@@ -242,56 +308,6 @@ class Keyboard(QGraphicsView):
                 letter = "a"
             if letter == "c":
                 octave += 1
-
-    ###########################################################################
-
-    def keyPressEvent(self, evt: QKeyEvent) -> None:
-        if evt.isAutoRepeat():
-            return
-
-        keyval = evt.key()
-
-        if keyval == Qt.Key.Key_Escape:
-            self.active = not self.active
-
-        if self.active:
-            if evt.modifiers() & Qt.KeyboardModifier.KeypadModifier:
-                if keyval == Qt.Key.Key_Asterisk:
-                    self.octave += 1
-                if keyval == Qt.Key.Key_Slash:
-                    self.octave -= 1
-            else:
-                with suppress(KeyError):
-                    key, offset = KEY_TABLE[Qt.Key(keyval)]
-                    self.press_key(key, self.octave, offset)
-
-    ###########################################################################
-
-    def keyReleaseEvent(self, evt: QKeyEvent) -> None:
-        if evt.isAutoRepeat():
-            return
-
-        if self.active:
-            if not (evt.modifiers() & Qt.KeyboardModifier.KeypadModifier):
-                with suppress(KeyError):
-                    key, offset = KEY_TABLE[Qt.Key(evt.key())]
-                    self.release_key(key, self.octave, offset)
-
-    ###########################################################################
-
-    def press_key(self, letter: str, octave: int, offset: int = 0) -> None:
-        octave = max(min(octave + offset, 10), 0)
-
-        with suppress(KeyError):
-            self.keys[f"{letter}{octave}"].activate()
-
-    ###########################################################################
-
-    def release_key(self, letter: str, octave: int, offset: int = 0) -> None:
-        octave = max(min(octave + offset, 10), 0)
-
-        with suppress(KeyError):
-            self.keys[f"{letter}{octave}"].deactivate()
 
     ###########################################################################
     # API property definitions
