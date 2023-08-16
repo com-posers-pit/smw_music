@@ -15,6 +15,7 @@ Tools for playing brr samples
 from collections import deque
 from contextlib import closing
 from pathlib import Path
+from typing import Mapping
 
 # Library imports
 import pyaudio
@@ -30,7 +31,12 @@ from smw_music.spc700 import SAMPLE_FREQ
 
 
 class SamplePlayer:
-    def __init__(self):
+    _p: pyaudio.PyAudio
+    _frames: deque[bytes]
+
+    ###########################################################################
+
+    def __init__(self) -> None:
         self._running = False
         # TODO: Add a .terminate on _p
         self._p = pyaudio.PyAudio()
@@ -78,7 +84,7 @@ class SamplePlayer:
             )
         ):
             for frame in brr.generate(pitch_reg):
-                self._frames.append(frame)
+                self._frames.append(bytes(frame))
                 while len(self._frames) > 10:
                     if not self._running:
                         break
@@ -89,9 +95,9 @@ class SamplePlayer:
 
     def _stream_cb(
         self,
-        in_data: bytes,
+        in_data: bytes | None,
         frame_count: int,
-        time_info: dict,
+        time_info: Mapping[str, float],
         status_flags: int,
     ) -> tuple[bytes, int]:
         while not len(self._frames):

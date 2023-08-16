@@ -138,8 +138,8 @@ class Brr:
         nblocks = int(np.ceil(chunk_size * dt))
         frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
         frame = np.zeros(frame_size)
-        xp = [-1]
-        ts = [-dt]
+        xp = np.array([-1])
+        ts = np.array([-dt])
 
         one_shot = not self.sample_loops
 
@@ -263,7 +263,7 @@ class Brr:
 
     @property
     def BYTES_PER_FRAME(self) -> int:
-        return 1024
+        return 4 * 1024
 
     ###########################################################################
     @property

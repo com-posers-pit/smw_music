@@ -1598,6 +1598,18 @@ files = [
 ]
 
 [[package]]
+name = "types-pyaudio"
+version = "0.2.16.7"
+description = "Typing stubs for pyaudio"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "types-pyaudio-0.2.16.7.tar.gz", hash = "sha256:27df8a3bac1cf49e690a56fe5f7b5f75a538275bb0374cdda9224a93c8bc7220"},
+    {file = "types_pyaudio-0.2.16.7-py3-none-any.whl", hash = "sha256:b796844a6fa59585359a0ebfec44cf0a13f1909b0bd0c604b288c31bca0901eb"},
+]
+
+[[package]]
 name = "types-pyyaml"
 version = "6.0.12.8"
 description = "Typing stubs for PyYAML"
@@ -1703,4 +1715,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10,<3.12"
-content-hash = "7df9883cf62d92fa0b7d69a34dc1c37cc22e085bc351d9564f611096804e8108"
+content-hash = "3e60799b61a105650db4e5ecac8bbdd38b7d3cd5c65ffb5ade6d44d8944d487b"
