@@ -54,6 +54,7 @@ pillow = "^9.5.0"
 types-pillow = "^10.0.0.2"
 pyaudio = "^0.2.13"
 types-pyaudio = "^0.2.16.7"
+pyinstaller = ">=5.12"
 
 [tool.poetry.group.midi]
 optional = true
