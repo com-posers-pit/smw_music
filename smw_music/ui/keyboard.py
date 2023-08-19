@@ -82,7 +82,7 @@ _KEYS_PER_OCTAVE = 12
 def _decode_key_idx(idx: int) -> tuple[str, int]:
     octave, key = divmod(idx, _KEYS_PER_OCTAVE)
     names = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"]
-    return (names[key], octave)
+    return (names[key], octave + 1)
 
 
 ###############################################################################
@@ -228,8 +228,7 @@ class Keyboard(QGraphicsView):
     ###########################################################################
 
     def press_key(self, letter: str, octave: int) -> None:
-        # Clip to valid octaves
-        octave = max(min(octave, self.octaves), 0)
+        octave = self._clip_octave(octave)
 
         with suppress(KeyError):
             self._keys[(letter, octave)].activate()
@@ -237,7 +236,7 @@ class Keyboard(QGraphicsView):
     ###########################################################################
 
     def release_key(self, letter: str, octave: int) -> None:
-        octave = max(min(octave, self.octaves), 0)
+        octave = self._clip_octave(octave)
 
         with suppress(KeyError):
             self._keys[(letter, octave)].deactivate()
@@ -286,10 +285,16 @@ class Keyboard(QGraphicsView):
     # Private method definitions
     ###########################################################################
 
+    def _clip_octave(self, octave: int) -> int:
+        return max(min(octave, self.octaves), 1)
+
+    ###########################################################################
+
     def _setup_bg(self) -> None:
         # Creates the highlighted background when active
+        active_width = 10
         pen = QPen(Qt.GlobalColor.red)
-        pen.setWidth(10)
+        pen.setWidth(active_width)
 
         width = self.white_keys * self._key_width
         self._bg = QGraphicsRectItem(0, 0, width, self._key_height)
@@ -345,7 +350,8 @@ class Keyboard(QGraphicsView):
             self.scene().addItem(key)
             self._keys[(letter, octave)] = key
 
-            # This sets the Z ordering so black keys are on top
+            # This shifts the key position every time a white key is placed and
+            # sets the Z ordering so black keys are on top
             if is_white:
                 key_pos += width
                 if last_key:
@@ -386,7 +392,7 @@ class Keyboard(QGraphicsView):
 
     @octave.setter
     def octave(self, val: int) -> None:
-        self._octave = max(min(val, 6), 0)
+        self._octave = self._clip_octave(val)
 
     ###########################################################################
 
