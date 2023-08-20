@@ -187,7 +187,9 @@ class Brr:
                         buffer = buffer[self.SAMPLES_PER_FRAME :]
 
                     if one_shot:
-                        yield buffer[:]
+                        rv = np.zeros(self.SAMPLES_PER_FRAME, dtype=np.int16)
+                        rv[: len(buffer)] = buffer[:]
+                        yield rv
                         return
 
             start_block = self.loop_block
