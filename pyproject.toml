@@ -66,6 +66,7 @@ python-rtmidi = {git = "https://github.com/SpotlightKid/python-rtmidi.git", rev 
 [tool.poetry.scripts]
 spcmw = "smw_music.scripts.dashboard:main"
 spcmw_ast = "smw_music.scripts.dump_ast:main"
+spcmw_decode_brr = "smw_music.scripts.describe_brr:main"
 spcmw_filttool = "smw_music.scripts.filttool:main"
 spcmw_to_mml = "smw_music.scripts.convert:main"
 
