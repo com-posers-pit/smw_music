@@ -384,11 +384,24 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         tune = 256 * sample.tune_setting + sample.subtune_setting
         note = nspc.midi_to_nspc(Pitch(audition_note).midi)
 
-        self._sample_player_th = threading.Thread(
-            target=self._sample_player.play_file,
-            args=(sample.brr_fname, tune, note, 0),
-        )
-        self._sample_player_th.start()
+        sample = self.state.sample
+        play = False
+        match sample.sample_source:
+            case SampleSource.SAMPLEPACK:
+                play = True
+                pack, path = sample.pack_sample
+                target = self._sample_player.play_bin
+                arg = self._sample_packs[pack][path].data
+            case SampleSource.BRR:
+                play = True
+                target = self._sample_player.play_file
+                arg = sample.brr_fname
+
+        if play:
+            self._sample_player_th = threading.Thread(
+                target=target, args=(arg, tune, note, 0)
+            )
+            self._sample_player_th.start()
 
     ###########################################################################
 
