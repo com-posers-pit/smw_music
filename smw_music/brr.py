@@ -135,6 +135,7 @@ class Brr:
         start_block = 0
         idx = 0
 
+        buffer = np.zeros(SAMPLES_PER_BLOCK, dtype=np.int16)
         nblocks = int(np.ceil(chunk_size * dt))
         frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
         frame = np.zeros(frame_size)
@@ -177,8 +178,16 @@ class Brr:
                     emit = True
 
                 if emit:
-                    yield np.round(np.interp(ts, xp, frame)).astype(np.int16)
+                    result = np.interp(ts, xp, frame)
+                    result = np.round(result).astype(np.int16)
+                    buffer = np.hstack((buffer, result))
+
+                    while len(buffer) >= self.SAMPLES_PER_FRAME:
+                        yield buffer[: self.SAMPLES_PER_FRAME]
+                        buffer = buffer[self.SAMPLES_PER_FRAME :]
+
                     if one_shot:
+                        yield buffer[:]
                         return
 
             start_block = self.loop_block

@@ -49,14 +49,14 @@ class SamplePlayer:
     def play_bin(
         self, binary: bytes, tune: int, note: int, subnote: int
     ) -> None:
-        self._play(Brr.from_binary(binary), tune, note, subnote)
+        self._start(Brr.from_binary(binary), tune, note, subnote)
 
     ###########################################################################
 
     def play_file(
         self, fname: Path, tune: int, note: int, subnote: int
     ) -> None:
-        self._play(Brr.from_file(fname), tune, note, subnote)
+        self._start(Brr.from_file(fname), tune, note, subnote)
 
     ###########################################################################
 
@@ -68,11 +68,13 @@ class SamplePlayer:
     ###########################################################################
 
     def _play(self, brr: Brr, tune: int, note: int, subnote: int) -> None:
+        # Arbitrary-ish size of the frame buffer we carry, there's nothing
+        # special about the value
+        buflen = 10
+
         self._running = True
         self._frames.clear()
 
-        fpb = brr.SAMPLES_PER_FRAME
-        bpb = 2 * fpb
         pitch_reg = set_pitch(tune, note, subnote)
 
         with closing(
@@ -81,23 +83,24 @@ class SamplePlayer:
                 channels=1,
                 rate=SAMPLE_FREQ,
                 output=True,
-                frames_per_buffer=fpb,
+                frames_per_buffer=brr.SAMPLES_PER_FRAME,
                 stream_callback=self._stream_cb,
             )
         ):
-            working_frame = bytearray()
             for frame in brr.generate(pitch_reg):
-                working_frame.extend(bytes(frame))
+                self._frames.append(bytes(frame))
 
-                while len(working_frame) > bpb:
-                    self._frames.append(bytes(working_frame[:bpb]))
-                    working_frame = working_frame[bpb:]
+                while self._running and len(self._frames) > buflen:
+                    pass
 
-                while len(self._frames) > 10:
-                    if not self._running:
-                        break
                 if not self._running:
                     break
+
+    ###########################################################################
+
+    def _start(self, brr: Brr, tune: int, note: int, subnote: int) -> None:
+        if not self._running:
+            self._play(brr, tune, note, subnote)
 
     ###########################################################################
 
