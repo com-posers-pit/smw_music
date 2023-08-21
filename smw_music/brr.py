@@ -30,10 +30,13 @@ File loop headers are discussed in [2]_.
 # Standard library imports
 import math
 import wave
-from collections.abc import Iterator
+from collections.abc import Iterator, Sequence
+from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
+from struct import iter_unpack
+from typing import List
 
 # Library imports
 import numpy as np
@@ -70,8 +73,80 @@ _FILTERS = {
 ###############################################################################
 
 
+def _block_loops(block: Sequence[int]) -> bool:
+    return bool(block[0] & 0x2)
+
+
+###############################################################################
+
+
+def _end_block(block: Sequence[int]) -> bool:
+    return bool(block[0] & 0x1)
+
+
+###############################################################################
+
+
 def _u4_to_s4(data: npt.NDArray[np.uint8]) -> npt.NDArray[np.int8]:
     return (0xF & (data.astype(np.int8) + 8)) - 8
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def extract_brrs(spc: bytes) -> List["Brr"]:
+    header = spc[:256]
+    aram = spc[256:]
+
+    magic = header[:0x23]
+
+    if magic != b"SNES-SPC700 Sound File Data v0.30\x1A\x1A":
+        return []
+    if len(spc) < 0x10200:
+        return []
+
+    dir_reg = spc[0x1015D]
+    sample_dir_offset = 256 * dir_reg
+    sample_dir = aram[sample_dir_offset : sample_dir_offset + 0x400]
+
+    brrs = []
+    for start_addr, loop in iter_unpack("<2H", sample_dir):
+        brr = bytearray()
+
+        last_addr = addr = start_addr
+        valid_sample = False
+
+        while addr < len(aram):
+            if addr >= 0x10000:
+                break
+            if last_addr < sample_dir_offset <= addr:
+                break
+
+            block = aram[addr : addr + BLOCK_SIZE]
+            addr += BLOCK_SIZE
+
+            brr.extend(block)
+
+            if _end_block(block):
+                valid_sample = True
+                sample_loops = _block_loops(block)
+                break
+
+        if valid_sample:
+            loop_offset = 0
+            if sample_loops:
+                loop_offset = loop - start_addr
+
+            if loop_offset < 0:
+                continue
+
+            brr = loop_offset.to_bytes(2, "little") + brr
+            with suppress(BrrException):
+                brrs.append(Brr.from_binary(brr))
+
+    return brrs
 
 
 ###############################################################################
@@ -285,12 +360,13 @@ class Brr:
         ]
 
         data = 20 * [0]
-        for n, (rval, fval, block) in enumerate(
+        for n, (rval, fval, samples) in enumerate(
             zip(self.ranges, self.filters, self.samples)
         ):
-            loop = bool(self.blocks[n, 0] & 0x2)
-            end = bool(self.blocks[n, 0] & 0x1)
-            data = [rval, fval, loop, end, *block]
+            block = self.blocks[n]
+            loops = _block_loops(block)
+            ends = _end_block(block)
+            data = [rval, fval, loops, ends, *samples]
             rv.append(",".join(str(d) for d in data))
 
         return "\n".join(rv)
@@ -361,6 +437,16 @@ class Brr:
 
     ###########################################################################
     # Data model methods
+    ###########################################################################
+
+    def __eq__(self, other) -> bool:
+        return self.binary == other.binary
+
+    ###########################################################################
+
+    def __hash__(self) -> int:
+        return hash(self.binary)
+
     ###########################################################################
 
     def __post_init__(self) -> None:
