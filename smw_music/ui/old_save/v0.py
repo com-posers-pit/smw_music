@@ -23,11 +23,11 @@ from smw_music.music_xml.instrument import (
     Artic,
     ArticSetting,
     Dynamics,
-    GainMode,
     InstrumentConfig,
     InstrumentSample,
     SampleSource,
 )
+from smw_music.spc700 import Envelope, GainMode
 from smw_music.ui.state import State
 
 ###############################################################################
@@ -167,13 +167,15 @@ def _load_sample(inst: _InstrumentDict) -> InstrumentSample:
         builtin_sample_index=inst["builtin_sample_index"],
         pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
         brr_fname=Path(inst["brr_fname"]),
-        adsr_mode=inst["adsr_mode"],
-        attack_setting=inst["attack_setting"],
-        decay_setting=inst["decay_setting"],
-        sus_level_setting=inst["sus_level_setting"],
-        sus_rate_setting=inst["sus_rate_setting"],
-        gain_mode=GainMode(inst["gain_mode"]),
-        gain_setting=inst["gain_setting"],
+        envelope=Envelope(
+            adsr_mode=inst["adsr_mode"],
+            attack_setting=inst["attack_setting"],
+            decay_setting=inst["decay_setting"],
+            sus_level_setting=inst["sus_level_setting"],
+            sus_rate_setting=inst["sus_rate_setting"],
+            gain_mode=GainMode(inst["gain_mode"]),
+            gain_setting=inst["gain_setting"],
+        ),
         tune_setting=inst["tune_setting"],
         subtune_setting=inst["subtune_setting"],
         mute=inst["mute"],

@@ -14,6 +14,7 @@
 # Standard library imports
 import argparse
 import sys
+from pathlib import Path
 
 # Package imports
 from smw_music import __version__
@@ -24,7 +25,7 @@ from smw_music.brr import Brr
 ###############################################################################
 
 
-def _describe(fname: str) -> None:
+def _describe(fname: Path) -> None:
     brr = Brr.from_file(fname)
     print(f"Blocks: {brr.nblocks}")
     print(f"Loop block: {brr.loop_block}")
@@ -46,7 +47,7 @@ def main(arg_list: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         description=f"SMW Music BRR tool v{__version__}"
     )
-    parser.add_argument("brr", type=str, help="Source BRR file")
+    parser.add_argument("brr", type=Path, help="Source BRR file")
 
     args = parser.parse_args(arg_list)
 

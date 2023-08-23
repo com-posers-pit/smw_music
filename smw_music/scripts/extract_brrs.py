@@ -17,10 +17,11 @@ import sys
 from collections import defaultdict
 from os import makedirs
 from pathlib import Path
+from typing import Callable, MutableMapping
 
 # Package imports
 from smw_music import __version__
-from smw_music.brr import SAMPLES_PER_BLOCK, extract_brrs
+from smw_music.brr import BLOCK_SIZE, Brr, extract_brrs
 
 ###############################################################################
 # Private function definitions
@@ -44,15 +45,15 @@ def _extract(
         # If the loop point doesn't point to the start of a block, discard
         _filter(
             brrs,
-            lambda brr: not brr.sample_loops
-            or (brr.loop_point % SAMPLES_PER_BLOCK == 0),
+            lambda brr: brr.loop_point is None
+            or (brr.loop_point % BLOCK_SIZE == 0),
         )
 
         # Confirm that the loop point is somewhere in the sample
         if loop_check:
             _filter(
                 brrs,
-                lambda brr: not brr.sample_loops
+                lambda brr: brr.loop_point is None
                 or (0 <= brr.loop_point < len(brr.binary)),
             )
 
@@ -88,7 +89,9 @@ def _extract(
 ###############################################################################
 
 
-def _filter(brrs, valid) -> None:
+def _filter(
+    brrs: MutableMapping[Brr, list[int]], valid: Callable[[Brr], bool]
+) -> None:
     for brr in list(brrs.keys()):
         if not valid(brr):
             # Shift values 13-15 are not valid

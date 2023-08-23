@@ -9,27 +9,12 @@
 # Imports
 ###############################################################################
 
-# Standard library imports
-from enum import IntEnum, auto
-
 # Library imports
 import pyqtgraph as pg  # type: ignore
 from PyQt6.QtWidgets import QMainWindow, QWidget
 
 # Package imports
 from smw_music import spc700
-
-###############################################################################
-# Private class definitions
-###############################################################################
-
-
-class _AdsrState(IntEnum):
-    ATTACK = auto()
-    DECAY = auto()
-    SUSTAIN = auto()
-    RELEASE = auto()
-
 
 ###############################################################################
 # API class definitions

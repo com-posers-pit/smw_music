@@ -11,6 +11,10 @@ Logic related to the SPC700 chip
 # Imports
 ###############################################################################
 
+# Standard library imports
+from dataclasses import dataclass
+from enum import IntEnum, auto
+
 # Library imports
 import numpy as np
 import numpy.typing as npt
@@ -74,7 +78,7 @@ def generate_adsr(
     decay_reg: int,
     slevel_reg: int,
     srate_reg: int,
-) -> tuple[npt.NDArray[float], tuple[str, str, str, str]]:
+) -> tuple[npt.NDArray[np.double], tuple[str, str, str, str]]:
     times = [0.0, 0.0]
     envelope = [0.0, 1.0]
 
@@ -128,10 +132,10 @@ def generate_adsr(
     return (plot, (attack_str, decay_str, slevel_str, release_str))
 
 
-###########################################################################
+###############################################################################
 
 
-def generate_decexp(gain_reg: int) -> tuple[npt.NDArray[float], str]:
+def generate_decexp(gain_reg: int) -> tuple[npt.NDArray[np.double], str]:
     times = [0.0]
     envelope = [1.0]
 
@@ -156,10 +160,10 @@ def generate_decexp(gain_reg: int) -> tuple[npt.NDArray[float], str]:
     return (plot, rv)
 
 
-###########################################################################
+###############################################################################
 
 
-def generate_declin(gain_reg: int) -> tuple[npt.NDArray[float], str]:
+def generate_declin(gain_reg: int) -> tuple[npt.NDArray[np.double], str]:
     times = [0.0, 0.0, 100]
     envelope = [1, 0, 0]
 
@@ -175,10 +179,10 @@ def generate_declin(gain_reg: int) -> tuple[npt.NDArray[float], str]:
     return (plot, rv)
 
 
-###########################################################################
+###############################################################################
 
 
-def generate_direct_gain(gain_reg: int) -> tuple[npt.NDArray[float], str]:
+def generate_direct_gain(gain_reg: int) -> tuple[npt.NDArray[np.double], str]:
     gain = (gain_reg << 4) / _LIMIT
     rv = f"{100*(gain_reg)/(_LIMIT >> 4):.2f}%"
 
@@ -187,10 +191,10 @@ def generate_direct_gain(gain_reg: int) -> tuple[npt.NDArray[float], str]:
     return (plot, rv)
 
 
-###########################################################################
+###############################################################################
 
 
-def generate_incbent(gain_reg: int) -> str:
+def generate_incbent(gain_reg: int) -> tuple[npt.NDArray[np.double], str]:
     times = [0.0, 0.0, 0.0, 100]
     envelope = [0, 0.75, 1, 1]
 
@@ -210,10 +214,10 @@ def generate_incbent(gain_reg: int) -> str:
     return (plot, rv)
 
 
-###########################################################################
+###############################################################################
 
 
-def generate_inclin(gain_reg: int) -> str:
+def generate_inclin(gain_reg: int) -> tuple[npt.NDArray[np.double], str]:
     times = [0.0, 0.0, 100]
     envelope = [0, 1, 1]
 
@@ -231,9 +235,9 @@ def generate_inclin(gain_reg: int) -> str:
     return (plot, rv)
 
 
-###########################################################################
+###############################################################################
 # Private method definitions
-###########################################################################
+###############################################################################
 
 
 def _propagate(
@@ -247,3 +251,103 @@ def _propagate(
 
     nstep = ((target - start[1]) * (_LIMIT + 1)) // slope
     return start[0] + (nstep * period - (offset % period)) / SAMPLE_FREQ
+
+
+###############################################################################
+# API class definitions
+###############################################################################
+
+
+class GainMode(IntEnum):
+    DIRECT = auto()
+    INCLIN = auto()
+    INCBENT = auto()
+    DECLIN = auto()
+    DECEXP = auto()
+
+
+###############################################################################
+
+
+@dataclass
+class Envelope:
+    adsr_mode: bool = True
+    attack_setting: int = 0
+    decay_setting: int = 0
+    sus_level_setting: int = 0
+    sus_rate_setting: int = 0
+    gain_mode: GainMode = GainMode.DIRECT
+    gain_setting: int = 0
+
+    ###########################################################################
+    # API constructor definitions
+    ###########################################################################
+
+    @classmethod
+    def from_regs(
+        cls, adsr1_reg: int, adsr2_reg: int, gain_reg: int
+    ) -> "Envelope":
+        adsr_mode = bool(adsr1_reg >> 7)
+        attack_setting = 0xF & adsr1_reg
+        decay_setting = 0x7 & (adsr1_reg >> 4)
+        sus_level_setting = adsr2_reg >> 5
+        sus_rate_setting = 0x1F & adsr2_reg
+
+        if gain_reg & 0x80:
+            gain_mode = GainMode.DIRECT
+        else:
+            match gain_reg >> 5:
+                case 0b00:
+                    gain_mode = GainMode.DECLIN
+                case 0b01:
+                    gain_mode = GainMode.DECEXP
+                case 0b10:
+                    gain_mode = GainMode.INCLIN
+                case 0b11:
+                    gain_mode = GainMode.INCBENT
+
+        gain_mask = 0x7F if gain_mode == GainMode.DIRECT else 0x1F
+        gain_setting = gain_reg & gain_mask
+
+        return cls(
+            adsr_mode,
+            attack_setting,
+            decay_setting,
+            sus_level_setting,
+            sus_rate_setting,
+            gain_mode,
+            gain_setting,
+        )
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def adsr1_reg(self) -> int:
+        rv = int(self.adsr_mode) << 7
+        rv |= self.decay_setting << 4
+        rv |= self.attack_setting
+        return rv
+
+    ###########################################################################
+    @property
+    def adsr2_reg(self) -> int:
+        return (self.sus_level_setting << 5) | self.sus_rate_setting
+
+    ###########################################################################
+    @property
+    def gain_reg(self) -> int:
+        match self.gain_mode:
+            case GainMode.DIRECT:
+                rv = self.gain_setting
+            case GainMode.INCLIN:
+                rv = 0xC0 | self.gain_setting
+            case GainMode.INCBENT:
+                rv = 0xE0 | self.gain_setting
+            case GainMode.DECLIN:
+                rv = 0x80 | self.gain_setting
+            case GainMode.DECEXP:
+                rv = 0xA0 | self.gain_setting
+
+        return rv

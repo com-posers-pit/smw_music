@@ -142,7 +142,7 @@ def extract_brrs(spc: bytes) -> List["Brr"]:
             if loop_offset < 0:
                 continue
 
-            brr = loop_offset.to_bytes(2, "little") + brr
+            brr = bytearray(loop_offset.to_bytes(2, "little")) + brr
             with suppress(BrrException):
                 brrs.append(Brr.from_binary(brr))
 
@@ -439,8 +439,10 @@ class Brr:
     # Data model methods
     ###########################################################################
 
-    def __eq__(self, other) -> bool:
-        return self.binary == other.binary
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, self.__class__):
+            return self.binary == other.binary
+        return False
 
     ###########################################################################
 

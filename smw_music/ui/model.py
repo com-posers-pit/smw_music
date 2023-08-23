@@ -25,6 +25,7 @@ from dataclasses import replace
 from glob import glob
 from pathlib import Path, PurePosixPath
 from random import choice
+from typing import Callable
 
 # Library imports
 import yaml
@@ -35,14 +36,13 @@ from watchdog import events, observers
 
 # Package imports
 from smw_music import RESOURCES, SmwMusicException, __version__, nspc
-from smw_music.brr import SAMPLE_FREQ, Brr
+from smw_music.brr import Brr
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,
     ArticSetting,
     Dynamics,
-    GainMode,
     InstrumentConfig,
     InstrumentSample,
     NoteHead,
@@ -52,6 +52,7 @@ from smw_music.music_xml.instrument import (
 )
 from smw_music.music_xml.song import Song
 from smw_music.sample_player import SamplePlayer
+from smw_music.spc700 import SAMPLE_FREQ, Envelope, GainMode
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
@@ -374,7 +375,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_attack_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 15)
-        self._update_sample_state(attack_setting=setting, adsr_mode=True)
+        self._update_envelope_state(attack_setting=setting, adsr_mode=True)
         self.update_status(f"Attack set to {setting}")
 
     ###########################################################################
@@ -386,6 +387,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         sample = self.state.sample
         play = False
+        target: Callable[[bytes, int, int, int], None] | Callable[
+            [Path, int, int, int], None
+        ]
+        arg: bytes | Path
         match sample.sample_source:
             case SampleSource.SAMPLEPACK:
                 play = True
@@ -448,7 +453,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_decay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_sample_state(decay_setting=setting, adsr_mode=True)
+        self._update_envelope_state(decay_setting=setting, adsr_mode=True)
         self.update_status(f"Decay set to {setting}")
 
     ###########################################################################
@@ -542,7 +547,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
-            self._update_sample_state(
+            self._update_envelope_state(
                 gain_mode=GainMode.DIRECT, adsr_mode=False
             )
             self.update_status("Direct gain envelope selected")
@@ -561,11 +566,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_changed(self, val: int | str) -> None:
         with suppress(NoSample):
-            mode = self.state.sample.gain_mode
+            mode = self.state.sample.envelope.gain_mode
             # TODO: Unify this 31 with the others
             limit = 127 if mode == GainMode.DIRECT else 31
             setting = _parse_setting(val, limit)
-            self._update_sample_state(gain_setting=setting, adsr_mode=False)
+            self._update_envelope_state(gain_setting=setting, adsr_mode=False)
             self.update_status("Gain setting changed to {setting}")
 
     ###########################################################################
@@ -935,7 +940,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_sample_state(adsr_mode=state)
+        self._update_envelope_state(adsr_mode=state)
         self.update_status(
             f"Envelope mode set to {'ADSR' if state else 'Gain'}"
         )
@@ -1027,14 +1032,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_sus_level_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_sample_state(sus_level_setting=setting, adsr_mode=True)
+        self._update_envelope_state(sus_level_setting=setting, adsr_mode=True)
         self.update_status(f"Sustain level set to {setting}")
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 31)
-        self._update_sample_state(sus_rate_setting=setting, adsr_mode=True)
+        self._update_envelope_state(sus_rate_setting=setting, adsr_mode=True)
         self.update_status(f"Decay rate set to {setting}")
 
     ###########################################################################
@@ -1317,14 +1322,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         pack, sample_path = item_id
         params = self._sample_packs[pack][sample_path].params
 
+        # TODO
         self._update_sample_state(
-            attack_setting=params.attack,
-            decay_setting=params.decay,
-            sus_level_setting=params.sustain_level,
-            sus_rate_setting=params.sustain_rate,
-            adsr_mode=params.adsr_mode,
-            gain_mode=params.gain_mode,
-            gain_setting=params.gain,
+            envelope=params.envelope,
             tune_setting=params.tuning,
             subtune_setting=params.subtuning,
         )
@@ -1550,11 +1550,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             }
             with suppress(NoSample):
                 kwargs["gain_setting"] = min(
-                    31, self.state.sample.gain_setting
+                    31, self.state.sample.envelope.gain_setting
                 )
 
             # TODO: address this mypy error
-            self._update_sample_state(**kwargs)  # type: ignore
+            self._update_envelope_state(**kwargs)
             self.update_status(f"{caption} envelope selected")
 
     ###########################################################################
@@ -1656,6 +1656,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _update_envelope_state(self, **kwargs: bool | int | GainMode) -> None:
+        new_env = replace(self.state.sample.envelope, **kwargs)
+        self._update_sample_state(envelope=new_env)
+
+    ###########################################################################
+
     def _update_sample_state(
         self,
         force_update: bool = False,
@@ -1669,8 +1675,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | tuple[str, Path]
         | tuple[bool, bool]
         | Path
-        | GainMode
-        | Tuning,
+        | Tuning
+        | Envelope,
     ) -> None:
         with suppress(NoSample):
             old_sample = self.state.sample

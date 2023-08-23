@@ -20,7 +20,7 @@ from zipfile import ZipFile
 
 # Package imports
 from smw_music.brr import Brr
-from smw_music.music_xml.instrument import GainMode
+from smw_music.spc700 import Envelope, GainMode
 
 ###############################################################################
 # API Class Definitions
@@ -113,6 +113,7 @@ class SamplePack:
 ###############################################################################
 
 
+# TODO: combine with Envelope definitions
 @dataclass
 class SampleParams:
     attack: int = 0
@@ -198,3 +199,17 @@ class SampleParams:
                 patterns.append(cls.from_pattern(line))
 
         return patterns
+
+    ###########################################################################
+
+    @property
+    def envelope(self) -> Envelope:
+        return Envelope(
+            self.adsr_mode,
+            self.attack,
+            self.decay,
+            self.sustain_level,
+            self.sustain_rate,
+            self.gain_mode,
+            self.gain,
+        )
