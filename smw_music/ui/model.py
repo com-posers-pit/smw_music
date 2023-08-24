@@ -409,7 +409,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if play:
             self._sample_player_th = threading.Thread(
-                target=target, args=(arg, tune, note, 0)
+                target=target, args=(arg, sample.envelope, tune, note, 0)
             )
             self._sample_player_th.start()
 

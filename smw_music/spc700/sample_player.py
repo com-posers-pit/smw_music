@@ -20,7 +20,7 @@ from typing import Mapping
 # Library imports
 import pyaudio
 
-from .brr import Brr
+from .brr import Brr, Envelope
 from .nspc import set_pitch
 from .spc700 import SAMPLE_FREQ
 
@@ -46,16 +46,16 @@ class SamplePlayer:
     ###########################################################################
 
     def play_bin(
-        self, binary: bytes, tune: int, note: int, subnote: int
+        self, binary: bytes, env: Envelope, tune: int, note: int, subnote: int
     ) -> None:
-        self._start(Brr.from_binary(binary), tune, note, subnote)
+        self._start(Brr.from_binary(binary), env, tune, note, subnote)
 
     ###########################################################################
 
     def play_file(
-        self, fname: Path, tune: int, note: int, subnote: int
+        self, fname: Path, env: Envelope, tune: int, note: int, subnote: int
     ) -> None:
-        self._start(Brr.from_file(fname), tune, note, subnote)
+        self._start(Brr.from_file(fname), env, tune, note, subnote)
 
     ###########################################################################
 
@@ -66,7 +66,9 @@ class SamplePlayer:
     # Private method definitions
     ###########################################################################
 
-    def _play(self, brr: Brr, tune: int, note: int, subnote: int) -> None:
+    def _play(
+        self, brr: Brr, env: Envelope, tune: int, note: int, subnote: int
+    ) -> None:
         # Arbitrary-ish size of the frame buffer we carry, there's nothing
         # special about the value
         buflen = 10
@@ -86,7 +88,7 @@ class SamplePlayer:
                 stream_callback=self._stream_cb,
             )
         ):
-            for frame in brr.generate(pitch_reg):
+            for frame in brr.generate(pitch_reg, env):
                 self._frames.append(bytes(frame))
 
                 while self._running and len(self._frames) > buflen:
@@ -97,9 +99,11 @@ class SamplePlayer:
 
     ###########################################################################
 
-    def _start(self, brr: Brr, tune: int, note: int, subnote: int) -> None:
+    def _start(
+        self, brr: Brr, env: Envelope, tune: int, note: int, subnote: int
+    ) -> None:
         if not self._running:
-            self._play(brr, tune, note, subnote)
+            self._play(brr, env, tune, note, subnote)
 
     ###########################################################################
 

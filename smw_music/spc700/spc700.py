@@ -331,11 +331,41 @@ class Envelope:
         return rv
 
     ###########################################################################
+
     @property
     def adsr2_reg(self) -> int:
         return (self.sus_level_setting << 5) | self.sus_rate_setting
 
     ###########################################################################
+
+    @property
+    def envelope(
+        self,
+    ) -> tuple[npt.NDArray[np.double], npt.NDArray[np.double]]:
+        if self.adsr_mode:
+            env, _ = generate_adsr(
+                self.attack_setting,
+                self.decay_setting,
+                self.sus_level_setting,
+                self.sus_rate_setting,
+            )
+        else:
+            match self.gain_mode:
+                case GainMode.DIRECT:
+                    env, _ = generate_direct_gain(self.gain_setting)
+                case GainMode.INCLIN:
+                    env, _ = generate_inclin(self.gain_setting)
+                case GainMode.INCBENT:
+                    env, _ = generate_incbent(self.gain_setting)
+                case GainMode.DECLIN:
+                    env, _ = generate_declin(self.gain_setting)
+                case GainMode.DECEXP:
+                    env, _ = generate_decexp(self.gain_setting)
+
+        return env[0], env[1]
+
+    ###########################################################################
+
     @property
     def gain_reg(self) -> int:
         match self.gain_mode:

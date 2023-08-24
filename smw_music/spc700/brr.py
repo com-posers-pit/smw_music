@@ -47,7 +47,7 @@ from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 from smw_music import SmwMusicException
 
 from .nspc import calc_tune
-from .spc700 import PITCH_REG_SCALE, SAMPLE_FREQ
+from .spc700 import PITCH_REG_SCALE, SAMPLE_FREQ, Envelope
 
 ###############################################################################
 # API constant definitions
@@ -170,6 +170,7 @@ class Brr:
     _waveform_cache: dict[int, npt.NDArray[np.int16]] = field(
         init=False, repr=False, compare=False, default_factory=dict
     )
+    _keyed: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -200,7 +201,11 @@ class Brr:
     # API method definitions
     ###########################################################################
 
-    def generate(self, pitch_reg: int) -> Iterator[npt.NDArray[np.int16]]:
+    def generate(
+        self, pitch_reg: int, env: Envelope
+    ) -> Iterator[npt.NDArray[np.int16]]:
+        self._keyed = True
+
         # Variable initialization
         proc = np.zeros(SAMPLES_PER_BLOCK)
         chunk_size = self.SAMPLES_PER_FRAME / SAMPLES_PER_BLOCK
@@ -211,6 +216,9 @@ class Brr:
         # time and at the loop block all other times
         start_block = 0
         idx = 0
+
+        env_times, envelope = env.envelope
+        env_times *= SAMPLE_FREQ
 
         buffer = np.zeros(SAMPLES_PER_BLOCK, dtype=np.int16)
         nblocks = int(np.ceil(chunk_size * dt))
@@ -255,8 +263,9 @@ class Brr:
                     emit = True
 
                 if emit:
+                    weights = np.interp(ts, env_times, envelope)
                     result = np.interp(ts, xp, frame)
-                    result = np.round(result).astype(np.int16)
+                    result = np.round(result * weights).astype(np.int16)
                     buffer = np.hstack((buffer, result))
 
                     while len(buffer) >= self.SAMPLES_PER_FRAME:
