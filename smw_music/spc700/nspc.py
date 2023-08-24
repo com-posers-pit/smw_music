@@ -11,8 +11,7 @@ Logic related to the N-SPC SPC700 music engine
 # Imports
 ###############################################################################
 
-# Package imports
-from smw_music.spc700 import PITCH_REG_SCALE
+from .spc700 import PITCH_REG_SCALE
 
 ###############################################################################
 # Private constant definitions

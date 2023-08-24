@@ -20,10 +20,9 @@ from typing import Mapping
 # Library imports
 import pyaudio
 
-# Package imports
-from smw_music.brr import Brr
-from smw_music.nspc import set_pitch
-from smw_music.spc700 import SAMPLE_FREQ
+from .brr import Brr
+from .nspc import set_pitch
+from .spc700 import SAMPLE_FREQ
 
 ###############################################################################
 # API class definitions

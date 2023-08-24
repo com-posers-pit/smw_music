@@ -44,8 +44,10 @@ import numpy.typing as npt
 from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 
 # Package imports
-from smw_music import SmwMusicException, nspc
-from smw_music.spc700 import PITCH_REG_SCALE, SAMPLE_FREQ
+from smw_music import SmwMusicException
+
+from .nspc import calc_tune
+from .spc700 import PITCH_REG_SCALE, SAMPLE_FREQ
 
 ###############################################################################
 # API constant definitions
@@ -331,7 +333,7 @@ class Brr:
     ) -> tuple[int, float]:
         if fundamental < 0:
             fundamental = self.fundamental
-        return nspc.calc_tune(fundamental, note, target)
+        return calc_tune(fundamental, note, target)
 
     ###########################################################################
     # API property definitions

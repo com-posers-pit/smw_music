@@ -18,7 +18,7 @@ from pathlib import Path
 
 # Package imports
 from smw_music import __version__
-from smw_music.brr import Brr
+from smw_music.spc700 import Brr
 
 ###############################################################################
 # Private function definitions

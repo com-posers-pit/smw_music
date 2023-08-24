@@ -35,8 +35,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import RESOURCES, SmwMusicException, __version__, nspc
-from smw_music.brr import Brr
+from smw_music import RESOURCES, SmwMusicException, __version__
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
@@ -51,8 +50,14 @@ from smw_music.music_xml.instrument import (
     Tuning,
 )
 from smw_music.music_xml.song import Song
-from smw_music.sample_player import SamplePlayer
-from smw_music.spc700 import SAMPLE_FREQ, Envelope, GainMode
+from smw_music.spc700 import (
+    SAMPLE_FREQ,
+    Brr,
+    Envelope,
+    GainMode,
+    SamplePlayer,
+    midi_to_nspc,
+)
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
@@ -383,7 +388,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_audition_start(self, audition_note: str) -> None:
         sample = self.state.sample
         tune = 256 * sample.tune_setting + sample.subtune_setting
-        note = nspc.midi_to_nspc(Pitch(audition_note).midi)
+        note = midi_to_nspc(Pitch(audition_note).midi)
 
         sample = self.state.sample
         play = False
@@ -1603,7 +1608,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.state.calculated_tune = (
                 brr.fundamental,
                 brr.tune(
-                    nspc.midi_to_nspc(Pitch("C", octave=4).midi),
+                    midi_to_nspc(Pitch("C", octave=4).midi),
                     tuning.output.frequency,
                     fundamental,
                 ),

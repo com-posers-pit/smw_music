@@ -19,8 +19,7 @@ from typing import TextIO
 from zipfile import ZipFile
 
 # Package imports
-from smw_music.brr import Brr
-from smw_music.spc700 import Envelope, GainMode
+from smw_music.spc700 import Brr, Envelope, GainMode
 
 ###############################################################################
 # API Class Definitions

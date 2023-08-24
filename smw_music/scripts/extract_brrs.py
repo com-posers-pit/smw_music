@@ -21,7 +21,7 @@ from typing import Callable, MutableMapping
 
 # Package imports
 from smw_music import __version__
-from smw_music.brr import BLOCK_SIZE, Brr, extract_brrs
+from smw_music.spc700 import BLOCK_SIZE, Brr, extract_brrs
 
 ###############################################################################
 # Private function definitions
