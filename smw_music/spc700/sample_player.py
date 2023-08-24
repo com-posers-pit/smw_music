@@ -14,6 +14,7 @@ Tools for playing brr samples
 # Standard library imports
 from collections import deque
 from contextlib import closing
+from enum import Enum, auto
 from pathlib import Path
 from typing import Mapping
 
@@ -25,6 +26,18 @@ from .nspc import set_pitch
 from .spc700 import SAMPLE_FREQ
 
 ###############################################################################
+# Private class definitions
+###############################################################################
+
+
+class _State(Enum):
+    IDLE = auto()
+    PLAYING = auto()
+    KEYOFF = auto()
+    PLAYOUT = auto()
+
+
+###############################################################################
 # API class definitions
 ###############################################################################
 
@@ -32,14 +45,15 @@ from .spc700 import SAMPLE_FREQ
 class SamplePlayer:
     _p: pyaudio.PyAudio
     _frames: deque[bytes]
+    _state: _State
 
     ###########################################################################
 
     def __init__(self) -> None:
-        self._running = False
         # TODO: Add a .terminate on _p
         self._p = pyaudio.PyAudio()
         self._frames = deque()
+        self._state = _State.IDLE
 
     ###########################################################################
     # API method definitions
@@ -60,7 +74,8 @@ class SamplePlayer:
     ###########################################################################
 
     def stop(self) -> None:
-        self._running = False
+        if self._state == _State.PLAYING:
+            self._state = _State.KEYOFF
 
     ###########################################################################
     # Private method definitions
@@ -69,11 +84,12 @@ class SamplePlayer:
     def _play(
         self, brr: Brr, env: Envelope, tune: int, note: int, subnote: int
     ) -> None:
+        self._state = _State.PLAYING
+
         # Arbitrary-ish size of the frame buffer we carry, there's nothing
         # special about the value
-        buflen = 10
+        buflen = 5
 
-        self._running = True
         self._frames.clear()
 
         pitch_reg = set_pitch(tune, note, subnote)
@@ -87,22 +103,29 @@ class SamplePlayer:
                 frames_per_buffer=brr.SAMPLES_PER_FRAME,
                 stream_callback=self._stream_cb,
             )
-        ):
+        ) as stream:
             for frame in brr.generate(pitch_reg, env):
                 self._frames.append(bytes(frame))
 
-                while self._running and len(self._frames) > buflen:
+                while len(self._frames) > buflen:
                     pass
 
-                if not self._running:
-                    break
+                if self._state == _State.KEYOFF:
+                    brr.keyoff()
+                    self._state = _State.PLAYOUT
+
+            # Wait for the output to drain
+            while stream.is_active():
+                pass
+
+        self._state = _State.IDLE
 
     ###########################################################################
 
     def _start(
         self, brr: Brr, env: Envelope, tune: int, note: int, subnote: int
     ) -> None:
-        if not self._running:
+        if self._state == _State.IDLE:
             self._play(brr, env, tune, note, subnote)
 
     ###########################################################################
@@ -114,12 +137,11 @@ class SamplePlayer:
         time_info: Mapping[str, float],
         status_flags: int,
     ) -> tuple[bytes, int]:
-        while not len(self._frames):
-            if self._running:
-                pass
+        while not len(self._frames) and self._state == _State.PLAYING:
+            pass
 
-        if self._running:
+        try:
             frame = self._frames.popleft()
             return (frame, pyaudio.paContinue)
-        else:
-            return (b"", pyaudio.paAbort)
+        except IndexError:
+            return (b"", pyaudio.paComplete)

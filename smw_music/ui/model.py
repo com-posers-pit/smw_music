@@ -392,8 +392,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         sample = self.state.sample
         play = False
-        target: Callable[[bytes, int, int, int], None] | Callable[
-            [Path, int, int, int], None
+        target: Callable[[bytes, Envelope, int, int, int], None] | Callable[
+            [Path, Envelope, int, int, int], None
         ]
         arg: bytes | Path
         match sample.sample_source:

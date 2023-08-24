@@ -221,6 +221,7 @@ class Brr:
         env_times *= SAMPLE_FREQ
 
         buffer = np.zeros(SAMPLES_PER_BLOCK, dtype=np.int16)
+        weights = np.zeros(self.SAMPLES_PER_FRAME)
         nblocks = int(np.ceil(chunk_size * dt))
         frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
         frame = np.zeros(frame_size)
@@ -228,6 +229,7 @@ class Brr:
         ts = np.array([-dt])
 
         one_shot = not self.sample_loops
+        done = False
 
         # TODO: refactor with generate_waveform
         while True:
@@ -263,7 +265,14 @@ class Brr:
                     emit = True
 
                 if emit:
-                    weights = np.interp(ts, env_times, envelope)
+                    if self._keyed:
+                        weights = np.interp(ts, env_times, envelope)
+                    else:
+                        weights = weights[-1] * np.ones(len(ts))
+                        weights -= 8 * np.arange(len(ts)) / 2**11
+                        weights = np.maximum(weights, 0)
+                        done = True
+
                     result = np.interp(ts, xp, frame)
                     result = np.round(result * weights).astype(np.int16)
                     buffer = np.hstack((buffer, result))
@@ -272,7 +281,7 @@ class Brr:
                         yield buffer[: self.SAMPLES_PER_FRAME]
                         buffer = buffer[self.SAMPLES_PER_FRAME :]
 
-                    if one_shot:
+                    if one_shot or done:
                         rv = np.zeros(self.SAMPLES_PER_FRAME, dtype=np.int16)
                         rv[: len(buffer)] = buffer[:]
                         yield rv
@@ -321,6 +330,11 @@ class Brr:
         # Cache storage and return
         self._waveform_cache[loops] = rv.reshape(-1)
         return self._waveform_cache[loops]
+
+    ###########################################################################
+
+    def keyoff(self) -> None:
+        self._keyed = False
 
     ###########################################################################
 
