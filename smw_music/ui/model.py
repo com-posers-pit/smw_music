@@ -964,20 +964,24 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if sample_name:
             msg = f"{inst_name}.{sample_name}"
+            # TODO: remove ignore
             inst.multisamples[sample_name] = replace(
-                inst.multisamples[sample_name], **update
+                inst.multisamples[sample_name], **update  # type: ignore
             )
             # If a sample's solo/mute is being disabled, disable it in the
             # instrument as well
             if not state:
-                inst.sample = replace(inst.sample, **update)
+                # TODO: remove ignore
+                inst.sample = replace(inst.sample, **update)  # type: ignore
 
         else:
             # Apply an instrument mute/solo to all samples
             msg = f"{inst_name}"
-            inst.sample = replace(inst.sample, **update)
+            # TODO: remove ignore
+            inst.sample = replace(inst.sample, **update)  # type: ignore
             for sample_name, sample in inst.multisamples.items():
-                inst.multisamples[sample_name] = replace(sample, **update)
+                # TODO: remove ignore
+                inst.multisamples[sample_name] = replace(sample, **update)  # type: ignore
 
         self._update_state(instruments=instruments)
 
@@ -1656,13 +1660,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | float
         | bool,
     ) -> None:
-        new_echo = replace(self.state.echo, **kwargs)
+        # TODO: remove ignore
+        new_echo = replace(self.state.echo, **kwargs)  # type: ignore
         self._update_state(echo=new_echo)
 
     ###########################################################################
 
     def _update_envelope_state(self, **kwargs: bool | int | GainMode) -> None:
-        new_env = replace(self.state.sample.envelope, **kwargs)
+        # TODO: remove ignore
+        new_env = replace(self.state.sample.envelope, **kwargs)  # type: ignore
         self._update_sample_state(envelope=new_env)
 
     ###########################################################################
