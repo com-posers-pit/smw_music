@@ -133,16 +133,14 @@ class _Key(QGraphicsRectItem):
     # API method definitions
     ###########################################################################
 
-    def activate(self) -> None:
+    def press(self) -> None:
         self.setBrush(self._pressed_brush)
-        self._key_on()
         self.update()
 
     ###########################################################################
 
-    def deactivate(self) -> None:
+    def release(self) -> None:
         self.setBrush(self._brush)
-        self._key_off()
         self.update()
 
     ###########################################################################
@@ -150,27 +148,27 @@ class _Key(QGraphicsRectItem):
     ###########################################################################
 
     def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        self.activate()
+        self._key_on()
 
     ###########################################################################
 
     def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        self.deactivate()
+        self._key_off()
 
     ###########################################################################
 
     def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        self.deactivate()
+        self._key_off()
 
     ###########################################################################
 
     def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        self.activate()
+        self._key_on()
 
     ###########################################################################
 
     def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        self.deactivate()
+        self._key_off()
 
     ###########################################################################
     # API property definitions
@@ -199,6 +197,7 @@ class Keyboard(QGraphicsView):
     _key_width: int
     _octave: int
     _padding: int
+    _pressed: None | tuple[str, int]
 
     ###########################################################################
 
@@ -220,6 +219,7 @@ class Keyboard(QGraphicsView):
 
         self.octave = 2
         self.active = False
+        self._pressed = None
 
         self.show()
 
@@ -228,18 +228,26 @@ class Keyboard(QGraphicsView):
     ###########################################################################
 
     def press_key(self, letter: str, octave: int) -> None:
-        octave = self._clip_octave(octave)
+        if self._pressed is None:
+            self._pressed = (letter, octave)
 
-        with suppress(KeyError):
-            self._keys[(letter, octave)].activate()
+            octave = self._clip_octave(octave)
+
+            with suppress(KeyError):
+                self._keys[(letter, octave)].press()
+                self.key_on.emit(letter, octave)
 
     ###########################################################################
 
     def release_key(self, letter: str, octave: int) -> None:
-        octave = self._clip_octave(octave)
+        if self._pressed == (letter, octave):
+            octave = self._clip_octave(octave)
 
-        with suppress(KeyError):
-            self._keys[(letter, octave)].deactivate()
+            with suppress(KeyError):
+                self._keys[(letter, octave)].release()
+                self.key_off.emit(letter, octave)
+
+            self._pressed = None
 
     ###########################################################################
     # Event handler definitions
@@ -331,8 +339,8 @@ class Keyboard(QGraphicsView):
         for n in range(self.nkeys):
             # Define key event callbacks
             letter, octave = _decode_key_idx(n)
-            key_on = partial(self.key_on.emit, letter, octave)
-            key_off = partial(self.key_off.emit, letter, octave)
+            key_on = partial(self.press_key, letter, octave)
+            key_off = partial(self.release_key, letter, octave)
 
             is_white = _is_key_white(n)
 
