@@ -410,7 +410,10 @@ class Brr:
             start = 0
 
         nyquist = SAMPLE_FREQ / 2
-        waveform = self.generate_waveform(loops)
+        # Remove any DC bias
+        waveform = np.array(self.generate_waveform(loops), dtype=np.double)
+        waveform -= waveform.mean()
+
         spec = np.abs(np.fft.rfft(waveform[start:]))
         spec /= spec.max()
         peak: float
