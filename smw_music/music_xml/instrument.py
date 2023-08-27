@@ -19,8 +19,8 @@ from typing import cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.brr import SAMPLE_FREQ
 from smw_music.music_xml.tokens import Note
+from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
 
 ###############################################################################
@@ -103,17 +103,6 @@ class Dynamics(IntEnum):
 
     def __str__(self) -> str:
         return self.name
-
-
-###############################################################################
-
-
-class GainMode(IntEnum):
-    DIRECT = auto()
-    INCLIN = auto()
-    INCBENT = auto()
-    DECLIN = auto()
-    DECEXP = auto()
 
 
 ###############################################################################
@@ -213,14 +202,7 @@ class InstrumentSample:
     builtin_sample_index: int = 0
     pack_sample: tuple[str, Path] = ("", Path())
     brr_fname: Path = field(default_factory=Path)
-    # TODO: see if the following settings can be rolled into a Sample object
-    adsr_mode: bool = True
-    attack_setting: int = 0
-    decay_setting: int = 0
-    sus_level_setting: int = 0
-    sus_rate_setting: int = 0
-    gain_mode: GainMode = GainMode.DIRECT
-    gain_setting: int = 0
+    envelope: Envelope = field(default_factory=Envelope)
     tune_setting: int = 0
     subtune_setting: int = 0
     mute: bool = False
@@ -276,27 +258,10 @@ class InstrumentSample:
 
     @property
     def brr_setting(self) -> tuple[int, int, int, int, int]:
-        vxadsr1 = int(self.adsr_mode) << 7
-        vxadsr1 |= self.decay_setting << 4
-        vxadsr1 |= self.attack_setting
-        vxadsr2 = (self.sus_level_setting << 5) | self.sus_rate_setting
-
-        match self.gain_mode:
-            case GainMode.DIRECT:
-                vxgain = self.gain_setting
-            case GainMode.INCLIN:
-                vxgain = 0xC0 | self.gain_setting
-            case GainMode.INCBENT:
-                vxgain = 0xE0 | self.gain_setting
-            case GainMode.DECLIN:
-                vxgain = 0x80 | self.gain_setting
-            case GainMode.DECEXP:
-                vxgain = 0xA0 | self.gain_setting
-
         return (
-            vxadsr1,
-            vxadsr2,
-            vxgain,
+            self.envelope.adsr1_reg,
+            self.envelope.adsr2_reg,
+            self.envelope.gain_reg,
             self.tune_setting,
             self.subtune_setting,
         )
@@ -309,26 +274,7 @@ class InstrumentSample:
         # The [1:] drops the initial '$'
         regs = [int(x[1:], 16) for x in val.split(" ")]
 
-        self.adsr_mode = bool(regs[0] >> 7)
-        self.decay_setting = 0x7 & (regs[0] >> 4)
-        self.attack_setting = 0xF & regs[0]
-        self.sus_level_setting = regs[1] >> 5
-        self.sus_rate_setting = 0x1F & regs[1]
-        if regs[2] & 0x80:
-            self.gain_mode = GainMode.DIRECT
-            self.gain_setting = regs[2] & 0x7F
-        else:
-            self.gain_setting = regs[2] & 0x1F
-            match regs[2] >> 5:
-                case 0b00:
-                    self.gain_mode = GainMode.DECLIN
-                case 0b01:
-                    self.gain_mode = GainMode.DECEXP
-                case 0b10:
-                    self.gain_mode = GainMode.INCLIN
-                case 0b11:
-                    self.gain_mode = GainMode.INCBENT
-
+        self.envelope = Envelope.from_regs(*regs[:3])
         self.tune_setting = regs[3]
         self.subtune_setting = regs[4]
 

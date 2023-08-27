@@ -24,15 +24,19 @@ File loop headers are discussed in [2]_.
 """
 
 ###############################################################################
-# Standard Library imports
+# Imports
 ###############################################################################
 
 # Standard library imports
 import math
 import wave
+from collections.abc import Iterator, Sequence
+from contextlib import suppress
 from dataclasses import dataclass, field
 from functools import cached_property
 from pathlib import Path
+from struct import iter_unpack
+from typing import List
 
 # Library imports
 import numpy as np
@@ -40,15 +44,16 @@ import numpy.typing as npt
 from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 
 # Package imports
-from smw_music import SmwMusicException, nspc
+from smw_music import SmwMusicException
+
+from .nspc import calc_tune
+from .spc700 import PITCH_REG_SCALE, SAMPLE_FREQ, Envelope
 
 ###############################################################################
 # API constant definitions
 ###############################################################################
 
 BLOCK_SIZE = 9
-
-SAMPLE_FREQ = 32000
 
 SAMPLES_PER_BLOCK = 16
 
@@ -70,8 +75,80 @@ _FILTERS = {
 ###############################################################################
 
 
+def _block_loops(block: Sequence[int]) -> bool:
+    return bool(block[0] & 0x2)
+
+
+###############################################################################
+
+
+def _end_block(block: Sequence[int]) -> bool:
+    return bool(block[0] & 0x1)
+
+
+###############################################################################
+
+
 def _u4_to_s4(data: npt.NDArray[np.uint8]) -> npt.NDArray[np.int8]:
     return (0xF & (data.astype(np.int8) + 8)) - 8
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def extract_brrs(spc: bytes) -> List["Brr"]:
+    header = spc[:256]
+    aram = spc[256:]
+
+    magic = header[:0x23]
+
+    if magic != b"SNES-SPC700 Sound File Data v0.30\x1A\x1A":
+        return []
+    if len(spc) < 0x10200:
+        return []
+
+    dir_reg = spc[0x1015D]
+    sample_dir_offset = 256 * dir_reg
+    sample_dir = aram[sample_dir_offset : sample_dir_offset + 0x400]
+
+    brrs = []
+    for start_addr, loop in iter_unpack("<2H", sample_dir):
+        brr = bytearray()
+
+        last_addr = addr = start_addr
+        valid_sample = False
+
+        while addr < len(aram):
+            if addr >= 0x10000:
+                break
+            if last_addr < sample_dir_offset <= addr:
+                break
+
+            block = aram[addr : addr + BLOCK_SIZE]
+            addr += BLOCK_SIZE
+
+            brr.extend(block)
+
+            if _end_block(block):
+                valid_sample = True
+                sample_loops = _block_loops(block)
+                break
+
+        if valid_sample:
+            loop_offset = 0
+            if sample_loops:
+                loop_offset = loop - start_addr
+
+            if loop_offset < 0:
+                continue
+
+            brr = bytearray(loop_offset.to_bytes(2, "little")) + brr
+            with suppress(BrrException):
+                brrs.append(Brr.from_binary(brr))
+
+    return brrs
 
 
 ###############################################################################
@@ -93,6 +170,7 @@ class Brr:
     _waveform_cache: dict[int, npt.NDArray[np.int16]] = field(
         init=False, repr=False, compare=False, default_factory=dict
     )
+    _keyed: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -121,6 +199,96 @@ class Brr:
 
     ###########################################################################
     # API method definitions
+    ###########################################################################
+
+    def generate(
+        self, pitch_reg: int, env: Envelope
+    ) -> Iterator[npt.NDArray[np.int16]]:
+        self._keyed = True
+
+        # Variable initialization
+        proc = np.zeros(SAMPLES_PER_BLOCK)
+        chunk_size = self.SAMPLES_PER_FRAME / SAMPLES_PER_BLOCK
+
+        dt = pitch_reg / PITCH_REG_SCALE
+
+        # Loop the requested number of times, starting at block 0 the first
+        # time and at the loop block all other times
+        start_block = 0
+        idx = 0
+
+        env_times, envelope = env.envelope
+        env_times *= SAMPLE_FREQ
+
+        buffer = np.zeros(SAMPLES_PER_BLOCK, dtype=np.int16)
+        weights = np.zeros(self.SAMPLES_PER_FRAME)
+        nblocks = int(np.ceil(chunk_size * dt))
+        frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
+        frame = np.zeros(frame_size)
+        xp = np.array([-1])
+        ts = np.array([-dt])
+
+        one_shot = not self.sample_loops
+        done = False
+
+        # TODO: refactor with generate_waveform
+        while True:
+            for n in range(start_block, self.nblocks):
+                if idx == 0:
+                    frame[0] = frame[-1]
+                    xp = xp[-1] + np.arange(len(frame))
+                    ts = np.arange(ts[-1] + dt, xp[-1], dt)
+
+                # Get the filter coefficients
+                a_coeffs = _FILTERS[self.filters[n]]
+                b_coeffs = [2 ** self.ranges[n]]
+
+                # Run the IIR filter
+                init = lfiltic(b_coeffs, a_coeffs, [proc[-1], proc[-2]])
+                proc, _ = lfilter(b_coeffs, a_coeffs, self.samples[n], zi=init)
+
+                frame[
+                    1
+                    + idx * SAMPLES_PER_BLOCK : 1
+                    + (idx + 1) * SAMPLES_PER_BLOCK
+                ] = proc
+
+                idx += 1
+
+                emit = False
+                if (n == self.nblocks - 1) and one_shot:
+                    frame[1 + idx * SAMPLES_PER_BLOCK :] = 0
+                    emit = True
+
+                if idx == nblocks:
+                    idx = 0
+                    emit = True
+
+                if emit:
+                    if self._keyed:
+                        weights = np.interp(ts, env_times, envelope)
+                    else:
+                        weights = weights[-1] * np.ones(len(ts))
+                        weights -= 8 * np.arange(len(ts)) / 2**11
+                        weights = np.maximum(weights, 0)
+                        done = True
+
+                    result = np.interp(ts, xp, frame)
+                    result = np.round(result * weights).astype(np.int16)
+                    buffer = np.hstack((buffer, result))
+
+                    while len(buffer) >= self.SAMPLES_PER_FRAME:
+                        yield buffer[: self.SAMPLES_PER_FRAME]
+                        buffer = buffer[self.SAMPLES_PER_FRAME :]
+
+                    if one_shot or done:
+                        rv = np.zeros(self.SAMPLES_PER_FRAME, dtype=np.int16)
+                        rv[: len(buffer)] = buffer[:]
+                        yield rv
+                        return
+
+            start_block = self.loop_block
+
     ###########################################################################
 
     def generate_waveform(self, loops: int = 1) -> npt.NDArray[np.int16]:
@@ -165,8 +333,13 @@ class Brr:
 
     ###########################################################################
 
+    def keyoff(self) -> None:
+        self._keyed = False
+
+    ###########################################################################
+
     def to_wav(
-        self, fname: str, loops: int = 0, framerate: int = 32000
+        self, fname: str, loops: int = 0, framerate: int = SAMPLE_FREQ
     ) -> None:
         with wave.open(fname, "wb") as fobj:
             fobj.setnchannels(1)  # pylint: disable=no-member
@@ -183,7 +356,7 @@ class Brr:
     ) -> tuple[int, float]:
         if fundamental < 0:
             fundamental = self.fundamental
-        return nspc.calc_tune(fundamental, note, target)
+        return calc_tune(fundamental, note, target)
 
     ###########################################################################
     # API property definitions
@@ -200,6 +373,11 @@ class Brr:
     ###########################################################################
 
     @property
+    def SAMPLES_PER_FRAME(self) -> int:
+        return 1024
+
+    ###########################################################################
+    @property
     def csv(self) -> str:
         rv = [
             "Range,Filter,Loop,End,S1,S2,S3,S4,S5,S6,S7,S8,"
@@ -207,12 +385,13 @@ class Brr:
         ]
 
         data = 20 * [0]
-        for n, (rval, fval, block) in enumerate(
+        for n, (rval, fval, samples) in enumerate(
             zip(self.ranges, self.filters, self.samples)
         ):
-            loop = bool(self.blocks[n, 0] & 0x2)
-            end = bool(self.blocks[n, 0] & 0x1)
-            data = [rval, fval, loop, end, *block]
+            block = self.blocks[n]
+            loops = _block_loops(block)
+            ends = _end_block(block)
+            data = [rval, fval, loops, ends, *samples]
             rv.append(",".join(str(d) for d in data))
 
         return "\n".join(rv)
@@ -283,6 +462,18 @@ class Brr:
 
     ###########################################################################
     # Data model methods
+    ###########################################################################
+
+    def __eq__(self, other: object) -> bool:
+        if isinstance(other, self.__class__):
+            return self.binary == other.binary
+        return False
+
+    ###########################################################################
+
+    def __hash__(self) -> int:
+        return hash(self.binary)
+
     ###########################################################################
 
     def __post_init__(self) -> None:

@@ -52,10 +52,12 @@ from smw_music import RESOURCES, __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
-from smw_music.music_xml.instrument import GainMode, SampleSource, TuneSource
+from smw_music.music_xml.instrument import SampleSource, TuneSource
+from smw_music.spc700 import Envelope, GainMode
 from smw_music.ui.dashboard_ui import update_sample_opt
 from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.envelope_preview import EnvelopePreview
+from smw_music.ui.keyboard import Keyboard
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
@@ -193,6 +195,7 @@ class _TblCol(enum.IntEnum):
 
 class Dashboard(QWidget):
     _history: QMainWindow
+    _keyboard: QMainWindow
     _quicklook: QMainWindow
     _checkitout: QMainWindow
     _camelitout: QMainWindow
@@ -276,6 +279,12 @@ class Dashboard(QWidget):
         self._envelope_preview = EnvelopePreview(self)
         self._history.setWindowTitle("History")
 
+        self._keyboard = QMainWindow(parent=self)
+        self._keyboard.setWindowTitle("Keyboard")
+        self._kbd = Keyboard()
+        self._keyboard.setCentralWidget(self._kbd)
+        self._keyboard.setFixedSize(self._kbd.size())
+
         self._setup_menus()
         self._fix_edit_widths()
         self._combine_widgets()
@@ -347,6 +356,11 @@ class Dashboard(QWidget):
 
     ###########################################################################
     # API slot definitions
+    ###########################################################################
+
+    def on_audition_sample_clicked(self) -> None:
+        self._keyboard.show()
+
     ###########################################################################
 
     def on_brr_clicked(self) -> None:
@@ -826,6 +840,7 @@ class Dashboard(QWidget):
             (v.subtune_setting, m.on_subtune_changed),
             (v.brr_setting, m.on_brr_setting_changed),
             (v.preview_envelope, self.on_preview_envelope_clicked),
+            (v.audition_sample, self.on_audition_sample_clicked),
             # Global settings
             (v.global_volume_slider, m.on_global_volume_changed),
             (v.global_volume_setting, m.on_global_volume_changed),
@@ -925,6 +940,9 @@ class Dashboard(QWidget):
         )
 
         v.start_section.activated.connect(m.on_start_section_activated)
+
+        self._kbd.key_on.connect(self._on_audition_start)
+        self._kbd.key_off.connect(lambda x, y: m.on_audition_stop())
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
@@ -1070,6 +1088,11 @@ class Dashboard(QWidget):
         item.setData(_TblCol.NAME, Qt.ItemDataRole.UserRole, role)
 
         return item
+
+    ###########################################################################
+
+    def _on_audition_start(self, note: str, octave: int) -> None:
+        self._model.on_audition_start(f"{note}{octave}")
 
     ###########################################################################
 
@@ -1240,38 +1263,34 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _update_envelope(  # pylint: disable=too-many-arguments
-        self,
-        adsr_mode: bool,
-        attack_reg: int,
-        decay_reg: int,
-        sus_level_reg: int,
-        sus_rate_reg: int,
-        gain_mode: GainMode,
-        gain_reg: int,
+        self, env: Envelope
     ) -> None:
-        env = self._envelope_preview
+        prev = self._envelope_preview
         view = self._view
 
-        if adsr_mode:
-            labels = env.plot_adsr(
-                attack_reg, decay_reg, sus_level_reg, sus_rate_reg
+        if env.adsr_mode:
+            labels = prev.plot_adsr(
+                env.attack_setting,
+                env.decay_setting,
+                env.sus_level_setting,
+                env.sus_rate_setting,
             )
             view.attack_eu_label.setText(labels[0])
             view.decay_eu_label.setText(labels[1])
             view.sus_level_eu_label.setText(labels[2])
             view.sus_rate_eu_label.setText(labels[3])
         else:  # gain mode
-            match gain_mode:
+            match env.gain_mode:
                 case GainMode.DIRECT:
-                    label = env.plot_direct_gain(gain_reg)
+                    label = prev.plot_direct_gain(env.gain_setting)
                 case GainMode.INCLIN:
-                    label = env.plot_inclin(gain_reg)
+                    label = prev.plot_inclin(env.gain_setting)
                 case GainMode.INCBENT:
-                    label = env.plot_incbent(gain_reg)
+                    label = prev.plot_incbent(env.gain_setting)
                 case GainMode.DECLIN:
-                    label = env.plot_declin(gain_reg)
+                    label = prev.plot_declin(env.gain_setting)
                 case GainMode.DECEXP:
-                    label = env.plot_decexp(gain_reg)
+                    label = prev.plot_decexp(env.gain_setting)
                 case _:
                     label = ""
             view.gain_eu_label.setText(label)
@@ -1365,6 +1384,7 @@ class Dashboard(QWidget):
 
         sel_inst = state.instruments[sample_idx[0]]
         sel_sample = state.samples[sample_idx]
+        env = sel_sample.envelope
 
         v.interpolate.setChecked(sel_sample.dyn_interpolate)
 
@@ -1438,30 +1458,26 @@ class Dashboard(QWidget):
 
         v.octave_shift.setValue(sel_sample.octave_shift)
 
-        v.select_adsr_mode.setChecked(sel_sample.adsr_mode)
-        v.select_gain_mode.setChecked(not sel_sample.adsr_mode)
-        v.gain_mode_direct.setChecked(sel_sample.gain_mode == GainMode.DIRECT)
-        v.gain_mode_inclin.setChecked(sel_sample.gain_mode == GainMode.INCLIN)
-        v.gain_mode_incbent.setChecked(
-            sel_sample.gain_mode == GainMode.INCBENT
-        )
-        v.gain_mode_declin.setChecked(sel_sample.gain_mode == GainMode.DECLIN)
-        v.gain_mode_decexp.setChecked(sel_sample.gain_mode == GainMode.DECEXP)
-        invert = (not sel_sample.adsr_mode) and (
-            sel_sample.gain_mode != GainMode.DIRECT
-        )
+        v.select_adsr_mode.setChecked(env.adsr_mode)
+        v.select_gain_mode.setChecked(not env.adsr_mode)
+        v.gain_mode_direct.setChecked(env.gain_mode == GainMode.DIRECT)
+        v.gain_mode_inclin.setChecked(env.gain_mode == GainMode.INCLIN)
+        v.gain_mode_incbent.setChecked(env.gain_mode == GainMode.INCBENT)
+        v.gain_mode_declin.setChecked(env.gain_mode == GainMode.DECLIN)
+        v.gain_mode_decexp.setChecked(env.gain_mode == GainMode.DECEXP)
+        invert = (not env.adsr_mode) and (env.gain_mode != GainMode.DIRECT)
         v.gain_slider.setInvertedAppearance(invert)
         v.gain_slider.setInvertedControls(invert)
-        v.gain_slider.setValue(sel_sample.gain_setting)
-        v.gain_setting.setText(hexb(sel_sample.gain_setting))
-        v.attack_slider.setValue(sel_sample.attack_setting)
-        v.attack_setting.setText(hexb(sel_sample.attack_setting))
-        v.decay_slider.setValue(sel_sample.decay_setting)
-        v.decay_setting.setText(hexb(sel_sample.decay_setting))
-        v.sus_level_slider.setValue(sel_sample.sus_level_setting)
-        v.sus_level_setting.setText(hexb(sel_sample.sus_level_setting))
-        v.sus_rate_slider.setValue(sel_sample.sus_rate_setting)
-        v.sus_rate_setting.setText(hexb(sel_sample.sus_rate_setting))
+        v.gain_slider.setValue(env.gain_setting)
+        v.gain_setting.setText(hexb(env.gain_setting))
+        v.attack_slider.setValue(env.attack_setting)
+        v.attack_setting.setText(hexb(env.attack_setting))
+        v.decay_slider.setValue(env.decay_setting)
+        v.decay_setting.setText(hexb(env.decay_setting))
+        v.sus_level_slider.setValue(env.sus_level_setting)
+        v.sus_level_setting.setText(hexb(env.sus_level_setting))
+        v.sus_rate_slider.setValue(env.sus_rate_setting)
+        v.sus_rate_setting.setText(hexb(env.sus_rate_setting))
 
         v.tune_slider.setValue(sel_sample.tune_setting)
         v.tune_setting.setText(hexb(sel_sample.tune_setting))
@@ -1476,16 +1492,8 @@ class Dashboard(QWidget):
         v.instrument_dynamics_tab.setEnabled(not sel_sample.track)
 
         # Apply the more interesting UI updates
-        self._update_gain_limits(sel_sample.gain_mode == GainMode.DIRECT)
-        self._update_envelope(
-            sel_sample.adsr_mode,
-            sel_sample.attack_setting,
-            sel_sample.decay_setting,
-            sel_sample.sus_level_setting,
-            sel_sample.sus_rate_setting,
-            sel_sample.gain_mode,
-            sel_sample.gain_setting,
-        )
+        self._update_gain_limits(env.gain_mode == GainMode.DIRECT)
+        self._update_envelope(sel_sample.envelope)
 
     ###########################################################################
 

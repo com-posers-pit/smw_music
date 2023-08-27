@@ -1280,18 +1280,15 @@
                      </item>
                      <item>
                       <widget class="QWidget" name="sample_settings_widget" native="true">
-                       <layout class="QHBoxLayout" name="horizontalLayout_3">
-                        <item>
-                         <widget class="QLabel" name="brr_setting_label">
+                       <layout class="QGridLayout" name="gridLayout_24">
+                        <item row="1" column="0">
+                         <widget class="QPushButton" name="audition_sample">
                           <property name="text">
-                           <string>Sample Settings:</string>
+                           <string>Audition</string>
                           </property>
                          </widget>
                         </item>
-                        <item>
-                         <widget class="QLineEdit" name="brr_setting"/>
-                        </item>
-                        <item>
+                        <item row="0" column="2">
                          <spacer name="sample_settings_spacer">
                           <property name="orientation">
                            <enum>Qt::Horizontal</enum>
@@ -1304,10 +1301,20 @@
                           </property>
                          </spacer>
                         </item>
-                        <item>
+                        <item row="0" column="3">
                          <widget class="QPushButton" name="preview_envelope">
                           <property name="text">
                            <string>Preview Envelope</string>
+                          </property>
+                         </widget>
+                        </item>
+                        <item row="0" column="1">
+                         <widget class="QLineEdit" name="brr_setting"/>
+                        </item>
+                        <item row="0" column="0">
+                         <widget class="QLabel" name="brr_setting_label">
+                          <property name="text">
+                           <string>Sample Settings:</string>
                           </property>
                          </widget>
                         </item>

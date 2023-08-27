@@ -72,6 +72,8 @@ Control Panel
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
       view.start_measure.valueChanged --> model.on_start_measure_changed
       view.start_section.activated --> model.on_start_section_activated
+      view.audition_sample.pressed --> dashboard._on_audition_start --> model.on_audition_start
+      view.audition_sample.released --> model.on_audition_stop
       view.reload_musicxml.released --> model.on_reload_musicxml_clicked
       view.open_quicklook.released --> dashboard.on_open_quicklook_clicked
       view.open_history.released --> dashboard.on_open_history_clicked
