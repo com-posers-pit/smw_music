@@ -87,8 +87,9 @@ class SamplePlayer:
         self._state = _State.PLAYING
 
         # Arbitrary-ish size of the frame buffer we carry, there's nothing
-        # special about the value
-        buflen = 5
+        # special about the value.  Bigger means more audio after a sample is
+        # released, so keep it low.
+        buflen = 3
 
         self._frames.clear()
 

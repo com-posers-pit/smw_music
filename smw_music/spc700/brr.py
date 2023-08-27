@@ -374,7 +374,7 @@ class Brr:
 
     @property
     def SAMPLES_PER_FRAME(self) -> int:
-        return 1024
+        return 512
 
     ###########################################################################
     @property
