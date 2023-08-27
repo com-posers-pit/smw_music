@@ -203,7 +203,7 @@ class Keyboard(QGraphicsView):
 
     def __init__(
         self,
-        nkeys: int = 61,
+        nkeys: int = 60,
         key_width: int = 16,
         key_height: int = 50,
         padding: int = 5,
