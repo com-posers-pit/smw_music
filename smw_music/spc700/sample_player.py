@@ -126,6 +126,11 @@ class SamplePlayer:
     def _start(
         self, brr: Brr, env: Envelope, tune: int, note: int, subnote: int
     ) -> None:
+        # Busy loop if a new key comes when the last key was released but the
+        # buffer isn't free
+        while self._state in [_State.KEYOFF, _State.PLAYOUT]:
+            pass
+
         if self._state == _State.IDLE:
             self._play(brr, env, tune, note, subnote)
 
