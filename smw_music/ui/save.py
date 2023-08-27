@@ -12,6 +12,7 @@
 # Standard library imports
 import datetime
 import shutil
+from contextlib import suppress
 from pathlib import Path
 from typing import TypedDict
 
@@ -336,11 +337,24 @@ def load(fname: Path) -> tuple[State, Path | None]:
     else:
         project = contents["song"]
         sdict = contents["state"]
-        musicxml = sdict["musicxml_fname"]
-        mml = sdict["mml_fname"]
+        musicxml: Path | str | None = sdict["musicxml_fname"]
+        mml: Path | str | None = sdict["mml_fname"]
+
+        proj_dir = fname.parent.resolve()
+
+        # Convert to absolute path if needed
+        if musicxml is not None:
+            musicxml = Path(musicxml)
+            if not musicxml.is_absolute():
+                musicxml = proj_dir / musicxml
+        if mml is not None:
+            mml = Path(mml)
+            if not mml.is_absolute():
+                mml = proj_dir / mml
+
         state = State(
-            musicxml_fname=None if musicxml is None else Path(musicxml),
-            mml_fname=None if mml is None else Path(mml),
+            musicxml_fname=None if musicxml is None else musicxml,
+            mml_fname=None if mml is None else mml,
             loop_analysis=sdict["loop_analysis"],
             measure_numbers=sdict["measure_numbers"],
             global_volume=sdict["global_volume"],
@@ -364,12 +378,15 @@ def load(fname: Path) -> tuple[State, Path | None]:
 
 
 def save(fname: Path, state: State) -> None:
+    proj_dir = fname.parent.resolve()
     musicxml = state.musicxml_fname
     if musicxml is not None:
         musicxml = musicxml.resolve()
+        with suppress(ValueError):
+            musicxml = musicxml.relative_to(proj_dir)
     mml = state.mml_fname
     if mml is not None:
-        mml = mml.resolve()
+        mml = mml.resolve().relative_to(proj_dir)
 
     contents = {
         "tool_version": __version__,
