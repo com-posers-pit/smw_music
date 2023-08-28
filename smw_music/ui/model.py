@@ -21,7 +21,7 @@ import threading
 import zipfile
 from contextlib import suppress
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import fields, replace
 from glob import glob
 from pathlib import Path, PurePosixPath
 from random import choice
@@ -1722,8 +1722,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | list[BuiltinSampleSource],
     ) -> None:
         if kwargs:
-            new_state = replace(self.state)
-            for key, val in kwargs.items():
+            # TODO: This is a goofy way to split setting fields and properties.
+            # Needs revisiting.
+            attrs = {}
+            props = {}
+            state_fields = [x.name for x in fields(self.state)]
+            for k, v in kwargs.items():
+                if k in state_fields:
+                    attrs[k] = v
+                else:
+                    props[k] = v
+
+            new_state = replace(self.state, **attrs)
+
+            for key, val in props.items():
                 setattr(new_state, key, val)
         else:
             new_state = State()
