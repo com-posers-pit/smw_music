@@ -568,6 +568,7 @@ class Song:
         echo_config: EchoConfig | None = None,
         sample_path: PurePosixPath | None = None,
         start_measure: int = 1,
+        sample_groups: str = "optimized",
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -686,6 +687,7 @@ class Song:
             custom_samples=samples,
             dynamics=list(Dynamics),
             sample_path=str(sample_path),
+            sample_groups=sample_groups,
         )
 
         rv = rv.replace(" ^", "^")
@@ -709,6 +711,7 @@ class Song:
         echo_config: EchoConfig | None = None,
         sample_path: PurePosixPath | None = None,
         start_measure: int = 1,
+        sample_groups: str = "optimized",
     ) -> str:
         """
         Output the MML representation of this Song to a file.
@@ -743,6 +746,7 @@ class Song:
             echo_config,
             sample_path,
             start_measure,
+            sample_groups,
         )
 
         if fname:

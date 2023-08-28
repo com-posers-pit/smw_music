@@ -34,7 +34,7 @@
 %else:
 
 #samples {
-    #optimized
+    #${sample_groups}
 }
 %endif
 

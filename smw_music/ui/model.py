@@ -1415,35 +1415,39 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         title = "MML Generation"
         error = True
-        fname = self.state.mml_fname
+        state = self.state
+        fname = state.mml_fname
         if self.song is None:
             msg = "Song not loaded"
             self.mml_generated.emit("\n".join(ashtley))
         else:
-            assert self.state.project_name is not None  # nosec: B101
+            assert state.project_name is not None  # nosec: B101
+
+            self._update_sample_groups()
 
             try:
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
 
-                self.song.instruments = deepcopy(self.state.instruments)
+                self.song.instruments = deepcopy(state.instruments)
 
-                self.song.volume = self.state.global_volume
-                if self.state.porter:
-                    self.song.porter = self.state.porter
-                if self.state.game:
-                    self.song.game = self.state.game
+                self.song.volume = state.global_volume
+                if state.porter:
+                    self.song.porter = state.porter
+                if state.game:
+                    self.song.game = state.game
 
                 mml = self.song.to_mml_file(
                     str(fname),
-                    self.state.global_legato,
-                    self.state.loop_analysis,
-                    self.state.superloop_analysis,
-                    self.state.measure_numbers,
+                    state.global_legato,
+                    state.loop_analysis,
+                    state.superloop_analysis,
+                    state.measure_numbers,
                     True,
-                    self.state.echo if self.state.global_echo_enable else None,
-                    PurePosixPath(self.state.project_name),
-                    self.state.start_measure,
+                    state.echo if state.global_echo_enable else None,
+                    PurePosixPath(state.project_name),
+                    state.start_measure,
+                    state.builtin_sample_group.value,
                 )
                 self.mml_generated.emit(mml)
                 self.update_status("MML generated")
@@ -1670,6 +1674,62 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # TODO: remove ignore
         new_env = replace(self.state.sample.envelope, **kwargs)  # type: ignore
         self._update_sample_state(envelope=new_env)
+
+    ###########################################################################
+
+    # TODO: Fix this awful hack
+    def _update_sample_groups(self) -> None:
+        sep = "}"
+        state = self.state
+        fname = self._project_path / "Addmusic_sample groups.txt"
+        with open(fname) as fobj:
+            contents = fobj.read().split(sep)
+
+        stock_groups = 5
+        contents = contents[:stock_groups]
+
+        if state.builtin_sample_group == BuiltinSampleGroup.CUSTOM:
+            smap = [
+                '00 SMW @0.brr"!',
+                '01 SMW @1.brr"!',
+                '02 SMW @2.brr"!',
+                '03 SMW @3.brr"!',
+                '04 SMW @4.brr"!',
+                '05 SMW @8.brr"!',
+                '06 SMW @22.brr"!',
+                '07 SMW @5.brr"!',
+                '08 SMW @6.brr"!',
+                '09 SMW @7.brr"!',
+                '0A SMW @9.brr"!',
+                '0B SMW @10.brr"!',
+                '0C SMW @13.brr"!',
+                '0D SMW @14.brr"',
+                '0E SMW @29.brr"!',
+                '0F SMW @21.brr"',
+                '10 SMW @12.brr"!',
+                '11 SMW @17.brr"',
+                '12 SMW @15.brr"!',
+                '13 SMW Thunder.brr"!',
+            ]
+
+            new_group = ["", "", "#custom", "{"]
+            for src, sample in zip(state.builtin_sample_sources, smap):
+                match src:
+                    case BuiltinSampleSource.DEFAULT:
+                        new_group.append(f'    "default/{sample}')
+                    case BuiltinSampleSource.OPTIMIZED:
+                        new_group.append(f'    "optimized/{sample}')
+                    case BuiltinSampleSource.EMPTY:
+                        new_group.append('    "EMPTY.brr"')
+            new_group.append("")
+            new_group = "\n".join(new_group)
+            contents.append(new_group)
+
+        contents.append("\n")
+        contents = sep.join(contents)
+
+        with open(fname, "w", newline="\r\n") as fobj:
+            fobj.write(contents)
 
     ###########################################################################
 

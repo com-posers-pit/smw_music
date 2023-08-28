@@ -15,11 +15,11 @@
 	"optimized/0A SMW @9.brr"!
 	"optimized/0B SMW @10.brr"!
 	"optimized/0C SMW @13.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 	"optimized/0E SMW @29.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 	"optimized/10 SMW @12.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 	"optimized/12 SMW @15.brr"!
 	"optimized/13 SMW Thunder.brr"!
 }
@@ -39,11 +39,11 @@
 	"optimized/0A SMW @9.brr"!
 	"optimized/0B SMW @10.brr"!
 	"optimized/0C SMW @13.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 	"optimized/0E SMW @29.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 	"optimized/10 SMW @12.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 	"optimized/12 SMW @15.brr"!
-	"EMPTY.brr"!
+	"EMPTY.brr"
 }
