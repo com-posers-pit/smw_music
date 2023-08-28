@@ -321,6 +321,7 @@ class Song:
     def _collect_instruments(self) -> None:
         inst_dyns: dict[str, set[Dynamics]] = {}
         transposes: dict[str, int] = {}
+        last_dyn: Dynamics = Dynamics.MF
 
         for channel in self.channels:
             for token in channel.tokens:
@@ -329,10 +330,13 @@ class Song:
                     if inst not in inst_dyns:
                         inst_dyns[inst] = set()
                         transposes[inst] = token.transpose
+                    inst_dyns[inst].add(last_dyn)
                 if isinstance(token, Dynamic):
-                    inst_dyns[inst].add(Dynamics[token.level.upper()])
+                    last_dyn = Dynamics[token.level.upper()]
+                    inst_dyns[inst].add(last_dyn)
                 if isinstance(token, Crescendo):
-                    inst_dyns[inst].add(Dynamics[token.target.upper()])
+                    last_dyn = Dynamics[token.level.upper()]
+                    inst_dyns[inst].add(last_dyn)
 
         inst_names = sorted(inst_dyns)
 
