@@ -914,9 +914,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_sample_opt_selected(self, group: BuiltinSampleGroup) -> None:
-        self._update_state(builtin_sample_group=group)
-        self.update_status(f"Builtin group set to {group}")
+    def on_sample_opt_selected(
+        self, group: BuiltinSampleGroup, checked: bool
+    ) -> None:
+        if checked:
+            self._update_state(builtin_sample_group=group)
+            self.update_status(f"Builtin group set to {group}")
 
     ###########################################################################
 
