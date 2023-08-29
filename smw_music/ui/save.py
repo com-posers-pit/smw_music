@@ -13,6 +13,7 @@
 import datetime
 import shutil
 from contextlib import suppress
+from dataclasses import fields
 from pathlib import Path
 from typing import TypedDict
 
@@ -34,7 +35,7 @@ from smw_music.music_xml.instrument import (
 )
 from smw_music.spc700 import Envelope, GainMode
 from smw_music.ui.old_save import v0
-from smw_music.ui.state import State
+from smw_music.ui.state import BuiltinSampleGroup, BuiltinSampleSource, State
 from smw_music.ui.utils import make_vis_dir
 
 ###############################################################################
@@ -128,6 +129,8 @@ class _StateDict(TypedDict):
     porter: str
     game: str
     start_measure: int
+    builtin_sample_group: int
+    builtin_sample_sources: list[int]
 
 
 ###############################################################################
@@ -352,6 +355,8 @@ def load(fname: Path) -> tuple[State, Path | None]:
             if not mml.is_absolute():
                 mml = proj_dir / mml
 
+        state_fields = {x.name: x for x in fields(State)}
+
         state = State(
             musicxml_fname=None if musicxml is None else musicxml,
             mml_fname=None if mml is None else mml,
@@ -367,7 +372,22 @@ def load(fname: Path) -> tuple[State, Path | None]:
             project_name=project,
             porter=sdict["porter"],
             game=sdict["game"],
-            start_measure=sdict.get("start_measure", 1),
+            start_measure=sdict.get(
+                "start_measure", state_fields["start_measure"].default
+            ),
+            builtin_sample_group=BuiltinSampleGroup(
+                sdict.get(
+                    "builtin_sample_group",
+                    state_fields["builtin_sample_group"].default,
+                )
+            ),
+            builtin_sample_sources=[
+                BuiltinSampleSource(x)
+                for x in sdict.get(
+                    "builtin_sample_sources",
+                    state_fields["builtin_sample_sources"].default_factory(),
+                )
+            ],
         )
         rv = state, None
 
@@ -408,6 +428,10 @@ def save(fname: Path, state: State) -> None:
             "porter": state.porter,
             "game": state.game,
             "start_measure": state.start_measure,
+            "builtin_sample_group": state.builtin_sample_group.value,
+            "builtin_sample_sources": [
+                x.value for x in state.builtin_sample_sources
+            ],
         },
     }
 

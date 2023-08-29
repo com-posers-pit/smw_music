@@ -11,7 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from enum import Enum, StrEnum, auto
+from enum import Enum, auto
 from pathlib import Path
 
 # Library imports
@@ -34,12 +34,12 @@ N_BUILTIN_SAMPLES = 20
 ###############################################################################
 
 
-class BuiltinSampleGroup(StrEnum):
-    DEFAULT = "default"
-    OPTIMIZED = "optimized"
-    REDUX1 = "redux1"
-    REDUX2 = "redux2"
-    CUSTOM = "custom"
+class BuiltinSampleGroup(Enum):
+    DEFAULT = auto()
+    OPTIMIZED = auto()
+    REDUX1 = auto()
+    REDUX2 = auto()
+    CUSTOM = auto()
 
 
 ###############################################################################

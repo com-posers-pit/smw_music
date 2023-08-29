@@ -1440,6 +1440,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 if state.game:
                     self.song.game = state.game
 
+                # TODO Move this into the to_mml_file
+                sample_group = "optimized"
+                match state.builtin_sample_group:
+                    case BuiltinSampleGroup.DEFAULT:
+                        sample_group = "default"
+                    case BuiltinSampleGroup.OPTIMIZED:
+                        sample_group = "optimized"
+                    case BuiltinSampleGroup.REDUX1:
+                        sample_group = "redux1"
+                    case BuiltinSampleGroup.REDUX2:
+                        sample_group = "redux2"
+                    case BuiltinSampleGroup.CUSTOM:
+                        sample_group = "custom"
+
                 mml = self.song.to_mml_file(
                     str(fname),
                     state.global_legato,
@@ -1450,7 +1464,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     state.echo if state.global_echo_enable else None,
                     PurePosixPath(state.project_name),
                     state.start_measure,
-                    state.builtin_sample_group.value,
+                    sample_group,
                 )
                 self.mml_generated.emit(mml)
                 self.update_status("MML generated")
