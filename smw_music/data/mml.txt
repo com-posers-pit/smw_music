@@ -34,7 +34,7 @@
 %else:
 
 #samples {
-    #optimized
+    #${sample_groups}
 }
 %endif
 
@@ -66,7 +66,7 @@ w${song.volume}
     def artic_str(sample):
         rv = []
         for artic, val in sample.artics.items():
-            rv.append(f'\\"q{artic}=q{val.setting:02X}\\"')
+            rv.append(f'\\"_q{artic}=q{val.setting:02X}\\"')
         return ' '.join(rv)
 
     def pan_str(sample):
@@ -76,10 +76,10 @@ w${song.volume}
         return f' h{sample.transpose}' if do_transpose else ''
 
     def pitched_defn(name):
-        return f'"{name} = {voice(name)} {dyn(name)} {artic(name)} {pan(name)} qDEF"'
+        return f'"{name} = {voice(name)} {dyn(name)} {artic(name)} {pan(name)} vCUR qCUR"'
 
     def unpitched_defn(name):
-        return f'"{name} = {dyn(name)} {artic(name)} {pan(name)} qDEF @{voice(name)} {name}n"'
+        return f'"{name} = {dyn(name)} {artic(name)} {pan(name)} vCUR qCUR @{voice(name)} {name}n"'
 
     unpitched_sz = max(list(len(unpitched_defn(k)) for k, v in inst_samples.items() if v.percussion), default=0)
 %>\
@@ -139,8 +139,13 @@ ${f'{unpitched_defn(name):{unpitched_sz}}'} "${name}n = o${sample.percussion_oct
 ; values because that's how volume fades work.  Update the corresponding
 ; dynamics marks in each instrument.
 %for dyn in dynamics:
-${f'"v{str(dyn): <4} = $E7$_{dyn}"'}
+${f'"v{str(dyn): <4} = $E7$_{dyn} \\"vCUR = v{dyn}\\""'}
 %endfor
+
+"qDEF = _qDEF \"qCUR = qDEF\""
+"qACC = _qACC \"qCUR = qACC\""
+"qSTAC = _qSTAC \"qCUR = qSTAC\""
+"qACCSTAC = _qACCSTAC \"qCUR = qACCSTAC\""
 
 ; Magic hex values are no fun, we'll give them nicer names
 "LEGATO_ON     = $F4$01"
@@ -160,9 +165,10 @@ ${f'"v{str(dyn): <4} = $E7$_{dyn}"'}
 ; Staff ${n + 1}
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#${n}\
+#${n} \
 ${" GLOBAL_LEGATO" if global_legato and (n == 0) else ""}\
 ${" /" if "/" not in channel else ""}
 
+"vCUR = vMF" "qCUR = qDEF"
 ${channel}
 %endfor

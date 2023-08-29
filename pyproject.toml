@@ -22,7 +22,7 @@ skip_glob = ["smw_music/doc/"]
 
 [tool.poetry]
 name = "smw_music"
-version = "0.3.12"
+version = "0.3.13"
 description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"
@@ -52,6 +52,9 @@ qdarkstyle = "^3.1"
 watchdog = "^2.3.1"
 pillow = "^9.5.0"
 types-pillow = "^10.0.0.2"
+pyaudio = "^0.2.13"
+types-pyaudio = "^0.2.16.7"
+pyinstaller = ">=5.12"
 
 [tool.poetry.group.midi]
 optional = true
@@ -63,6 +66,8 @@ python-rtmidi = {git = "https://github.com/SpotlightKid/python-rtmidi.git", rev 
 [tool.poetry.scripts]
 spcmw = "smw_music.scripts.dashboard:main"
 spcmw_ast = "smw_music.scripts.dump_ast:main"
+spcmw_decode_brr = "smw_music.scripts.describe_brr:main"
+spcmw_extract_brrs = "smw_music.scripts.extract_brrs:main"
 spcmw_filttool = "smw_music.scripts.filttool:main"
 spcmw_to_mml = "smw_music.scripts.convert:main"
 

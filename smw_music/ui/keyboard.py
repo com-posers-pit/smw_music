@@ -10,16 +10,14 @@
 ###############################################################################
 
 # Standard library imports
-import sys
-import threading
 from contextlib import suppress
+from functools import partial
+from typing import Callable
 
 # Library imports
-import mido  # type: ignore
-from PyQt6.QtCore import Qt
+from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QKeyEvent, QPen
 from PyQt6.QtWidgets import (
-    QApplication,
     QGraphicsRectItem,
     QGraphicsScene,
     QGraphicsSceneDragDropEvent,
@@ -28,55 +26,10 @@ from PyQt6.QtWidgets import (
 )
 
 ###############################################################################
-
-
-class Key(QGraphicsRectItem):
-    def __init__(
-        self, x0: int, y0: int, x1: int, y1: int, white: bool
-    ) -> None:
-        super().__init__(x0, y0, x1, y1)
-        self.white = white
-        self._brush = QBrush(self.color)
-        self.pressed = QBrush(Qt.GlobalColor.magenta)
-        self.setBrush(self._brush)
-        self.setAcceptDrops(True)
-
-    def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        print(f"{self} drag enter")
-        self.activate()
-
-    def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        print(f"{self} drag leave")
-        self.deactivate()
-
-    def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
-        print(f"{self} drag move")
-        self.deactivate()
-
-    def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        print(f"{self} mouse press")
-        self.activate()
-
-    def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
-        print(f"{self} mouse release")
-        self.deactivate()
-
-    def activate(self) -> None:
-        self.setBrush(self.pressed)
-        self.update()
-
-    def deactivate(self) -> None:
-        self.setBrush(self._brush)
-        self.update()
-
-    @property
-    def color(self) -> Qt.GlobalColor:
-        return Qt.GlobalColor.white if self.white else Qt.GlobalColor.black
-
-
+# Private constant definitions
 ###############################################################################
 
-KEY_TABLE: dict[Qt.Key, tuple[str, int]] = {
+_KEY_TABLE = {
     Qt.Key.Key_Z: ("c", 0),
     Qt.Key.Key_S: ("c#", 0),
     Qt.Key.Key_X: ("d", 0),
@@ -119,116 +72,311 @@ KEY_TABLE: dict[Qt.Key, tuple[str, int]] = {
     Qt.Key.Key_BracketRight: ("g", 2),
 }
 
+_KEYS_PER_OCTAVE = 12
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _decode_key_idx(idx: int) -> tuple[str, int]:
+    octave, key = divmod(idx, _KEYS_PER_OCTAVE)
+    names = ["c", "c#", "d", "d#", "e", "f", "f#", "g", "g#", "a", "a#", "b"]
+    return (names[key], octave + 1)
+
 
 ###############################################################################
 
 
-class Keyboard(QGraphicsView):
-    keys: dict[str, Key]
-    _active: bool
-    _octave: int
+def _is_key_white(idx: int) -> bool:
+    _, key = divmod(idx, _KEYS_PER_OCTAVE)
+    return key in [0, 2, 4, 5, 7, 9, 11]
+
+
+###############################################################################
+# Private class definitions
+###############################################################################
+
+
+class _Key(QGraphicsRectItem):
+    is_white: bool
+
+    _brush: QBrush
+    _key_off: Callable[[], None]
+    _key_on: Callable[[], None]
+    _pressed_brush: QBrush
 
     ###########################################################################
 
-    def __init__(self) -> None:
+    def __init__(
+        self,
+        x0: int,
+        y0: int,
+        x1: int,
+        y1: int,
+        is_white: bool,
+        key_on: Callable[[], None],
+        key_off: Callable[[], None],
+    ) -> None:
+        super().__init__(x0, y0, x1, y1)
+
+        self.is_white = is_white
+        self._brush = QBrush(self.color)
+        self._key_off = key_off
+        self._key_on = key_on
+        self._pressed_brush = QBrush(Qt.GlobalColor.cyan)
+
+        self.setBrush(self._brush)
+        self.setAcceptDrops(True)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def press(self) -> None:
+        self.setBrush(self._pressed_brush)
+        self.update()
+
+    ###########################################################################
+
+    def release(self) -> None:
+        self.setBrush(self._brush)
+        self.update()
+
+    ###########################################################################
+    # Event handler definitions
+    ###########################################################################
+
+    def dragEnterEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
+        self._key_on()
+
+    ###########################################################################
+
+    def dragLeaveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
+        self._key_off()
+
+    ###########################################################################
+
+    def dragMoveEvent(self, _: QGraphicsSceneDragDropEvent) -> None:
+        self._key_off()
+
+    ###########################################################################
+
+    def mousePressEvent(self, _: QGraphicsSceneMouseEvent) -> None:
+        self._key_on()
+
+    ###########################################################################
+
+    def mouseReleaseEvent(self, _: QGraphicsSceneMouseEvent) -> None:
+        self._key_off()
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def color(self) -> Qt.GlobalColor:
+        return Qt.GlobalColor.white if self.is_white else Qt.GlobalColor.black
+
+
+###############################################################################
+# API class definitions
+###############################################################################
+
+
+class Keyboard(QGraphicsView):
+    key_on = pyqtSignal(str, int)
+    key_off = pyqtSignal(str, int)
+
+    nkeys: int
+
+    _active: bool
+    _bg: QGraphicsRectItem
+    _keys: dict[tuple[str, int], _Key]
+    _key_height: int
+    _key_width: int
+    _octave: int
+    _padding: int
+    _pressed: None | tuple[str, int]
+
+    ###########################################################################
+
+    def __init__(
+        self,
+        nkeys: int = 60,
+        key_width: int = 16,
+        key_height: int = 50,
+        padding: int = 5,
+    ) -> None:
         super().__init__()
 
+        self.nkeys = nkeys
+        self._key_width = key_width
+        self._key_height = key_height
+        self._padding = padding
+
         self._setup_graphics()
-        self.octave = 3
-        self._active = False
+
+        self.octave = 2
+        self.active = False
+        self._pressed = None
+
         self.show()
 
     ###########################################################################
+    # API method definitions
+    ###########################################################################
 
-    def _setup_graphics(self) -> None:
-        scene = QGraphicsScene(0, 0, 1500, 200)
-        self.setScene(scene)
+    def press_key(self, letter: str, octave: int) -> None:
+        if self._pressed is None:
+            self._pressed = (letter, octave)
 
-        self.pen = QPen(Qt.GlobalColor.black)
-        self.pen.setWidth(1)
+            octave = self._clip_octave(octave)
 
-        key_width = 16
-
-        self.keys = {}
-        letter = "c"
-        octave = 0
-        for n in range(75):
-            key = Key(0, 0, key_width, 50, True)
-            key.setPos(n * key_width, 0)
-            key.setPen(self.pen)
-
-            scene.addItem(key)
-            self.keys[f"{letter}{octave}"] = key
-            letter = chr(ord(letter) + 1)
-            if letter == "h":
-                letter = "a"
-            if letter == "c":
-                octave += 1
-
-        offset = 0
-        letter = "c"
-        octave = 0
-        for n in range(74):
-            offset += key_width
-
-            if (n % 7) not in [2, 6]:
-                key = Key(-key_width // 4, 0, key_width // 2, 30, False)
-                key.setPos(offset, 0)
-                key.setPen(self.pen)
-
-                scene.addItem(key)
-                self.keys[f"{letter}#{octave}"] = key
-
-            letter = chr(ord(letter) + 1)
-            if letter == "h":
-                letter = "a"
-            if letter == "c":
-                octave += 1
+            with suppress(KeyError):
+                self._keys[(letter, octave)].press()
+                self.key_on.emit(letter, octave)
 
     ###########################################################################
 
+    def release_key(self, letter: str, octave: int) -> None:
+        if self._pressed == (letter, octave):
+            octave = self._clip_octave(octave)
+
+            with suppress(KeyError):
+                self._keys[(letter, octave)].release()
+                self.key_off.emit(letter, octave)
+
+            self._pressed = None
+
+    ###########################################################################
+    # Event handler definitions
+    ###########################################################################
+
     def keyPressEvent(self, evt: QKeyEvent) -> None:
+        # Autorepeat is the worst
+        if evt.isAutoRepeat():
+            return
+
         keyval = evt.key()
 
+        # Escape toggles keyboard active state
         if keyval == Qt.Key.Key_Escape:
             self.active = not self.active
 
+        # While active
         if self.active:
             if evt.modifiers() & Qt.KeyboardModifier.KeypadModifier:
+                # If it's a keypad '*' or '/', change the octave
                 if keyval == Qt.Key.Key_Asterisk:
-                    self.octave = min(self.octave + 1, 10)
+                    self.octave += 1
                 if keyval == Qt.Key.Key_Slash:
-                    self.octave = max(self.octave - 1, 0)
+                    self.octave -= 1
             else:
+                # Otherwise try to play a note
                 with suppress(KeyError):
-                    key, offset = KEY_TABLE[Qt.Key(keyval)]
-                    self.press_key(key, self.octave, offset)
+                    key, offset = _KEY_TABLE[Qt.Key(keyval)]
+                    self.press_key(key, self.octave + offset)
 
     ###########################################################################
 
     def keyReleaseEvent(self, evt: QKeyEvent) -> None:
+        if evt.isAutoRepeat():
+            return
+
         if self.active:
-            if not (evt.modifiers() & Qt.KeyboardModifier.KeypadModifier):
-                with suppress(KeyError):
-                    key, offset = KEY_TABLE[Qt.Key(evt.key())]
-                    self.release_key(key, self.octave, offset)
+            with suppress(KeyError):
+                key, offset = _KEY_TABLE[Qt.Key(evt.key())]
+                self.release_key(key, self.octave + offset)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _clip_octave(self, octave: int) -> int:
+        return max(min(octave, self.octaves), 1)
 
     ###########################################################################
 
-    def press_key(self, letter: str, octave: int, offset: int = 0) -> None:
-        octave = max(min(octave + offset, 10), 0)
+    def _setup_bg(self) -> None:
+        # Creates the highlighted background when active
+        active_width = 10
+        pen = QPen(Qt.GlobalColor.red)
+        pen.setWidth(active_width)
 
-        with suppress(KeyError):
-            self.keys[f"{letter}{octave}"].activate()
+        width = self.white_keys * self._key_width
+        self._bg = QGraphicsRectItem(0, 0, width, self._key_height)
+        self._bg.setPen(pen)
+        self._bg.setPos(self._padding, 0)
+        self.scene().addItem(self._bg)
 
     ###########################################################################
 
-    def release_key(self, letter: str, octave: int, offset: int = 0) -> None:
-        octave = max(min(octave + offset, 10), 0)
+    def _setup_graphics(self) -> None:
+        # Scrollbars bad.  Go away.
+        self.setHorizontalScrollBarPolicy(
+            Qt.ScrollBarPolicy.ScrollBarAlwaysOff
+        )
 
-        with suppress(KeyError):
-            self.keys[f"{letter}{octave}"].deactivate()
+        self._setup_scene()
+        self._setup_bg()
+        self._setup_keyboard()
 
+    ###########################################################################
+
+    def _setup_keyboard(self) -> None:
+        pen = QPen(Qt.GlobalColor.black)
+        pen.setWidth(1)
+
+        self._keys = {}
+        last_key: _Key | None = None
+
+        width = self._key_width
+        height = self._key_height
+
+        key_pos = 0
+
+        for n in range(self.nkeys):
+            # Define key event callbacks
+            letter, octave = _decode_key_idx(n)
+            key_on = partial(self.press_key, letter, octave)
+            key_off = partial(self.release_key, letter, octave)
+
+            is_white = _is_key_white(n)
+
+            # Lays out key geometry
+            if is_white:
+                x0, y0, x1, y1 = 0, 0, width, height
+            else:
+                x0, y0, x1, y1 = -width // 4, 0, width // 2, 3 * height // 5
+
+            # Creates and draws a key
+            key = _Key(x0, y0, x1, y1, is_white, key_on, key_off)
+            key.setPos(self._padding + key_pos, 0)
+            key.setPen(pen)
+
+            self.scene().addItem(key)
+            self._keys[(letter, octave)] = key
+
+            # This shifts the key position every time a white key is placed and
+            # sets the Z ordering so black keys are on top
+            if is_white:
+                key_pos += width
+                if last_key:
+                    key.stackBefore(last_key)
+
+            last_key = key
+
+    ###########################################################################
+
+    def _setup_scene(self) -> None:
+        width = 3 * self._padding + self.white_keys * self._key_width
+
+        scene = QGraphicsScene(0, 0, width, self._key_height)
+        self.setScene(scene)
+
+    ###########################################################################
+    # API property definitions
     ###########################################################################
 
     @property
@@ -240,6 +388,7 @@ class Keyboard(QGraphicsView):
     @active.setter
     def active(self, val: bool) -> None:
         self._active = val
+        self._bg.setVisible(val)
 
     ###########################################################################
 
@@ -251,50 +400,33 @@ class Keyboard(QGraphicsView):
 
     @octave.setter
     def octave(self, val: int) -> None:
-        self._octave = max(min(val, 10), 0)
+        self._octave = self._clip_octave(val)
 
+    ###########################################################################
 
-###############################################################################
+    @property
+    def octaves(self) -> int:
+        return self.nkeys // _KEYS_PER_OCTAVE
 
-app = QApplication(sys.argv)
-keyboard = Keyboard()
+    ###########################################################################
 
+    @property
+    def white_keys(self) -> int:
+        octaves, leftover = divmod(self.nkeys, _KEYS_PER_OCTAVE)
+        match leftover:
+            case 0:
+                leftover = 0
+            case [1, 2]:
+                leftover = 1
+            case [3, 4]:
+                leftover = 2
+            case 5:
+                leftover = 3
+            case [6, 7]:
+                leftover = 4
+            case [8, 9]:
+                leftover = 5
+            case [10, 11]:
+                leftover = 6
 
-def convert(ival: int) -> tuple[str, int]:
-    octave, key = divmod(ival, 12)
-    keyname = [
-        "c",
-        "c#",
-        "d",
-        "d#",
-        "e",
-        "f",
-        "f#",
-        "g",
-        "g#",
-        "a",
-        "a#",
-        "b",
-    ][key]
-    return keyname, octave
-
-
-def poll(keyboard: Keyboard) -> None:
-    in_fname = ""
-    out_fname = "SPaCeMusicW"
-
-    with mido.open_input(in_fname) as inport, mido.open_output(
-        out_fname, virtual=True
-    ) as outport:
-        for msg in inport:
-            outport.send(msg)
-            if msg.type == "note_on":
-                keyboard.press_key(*convert(msg.note))
-            elif msg.type == "note_off":
-                keyboard.release_key(*convert(msg.note))
-
-
-thread = threading.Thread(target=poll, args=(keyboard,), daemon=True)
-# thread.start()
-
-app.exec()
+        return 7 * octaves + leftover

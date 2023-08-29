@@ -321,6 +321,7 @@ class Song:
     def _collect_instruments(self) -> None:
         inst_dyns: dict[str, set[Dynamics]] = {}
         transposes: dict[str, int] = {}
+        last_dyn: Dynamics = Dynamics.MF
 
         for channel in self.channels:
             for token in channel.tokens:
@@ -329,10 +330,13 @@ class Song:
                     if inst not in inst_dyns:
                         inst_dyns[inst] = set()
                         transposes[inst] = token.transpose
+                    inst_dyns[inst].add(last_dyn)
                 if isinstance(token, Dynamic):
-                    inst_dyns[inst].add(Dynamics[token.level.upper()])
+                    last_dyn = Dynamics[token.level.upper()]
+                    inst_dyns[inst].add(last_dyn)
                 if isinstance(token, Crescendo):
-                    inst_dyns[inst].add(Dynamics[token.target.upper()])
+                    last_dyn = Dynamics[token.target.upper()]
+                    inst_dyns[inst].add(last_dyn)
 
         inst_names = sorted(inst_dyns)
 
@@ -564,6 +568,7 @@ class Song:
         echo_config: EchoConfig | None = None,
         sample_path: PurePosixPath | None = None,
         start_measure: int = 1,
+        sample_groups: str = "optimized",
     ) -> str:
         """
         Return this song's AddmusicK's text.
@@ -682,6 +687,7 @@ class Song:
             custom_samples=samples,
             dynamics=list(Dynamics),
             sample_path=str(sample_path),
+            sample_groups=sample_groups,
         )
 
         rv = rv.replace(" ^", "^")
@@ -705,6 +711,7 @@ class Song:
         echo_config: EchoConfig | None = None,
         sample_path: PurePosixPath | None = None,
         start_measure: int = 1,
+        sample_groups: str = "optimized",
     ) -> str:
         """
         Output the MML representation of this Song to a file.
@@ -739,6 +746,7 @@ class Song:
             echo_config,
             sample_path,
             start_measure,
+            sample_groups,
         )
 
         if fname:

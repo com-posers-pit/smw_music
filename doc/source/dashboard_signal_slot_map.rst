@@ -72,6 +72,8 @@ Control Panel
       view.measure_numbers.stateChanged --> model.on_measure_numbers_changed
       view.start_measure.valueChanged --> model.on_start_measure_changed
       view.start_section.activated --> model.on_start_section_activated
+      view.audition_sample.pressed --> dashboard._on_audition_start --> model.on_audition_start
+      view.audition_sample.released --> model.on_audition_stop
       view.reload_musicxml.released --> model.on_reload_musicxml_clicked
       view.open_quicklook.released --> dashboard.on_open_quicklook_clicked
       view.open_history.released --> dashboard.on_open_history_clicked
@@ -233,6 +235,31 @@ Global Settings
      view.echo_feedback_surround.stateChanged --> model.on_echo_feedback_surround_changed
      view.echo_delay_slider.valueChanged --> model.on_echo_delay_changed
      view.echo_delay_setting.valueChanged --> model.on_echo_delay_changed
+     view.sample_opt_default.toggled --> model.on_sample_opt_selected
+     view.sample_opt_optimized.toggled --> model.on_sample_opt_selected
+     view.sample_opt_redux1.toggled --> model.on_sample_opt_selected
+     view.sample_opt_redux2.toggled --> model.on_sample_opt_selected
+     view.sample_opt_custom.toggled --> model.on_sample_opt_selected
+     view.sample_opt_00.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_01.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_02.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_03.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_04.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_05.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_06.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_07.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_08.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_09.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_0a.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_0b.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_0c.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_0d.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_0e.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_0f.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_10.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_11.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_12.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
+     view.sample_opt_13.currentIndexChanged --> dashboard._on_sample_opt_source_changed --> model.on_sample_opt_source_changed
 
 
 Preferences Signal/Slot Map

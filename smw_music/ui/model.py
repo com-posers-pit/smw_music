@@ -21,10 +21,11 @@ import threading
 import zipfile
 from contextlib import suppress
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import fields, replace
 from glob import glob
 from pathlib import Path, PurePosixPath
 from random import choice
+from typing import Callable
 
 # Library imports
 import yaml
@@ -34,15 +35,13 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import SmwMusicException, __version__, nspc
-from smw_music.brr import SAMPLE_FREQ, Brr
+from smw_music import RESOURCES, SmwMusicException, __version__
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,
     ArticSetting,
     Dynamics,
-    GainMode,
     InstrumentConfig,
     InstrumentSample,
     NoteHead,
@@ -51,15 +50,25 @@ from smw_music.music_xml.instrument import (
     Tuning,
 )
 from smw_music.music_xml.song import Song
+from smw_music.spc700 import (
+    SAMPLE_FREQ,
+    Brr,
+    Envelope,
+    GainMode,
+    SamplePlayer,
+    midi_to_nspc,
+)
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
-from smw_music.ui.state import NoSample, PreferencesState, State
-from smw_music.ui.utilization import (
-    Utilization,
-    decode_utilization,
-    echo_bytes,
+from smw_music.ui.state import (
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    NoSample,
+    PreferencesState,
+    State,
 )
+from smw_music.ui.utilization import decode_utilization, echo_bytes
 from smw_music.ui.utils import make_vis_dir
 from smw_music.utils import brr_size_b, newest_release, version_tuple, zip_top
 
@@ -147,7 +156,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         str,  # title
         str,  # response
     )
-    utilization_updated = pyqtSignal(Utilization)
 
     song: Song | None
     preferences: PreferencesState
@@ -156,6 +164,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _sample_packs: dict[str, SamplePack]
     _project_path: Path | None
     _sample_watcher: observers.Observer
+    _sample_player: SamplePlayer
 
     ###########################################################################
     # Constructor definitions
@@ -169,8 +178,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._undo_level = 0
         self._sample_packs = {}
         self._project_path = None
+        self._sample_player = SamplePlayer()
 
         os.makedirs(self.config_dir, exist_ok=True)
+
         self._start_watcher()
 
     ###########################################################################
@@ -213,6 +224,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 shutil.move(extract_dir / root / member, path / member)
 
             shutil.rmtree(extract_dir)
+
+        # Append new sample groups
+        with (RESOURCES / "sample_groups.txt").open("rb") as fobj_in, open(
+            path / "Addmusic_sample groups.txt", "ab"
+        ) as fobj_out:
+            fobj_out.write(fobj_in.read())
 
         # Add visualizations directory
         make_vis_dir(path)
@@ -270,26 +287,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def start(self) -> None:
+        self._check_first_use()
         self._load_prefs()
-        if self.preferences.release_check:
-            release = newest_release()
-            if release is not None and release[1] > version_tuple(__version__):
-                url, version = release
-                self.response_generated.emit(
-                    False,
-                    "New Version",
-                    f"SPaCeMusicW <a href={url}>v{version}</a> is available "
-                    + "for download<br />Version checking can be disabled "
-                    + "in preferences",
-                )
-
+        self._check_for_updates()
         self.update_sample_packs()
 
         self.recent_projects_updated.emit(self.recent_projects)
-        self.reinforce_state()
 
-        quote: tuple[str, str] = choice(quotes)  # nosec: B311
-        self.update_status(f"{quote[1]}: {quote[0]}")
+        self.reinforce_state()
+        self._emit_quote()
 
     ###########################################################################
 
@@ -374,8 +380,43 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_attack_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 15)
-        self._update_sample_state(attack_setting=setting, adsr_mode=True)
+        self._update_envelope_state(attack_setting=setting, adsr_mode=True)
         self.update_status(f"Attack set to {setting}")
+
+    ###########################################################################
+
+    def on_audition_start(self, audition_note: str) -> None:
+        sample = self.state.sample
+        tune = 256 * sample.tune_setting + sample.subtune_setting
+        note = midi_to_nspc(Pitch(audition_note).midi)
+
+        sample = self.state.sample
+        play = False
+        target: Callable[[bytes, Envelope, int, int, int], None] | Callable[
+            [Path, Envelope, int, int, int], None
+        ]
+        arg: bytes | Path
+        match sample.sample_source:
+            case SampleSource.SAMPLEPACK:
+                play = True
+                pack, path = sample.pack_sample
+                target = self._sample_player.play_bin
+                arg = self._sample_packs[pack][path].data
+            case SampleSource.BRR:
+                play = True
+                target = self._sample_player.play_file
+                arg = sample.brr_fname
+
+        if play:
+            self._sample_player_th = threading.Thread(
+                target=target, args=(arg, sample.envelope, tune, note, 0)
+            )
+            self._sample_player_th.start()
+
+    ###########################################################################
+
+    def on_audition_stop(self) -> None:
+        self._sample_player.stop()
 
     ###########################################################################
 
@@ -417,7 +458,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_decay_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_sample_state(decay_setting=setting, adsr_mode=True)
+        self._update_envelope_state(decay_setting=setting, adsr_mode=True)
         self.update_status(f"Decay set to {setting}")
 
     ###########################################################################
@@ -511,7 +552,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
-            self._update_sample_state(
+            self._update_envelope_state(
                 gain_mode=GainMode.DIRECT, adsr_mode=False
             )
             self.update_status("Direct gain envelope selected")
@@ -530,11 +571,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_changed(self, val: int | str) -> None:
         with suppress(NoSample):
-            mode = self.state.sample.gain_mode
+            mode = self.state.sample.envelope.gain_mode
             # TODO: Unify this 31 with the others
             limit = 127 if mode == GainMode.DIRECT else 31
             setting = _parse_setting(val, limit)
-            self._update_sample_state(gain_setting=setting, adsr_mode=False)
+            self._update_envelope_state(gain_setting=setting, adsr_mode=False)
             self.update_status("Gain setting changed to {setting}")
 
     ###########################################################################
@@ -873,6 +914,25 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_sample_opt_selected(
+        self, group: BuiltinSampleGroup, checked: bool
+    ) -> None:
+        if checked:
+            self._update_state(builtin_sample_group=group)
+            self.update_status(f"Builtin group set to {group}")
+
+    ###########################################################################
+
+    def on_sample_opt_source_changed(
+        self, idx: int, source: BuiltinSampleSource
+    ) -> None:
+        sources = self.state.builtin_sample_sources.copy()
+        sources[idx] = source
+        self._update_state(builtin_sample_sources=sources)
+        self.update_status(f"Builtin sample {idx:02x} set to {source}")
+
+    ###########################################################################
+
     def on_save(self) -> None:
         self._save_backup()
 
@@ -888,7 +948,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_sample_state(adsr_mode=state)
+        self._update_envelope_state(adsr_mode=state)
         self.update_status(
             f"Envelope mode set to {'ADSR' if state else 'Gain'}"
         )
@@ -907,20 +967,24 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if sample_name:
             msg = f"{inst_name}.{sample_name}"
+            # TODO: remove ignore
             inst.multisamples[sample_name] = replace(
-                inst.multisamples[sample_name], **update
+                inst.multisamples[sample_name], **update  # type: ignore
             )
             # If a sample's solo/mute is being disabled, disable it in the
             # instrument as well
             if not state:
-                inst.sample = replace(inst.sample, **update)
+                # TODO: remove ignore
+                inst.sample = replace(inst.sample, **update)  # type: ignore
 
         else:
             # Apply an instrument mute/solo to all samples
             msg = f"{inst_name}"
-            inst.sample = replace(inst.sample, **update)
+            # TODO: remove ignore
+            inst.sample = replace(inst.sample, **update)  # type: ignore
             for sample_name, sample in inst.multisamples.items():
-                inst.multisamples[sample_name] = replace(sample, **update)
+                # TODO: remove ignore
+                inst.multisamples[sample_name] = replace(sample, **update)  # type: ignore
 
         self._update_state(instruments=instruments)
 
@@ -980,14 +1044,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_sus_level_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 7)
-        self._update_sample_state(sus_level_setting=setting, adsr_mode=True)
+        self._update_envelope_state(sus_level_setting=setting, adsr_mode=True)
         self.update_status(f"Sustain level set to {setting}")
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 31)
-        self._update_sample_state(sus_rate_setting=setting, adsr_mode=True)
+        self._update_envelope_state(sus_rate_setting=setting, adsr_mode=True)
         self.update_status(f"Decay rate set to {setting}")
 
     ###########################################################################
@@ -1119,6 +1183,40 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _check_first_use(self) -> None:
+        if not self.prefs_fname.exists():
+            msg = "Welcome, and thank you for trying SPaCeMusicW."
+            msg += "\n\nIt looks like this is your first time using the tool."
+            msg += "\nWe recommend reading through our getting started guide."
+            msg += "\nIt's short, we promise."
+
+            self.response_generated.emit(
+                False, "It's dangerous to go alone!  Take this.", msg
+            )
+
+    ###########################################################################
+
+    def _check_for_updates(self) -> None:
+        if self.preferences.release_check:
+            release = newest_release()
+            if release is not None and release[1] > version_tuple(__version__):
+                url, version = release
+                self.response_generated.emit(
+                    False,
+                    "New Version",
+                    f"SPaCeMusicW <a href={url}>v{version}</a> is available "
+                    + "for download<br />Version checking can be disabled "
+                    + "in preferences",
+                )
+
+    ###########################################################################
+
+    def _emit_quote(self) -> None:
+        quote: tuple[str, str] = choice(quotes)  # nosec: B311
+        self.update_status(f"{quote[1]}: {quote[0]}")
+
+    ###########################################################################
+
     def _interpolate(self, level: Dynamics, setting: int) -> None:
         inst = self.state.instrument
         sample = self.state.sample
@@ -1236,14 +1334,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         pack, sample_path = item_id
         params = self._sample_packs[pack][sample_path].params
 
+        # TODO
         self._update_sample_state(
-            attack_setting=params.attack,
-            decay_setting=params.decay,
-            sus_level_setting=params.sustain_level,
-            sus_rate_setting=params.sustain_rate,
-            adsr_mode=params.adsr_mode,
-            gain_mode=params.gain_mode,
-            gain_setting=params.gain,
+            envelope=params.envelope,
             tune_setting=params.tuning,
             subtune_setting=params.subtuning,
         )
@@ -1325,35 +1418,53 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         title = "MML Generation"
         error = True
-        fname = self.state.mml_fname
+        state = self.state
+        fname = self.state.mml_fname  # use self.state so assert is captured
         if self.song is None:
             msg = "Song not loaded"
             self.mml_generated.emit("\n".join(ashtley))
         else:
-            assert self.state.project_name is not None  # nosec: B101
+            assert state.project_name is not None  # nosec: B101
+
+            self._update_sample_groups()
 
             try:
                 if os.path.exists(fname):
                     shutil.copy2(fname, f"{fname}.bak")
 
-                self.song.instruments = deepcopy(self.state.instruments)
+                self.song.instruments = deepcopy(state.instruments)
 
-                self.song.volume = self.state.global_volume
-                if self.state.porter:
-                    self.song.porter = self.state.porter
-                if self.state.game:
-                    self.song.game = self.state.game
+                self.song.volume = state.global_volume
+                if state.porter:
+                    self.song.porter = state.porter
+                if state.game:
+                    self.song.game = state.game
+
+                # TODO Move this into the to_mml_file
+                sample_group = "optimized"
+                match state.builtin_sample_group:
+                    case BuiltinSampleGroup.DEFAULT:
+                        sample_group = "default"
+                    case BuiltinSampleGroup.OPTIMIZED:
+                        sample_group = "optimized"
+                    case BuiltinSampleGroup.REDUX1:
+                        sample_group = "redux1"
+                    case BuiltinSampleGroup.REDUX2:
+                        sample_group = "redux2"
+                    case BuiltinSampleGroup.CUSTOM:
+                        sample_group = "custom"
 
                 mml = self.song.to_mml_file(
                     str(fname),
-                    self.state.global_legato,
-                    self.state.loop_analysis,
-                    self.state.superloop_analysis,
-                    self.state.measure_numbers,
+                    state.global_legato,
+                    state.loop_analysis,
+                    state.superloop_analysis,
+                    state.measure_numbers,
                     True,
-                    self.state.echo if self.state.global_echo_enable else None,
-                    PurePosixPath(self.state.project_name),
-                    self.state.start_measure,
+                    state.echo if state.global_echo_enable else None,
+                    PurePosixPath(state.project_name),
+                    state.start_measure,
+                    sample_group,
                 )
                 self.mml_generated.emit(mml)
                 self.update_status("MML generated")
@@ -1469,11 +1580,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             }
             with suppress(NoSample):
                 kwargs["gain_setting"] = min(
-                    31, self.state.sample.gain_setting
+                    31, self.state.sample.envelope.gain_setting
                 )
 
             # TODO: address this mypy error
-            self._update_sample_state(**kwargs)  # type: ignore
+            self._update_envelope_state(**kwargs)
             self.update_status(f"{caption} envelope selected")
 
     ###########################################################################
@@ -1522,7 +1633,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.state.calculated_tune = (
                 brr.fundamental,
                 brr.tune(
-                    nspc.midi_to_nspc(Pitch("C", octave=4).midi),
+                    midi_to_nspc(Pitch("C", octave=4).midi),
                     tuning.output.frequency,
                     fundamental,
                 ),
@@ -1570,8 +1681,74 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | float
         | bool,
     ) -> None:
-        new_echo = replace(self.state.echo, **kwargs)
+        # TODO: remove ignore
+        new_echo = replace(self.state.echo, **kwargs)  # type: ignore
         self._update_state(echo=new_echo)
+
+    ###########################################################################
+
+    def _update_envelope_state(self, **kwargs: bool | int | GainMode) -> None:
+        # TODO: remove ignore
+        new_env = replace(self.state.sample.envelope, **kwargs)  # type: ignore
+        self._update_sample_state(envelope=new_env)
+
+    ###########################################################################
+
+    # TODO: Fix this awful hack
+    def _update_sample_groups(self) -> None:
+        assert self._project_path is not None  # nosec: B101
+
+        sep = "}"
+        state = self.state
+        fname = self._project_path / "Addmusic_sample groups.txt"
+        with open(fname) as fobj:
+            contents = fobj.read().split(sep)
+
+        stock_groups = 5
+        contents = contents[:stock_groups]
+
+        if state.builtin_sample_group == BuiltinSampleGroup.CUSTOM:
+            smap = [
+                '00 SMW @0.brr"!',
+                '01 SMW @1.brr"!',
+                '02 SMW @2.brr"!',
+                '03 SMW @3.brr"!',
+                '04 SMW @4.brr"!',
+                '05 SMW @8.brr"!',
+                '06 SMW @22.brr"!',
+                '07 SMW @5.brr"!',
+                '08 SMW @6.brr"!',
+                '09 SMW @7.brr"!',
+                '0A SMW @9.brr"!',
+                '0B SMW @10.brr"!',
+                '0C SMW @13.brr"!',
+                '0D SMW @14.brr"',
+                '0E SMW @29.brr"!',
+                '0F SMW @21.brr"',
+                '10 SMW @12.brr"!',
+                '11 SMW @17.brr"',
+                '12 SMW @15.brr"!',
+                '13 SMW Thunder.brr"!',
+            ]
+
+            new_group = ["", "", "#custom", "{"]
+            for src, sample in zip(state.builtin_sample_sources, smap):
+                match src:
+                    case BuiltinSampleSource.DEFAULT:
+                        new_group.append(f'    "default/{sample}')
+                    case BuiltinSampleSource.OPTIMIZED:
+                        new_group.append(f'    "optimized/{sample}')
+                    case BuiltinSampleSource.EMPTY:
+                        new_group.append('    "EMPTY.brr"')
+            new_group.append("")
+            new_group_str = "\n".join(new_group)
+            contents.append(new_group_str)
+
+        contents.append("\n")
+        contents_str = sep.join(contents)
+
+        with open(fname, "w", newline="\r\n") as fobj:
+            fobj.write(contents_str)
 
     ###########################################################################
 
@@ -1588,8 +1765,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | tuple[str, Path]
         | tuple[bool, bool]
         | Path
-        | GainMode
-        | Tuning,
+        | Tuning
+        | Envelope,
     ) -> None:
         with suppress(NoSample):
             old_sample = self.state.sample
@@ -1619,18 +1796,28 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | EchoConfig
         | int
         | tuple[str, str | None]
-        | Path,
+        | Path
+        | BuiltinSampleGroup
+        | list[BuiltinSampleSource],
     ) -> None:
         if kwargs:
-            new_state = replace(self.state)
-            for key, val in kwargs.items():
+            # TODO: This is a goofy way to split setting fields and properties.
+            # Needs revisiting.
+            attrs = {}
+            props = {}
+            state_fields = [x.name for x in fields(self.state)]
+            for k, v in kwargs.items():
+                if k in state_fields:
+                    attrs[k] = v
+                else:
+                    props[k] = v
+
+            new_state = replace(self.state, **attrs)  # type: ignore
+
+            for key, val in props.items():
                 setattr(new_state, key, val)
         else:
             new_state = State()
-
-        for inst in new_state.instruments.values():
-            for sample in inst.multisamples.values():
-                sample.track_settings(inst.sample)
 
         if new_state != self.state:
             self._rollback_undo()

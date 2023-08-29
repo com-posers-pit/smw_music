@@ -8,6 +8,12 @@ SMW Music README
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
 
+README FIRST
+------------
+
+If you want to use the tool, you can ignore the rest of this document.
+Ask for more info in com_poser's discord server.
+
 The tooling has only been tested with exported MusicXML files from MuseScore
 3.6.2, but it should work with outputs from other music notation software.
 Output files are tested against `AddMusicK`_ 1.0.8.

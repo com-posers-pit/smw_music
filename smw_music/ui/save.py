@@ -12,8 +12,10 @@
 # Standard library imports
 import datetime
 import shutil
+from contextlib import suppress
+from dataclasses import fields
 from pathlib import Path
-from typing import TypedDict
+from typing import Callable, TypedDict, cast
 
 # Library imports
 import yaml
@@ -26,14 +28,14 @@ from smw_music.music_xml.instrument import (
     Artic,
     ArticSetting,
     Dynamics,
-    GainMode,
     InstrumentConfig,
     InstrumentSample,
     NoteHead,
     SampleSource,
 )
+from smw_music.spc700 import Envelope, GainMode
 from smw_music.ui.old_save import v0
-from smw_music.ui.state import State
+from smw_music.ui.state import BuiltinSampleGroup, BuiltinSampleSource, State
 from smw_music.ui.utils import make_vis_dir
 
 ###############################################################################
@@ -127,6 +129,8 @@ class _StateDict(TypedDict):
     porter: str
     game: str
     start_measure: int
+    builtin_sample_group: int
+    builtin_sample_sources: list[int]
 
 
 ###############################################################################
@@ -183,13 +187,15 @@ def _load_sample(inst: _SampleDict) -> InstrumentSample:
         builtin_sample_index=inst["builtin_sample_index"],
         pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
         brr_fname=Path(inst["brr_fname"]),
-        adsr_mode=inst["adsr_mode"],
-        attack_setting=inst["attack_setting"],
-        decay_setting=inst["decay_setting"],
-        sus_level_setting=inst["sus_level_setting"],
-        sus_rate_setting=inst["sus_rate_setting"],
-        gain_mode=GainMode(inst["gain_mode"]),
-        gain_setting=inst["gain_setting"],
+        envelope=Envelope(
+            adsr_mode=inst["adsr_mode"],
+            attack_setting=inst["attack_setting"],
+            decay_setting=inst["decay_setting"],
+            sus_level_setting=inst["sus_level_setting"],
+            sus_rate_setting=inst["sus_rate_setting"],
+            gain_mode=GainMode(inst["gain_mode"]),
+            gain_setting=inst["gain_setting"],
+        ),
         tune_setting=inst["tune_setting"],
         subtune_setting=inst["subtune_setting"],
         mute=inst["mute"],
@@ -247,13 +253,13 @@ def _save_sample(sample: InstrumentSample) -> _SampleDict:
         "builtin_sample_index": sample.builtin_sample_index,
         "pack_sample": [sample.pack_sample[0], str(sample.pack_sample[1])],
         "brr_fname": str(sample.brr_fname),
-        "adsr_mode": sample.adsr_mode,
-        "attack_setting": sample.attack_setting,
-        "decay_setting": sample.decay_setting,
-        "sus_level_setting": sample.sus_level_setting,
-        "sus_rate_setting": sample.sus_rate_setting,
-        "gain_mode": sample.gain_mode.value,
-        "gain_setting": sample.gain_setting,
+        "adsr_mode": sample.envelope.adsr_mode,
+        "attack_setting": sample.envelope.attack_setting,
+        "decay_setting": sample.envelope.decay_setting,
+        "sus_level_setting": sample.envelope.sus_level_setting,
+        "sus_rate_setting": sample.envelope.sus_rate_setting,
+        "gain_mode": sample.envelope.gain_mode.value,
+        "gain_setting": sample.envelope.gain_setting,
         "tune_setting": sample.tune_setting,
         "subtune_setting": sample.subtune_setting,
         "mute": sample.mute,
@@ -334,11 +340,26 @@ def load(fname: Path) -> tuple[State, Path | None]:
     else:
         project = contents["song"]
         sdict = contents["state"]
-        musicxml = sdict["musicxml_fname"]
-        mml = sdict["mml_fname"]
+        musicxml: Path | str | None = sdict["musicxml_fname"]
+        mml: Path | str | None = sdict["mml_fname"]
+
+        proj_dir = fname.parent.resolve()
+
+        # Convert to absolute path if needed
+        if musicxml is not None:
+            musicxml = Path(musicxml)
+            if not musicxml.is_absolute():
+                musicxml = proj_dir / musicxml
+        if mml is not None:
+            mml = Path(mml)
+            if not mml.is_absolute():
+                mml = proj_dir / mml
+
+        state_fields = {x.name: x for x in fields(State)}
+
         state = State(
-            musicxml_fname=None if musicxml is None else Path(musicxml),
-            mml_fname=None if mml is None else Path(mml),
+            musicxml_fname=None if musicxml is None else musicxml,
+            mml_fname=None if mml is None else mml,
             loop_analysis=sdict["loop_analysis"],
             measure_numbers=sdict["measure_numbers"],
             global_volume=sdict["global_volume"],
@@ -351,7 +372,26 @@ def load(fname: Path) -> tuple[State, Path | None]:
             project_name=project,
             porter=sdict["porter"],
             game=sdict["game"],
-            start_measure=sdict.get("start_measure", 1),
+            start_measure=sdict.get(
+                "start_measure",
+                cast(int, state_fields["start_measure"].default),
+            ),
+            builtin_sample_group=BuiltinSampleGroup(
+                sdict.get(
+                    "builtin_sample_group",
+                    state_fields["builtin_sample_group"].default,
+                )
+            ),
+            builtin_sample_sources=[
+                BuiltinSampleSource(x)
+                for x in sdict.get(
+                    "builtin_sample_sources",
+                    cast(
+                        Callable[[], list[BuiltinSampleSource]],
+                        state_fields["builtin_sample_sources"].default_factory,
+                    )(),
+                )
+            ],
         )
         rv = state, None
 
@@ -362,12 +402,15 @@ def load(fname: Path) -> tuple[State, Path | None]:
 
 
 def save(fname: Path, state: State) -> None:
+    proj_dir = fname.parent.resolve()
     musicxml = state.musicxml_fname
     if musicxml is not None:
         musicxml = musicxml.resolve()
+        with suppress(ValueError):
+            musicxml = musicxml.relative_to(proj_dir)
     mml = state.mml_fname
     if mml is not None:
-        mml = mml.resolve()
+        mml = mml.resolve().relative_to(proj_dir)
 
     contents = {
         "tool_version": __version__,
@@ -389,6 +432,10 @@ def save(fname: Path, state: State) -> None:
             "porter": state.porter,
             "game": state.game,
             "start_measure": state.start_measure,
+            "builtin_sample_group": state.builtin_sample_group.value,
+            "builtin_sample_sources": [
+                x.value for x in state.builtin_sample_sources
+            ],
         },
     }
 

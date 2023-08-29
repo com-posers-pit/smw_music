@@ -13,6 +13,8 @@ jobs:
   pypi:
     runs-on: ubuntu-latest
     steps:
+      - name: Install audio library
+        run: sudo apt install -y portaudio19-dev
       - uses: actions/checkout@v3
       - name: Build and publish to pypi
         uses: JRubics/poetry-publish@v1.10
@@ -46,15 +48,46 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
 
-  posix:
+  linux:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Install audio library
+        run: sudo apt install -y portaudio19-dev
+      - name: Check out repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11.0'
+      - name: Install poetry
+        uses: snok/install-poetry@v1
+      - name: Install library
+        run: poetry install --no-interaction
+      - name: Run pyinstaller
+        run: poetry run pyinstaller dashboard.spec
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/dashboard
+          asset_name: SPaCeMusicW-${{ matrix.os }}-$tag
+          tag: ${{ github.ref }}
+          overwrite: true
+
+  osx:
     strategy:
       matrix:
         os:
           - macos-12
           - macos-11
-          - ubuntu-latest
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Install audio library
+        run: brew install portaudio
       - name: Check out repository
         uses: actions/checkout@v3
       - name: Set up Python

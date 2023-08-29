@@ -71,6 +71,7 @@ class DashboardView(QMainWindow):
     attack_label: QLabel
     attack_setting: QLineEdit
     attack_slider: QSlider
+    audition_sample: QPushButton
     brr_fname: QLineEdit
     brr_setting: QLineEdit
     brr_setting_label: QLabel
@@ -247,6 +248,52 @@ class DashboardView(QMainWindow):
     render_zip: QPushButton
     sample_list: QTreeWidget
     sample_list_box: QGroupBox
+    sample_opt_00: QComboBox
+    sample_opt_00_label: QLabel
+    sample_opt_01: QComboBox
+    sample_opt_01_label: QLabel
+    sample_opt_02: QComboBox
+    sample_opt_02_label: QLabel
+    sample_opt_03: QComboBox
+    sample_opt_03_label: QLabel
+    sample_opt_04: QComboBox
+    sample_opt_04_label: QLabel
+    sample_opt_05: QComboBox
+    sample_opt_05_label: QLabel
+    sample_opt_06: QComboBox
+    sample_opt_06_label: QLabel
+    sample_opt_07: QComboBox
+    sample_opt_07_label: QLabel
+    sample_opt_08: QComboBox
+    sample_opt_08_label: QLabel
+    sample_opt_09: QComboBox
+    sample_opt_09_label: QLabel
+    sample_opt_0a: QComboBox
+    sample_opt_0a_label: QLabel
+    sample_opt_0b: QComboBox
+    sample_opt_0b_label: QLabel
+    sample_opt_0c: QComboBox
+    sample_opt_0c_label: QLabel
+    sample_opt_0d: QComboBox
+    sample_opt_0d_label: QLabel
+    sample_opt_0e: QComboBox
+    sample_opt_0e_label: QLabel
+    sample_opt_0f: QComboBox
+    sample_opt_0f_label: QLabel
+    sample_opt_10: QComboBox
+    sample_opt_10_label: QLabel
+    sample_opt_11: QComboBox
+    sample_opt_11_label: QLabel
+    sample_opt_12: QComboBox
+    sample_opt_12_label: QLabel
+    sample_opt_13: QComboBox
+    sample_opt_13_label: QLabel
+    sample_opt_custom: QRadioButton
+    sample_opt_default: QRadioButton
+    sample_opt_optimized: QRadioButton
+    sample_opt_redux1: QRadioButton
+    sample_opt_redux2: QRadioButton
+    sample_optimization_box: QGroupBox
     sample_pack_list: QTreeWidget
     sample_settings_box: QGroupBox
     sample_settings_tabs: QTabWidget

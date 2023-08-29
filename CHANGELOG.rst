@@ -11,7 +11,79 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.13`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.13 - 2023-08-28
+---------------------------
+
+CODENAME: `The Valley Road`_
+
+Sometimes I lead, sometimes I follow
+
+This time I'll go where she wants me to go
+
+`Release 0.3.13`_
+
 `Differences from 0.3.12`_
+
+Purpose
++++++++
+
+Add custom sample group handling, multisample dynamics, and BRR auditioning
+
+
+Affected Issues
++++++++++++++++
+
+- `#252 Handle un-tuneable BRRs`_
+
+- `_#249 Set octave shift to 0 by default`_
+
+- `_#248 Update pyinstaller version`_
+
+- `_#225 Default and inferred dynamics (via hairpins) are not captured in the slider window`_
+
+- `_#219 Support for removing rarely-used builtin samples`_
+
+- `_#218 Add support for custom sample groups`_
+
+Changed
++++++++
+
+- Default octave shift changed from -1 to 0
+
+- Current dynamics setting is tracked across sample and instrument changes
+
+- DC bias removed when computing BRR fundamentals
+
+Added
++++++
+
+- Sample group selection
+
+- BRR sample auditioning
+
+- First-use check
+
+- MS v4.10 drumset file
+
+Removed
++++++++
+
+- Docker references
+
+- old webserver references
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
+
+- Broken on python 3.10
 
 --------------------------------------------------------------------------------
 
@@ -1403,15 +1475,22 @@ Affected Issues
 - `#10 Add support for AMK octave up/down commands`_
 - `#1 Add support for AMK annotations`_
 
-.. _#240 Support AddMusicK 1.0.9: http://github.com/com-posers-pit/smw_music/issues/231
-.. _#239 Set unused volume sliders to left: http://github.com/com-posers-pit/smw_music/issues/231
-.. _#237 Add "jump to rehearsal marks" like the "jump to measure": http://github.com/com-posers-pit/smw_music/issues/231
-.. _#232 Musescore artifact publisher is broken: http://github.com/com-posers-pit/smw_music/issues/231
+
+.. _#252 Handle un-tuneable BRRs: http://github.com/com-posers-pit/smw_music/issues/252
+.. _#249 Set octave shift to 0 by default: http://github.com/com-posers-pit/smw_music/issues/249
+.. _#248 Update pyinstaller version: http://github.com/com-posers-pit/smw_music/issues/248
+.. _#240 Support AddMusicK 1.0.9: http://github.com/com-posers-pit/smw_music/issues/240
+.. _#239 Set unused volume sliders to left: http://github.com/com-posers-pit/smw_music/issues/239
+.. _#237 Add "jump to rehearsal marks" like the "jump to measure": http://github.com/com-posers-pit/smw_music/issues/237
+.. _#232 Musescore artifact publisher is broken: http://github.com/com-posers-pit/smw_music/issues/232
 .. _#231 Multisample broken with enharmonic equivalence: http://github.com/com-posers-pit/smw_music/issues/231
 .. _#230 Add option in multisample to track articulations and dynamics: http://github.com/com-posers-pit/smw_music/issues/230
 .. _#229 Not all notehead detection is correct: http://github.com/com-posers-pit/smw_music/issues/229
+.. _#225 Default and inferred dynamics (via hairpins) are not captured in the slider window: http://github.com/com-posers-pit/smw_music/issues/225
 .. _#222 Duplicate unused samples show up in multisample list: http://github.com/com-posers-pit/smw_music/issues/222
 .. _#220 Non-looping samples that are auto-tuned break playback: http://github.com/com-posers-pit/smw_music/issues/220
+.. _#219 Support for removing rarely-used builtin samples: http://github.com/com-posers-pit/smw_music/issues/219
+.. _#218 Add support for custom sample groups: http://github.com/com-posers-pit/smw_music/issues/218
 .. _#215 Tune 0.0 detection is too aggressive: https://github.com/com-posers-pit/smw_music/issues/215
 .. _#214 Generated ono-ADSR outputs are wrong: https://github.com/com-posers-pit/smw_music/issues/214
 .. _#212 Add a check for 0 tuning: https://github.com/com-posers-pit/smw_music/issues/212
@@ -1548,6 +1627,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.13: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.13
 .. _Release 0.3.12: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.12
 .. _Release 0.3.11: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.11
 .. _Release 0.3.10: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.10
@@ -1570,7 +1650,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.12: https://github.com/com-posers-pit/smw_music/compare/v0.3.12...HEAD
+.. _Differences from 0.3.13: https://github.com/com-posers-pit/smw_music/compare/v0.3.13...HEAD
+.. _Differences from 0.3.12: https://github.com/com-posers-pit/smw_music/compare/v0.3.12...v0.3.13
 .. _Differences from 0.3.11: https://github.com/com-posers-pit/smw_music/compare/v0.3.11...v0.3.12
 .. _Differences from 0.3.10: https://github.com/com-posers-pit/smw_music/compare/v0.3.10...v0.3.11
 .. _Differences from 0.3.9: https://github.com/com-posers-pit/smw_music/compare/v0.3.9...v0.3.10
@@ -1591,6 +1672,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _The Valley Road: https://www.youtube.com/watch?v=KfKIq1Pmc8Q
 .. _Big Enough: https://youtube.com/watch?v=rvrZJ5C_Nwg
 .. _Domino Dancing: https://www.youtube.com/watch?v=ik2YF05iX2w
 .. _Weapon of Choice: https://www.youtube.com/watch?v=wCDIYvFmgW8
