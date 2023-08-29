@@ -928,7 +928,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ) -> None:
         sources = self.state.builtin_sample_sources.copy()
         sources[idx] = source
-        self._update_state(builtin_sample_source=sources)
+        self._update_state(builtin_sample_sources=sources)
         self.update_status(f"Builtin sample {idx:02x} set to {source}")
 
     ###########################################################################

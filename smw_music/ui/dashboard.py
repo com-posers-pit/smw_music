@@ -65,6 +65,7 @@ from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
+    BuiltinSampleSource,
     NoSample,
     State,
 )
@@ -892,8 +893,10 @@ class Dashboard(QWidget):
         ]
 
         for n in range(N_BUILTIN_SAMPLES):
-            # TODO: Hook up signals
-            pass
+            w = getattr(v, f"sample_opt_{n:02x}")
+            connections.append(
+                (w, partial(self._on_sample_opt_source_changed, n))
+            )
 
         # Instrument dynamics settings
         for dkey, dwidgets in self._dyn_widgets.items():
@@ -1143,6 +1146,16 @@ class Dashboard(QWidget):
             _TblCol.NAME, Qt.ItemDataRole.UserRole
         )
         self._model.on_sample_changed(sample)
+
+    ###########################################################################
+
+    def _on_sample_opt_source_changed(self, n: int, idx: int) -> None:
+        src = [
+            BuiltinSampleSource.DEFAULT,
+            BuiltinSampleSource.OPTIMIZED,
+            BuiltinSampleSource.EMPTY,
+        ]
+        self._model.on_sample_opt_source_changed(n, src[idx])
 
     ###########################################################################
 
