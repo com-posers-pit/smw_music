@@ -39,15 +39,15 @@ Affected Issues
 
 - `#252 Handle un-tuneable BRRs`_
 
-- `_#249 Set octave shift to 0 by default`_
+- `#249 Set octave shift to 0 by default`_
 
-- `_#248 Update pyinstaller version`_
+- `#248 Update pyinstaller version`_
 
-- `_#225 Default and inferred dynamics (via hairpins) are not captured in the slider window`_
+- `#225 Default and inferred dynamics (via hairpins) are not captured in the slider window`_
 
-- `_#219 Support for removing rarely-used builtin samples`_
+- `#219 Support for removing rarely-used builtin samples`_
 
-- `_#218 Add support for custom sample groups`_
+- `#218 Add support for custom sample groups`_
 
 Changed
 +++++++
