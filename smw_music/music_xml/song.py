@@ -335,7 +335,7 @@ class Song:
                     last_dyn = Dynamics[token.level.upper()]
                     inst_dyns[inst].add(last_dyn)
                 if isinstance(token, Crescendo):
-                    last_dyn = Dynamics[token.level.upper()]
+                    last_dyn = Dynamics[token.target.upper()]
                     inst_dyns[inst].add(last_dyn)
 
         inst_names = sorted(inst_dyns)
