@@ -15,7 +15,7 @@ import shutil
 from contextlib import suppress
 from dataclasses import fields
 from pathlib import Path
-from typing import TypedDict
+from typing import Callable, TypedDict, cast
 
 # Library imports
 import yaml
@@ -373,7 +373,8 @@ def load(fname: Path) -> tuple[State, Path | None]:
             porter=sdict["porter"],
             game=sdict["game"],
             start_measure=sdict.get(
-                "start_measure", state_fields["start_measure"].default
+                "start_measure",
+                cast(int, state_fields["start_measure"].default),
             ),
             builtin_sample_group=BuiltinSampleGroup(
                 sdict.get(
@@ -385,7 +386,10 @@ def load(fname: Path) -> tuple[State, Path | None]:
                 BuiltinSampleSource(x)
                 for x in sdict.get(
                     "builtin_sample_sources",
-                    state_fields["builtin_sample_sources"].default_factory(),
+                    cast(
+                        Callable[[], list[BuiltinSampleSource]],
+                        state_fields["builtin_sample_sources"].default_factory,
+                    )(),
                 )
             ],
         )

@@ -1419,7 +1419,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         title = "MML Generation"
         error = True
         state = self.state
-        fname = state.mml_fname
+        fname = self.state.mml_fname  # use self.state so assert is captured
         if self.song is None:
             msg = "Song not loaded"
             self.mml_generated.emit("\n".join(ashtley))
@@ -1696,6 +1696,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     # TODO: Fix this awful hack
     def _update_sample_groups(self) -> None:
+        assert self._project_path is not None  # nosec: B101
+
         sep = "}"
         state = self.state
         fname = self._project_path / "Addmusic_sample groups.txt"
@@ -1739,14 +1741,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     case BuiltinSampleSource.EMPTY:
                         new_group.append('    "EMPTY.brr"')
             new_group.append("")
-            new_group = "\n".join(new_group)
-            contents.append(new_group)
+            new_group_str = "\n".join(new_group)
+            contents.append(new_group_str)
 
         contents.append("\n")
-        contents = sep.join(contents)
+        contents_str = sep.join(contents)
 
         with open(fname, "w", newline="\r\n") as fobj:
-            fobj.write(contents)
+            fobj.write(contents_str)
 
     ###########################################################################
 
@@ -1810,7 +1812,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 else:
                     props[k] = v
 
-            new_state = replace(self.state, **attrs)
+            new_state = replace(self.state, **attrs)  # type: ignore
 
             for key, val in props.items():
                 setattr(new_state, key, val)
