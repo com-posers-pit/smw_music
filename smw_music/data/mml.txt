@@ -20,7 +20,7 @@
 #path "${sample_path}"
 
 #samples {
-    #optimized
+    #${sample_groups}
 %for sample in set(x[0] for x in custom_samples):
     "${sample}"
 %endfor
