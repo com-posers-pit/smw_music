@@ -1,6 +1,6 @@
 #amk 2
 
-; beer v0.3.11
+; SPaCeMusicW v0.3.13
 
 #spc {
     #author  "Composer"

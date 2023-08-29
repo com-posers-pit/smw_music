@@ -22,7 +22,7 @@ skip_glob = ["smw_music/doc/"]
 
 [tool.poetry]
 name = "smw_music"
-version = "0.3.12"
+version = "0.3.13"
 description = "Tools for working with SMW Music"
 authors = ["Thomas A. Werne <werneta@gmail.com>"]
 license = "AGPL-3.0-only"
