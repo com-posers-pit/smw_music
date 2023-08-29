@@ -11,7 +11,61 @@ and this project adheres to `Semantic Versioning <https://semver.org/spec/v2.0.0
 Unreleased
 ----------
 
+`Differences from 0.3.14`_
+
+--------------------------------------------------------------------------------
+
+Release 0.3.14 - 2023-08-29
+---------------------------
+
+CODENAME: `Across The River`_
+
+Well I hear it's better on the other side
+
+They say you'll never do it so don't even try
+
+Well you may be beaten down with your closed mind
+
+But don't try and make it mine
+
+`Release 0.3.14`_
+
 `Differences from 0.3.13`_
+
+Purpose
++++++++
+
+Fix "sample groups don't update w/ custom samples" bug
+
+
+Affected Issues
++++++++++++++++
+
+- `#256 Sample groups broken w/ custom samples`
+
+Changed
++++++++
+
+- When custom samples are used, don't forget to set the sample group
+
+Added
++++++
+
+None
+
+Removed
++++++++
+
+None
+
+Idiosyncrasies
+++++++++++++++
+
+- Lightly tested on windows, watch out for problems on that OS
+
+- All tests are broken
+
+- Broken on python 3.10
 
 --------------------------------------------------------------------------------
 
@@ -1476,6 +1530,7 @@ Affected Issues
 - `#1 Add support for AMK annotations`_
 
 
+.. _#256 Sample groups broken w/ custom samples: http://github.com/com-posers-pit/smw_music/issues/256
 .. _#252 Handle un-tuneable BRRs: http://github.com/com-posers-pit/smw_music/issues/252
 .. _#249 Set octave shift to 0 by default: http://github.com/com-posers-pit/smw_music/issues/249
 .. _#248 Update pyinstaller version: http://github.com/com-posers-pit/smw_music/issues/248
@@ -1627,6 +1682,7 @@ Affected Issues
 .. _#2 Add support for percussion: https://github.com/com-posers-pit/smw_music/issues/2
 .. _#1 Add support for AMK annotations: https://github.com/com-posers-pit/smw_music/issues/1
 
+.. _Release 0.3.14: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.14
 .. _Release 0.3.13: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.13
 .. _Release 0.3.12: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.12
 .. _Release 0.3.11: https://github.com/com-posers-pit/smw_music/releases/tag/v0.3.11
@@ -1650,7 +1706,8 @@ Affected Issues
 .. _Release 0.1.1: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.1
 .. _Release 0.1.0: https://github.com/com-posers-pit/smw_music/releases/tag/v0.1.0
 
-.. _Differences from 0.3.13: https://github.com/com-posers-pit/smw_music/compare/v0.3.13...HEAD
+.. _Differences from 0.3.14: https://github.com/com-posers-pit/smw_music/compare/v0.3.14...HEAD
+.. _Differences from 0.3.13: https://github.com/com-posers-pit/smw_music/compare/v0.3.12...v0.3.13
 .. _Differences from 0.3.12: https://github.com/com-posers-pit/smw_music/compare/v0.3.12...v0.3.13
 .. _Differences from 0.3.11: https://github.com/com-posers-pit/smw_music/compare/v0.3.11...v0.3.12
 .. _Differences from 0.3.10: https://github.com/com-posers-pit/smw_music/compare/v0.3.10...v0.3.11
@@ -1672,6 +1729,7 @@ Affected Issues
 .. _Differences from 0.1.1: https://github.com/com-posers-pit/smw_music/compare/v0.1.1...v0.1.2
 .. _Differences from 0.1.0: https://github.com/com-posers-pit/smw_music/compare/v0.1.0...v0.1.1
 
+.. _Across The River: https://www.youtube.com/watch?v=fmIJ-q9uCq0
 .. _The Valley Road: https://www.youtube.com/watch?v=KfKIq1Pmc8Q
 .. _Big Enough: https://youtube.com/watch?v=rvrZJ5C_Nwg
 .. _Domino Dancing: https://www.youtube.com/watch?v=ik2YF05iX2w
