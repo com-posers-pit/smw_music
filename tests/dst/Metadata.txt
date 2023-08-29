@@ -1,6 +1,6 @@
 #amk 2
 
-; SPaCeMusicW v0.3.13
+; SPaCeMusicW v0.3.14
 
 #spc {
     #author  "O.G. Composer"
