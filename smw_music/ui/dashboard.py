@@ -118,6 +118,13 @@ def _set_lineedit_width(edit: QLineEdit, limit: str = "1000.0%") -> None:
 
 
 ###############################################################################
+
+
+def _slider_inv(slider: QSlider, val: int) -> int:
+    return slider.maximum() - val
+
+
+###############################################################################
 # Private constant definitions
 ###############################################################################
 
@@ -816,13 +823,24 @@ class Dashboard(QWidget):
             (v.gain_mode_decexp, m.on_gain_decexp_selected),
             (v.gain_slider, m.on_gain_changed),
             (v.gain_setting, m.on_gain_changed),
-            (v.attack_slider, m.on_attack_changed),
+            (
+                v.attack_slider,
+                lambda x: m.on_attack_changed(_slider_inv(v.attack_slider, x)),
+            ),
             (v.attack_setting, m.on_attack_changed),
-            (v.decay_slider, m.on_decay_changed),
+            (
+                v.decay_slider,
+                lambda x: m.on_decay_changed(_slider_inv(v.decay_slider, x)),
+            ),
             (v.decay_setting, m.on_decay_changed),
             (v.sus_level_slider, m.on_sus_level_changed),
             (v.sus_level_setting, m.on_sus_level_changed),
-            (v.sus_rate_slider, m.on_sus_rate_changed),
+            (
+                v.sus_rate_slider,
+                lambda x: m.on_sus_rate_changed(
+                    _slider_inv(v.sus_rate_slider, x)
+                ),
+            ),
             (v.sus_rate_setting, m.on_sus_rate_changed),
             (v.tuning_use_auto_freq, m.on_tuning_use_auto_freq_selected),
             (v.tuning_use_manual_freq, m.on_tuning_use_manual_freq_selected),
@@ -1483,13 +1501,16 @@ class Dashboard(QWidget):
         v.gain_slider.setInvertedControls(invert)
         v.gain_slider.setValue(env.gain_setting)
         v.gain_setting.setText(hexb(env.gain_setting))
-        v.attack_slider.setValue(env.attack_setting)
+        slider = v.attack_slider
+        slider.setValue(_slider_inv(slider, env.attack_setting))
         v.attack_setting.setText(hexb(env.attack_setting))
-        v.decay_slider.setValue(env.decay_setting)
+        slider = v.decay_slider
+        slider.setValue(_slider_inv(slider, env.decay_setting))
         v.decay_setting.setText(hexb(env.decay_setting))
         v.sus_level_slider.setValue(env.sus_level_setting)
         v.sus_level_setting.setText(hexb(env.sus_level_setting))
-        v.sus_rate_slider.setValue(env.sus_rate_setting)
+        slider = v.sus_rate_slider
+        slider.setValue(_slider_inv(slider, env.sus_rate_setting))
         v.sus_rate_setting.setText(hexb(env.sus_rate_setting))
 
         v.tune_slider.setValue(sel_sample.tune_setting)
