@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1400</width>
-    <height>800</height>
+    <height>1200</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -3332,6 +3332,39 @@ Saves 2.4KB over Redux 1</string>
      </widget>
     </item>
     <item>
+     <widget class="QGroupBox" name="spcplayer_groupBox">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>530</width>
+        <height>190</height>
+       </size>
+      </property>
+      <property name="title">
+       <string>spcplayer area</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_25"/>
+     </widget>
+    </item>
+    <item>
+     <spacer name="verticalSpacer_6">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
      <widget class="QWidget" name="main_controls_widget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
@@ -3499,19 +3532,6 @@ Saves 2.4KB over Redux 1</string>
        </item>
       </layout>
      </widget>
-    </item>
-    <item>
-     <spacer name="verticalSpacer_6">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>40</height>
-       </size>
-      </property>
-     </spacer>
     </item>
    </layout>
   </widget>
