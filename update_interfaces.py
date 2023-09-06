@@ -8,6 +8,7 @@
 # Standard library imports
 import pathlib
 import xml.etree.ElementTree as ET
+from collections import defaultdict
 from contextlib import redirect_stdout
 from typing import cast
 
@@ -31,6 +32,7 @@ for ui_fname, py_fname, module in uis:
     top = root[1]  # Gets the top-level widget
     widgets: dict[str, str] = {}
     actions: list[str] = []
+    custom_widgets: defaultdict[str, list[str]] = defaultdict(lambda: [])
 
     for widget in top.findall(".//widget"):
         widget_name = cast(str, widget.get("name"))
@@ -43,6 +45,12 @@ for ui_fname, py_fname, module in uis:
     widget_set = set(widgets.values())
     top_class = cast(str, top.get("class"))
     widget_set.add(top_class)
+
+    for widget in root.findall(".//customwidget"):
+        widget_class = widget.find("class").text
+        header = widget.find("header").text.replace("/", ".")
+        custom_widgets[header].append(widget_class)
+        widget_set.remove(widget_class)
 
     fname = base_dir / "ui" / py_fname
     with open(fname, "w", encoding="utf8") as fobj, redirect_stdout(fobj):
@@ -58,6 +66,13 @@ for ui_fname, py_fname, module in uis:
         print(")")
         print("")
         print("")
+        for widget_module in sorted(custom_widgets.keys()):
+            imports = ",".join(custom_widgets[widget_module])
+            print(f"from {widget_module} import {imports}")
+        if custom_widgets:
+            print("")
+            print("")
+
         print(f"class {module}({top_class}):")
         for action in actions:
             widgets[action] = "QAction"
