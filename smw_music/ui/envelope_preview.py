@@ -11,7 +11,7 @@
 
 # Library imports
 import pyqtgraph as pg  # type: ignore
-from PyQt6.QtWidgets import QMainWindow, QWidget
+from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
 # Package imports
 from smw_music import spc700
@@ -21,11 +21,7 @@ from smw_music import spc700
 ###############################################################################
 
 
-class EnvelopePreview(QMainWindow):
-    _window: QMainWindow
-    _graph: pg.PlotWidget
-    _plot_data: pg.graphicsItems.PlotDataItem.PlotDataItem
-
+class EnvelopePreview(QWidget):
     ###########################################################################
     # Constructor definitions
     ###########################################################################
@@ -34,7 +30,6 @@ class EnvelopePreview(QMainWindow):
         super().__init__(parent)
 
         self._graph = pg.PlotWidget()
-        self.setCentralWidget(self._graph)
         self._graph.setBackground("w")
 
         # plot data: x, y values
@@ -46,7 +41,11 @@ class EnvelopePreview(QMainWindow):
         self._graph.setYRange(0, 1)
         self._graph.setXRange(0, 0.1)
         self._graph.setMouseEnabled(y=False)
-        self.setWindowTitle("Envelope Preview")
+
+        layout = QHBoxLayout()
+        layout.addWidget(self._graph)
+
+        self.setLayout(layout)
 
     ###########################################################################
     # API method definitions

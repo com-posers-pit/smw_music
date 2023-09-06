@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1400</width>
+    <width>1800</width>
     <height>1200</height>
    </rect>
   </property>
@@ -809,22 +809,38 @@
                                </attribute>
                               </widget>
                              </item>
-                             <item row="1" column="2">
-                              <spacer name="horizontalSpacer">
-                               <property name="orientation">
-                                <enum>Qt::Horizontal</enum>
-                               </property>
-                               <property name="sizeHint" stdset="0">
-                                <size>
-                                 <width>40</width>
-                                 <height>20</height>
-                                </size>
-                               </property>
-                              </spacer>
-                             </item>
                             </layout>
                            </widget>
                           </widget>
+                         </item>
+                         <item>
+                          <widget class="EnvelopePreview" name="envelope_preview" native="true">
+                           <property name="sizePolicy">
+                            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                             <horstretch>0</horstretch>
+                             <verstretch>0</verstretch>
+                            </sizepolicy>
+                           </property>
+                           <property name="minimumSize">
+                            <size>
+                             <width>400</width>
+                             <height>0</height>
+                            </size>
+                           </property>
+                          </widget>
+                         </item>
+                         <item>
+                          <spacer name="horizontalSpacer">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
                          </item>
                         </layout>
                        </widget>
@@ -1256,6 +1272,19 @@
                            </layout>
                           </widget>
                          </item>
+                         <item row="1" column="2">
+                          <spacer name="horizontalSpacer_5">
+                           <property name="orientation">
+                            <enum>Qt::Horizontal</enum>
+                           </property>
+                           <property name="sizeHint" stdset="0">
+                            <size>
+                             <width>40</width>
+                             <height>20</height>
+                            </size>
+                           </property>
+                          </spacer>
+                         </item>
                         </layout>
                        </widget>
                       </widget>
@@ -1263,10 +1292,13 @@
                      <item>
                       <widget class="QWidget" name="sample_settings_widget" native="true">
                        <layout class="QGridLayout" name="gridLayout_24">
-                        <item row="1" column="0">
-                         <widget class="QPushButton" name="audition_sample">
+                        <item row="0" column="1">
+                         <widget class="QLineEdit" name="brr_setting"/>
+                        </item>
+                        <item row="0" column="0">
+                         <widget class="QLabel" name="brr_setting_label">
                           <property name="text">
-                           <string>Audition</string>
+                           <string>Sample Settings:</string>
                           </property>
                          </widget>
                         </item>
@@ -1282,23 +1314,6 @@
                            </size>
                           </property>
                          </spacer>
-                        </item>
-                        <item row="0" column="3">
-                         <widget class="QPushButton" name="preview_envelope">
-                          <property name="text">
-                           <string>Preview Envelope</string>
-                          </property>
-                         </widget>
-                        </item>
-                        <item row="0" column="1">
-                         <widget class="QLineEdit" name="brr_setting"/>
-                        </item>
-                        <item row="0" column="0">
-                         <widget class="QLabel" name="brr_setting_label">
-                          <property name="text">
-                           <string>Sample Settings:</string>
-                          </property>
-                         </widget>
                         </item>
                        </layout>
                       </widget>
@@ -3332,23 +3347,45 @@ Saves 2.4KB over Redux 1</string>
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="spcplayer_groupBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="minimumSize">
-       <size>
-        <width>530</width>
-        <height>190</height>
-       </size>
-      </property>
-      <property name="title">
-       <string>spcplayer area</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_25"/>
+     <widget class="QWidget" name="footer_area" native="true">
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="spcplayer_groupBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>530</width>
+           <height>190</height>
+          </size>
+         </property>
+         <property name="title">
+          <string>spcplayer area</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_25"/>
+        </widget>
+       </item>
+       <item>
+        <widget class="Keyboard" name="audition_player"/>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
     </item>
     <item>
@@ -3540,7 +3577,7 @@ Saves 2.4KB over Redux 1</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1400</width>
+     <width>1800</width>
      <height>22</height>
     </rect>
    </property>
@@ -3671,6 +3708,19 @@ Saves 2.4KB over Redux 1</string>
    </property>
   </action>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>EnvelopePreview</class>
+   <extends>QWidget</extends>
+   <header>smw_music/ui/envelope_preview</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>Keyboard</class>
+   <extends>QGraphicsView</extends>
+   <header>smw_music/ui/keyboard</header>
+  </customwidget>
+ </customwidgets>
  <tabstops>
   <tabstop>select_musicxml_fname</tabstop>
   <tabstop>musicxml_fname</tabstop>
@@ -3719,7 +3769,6 @@ Saves 2.4KB over Redux 1</string>
   <tabstop>gain_slider</tabstop>
   <tabstop>gain_setting</tabstop>
   <tabstop>brr_setting</tabstop>
-  <tabstop>preview_envelope</tabstop>
   <tabstop>tune_slider</tabstop>
   <tabstop>tune_setting</tabstop>
   <tabstop>subtune_slider</tabstop>

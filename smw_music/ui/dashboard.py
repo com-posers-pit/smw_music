@@ -203,11 +203,9 @@ class _TblCol(enum.IntEnum):
 
 class Dashboard(QWidget):
     _history: QMainWindow
-    _keyboard: QMainWindow
     _quicklook: QMainWindow
     _checkitout: QMainWindow
     _camelitout: QMainWindow
-    _envelope_preview: EnvelopePreview
     _extension = "prj"
     _model: Model
     _preferences: Preferences
@@ -283,15 +281,7 @@ class Dashboard(QWidget):
         self._history.setWindowTitle("Action history")
         self._history.setMinimumSize(800, 600)
         self._history.setCentralWidget(QListWidget())
-
-        self._envelope_preview = EnvelopePreview(self)
         self._history.setWindowTitle("History")
-
-        self._keyboard = QMainWindow(parent=self)
-        self._keyboard.setWindowTitle("Keyboard")
-        self._kbd = Keyboard()
-        self._keyboard.setCentralWidget(self._kbd)
-        self._keyboard.setFixedSize(self._kbd.size())
 
         self._setup_menus()
         self._fix_edit_widths()
@@ -309,7 +299,6 @@ class Dashboard(QWidget):
             self._history,
             self._quicklook,
             self._checkitout,
-            self._envelope_preview,
         ]:
             widget.setWindowIcon(QIcon(str(RESOURCES / "maestro.svg")))
 
@@ -364,11 +353,6 @@ class Dashboard(QWidget):
 
     ###########################################################################
     # API slot definitions
-    ###########################################################################
-
-    def on_audition_sample_clicked(self) -> None:
-        self._keyboard.show()
-
     ###########################################################################
 
     def on_brr_clicked(self) -> None:
@@ -503,11 +487,6 @@ class Dashboard(QWidget):
 
             action.setToolTip(tooltip)
             action.setEnabled(enable)
-
-    ###########################################################################
-
-    def on_preview_envelope_clicked(self) -> None:
-        self._envelope_preview.show()
 
     ###########################################################################
 
@@ -858,8 +837,6 @@ class Dashboard(QWidget):
             (v.subtune_slider, m.on_subtune_changed),
             (v.subtune_setting, m.on_subtune_changed),
             (v.brr_setting, m.on_brr_setting_changed),
-            (v.preview_envelope, self.on_preview_envelope_clicked),
-            (v.audition_sample, self.on_audition_sample_clicked),
             # Global settings
             (v.global_volume_slider, m.on_global_volume_changed),
             (v.global_volume_setting, m.on_global_volume_changed),
@@ -962,8 +939,8 @@ class Dashboard(QWidget):
 
         v.start_section.activated.connect(m.on_start_section_activated)
 
-        self._kbd.key_on.connect(self._on_audition_start)
-        self._kbd.key_off.connect(lambda x, y: m.on_audition_stop())
+        v.audition_player.key_on.connect(self._on_audition_start)
+        v.audition_player.key_off.connect(lambda x, y: m.on_audition_stop())
 
         # Return signals
         m.state_changed.connect(self.on_state_changed)
@@ -1296,8 +1273,8 @@ class Dashboard(QWidget):
     def _update_envelope(  # pylint: disable=too-many-arguments
         self, env: Envelope
     ) -> None:
-        prev = self._envelope_preview
         view = self._view
+        prev = self._view.envelope_preview
 
         if env.adsr_mode:
             labels = prev.plot_adsr(

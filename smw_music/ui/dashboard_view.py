@@ -30,6 +30,10 @@ from PyQt6.QtWidgets import (
     QWidget,
 )
 
+# Package imports
+from smw_music.ui.envelope_preview import EnvelopePreview
+from smw_music.ui.keyboard import Keyboard
+
 
 class DashboardView(QMainWindow):
     actionClearRecentProjects: QAction
@@ -71,7 +75,7 @@ class DashboardView(QMainWindow):
     attack_label: QLabel
     attack_setting: QLineEdit
     attack_slider: QSlider
-    audition_sample: QPushButton
+    audition_player: Keyboard
     brr_fname: QLineEdit
     brr_setting: QLineEdit
     brr_setting_label: QLabel
@@ -122,6 +126,7 @@ class DashboardView(QMainWindow):
     echo_right_surround: QCheckBox
     echo_settings_box: QGroupBox
     echo_sliders_widget: QWidget
+    envelope_preview: EnvelopePreview
     envelope_tab: QWidget
     exit_dashboard: QAction
     f_label: QLabel
@@ -140,6 +145,7 @@ class DashboardView(QMainWindow):
     ffff_setting: QLineEdit
     ffff_setting_label: QLabel
     ffff_slider: QSlider
+    footer_area: QWidget
     gain_box: QFrame
     gain_eu_label: QLabel
     gain_frame: QFrame
@@ -242,7 +248,6 @@ class DashboardView(QMainWindow):
     pppp_setting: QLineEdit
     pppp_setting_label: QLabel
     pppp_slider: QSlider
-    preview_envelope: QPushButton
     redo: QAction
     reload_musicxml: QPushButton
     render_zip: QPushButton
@@ -312,6 +317,7 @@ class DashboardView(QMainWindow):
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
+    spcplayer_groupBox: QGroupBox
     splitter: QSplitter
     splitter_2: QSplitter
     splitter_3: QSplitter

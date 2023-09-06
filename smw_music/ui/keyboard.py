@@ -23,6 +23,7 @@ from PyQt6.QtWidgets import (
     QGraphicsSceneDragDropEvent,
     QGraphicsSceneMouseEvent,
     QGraphicsView,
+    QWidget,
 )
 
 ###############################################################################
@@ -203,12 +204,13 @@ class Keyboard(QGraphicsView):
 
     def __init__(
         self,
+        parent: QWidget | None = None,
         nkeys: int = 60,
         key_width: int = 16,
         key_height: int = 50,
         padding: int = 5,
     ) -> None:
-        super().__init__()
+        super().__init__(parent)
 
         self.nkeys = nkeys
         self._key_width = key_width
