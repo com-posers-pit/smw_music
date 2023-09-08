@@ -12,10 +12,10 @@
 # Standard library imports
 from contextlib import suppress
 from functools import partial
-from typing import Callable
+from typing import Callable, cast
 
 # Library imports
-from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtCore import QEvent, QObject, Qt, pyqtSignal
 from PyQt6.QtGui import QBrush, QKeyEvent, QPen
 from PyQt6.QtWidgets import (
     QGraphicsRectItem,
@@ -252,46 +252,6 @@ class Keyboard(QGraphicsView):
             self._pressed = None
 
     ###########################################################################
-    # Event handler definitions
-    ###########################################################################
-
-    def keyPressEvent(self, evt: QKeyEvent) -> None:
-        # Autorepeat is the worst
-        if evt.isAutoRepeat():
-            return
-
-        keyval = evt.key()
-
-        # Escape toggles keyboard active state
-        if keyval == Qt.Key.Key_Escape:
-            self.active = not self.active
-
-        # While active
-        if self.active:
-            if evt.modifiers() & Qt.KeyboardModifier.KeypadModifier:
-                # If it's a keypad '*' or '/', change the octave
-                if keyval == Qt.Key.Key_Asterisk:
-                    self.octave += 1
-                if keyval == Qt.Key.Key_Slash:
-                    self.octave -= 1
-            else:
-                # Otherwise try to play a note
-                with suppress(KeyError):
-                    key, offset = _KEY_TABLE[Qt.Key(keyval)]
-                    self.press_key(key, self.octave + offset)
-
-    ###########################################################################
-
-    def keyReleaseEvent(self, evt: QKeyEvent) -> None:
-        if evt.isAutoRepeat():
-            return
-
-        if self.active:
-            with suppress(KeyError):
-                key, offset = _KEY_TABLE[Qt.Key(evt.key())]
-                self.release_key(key, self.octave + offset)
-
-    ###########################################################################
     # Private method definitions
     ###########################################################################
 
@@ -432,3 +392,83 @@ class Keyboard(QGraphicsView):
                 leftover = 6
 
         return 7 * octaves + leftover
+
+
+###############################################################################
+
+
+class KeyboardEventFilter(QObject):
+    def __init__(self, keyboard: Keyboard) -> None:
+        super().__init__()
+        self._kbd = keyboard
+        self._playing = False
+
+    ###########################################################################
+
+    def eventFilter(self, obj: QObject, evt: QEvent) -> bool:
+        # Guard clauses
+        if not isinstance(evt, QKeyEvent):
+            return False
+
+        # Autorepeat is the devil
+        if evt.isAutoRepeat():
+            return False
+
+        match cast(QKeyEvent, evt).type():
+            case QKeyEvent.Type.KeyPress:
+                return self._handle_keypress(evt)
+            case QKeyEvent.Type.KeyRelease:
+                return self._handle_keyrelease(evt)
+
+        return False
+
+    ###########################################################################
+
+    def _handle_keypress(self, evt: QKeyEvent) -> bool:
+        if self._playing:
+            return False
+
+        handled = False
+        keyval = evt.key()
+
+        # Escape toggles keyboard active state
+        if keyval == Qt.Key.Key_Escape:
+            self._kbd.active = not self._kbd.active
+            handled = True
+
+        # While active
+        if self._kbd.active:
+            if evt.modifiers() & Qt.KeyboardModifier.KeypadModifier:
+                # If it's a keypad '*' or '/', change the octave
+                if keyval == Qt.Key.Key_Asterisk:
+                    self._kbd.octave += 1
+                    handled = True
+                if keyval == Qt.Key.Key_Slash:
+                    self._kbd.octave -= 1
+                    handled = True
+            else:
+                # Otherwise try to play a note
+                with suppress(KeyError):
+                    key, offset = _KEY_TABLE[Qt.Key(keyval)]
+                    self._playing = True
+                    self._kbd.press_key(key, self._kbd.octave + offset)
+                    handled = True
+
+        return handled
+
+    ###########################################################################
+
+    def _handle_keyrelease(self, evt: QKeyEvent) -> bool:
+        if not self._playing:
+            return False
+
+        handled = False
+
+        if self._kbd.active:
+            with suppress(KeyError):
+                key, offset = _KEY_TABLE[Qt.Key(evt.key())]
+                self._playing = False
+                self._kbd.release_key(key, self._kbd.octave + offset)
+                handled = True
+
+        return handled

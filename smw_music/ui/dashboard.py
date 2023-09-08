@@ -56,8 +56,7 @@ from smw_music.music_xml.instrument import SampleSource, TuneSource
 from smw_music.spc700 import Envelope, GainMode
 from smw_music.ui.dashboard_ui import update_sample_opt
 from smw_music.ui.dashboard_view import DashboardView
-from smw_music.ui.envelope_preview import EnvelopePreview
-from smw_music.ui.keyboard import Keyboard
+from smw_music.ui.keyboard import KeyboardEventFilter
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
@@ -304,6 +303,9 @@ class Dashboard(QWidget):
 
         self._sample_remover = _SampleRemover(self._model)
         self._view.sample_list.installEventFilter(self._sample_remover)
+
+        self._kbd_filter = KeyboardEventFilter(self._view.audition_player)
+        QApplication.instance().installEventFilter(self._kbd_filter)
 
         self._view.show()
 
