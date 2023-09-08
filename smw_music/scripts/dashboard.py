@@ -14,6 +14,7 @@
 # Standard library imports
 import argparse
 import logging
+from contextlib import ExitStack, redirect_stderr, redirect_stdout
 from pathlib import Path
 
 # Library imports
@@ -32,6 +33,9 @@ def main() -> None:
     parser = argparse.ArgumentParser("UI")
     parser.add_argument("-v", action="count", default=0, help="Verbosity")
     parser.add_argument("project", default=None, type=Path, nargs="?")
+    parser.add_argument(
+        "--console", action="store_true", help="Print to console"
+    )
 
     args, _ = parser.parse_known_args()
     level = {
@@ -45,10 +49,17 @@ def main() -> None:
 
     logging.info("Starting application")
 
-    app = QApplication([])
-    app.setApplicationName("MusicXML -> MML")
-    _ = Dashboard(args.project)
-    app.exec()
+    with ExitStack() as stack:
+        if not args.console:
+            logfile = open("spcmw.log", "w")
+            stack.enter_context(logfile)
+            stack.enter_context(redirect_stdout(logfile))
+            stack.enter_context(redirect_stderr(logfile))
+
+        app = QApplication([])
+        app.setApplicationName("SPaCeMusicW")
+        _ = Dashboard(args.project)
+        app.exec()
 
 
 ###############################################################################
