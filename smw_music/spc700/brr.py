@@ -167,6 +167,7 @@ class BrrException(SmwMusicException):
 class Brr:
     blocks: npt.NDArray[np.uint8]
     loop_point: int | None = None
+    samples_per_frame: int = 1024
     _waveform_cache: dict[int, npt.NDArray[np.int16]] = field(
         init=False, repr=False, compare=False, default_factory=dict
     )
@@ -208,7 +209,7 @@ class Brr:
 
         # Variable initialization
         proc = np.zeros(SAMPLES_PER_BLOCK)
-        chunk_size = self.SAMPLES_PER_FRAME / SAMPLES_PER_BLOCK
+        chunk_size = self.samples_per_frame / SAMPLES_PER_BLOCK
 
         dt = pitch_reg / PITCH_REG_SCALE
 
@@ -221,7 +222,7 @@ class Brr:
         env_times *= SAMPLE_FREQ
 
         buffer = np.zeros(SAMPLES_PER_BLOCK, dtype=np.int16)
-        weights = np.zeros(self.SAMPLES_PER_FRAME)
+        weights = np.zeros(self.samples_per_frame)
         nblocks = int(np.ceil(chunk_size * dt))
         frame_size = 1 + nblocks * SAMPLES_PER_BLOCK
         frame = np.zeros(frame_size)
@@ -277,12 +278,12 @@ class Brr:
                     result = np.round(result * weights).astype(np.int16)
                     buffer = np.hstack((buffer, result))
 
-                    while len(buffer) >= self.SAMPLES_PER_FRAME:
-                        yield buffer[: self.SAMPLES_PER_FRAME]
-                        buffer = buffer[self.SAMPLES_PER_FRAME :]
+                    while len(buffer) >= self.samples_per_frame:
+                        yield buffer[: self.samples_per_frame]
+                        buffer = buffer[self.samples_per_frame :]
 
                     if one_shot or done:
-                        rv = np.zeros(self.SAMPLES_PER_FRAME, dtype=np.int16)
+                        rv = np.zeros(self.samples_per_frame, dtype=np.int16)
                         rv[: len(buffer)] = buffer[:]
                         yield rv
                         return
@@ -372,11 +373,6 @@ class Brr:
 
     ###########################################################################
 
-    @property
-    def SAMPLES_PER_FRAME(self) -> int:
-        return 512
-
-    ###########################################################################
     @property
     def csv(self) -> str:
         rv = [

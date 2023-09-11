@@ -101,7 +101,7 @@ class SamplePlayer:
                 channels=1,
                 rate=SAMPLE_FREQ,
                 output=True,
-                frames_per_buffer=brr.SAMPLES_PER_FRAME,
+                frames_per_buffer=brr.samples_per_frame,
                 stream_callback=self._stream_cb,
             )
         ) as stream:
