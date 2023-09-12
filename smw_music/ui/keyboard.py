@@ -12,7 +12,7 @@
 # Standard library imports
 from contextlib import suppress
 from functools import partial
-from typing import Callable, cast
+from typing import Callable
 
 # Library imports
 from PyQt6.QtCore import QEvent, QObject, Qt, pyqtSignal
@@ -412,9 +412,9 @@ class KeyboardEventFilter(QObject):
 
         # Autorepeat is the devil
         if evt.isAutoRepeat():
-            return False
+            return True
 
-        match cast(QKeyEvent, evt).type():
+        match evt.type():
             case QKeyEvent.Type.KeyPress:
                 return self._handle_keypress(evt)
             case QKeyEvent.Type.KeyRelease:

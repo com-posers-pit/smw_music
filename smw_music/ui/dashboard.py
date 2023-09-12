@@ -305,7 +305,7 @@ class Dashboard(QWidget):
         self._view.sample_list.installEventFilter(self._sample_remover)
 
         self._kbd_filter = KeyboardEventFilter(self._view.audition_player)
-        QApplication.instance().installEventFilter(self._kbd_filter)
+        # QApplication.instance().installEventFilter(self._kbd_filter)
 
         self._view.show()
 
@@ -351,7 +351,7 @@ class Dashboard(QWidget):
                 elif self._keyhist == _REV_KONAMI:
                     self._camelitout.show()
 
-        return super().eventFilter(obj, event)
+        return False
 
     ###########################################################################
     # API slot definitions
