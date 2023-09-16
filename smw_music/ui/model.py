@@ -1702,9 +1702,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         state = self.state
         fname = self._project_path / "Addmusic_sample groups.txt"
         with open(fname) as fobj:
-            contents = fobj.read().split(sep)
+            contents = [x for x in fobj.read().split(sep) if x]
 
-        stock_groups = 5
+        stock_groups = 4
         contents = contents[:stock_groups]
 
         if state.builtin_sample_group == BuiltinSampleGroup.CUSTOM:
@@ -1735,11 +1735,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             for src, sample in zip(state.builtin_sample_sources, smap):
                 match src:
                     case BuiltinSampleSource.DEFAULT:
-                        new_group.append(f'    "default/{sample}')
+                        new_group.append(f'\t"default/{sample}')
                     case BuiltinSampleSource.OPTIMIZED:
-                        new_group.append(f'    "optimized/{sample}')
+                        new_group.append(f'\t"optimized/{sample}')
                     case BuiltinSampleSource.EMPTY:
-                        new_group.append('    "EMPTY.brr"')
+                        new_group.append('\t"EMPTY.brr"')
             new_group.append("")
             new_group_str = "\n".join(new_group)
             contents.append(new_group_str)
