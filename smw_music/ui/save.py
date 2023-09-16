@@ -23,6 +23,7 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music import SmwMusicException, __version__
+from smw_music.amk import make_vis_dir
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
     Artic,
@@ -36,7 +37,6 @@ from smw_music.music_xml.instrument import (
 from smw_music.spc700 import Envelope, GainMode
 from smw_music.ui.old_save import v0
 from smw_music.ui.state import BuiltinSampleGroup, BuiltinSampleSource, State
-from smw_music.ui.utils import make_vis_dir
 
 ###############################################################################
 # Private constant definitions

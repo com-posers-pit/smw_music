@@ -27,13 +27,5 @@ def is_checked(checkbox: QCheckBox) -> bool:
 ###############################################################################
 
 
-# https://www.smwcentral.net/?p=viewthread&t=98793&page=1&pid=1579851#p1579851
-def make_vis_dir(path: Path) -> None:
-    os.makedirs(path / "Visualizations", exist_ok=True)
-
-
-###############################################################################
-
-
 def to_checkstate(checked: bool) -> Qt.CheckState:
     return Qt.CheckState.Checked if checked else Qt.CheckState.Unchecked

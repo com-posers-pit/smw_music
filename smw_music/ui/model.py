@@ -10,12 +10,9 @@
 ###############################################################################
 
 # Standard library imports
-import hashlib
 import os
-import pkgutil
 import platform
 import shutil
-import stat
 import subprocess  # nosec 404
 import threading
 import zipfile
@@ -29,13 +26,18 @@ from typing import Callable
 
 # Library imports
 import yaml
-from mako.template import Template  # type: ignore
 from music21.pitch import Pitch, PitchException
 from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import RESOURCES, SmwMusicException, __version__
+from smw_music import SmwMusicException, __version__
+from smw_music.amk import (
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    create_project,
+    update_sample_groups_file,
+)
 from smw_music.music_xml import MusicXmlException
 from smw_music.music_xml.echo import EchoCh, EchoConfig
 from smw_music.music_xml.instrument import (
@@ -61,16 +63,9 @@ from smw_music.spc700 import (
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
-from smw_music.ui.state import (
-    BuiltinSampleGroup,
-    BuiltinSampleSource,
-    NoSample,
-    PreferencesState,
-    State,
-)
+from smw_music.ui.state import NoSample, PreferencesState, State
 from smw_music.ui.utilization import decode_utilization, echo_bytes
-from smw_music.ui.utils import make_vis_dir
-from smw_music.utils import brr_size_b, newest_release, version_tuple, zip_top
+from smw_music.utils import brr_size_b, newest_release, version_tuple
 
 ###############################################################################
 # Private constant definitions
@@ -195,71 +190,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if project_name is None:
             project_name = path.name
 
-        members = [
-            "1DF9",
-            "AddmusicK.exe",
-            "Addmusic_sample groups.txt",
-            "asar.exe",
-            "music",
-            "SPCs",
-            "1DFC",
-            "Addmusic_list.txt",
-            "Addmusic_sound effects.txt",
-            "asm",
-            "samples",
-            "stats",
-        ]
-
-        extract_dir = path / "unzip"
-        with zipfile.ZipFile(str(self.preferences.amk_fname), "r") as zobj:
-            # Extract all the files
-            zobj.extractall(path=extract_dir)
-
-            # Some AMK releases have a top-level folder in the zip file, some
-            # don't.  This figures out what that is, if it's there
-            root = zip_top(zobj)
-
-            # Move them up a directory and delete the rest
-            for member in members:
-                shutil.move(extract_dir / root / member, path / member)
-
-            shutil.rmtree(extract_dir)
-
-        # Append new sample groups
-        with (RESOURCES / "sample_groups.txt").open("rb") as fobj_in, open(
-            path / "Addmusic_sample groups.txt", "ab"
-        ) as fobj_out:
-            fobj_out.write(fobj_in.read())
-
-        # Add visualizations directory
-        make_vis_dir(path)
-
-        # Apply updates to stock AMK files
-        # https://www.smwcentral.net/?p=viewthread&t=98793&page=2&pid=1601787#p1601787
-        expected_md5 = "7e9d4bd864cfc1e82272fb0a9379e318"
-        fname = path / "music/originals/09 Bonus End.txt"
-        with open(fname, "rb") as fobj:
-            data = fobj.read()
-        actual_md5 = hashlib.md5(data).hexdigest()  # nosec: B324
-        if actual_md5 == expected_md5:
-            contents = data.split(b"\n")
-            contents = contents[:15] + contents[16:]
-            data = b"\n".join(contents)
-            with open(fname, "wb") as fobj:
-                fobj.write(data)
-
-        # Create the conversion scripts
-        for tmpl_name in ["convert.bat", "convert.sh"]:
-            tmpl = Template(  # nosec B702
-                pkgutil.get_data("smw_music", f"data/{tmpl_name}")
-            )
-            script = tmpl.render(project=project_name)
-            target = path / tmpl_name
-
-            with open(target, "w", encoding="utf8") as fobj:
-                fobj.write(script)
-
-            os.chmod(target, os.stat(target).st_mode | stat.S_IXUSR)
+        create_project(path, project_name, self.preferences.amk_fname)
 
         self._update_state()
         self._update_state(
@@ -1425,8 +1356,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.mml_generated.emit("\n".join(ashtley))
         else:
             assert state.project_name is not None  # nosec: B101
+            assert self._project_path is not None  # nosec: B101
 
-            self._update_sample_groups()
+            update_sample_groups_file(
+                self._project_path,
+                state.builtin_sample_group,
+                state.builtin_sample_sources,
+            )
 
             try:
                 if os.path.exists(fname):
@@ -1691,64 +1627,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # TODO: remove ignore
         new_env = replace(self.state.sample.envelope, **kwargs)  # type: ignore
         self._update_sample_state(envelope=new_env)
-
-    ###########################################################################
-
-    # TODO: Fix this awful hack
-    def _update_sample_groups(self) -> None:
-        assert self._project_path is not None  # nosec: B101
-
-        sep = "}"
-        state = self.state
-        fname = self._project_path / "Addmusic_sample groups.txt"
-        with open(fname) as fobj:
-            contents = [x for x in fobj.read().split(sep) if x]
-
-        stock_groups = 4
-        contents = contents[:stock_groups]
-
-        if state.builtin_sample_group == BuiltinSampleGroup.CUSTOM:
-            smap = [
-                '00 SMW @0.brr"!',
-                '01 SMW @1.brr"!',
-                '02 SMW @2.brr"!',
-                '03 SMW @3.brr"!',
-                '04 SMW @4.brr"!',
-                '05 SMW @8.brr"!',
-                '06 SMW @22.brr"!',
-                '07 SMW @5.brr"!',
-                '08 SMW @6.brr"!',
-                '09 SMW @7.brr"!',
-                '0A SMW @9.brr"!',
-                '0B SMW @10.brr"!',
-                '0C SMW @13.brr"!',
-                '0D SMW @14.brr"',
-                '0E SMW @29.brr"!',
-                '0F SMW @21.brr"',
-                '10 SMW @12.brr"!',
-                '11 SMW @17.brr"',
-                '12 SMW @15.brr"!',
-                '13 SMW Thunder.brr"!',
-            ]
-
-            new_group = ["", "", "#custom", "{"]
-            for src, sample in zip(state.builtin_sample_sources, smap):
-                match src:
-                    case BuiltinSampleSource.DEFAULT:
-                        new_group.append(f'\t"default/{sample}')
-                    case BuiltinSampleSource.OPTIMIZED:
-                        new_group.append(f'\t"optimized/{sample}')
-                    case BuiltinSampleSource.EMPTY:
-                        new_group.append('\t"EMPTY.brr"')
-            new_group.append("")
-            new_group_str = "\n".join(new_group)
-            contents.append(new_group_str)
-
-        contents.append("\n")
-        contents_str = sep.join(contents)
-
-        with open(fname, "w", newline="\r\n") as fobj:
-            fobj.write(contents_str)
 
     ###########################################################################
 

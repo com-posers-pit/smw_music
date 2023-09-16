@@ -11,7 +11,6 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from enum import Enum, auto
 from pathlib import Path
 
 # Library imports
@@ -19,6 +18,7 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music import SmwMusicException
+from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
 from smw_music.ui.utilization import Utilization, default_utilization
@@ -31,26 +31,6 @@ N_BUILTIN_SAMPLES = 20
 
 ###############################################################################
 # API class definitions
-###############################################################################
-
-
-class BuiltinSampleGroup(Enum):
-    DEFAULT = auto()
-    OPTIMIZED = auto()
-    REDUX1 = auto()
-    REDUX2 = auto()
-    CUSTOM = auto()
-
-
-###############################################################################
-
-
-class BuiltinSampleSource(Enum):
-    DEFAULT = auto()
-    OPTIMIZED = auto()
-    EMPTY = auto()
-
-
 ###############################################################################
 
 
