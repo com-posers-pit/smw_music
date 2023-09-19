@@ -47,7 +47,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Package imports
-from smw_music import RESOURCES, __version__
+from smw_music import COPYRIGHT_YEAR, RESOURCES, __version__
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
@@ -677,7 +677,8 @@ class Dashboard(QWidget):
 
         title = "About MusicXML -> MML"
         text = f"Version: {__version__} ({codename})"
-        text += "\nCopyright Ⓒ 2023 The SMW Music Python Project Authors"
+        text += f"\nCopyright Ⓒ {COPYRIGHT_YEAR} The SMW Music Python Project "
+        text += "Authors"
         text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
 
         QMessageBox.about(self._view, title, text)
