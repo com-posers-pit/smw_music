@@ -64,14 +64,14 @@ for ui_fname, py_fname, module in uis:
         for widget_class in sorted(widget_set):
             print(f"    {widget_class},")
         print(")")
-        print("")
-        print("")
+        if custom_widgets:
+            print("")
+            print("# Package imports")
         for widget_module in sorted(custom_widgets.keys()):
             imports = ",".join(custom_widgets[widget_module])
             print(f"from {widget_module} import {imports}")
-        if custom_widgets:
-            print("")
-            print("")
+        print("")
+        print("")
 
         print(f"class {module}({top_class}):")
         for action in actions:

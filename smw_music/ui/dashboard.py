@@ -42,7 +42,6 @@ from PyQt6.QtWidgets import (
     QRadioButton,
     QSlider,
     QSpinBox,
-    QTextEdit,
     QTreeWidgetItem,
     QWidget,
 )
@@ -201,8 +200,6 @@ class _TblCol(enum.IntEnum):
 
 
 class Dashboard(QWidget):
-    _history: QMainWindow
-    _quicklook: QMainWindow
     _checkitout: QMainWindow
     _camelitout: QMainWindow
     _extension = "prj"
@@ -248,13 +245,7 @@ class Dashboard(QWidget):
         # h/t: https://forum.qt.io/topic/35999
         font = QFont("_")
         font.setStyleHint(QFont.StyleHint.Monospace)
-        quicklook_edit = QTextEdit()
-        quicklook_edit.setFont(font)
-        quicklook_edit.setReadOnly(True)
-        self._quicklook = QMainWindow(parent=self)
-        self._quicklook.setWindowTitle("Quicklook")
-        self._quicklook.setMinimumSize(800, 600)
-        self._quicklook.setCentralWidget(quicklook_edit)
+        self._view.mml_view.setFont(font)
 
         self._checkitout = QMainWindow(parent=self)
         self._checkitout.setWindowTitle(
@@ -276,12 +267,6 @@ class Dashboard(QWidget):
         movie.start()
         self._camelitout.setCentralWidget(label)
 
-        self._history = QMainWindow(parent=self)
-        self._history.setWindowTitle("Action history")
-        self._history.setMinimumSize(800, 600)
-        self._history.setCentralWidget(QListWidget())
-        self._history.setWindowTitle("History")
-
         self._setup_menus()
         self._fix_edit_widths()
         self._combine_widgets()
@@ -295,8 +280,6 @@ class Dashboard(QWidget):
 
         for widget in [
             self._view,
-            self._history,
-            self._quicklook,
             self._checkitout,
         ]:
             widget.setWindowIcon(QIcon(str(RESOURCES / "maestro.svg")))
@@ -377,7 +360,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_mml_generated(self, mml: str) -> None:
-        cast(QTextEdit, self._quicklook.centralWidget()).setText(mml)
+        self._view.mml_view.setText(mml)
 
     ###########################################################################
 
@@ -415,16 +398,6 @@ class Dashboard(QWidget):
         )
         if fname:
             self._model.on_musicxml_fname_changed(fname)
-
-    ###########################################################################
-
-    def on_open_history_clicked(self) -> None:
-        self._history.show()
-
-    ###########################################################################
-
-    def on_open_quicklook_clicked(self) -> None:
-        self._quicklook.show()
 
     ###########################################################################
 
@@ -690,7 +663,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_status_updated(self, msg: str) -> None:
-        cast(QListWidget, self._history.centralWidget()).insertItem(0, msg)
+        self._view.history_view.insertItem(0, msg)
         self._view.statusBar().showMessage(msg)
 
     ###########################################################################
@@ -758,8 +731,6 @@ class Dashboard(QWidget):
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),
             (v.start_measure, m.on_start_measure_changed),
-            (v.open_quicklook, self.on_open_quicklook_clicked),
-            (v.open_history, self.on_open_history_clicked),
             (v.generate_mml, m.on_generate_mml_clicked),
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
@@ -1247,7 +1218,6 @@ class Dashboard(QWidget):
 
         view.undo.triggered.connect(model.on_undo_clicked)
         view.redo.triggered.connect(model.on_redo_clicked)
-        view.view_history.triggered.connect(self.on_open_history_clicked)
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)

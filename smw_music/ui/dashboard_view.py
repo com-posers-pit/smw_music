@@ -26,6 +26,7 @@ from PyQt6.QtWidgets import (
     QSplitter,
     QStatusBar,
     QTabWidget,
+    QTextEdit,
     QTreeWidget,
     QWidget,
 )
@@ -171,6 +172,9 @@ class DashboardView(QMainWindow):
     global_volume_setting: QLineEdit
     global_volume_setting_label: QLabel
     global_volume_slider: QSlider
+    history_tab: QWidget
+    history_view: QListWidget
+    info_tab: QTabWidget
     instrument_articulation_tab: QWidget
     instrument_config_tab: QTabWidget
     instrument_dynamics_tab: QWidget
@@ -194,6 +198,8 @@ class DashboardView(QMainWindow):
     mf_setting_label: QLabel
     mf_slider: QSlider
     mml_fname: QLineEdit
+    mml_tab: QWidget
+    mml_view: QTextEdit
     mp_label: QLabel
     mp_setting: QLineEdit
     mp_setting_label: QLabel
@@ -217,10 +223,8 @@ class DashboardView(QMainWindow):
     new_project: QAction
     octave_shift: QSpinBox
     octave_shift_label: QLabel
-    open_history: QPushButton
     open_preferences: QAction
     open_project: QAction
-    open_quicklook: QPushButton
     other_settings_box: QGroupBox
     p_label: QLabel
     p_setting: QLineEdit
@@ -327,6 +331,8 @@ class DashboardView(QMainWindow):
     start_measure_label: QLabel
     start_section: QComboBox
     start_section_label: QLabel
+    status_tab: QWidget
+    status_view: QTextEdit
     statusbar: QStatusBar
     subtune_label: QLabel
     subtune_setting: QLineEdit

@@ -50,7 +50,6 @@ Menus
       view.exit_dashboard.triggered --> QApplication.quit
       view.undo.triggered --> model.on_undo_clicked
       view.redo.triggered --> model.on_redo_clicked
-      view.view_history.triggered --> dashboard.on_open_history_clicked
       view.show_about.triggered --> dashboard._about
       view.show_about_qt.triggered --> QApplication.aboutQt
 
@@ -75,8 +74,6 @@ Control Panel
       view.audition_player.pressed --> dashboard._on_audition_start --> model.on_audition_start
       view.audition_player.released --> model.on_audition_stop
       view.reload_musicxml.released --> model.on_reload_musicxml_clicked
-      view.open_quicklook.released --> dashboard.on_open_quicklook_clicked
-      view.open_history.released --> dashboard.on_open_history_clicked
       view.generate_mml.released --> model.on_generate_mml_clicked
       view.generate_spc.released --> model.on_generate_spc_clicked
       view.play_spc.released --> model.on_play_spc_clicked
