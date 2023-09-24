@@ -20,15 +20,13 @@ from functools import partial
 from typing import Any, Optional, cast
 
 # Library imports
-import matplotlib  # type: ignore
+import matplotlib
 import numpy as np
 import numpy.typing as npt
 import scipy.signal  # type: ignore
-from matplotlib.backends.backend_qt5agg import (  # type: ignore
-    FigureCanvasQTAgg,
-)
-from matplotlib.figure import Figure  # type: ignore
-from matplotlib.ticker import ScalarFormatter  # type: ignore
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+from matplotlib.figure import Figure
+from matplotlib.ticker import ScalarFormatter
 from PyQt6 import QtCore
 from PyQt6.QtWidgets import (
     QApplication,
@@ -47,10 +45,6 @@ from PyQt6.QtWidgets import (
 from smw_music import __version__
 
 ###############################################################################
-###############################################################################
-
-
-###############################################################################
 # Private function definitions
 ###############################################################################
 
@@ -67,7 +61,7 @@ def _decode_coeffs(arg: str) -> npt.NDArray[np.int8]:
 
 
 # Type info is missing, so we have to ignore typing in the subclassing
-class MplCanvas(FigureCanvasQTAgg):  # type: ignore
+class MplCanvas(FigureCanvasQTAgg):
     def __init__(
         self,
         parent: Optional[QWidget] = None,  # pylint: disable=unused-argument
