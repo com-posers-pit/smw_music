@@ -133,7 +133,8 @@ class _SamplePackWatcher(events.FileSystemEventHandler):
 
 class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(
-        (State, bool), arguments=["state", "update_instruments"]
+        (State, bool),
+        arguments=["state", "update_instruments"],  # type: ignore[call-arg]
     )
     preferences_changed = pyqtSignal(
         (bool, bool, bool, bool, bool),
@@ -143,18 +144,31 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "spcplayer_valid",
             "dark_mode",
             "confirm_render",
-        ],
+        ],  # type: ignore[call-arg]
     )
-    instruments_changed = pyqtSignal(list)
-    recent_projects_updated = pyqtSignal(list)
-    sample_packs_changed = pyqtSignal(dict)
+    instruments_changed = pyqtSignal(
+        list, arguments=["instruments"]  # type: ignore[call-arg]
+    )
+    recent_projects_updated = pyqtSignal(
+        list, arguments=["projects"]  # type: ignore[call-arg]
+    )
+    sample_packs_changed = pyqtSignal(
+        dict, arguments=["sample_packs"]  # type:ignore[call-arg]
+    )
 
-    mml_generated = pyqtSignal(str, arguments=["mml"])
-    status_updated = pyqtSignal(str, arguments=["message"])
-    response_generated = pyqtSignal(
-        (bool, str, str), arguments=["error", "title", "response"]
+    mml_generated = pyqtSignal(
+        str, arguments=["mml"]  # type: ignore[call-arg]
     )
-    songinfo_changed = pyqtSignal(str, arguments=["songinfo"])
+    status_updated = pyqtSignal(
+        str, arguments=["message"]  # type: ignore[call-arg]
+    )
+    response_generated = pyqtSignal(
+        (bool, str, str),
+        arguments=["error", "title", "response"],  # type: ignore[call-arg]
+    )
+    songinfo_changed = pyqtSignal(
+        str, arguments=["songinfo"]  # type: ignore[call-arg]
+    )
 
     song: Song | None
     preferences: PreferencesState

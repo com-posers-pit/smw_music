@@ -186,8 +186,12 @@ class _Key(QGraphicsRectItem):
 
 
 class Keyboard(QGraphicsView):
-    key_on = pyqtSignal(str, int)
-    key_off = pyqtSignal(str, int)
+    key_on = pyqtSignal(
+        (str, int), arguments=["note", "octave"]  # type: ignore[call-arg]
+    )
+    key_off = pyqtSignal(
+        (str, int), arguments=["note", "octave"]  # type: ignore[call-arg]
+    )
 
     nkeys: int
 
