@@ -321,6 +321,8 @@ class DashboardView(QMainWindow):
     settings_tab_widget: QTabWidget
     show_about: QAction
     show_about_qt: QAction
+    song_info_tab: QWidget
+    song_info_view: QTextEdit
     spcplayer_groupBox: QGroupBox
     splitter: QSplitter
     splitter_2: QSplitter
@@ -331,8 +333,6 @@ class DashboardView(QMainWindow):
     start_measure_label: QLabel
     start_section: QComboBox
     start_section_label: QLabel
-    status_tab: QWidget
-    status_view: QTextEdit
     statusbar: QStatusBar
     subtune_label: QLabel
     subtune_setting: QLineEdit

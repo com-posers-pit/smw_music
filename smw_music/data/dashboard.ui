@@ -3342,13 +3342,13 @@ Saves 2.4KB over Redux 1</string>
             </item>
            </layout>
           </widget>
-          <widget class="QWidget" name="status_tab">
+          <widget class="QWidget" name="song_info_tab">
            <attribute name="title">
             <string>Song Info</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_29">
             <item row="0" column="0">
-             <widget class="QTextEdit" name="status_view">
+             <widget class="QTextEdit" name="song_info_view">
               <property name="readOnly">
                <bool>true</bool>
               </property>

@@ -154,6 +154,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     response_generated = pyqtSignal(
         (bool, str, str), arguments=["error", "title", "response"]
     )
+    songinfo_changed = pyqtSignal(str, arguments=["songinfo"])
 
     song: Song | None
     preferences: PreferencesState
@@ -1202,6 +1203,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 f"Could not open score {musicxml}: {str(e)}",
             )
         else:
+            self.songinfo_changed.emit("")
             if keep_inst_settings:
                 # Reconcile instrument settings
                 for inst_name, song_inst in self.song.instruments.items():

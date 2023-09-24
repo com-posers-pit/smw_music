@@ -33,7 +33,6 @@ from PyQt6.QtWidgets import (
     QFileDialog,
     QLabel,
     QLineEdit,
-    QListWidget,
     QListWidgetItem,
     QMainWindow,
     QMenu,
@@ -513,6 +512,11 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_songinfo_changed(self, msg: str) -> None:
+        self._view.song_info_view.setText(msg)
+
+    ###########################################################################
+
     def on_state_changed(self, state: State, update_instruments: bool) -> None:
         if update_instruments:
             self._update_instruments(state)
@@ -927,6 +931,7 @@ class Dashboard(QWidget):
             m.on_recent_projects_cleared
         )
         m.status_updated.connect(self.on_status_updated)
+        m.songinfo_changed.connect(self.on_songinfo_changed)
 
     ###########################################################################
 
