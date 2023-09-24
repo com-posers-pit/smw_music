@@ -25,7 +25,7 @@
      <widget class="QWidget" name="main_ui_widget" native="true">
       <layout class="QHBoxLayout" name="horizontalLayout_9">
        <item>
-        <widget class="QSplitter" name="splitter_2">
+        <widget class="QSplitter" name="main_hsplit">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -3360,6 +3360,9 @@ Saves 2.4KB over Redux 1</string>
            <layout class="QGridLayout" name="gridLayout_27">
             <item row="0" column="0">
              <widget class="QTextEdit" name="mml_view">
+              <property name="lineWrapMode">
+               <enum>QTextEdit::NoWrap</enum>
+              </property>
               <property name="readOnly">
                <bool>true</bool>
               </property>
