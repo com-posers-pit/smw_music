@@ -23,7 +23,8 @@ from smw_music.ui.utils import Color
 ###############################################################################
 
 
-class _Rect(pg.BarGraphItem):
+# Bit of a hack to add rectangular regions to the graph
+class _Rect(pg.BarGraphItem):  # type: ignore
     ###########################################################################
     # Constructor definitions
     ###########################################################################

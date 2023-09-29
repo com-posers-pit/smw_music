@@ -80,7 +80,7 @@ def generate_adsr(
     srate_reg: int,
 ) -> tuple[
     npt.NDArray[np.double],
-    tuple[float, float, float, float, float],
+    tuple[float, float, float, float],
     tuple[str, str, str, str],
 ]:
     times = [0.0, 0.0]
