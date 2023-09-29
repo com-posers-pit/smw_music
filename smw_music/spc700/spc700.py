@@ -78,7 +78,11 @@ def generate_adsr(
     decay_reg: int,
     slevel_reg: int,
     srate_reg: int,
-) -> tuple[npt.NDArray[np.double], tuple[str, str, str, str]]:
+) -> tuple[
+    npt.NDArray[np.double],
+    tuple[float, float, float, float, float],
+    tuple[str, str, str, str],
+]:
     times = [0.0, 0.0]
     envelope = [0.0, 1.0]
 
@@ -122,6 +126,7 @@ def generate_adsr(
         release_done = times[-1]
         release_str = _time_to_str(release_done - decay_done)
     else:
+        release_done = 100
         release_str = "∞"
 
     times.append(100)
@@ -129,7 +134,11 @@ def generate_adsr(
 
     plot = np.array((times, envelope))
 
-    return (plot, (attack_str, decay_str, slevel_str, release_str))
+    return (
+        plot,
+        (0, attack_done, decay_done, release_done),
+        (attack_str, decay_str, slevel_str, release_str),
+    )
 
 
 ###############################################################################
@@ -343,7 +352,7 @@ class Envelope:
         self,
     ) -> tuple[npt.NDArray[np.double], npt.NDArray[np.double]]:
         if self.adsr_mode:
-            env, _ = generate_adsr(
+            env, _, _ = generate_adsr(
                 self.attack_setting,
                 self.decay_setting,
                 self.sus_level_setting,
