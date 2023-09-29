@@ -21,6 +21,7 @@ a = Analysis(
         ("smw_music/data/maestro.svg", "smw_music/data"),
         ("smw_music/data/mml.txt", "smw_music/data"),
         ("smw_music/data/preferences.ui", "smw_music/data"),
+        ("smw_music/data/project_settings.ui", "smw_music/data"),
         ("smw_music/data/sample_groups.txt", "smw_music/data"),
     ],
     hiddenimports=[

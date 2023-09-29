@@ -15,6 +15,7 @@ from typing import cast
 uis = [
     ("dashboard.ui", "dashboard_view.py", "DashboardView"),
     ("preferences.ui", "preferences_view.py", "PreferencesView"),
+    ("project_settings.ui", "project_settings_view.py", "ProjectSettingsView"),
 ]
 
 base_dir = pathlib.Path("smw_music")

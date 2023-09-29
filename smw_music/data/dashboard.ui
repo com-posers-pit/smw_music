@@ -29,117 +29,6 @@
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
-         <widget class="QGroupBox" name="control_groupBox">
-          <property name="title">
-           <string>Control Panel</string>
-          </property>
-          <layout class="QGridLayout" name="gridLayout">
-           <item row="4" column="0" colspan="3">
-            <widget class="QCheckBox" name="loop_analysis">
-             <property name="text">
-              <string>Loop Analysis</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0" colspan="3">
-            <widget class="QCheckBox" name="superloop_analysis">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Superloop Analysis</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="porter_name_label">
-             <property name="text">
-              <string>Porter:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="0" column="1">
-            <widget class="QLineEdit" name="musicxml_fname"/>
-           </item>
-           <item row="0" column="0">
-            <widget class="QPushButton" name="select_musicxml_fname">
-             <property name="text">
-              <string>MusicXML</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="1">
-            <widget class="QLineEdit" name="mml_fname"/>
-           </item>
-           <item row="3" column="1">
-            <widget class="QLineEdit" name="game_name"/>
-           </item>
-           <item row="11" column="0" colspan="2">
-            <widget class="QPushButton" name="play_spc">
-             <property name="text">
-              <string>Play SPC</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QPushButton" name="select_mml_fname">
-             <property name="text">
-              <string>MML</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0" colspan="2">
-            <widget class="QPushButton" name="generate_spc">
-             <property name="text">
-              <string>MML → SPC</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="1">
-            <widget class="QLineEdit" name="porter_name"/>
-           </item>
-           <item row="6" column="0" colspan="3">
-            <widget class="QCheckBox" name="measure_numbers">
-             <property name="text">
-              <string>Measure Numbers</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0">
-            <widget class="QLabel" name="game_name_label">
-             <property name="text">
-              <string>Game:</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0" colspan="2">
-            <widget class="QPushButton" name="generate_mml">
-             <property name="text">
-              <string>Generate MML</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
          <widget class="QTabWidget" name="settings_tab_widget">
           <property name="currentIndex">
            <number>0</number>
@@ -161,6 +50,12 @@
                <layout class="QGridLayout" name="gridLayout_2">
                 <item row="0" column="0" colspan="2">
                  <widget class="QTreeWidget" name="sample_list">
+                  <property name="minimumSize">
+                   <size>
+                    <width>200</width>
+                    <height>0</height>
+                   </size>
+                  </property>
                   <property name="horizontalScrollBarPolicy">
                    <enum>Qt::ScrollBarAlwaysOff</enum>
                   </property>
@@ -3475,22 +3370,6 @@ Saves 2.4KB over Redux 1</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QPushButton" name="render_zip">
-            <property name="minimumSize">
-             <size>
-              <width>100</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Render</string>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+R</string>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="2">
            <widget class="QPushButton" name="reload_musicxml">
             <property name="minimumSize">
@@ -3506,6 +3385,37 @@ Saves 2.4KB over Redux 1</string>
              <string>Ctrl+R</string>
             </property>
            </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QPushButton" name="generate_spc">
+            <property name="text">
+             <string>MML → SPC</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QPushButton" name="generate_mml">
+            <property name="text">
+             <string>Generate MML</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="start_section_label">
+            <property name="text">
+             <string>Start Section</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="start_measure_label">
+            <property name="text">
+             <string>Start Measure</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="start_section"/>
           </item>
           <item row="0" column="3">
            <widget class="QPushButton" name="generate_and_play">
@@ -3523,22 +3433,28 @@ Saves 2.4KB over Redux 1</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QLabel" name="start_measure_label">
+          <item row="1" column="4">
+           <widget class="QPushButton" name="play_spc">
             <property name="text">
-             <string>Start Measure</string>
+             <string>Play SPC</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="start_section_label">
+          <item row="0" column="4">
+           <widget class="QPushButton" name="render_zip">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
             <property name="text">
-             <string>Start Section</string>
+             <string>Render</string>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
             </property>
            </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="QComboBox" name="start_section"/>
           </item>
          </layout>
         </widget>
@@ -3657,7 +3573,7 @@ Saves 2.4KB over Redux 1</string>
     <addaction name="separator"/>
     <addaction name="menuRecent_Projects"/>
     <addaction name="separator"/>
-    <addaction name="open_preferences"/>
+    <addaction name="actionProject_Settings"/>
     <addaction name="separator"/>
     <addaction name="exit_dashboard"/>
    </widget>
@@ -3674,6 +3590,8 @@ Saves 2.4KB over Redux 1</string>
     </property>
     <addaction name="undo"/>
     <addaction name="redo"/>
+    <addaction name="separator"/>
+    <addaction name="open_preferences"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -3761,6 +3679,11 @@ Saves 2.4KB over Redux 1</string>
     <string>View &amp;History</string>
    </property>
   </action>
+  <action name="actionProject_Settings">
+   <property name="text">
+    <string>Project Settings</string>
+   </property>
+  </action>
  </widget>
  <customwidgets>
   <customwidget>
@@ -3776,18 +3699,6 @@ Saves 2.4KB over Redux 1</string>
   </customwidget>
  </customwidgets>
  <tabstops>
-  <tabstop>select_musicxml_fname</tabstop>
-  <tabstop>musicxml_fname</tabstop>
-  <tabstop>select_mml_fname</tabstop>
-  <tabstop>mml_fname</tabstop>
-  <tabstop>porter_name</tabstop>
-  <tabstop>game_name</tabstop>
-  <tabstop>loop_analysis</tabstop>
-  <tabstop>superloop_analysis</tabstop>
-  <tabstop>measure_numbers</tabstop>
-  <tabstop>generate_mml</tabstop>
-  <tabstop>generate_spc</tabstop>
-  <tabstop>play_spc</tabstop>
   <tabstop>settings_tab_widget</tabstop>
   <tabstop>instrument_config_tab</tabstop>
   <tabstop>sample_list</tabstop>

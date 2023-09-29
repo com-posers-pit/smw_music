@@ -38,6 +38,7 @@ from smw_music.ui.keyboard import Keyboard
 
 class DashboardView(QMainWindow):
     actionClearRecentProjects: QAction
+    actionProject_Settings: QAction
     adsr_box: QFrame
     apply_suggested_tune: QPushButton
     artic_acc_group: QGroupBox
@@ -85,7 +86,6 @@ class DashboardView(QMainWindow):
     builtin_sample: QComboBox
     centralwidget: QWidget
     close_project: QAction
-    control_groupBox: QGroupBox
     decay_eu_label: QLabel
     decay_label: QLabel
     decay_setting: QLineEdit
@@ -161,8 +161,6 @@ class DashboardView(QMainWindow):
     gain_setting: QLineEdit
     gain_setting_label: QLabel
     gain_slider: QSlider
-    game_name: QLineEdit
-    game_name_label: QLabel
     generate_and_play: QPushButton
     generate_mml: QPushButton
     generate_spc: QPushButton
@@ -183,11 +181,10 @@ class DashboardView(QMainWindow):
     instrument_sample_tab: QWidget
     instrument_settings_tab: QWidget
     interpolate: QCheckBox
-    loop_analysis: QCheckBox
     lower_control_widget: QWidget
     main_controls_widget: QWidget
+    main_hsplit: QSplitter
     main_ui_widget: QWidget
-    measure_numbers: QCheckBox
     menuEdit: QMenu
     menuFile: QMenu
     menuHelp: QMenu
@@ -197,7 +194,6 @@ class DashboardView(QMainWindow):
     mf_setting: QLineEdit
     mf_setting_label: QLabel
     mf_slider: QSlider
-    mml_fname: QLineEdit
     mml_tab: QWidget
     mml_view: QTextEdit
     mp_label: QLabel
@@ -219,7 +215,6 @@ class DashboardView(QMainWindow):
     multisample_sample_track_label: QLabel
     multisample_unmapped_box: QGroupBox
     multisample_unmapped_list: QListWidget
-    musicxml_fname: QLineEdit
     new_project: QAction
     octave_shift: QSpinBox
     octave_shift_label: QLabel
@@ -238,8 +233,6 @@ class DashboardView(QMainWindow):
     pan_setting: QDial
     pan_setting_label: QLabel
     play_spc: QPushButton
-    porter_name: QLineEdit
-    porter_name_label: QLabel
     pp_label: QLabel
     pp_setting: QLineEdit
     pp_setting_label: QLabel
@@ -313,10 +306,8 @@ class DashboardView(QMainWindow):
     select_brr_sample: QRadioButton
     select_builtin_sample: QRadioButton
     select_gain_mode: QRadioButton
-    select_mml_fname: QPushButton
     select_multisample_fname: QPushButton
     select_multisample_sample: QRadioButton
-    select_musicxml_fname: QPushButton
     select_pack_sample: QRadioButton
     settings_tab_widget: QTabWidget
     show_about: QAction
@@ -325,7 +316,6 @@ class DashboardView(QMainWindow):
     song_info_view: QTextEdit
     spcplayer_groupBox: QGroupBox
     splitter: QSplitter
-    splitter_2: QSplitter
     splitter_3: QSplitter
     splitter_4: QSplitter
     splitter_5: QSplitter
@@ -338,7 +328,6 @@ class DashboardView(QMainWindow):
     subtune_setting: QLineEdit
     subtune_setting_label: QLabel
     subtune_slider: QSlider
-    superloop_analysis: QCheckBox
     sus_level_eu_label: QLabel
     sus_level_label: QLabel
     sus_level_setting: QLineEdit
