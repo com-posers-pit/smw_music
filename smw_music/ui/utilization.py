@@ -17,28 +17,11 @@ from pathlib import Path
 import numpy as np
 import numpy.typing as npt
 from PIL import Image
-from PyQt6.QtGui import QColor, QPainter
+from PyQt6.QtGui import QPainter
 from PyQt6.QtWidgets import QLabel
 
-###############################################################################
-# Private Class Definitions
-###############################################################################
-
-
-# https://www.oberlo.com/blog/color-combinations-cheat-sheet
-class _Color(Enum):
-    BLACK = QColor("#000000")
-
-    GOLD = QColor("#E1A730")
-    IVORY = QColor("#E0E3D7")
-    BLUE_GROTTO = QColor("#2879C0")
-    CHILI_PEPPER = QColor("#AB3910")
-
-    MIDNIGHT_BLUE = QColor("#284E60")
-    ORANGE = QColor("#F99845")
-    BLUE_GRAY = QColor("#63AAC0")
-    HOT_PINK = QColor("#D95980")
-
+# Package imports
+from smw_music.ui.utils import Color
 
 ###############################################################################
 
@@ -68,21 +51,21 @@ def _count_matches(arr: npt.NDArray[np.uint8], val: _UsageType) -> int:
 ###############################################################################
 
 _DARK_MODE = {
-    "ENGINE": _Color.GOLD,
-    "SONG": _Color.IVORY,
-    "SAMPLES": _Color.BLUE_GROTTO,
-    "ECHO": _Color.CHILI_PEPPER,
-    "FREE": _Color.BLACK,
+    "ENGINE": Color.GOLD,
+    "SONG": Color.IVORY,
+    "SAMPLES": Color.BLUE_GROTTO,
+    "ECHO": Color.CHILI_PEPPER,
+    "FREE": Color.BLACK,
 }
 
 ###############################################################################
 
 _LIGHT_MODE = {
-    "ENGINE": _Color.MIDNIGHT_BLUE,
-    "SONG": _Color.ORANGE,
-    "SAMPLES": _Color.BLUE_GRAY,
-    "ECHO": _Color.HOT_PINK,
-    "FREE": _Color.IVORY,
+    "ENGINE": Color.MIDNIGHT_BLUE,
+    "SONG": Color.ORANGE,
+    "SAMPLES": Color.BLUE_GRAY,
+    "ECHO": Color.HOT_PINK,
+    "FREE": Color.IVORY,
 }
 
 ###############################################################################
@@ -278,7 +261,6 @@ def paint_utilization(
 def setup_utilization(
     dark: bool, engine: QLabel, song: QLabel, samples: QLabel, echo: QLabel
 ) -> None:
-
     global _colors
     _colors = _DARK_MODE if dark else _LIGHT_MODE
 
