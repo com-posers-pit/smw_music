@@ -348,6 +348,7 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    # TODO: Remove
     def on_mml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getSaveFileName(
             self._view, caption="MML Output File", filter="MML Files (*.txt)"
@@ -389,6 +390,7 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    # TODO: Remove
     def on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view,
@@ -541,17 +543,6 @@ class Dashboard(QWidget):
             for child in self._view_widgets:
                 stack.enter_context(QSignalBlocker(child))
 
-            # Control Panel
-            musicxml_fname = state.musicxml_fname
-            fname = "" if musicxml_fname is None else str(musicxml_fname)
-            v.musicxml_fname.setText(fname)
-
-            mml_fname = state.mml_fname
-            fname = "" if mml_fname is None else str(mml_fname)
-            v.mml_fname.setText(fname)
-
-            v.porter_name.setText(state.porter)
-            v.game_name.setText(state.game)
             v.loop_analysis.setChecked(state.loop_analysis)
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
@@ -568,8 +559,6 @@ class Dashboard(QWidget):
             v.play_spc.setEnabled(project_mode)
             v.save_project.setEnabled(project_mode)
             v.close_project.setEnabled(project_mode)
-            v.select_mml_fname.setEnabled(standalone_mode)
-            v.mml_fname.setEnabled(standalone_mode)
 
             # Solo/mute settings
             sample_list = self._view.sample_list
@@ -726,12 +715,6 @@ class Dashboard(QWidget):
 
         connections: list[tuple[QWidget, Callable[..., None]]] = [
             # Control Panel
-            (v.select_musicxml_fname, self.on_musicxml_fname_clicked),
-            (v.musicxml_fname, m.on_musicxml_fname_changed),
-            (v.select_mml_fname, self.on_mml_fname_clicked),
-            (v.mml_fname, m.on_mml_fname_changed),
-            (v.porter_name, m.on_porter_name_changed),
-            (v.game_name, m.on_game_name_changed),
             (v.loop_analysis, m.on_loop_analysis_changed),
             (v.superloop_analysis, m.on_superloop_analysis_changed),
             (v.measure_numbers, m.on_measure_numbers_changed),

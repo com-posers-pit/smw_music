@@ -61,8 +61,6 @@ Control Panel
 .. mermaid::
 
    flowchart LR
-      view.select_musicxml_fname.released --> dashboard.on_musicxml_fname_selected
-      view.musicxml_fname.editingFinished --> model.on_musicxml_changed
       view.select_mml_fname.released --> dashboard.on_mml_fname_selected
       view.mml_fname.editingFinished --> model.on_mml_fname_changed
       view.porter_name.editingFinished --> model.on_porter_name_changed
