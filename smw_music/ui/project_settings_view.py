@@ -7,7 +7,6 @@
 
 # Library imports
 from PyQt6.QtWidgets import (
-    QCheckBox,
     QDialog,
     QDialogButtonBox,
     QLabel,
@@ -24,12 +23,9 @@ class ProjectSettingsView(QDialog):
     control_widget: QWidget
     game_name: QLineEdit
     game_name_label: QLabel
-    loop_analysis: QCheckBox
-    measure_numbers: QCheckBox
     musicxml_fname: QLineEdit
     porter_name: QLineEdit
     porter_name_label: QLabel
     select_musicxml_fname: QPushButton
-    superloop_analysis: QCheckBox
     title: QLineEdit
     title_label: QLabel

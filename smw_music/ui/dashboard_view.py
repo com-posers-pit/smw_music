@@ -38,7 +38,6 @@ from smw_music.ui.keyboard import Keyboard
 
 class DashboardView(QMainWindow):
     actionClearRecentProjects: QAction
-    actionProject_Settings: QAction
     adsr_box: QFrame
     apply_suggested_tune: QPushButton
     artic_acc_group: QGroupBox
@@ -181,10 +180,12 @@ class DashboardView(QMainWindow):
     instrument_sample_tab: QWidget
     instrument_settings_tab: QWidget
     interpolate: QCheckBox
+    loop_analysis: QCheckBox
     lower_control_widget: QWidget
     main_controls_widget: QWidget
     main_hsplit: QSplitter
     main_ui_widget: QWidget
+    measure_numbers: QCheckBox
     menuEdit: QMenu
     menuFile: QMenu
     menuHelp: QMenu
@@ -220,6 +221,7 @@ class DashboardView(QMainWindow):
     octave_shift_label: QLabel
     open_preferences: QAction
     open_project: QAction
+    open_project_settings: QAction
     other_settings_box: QGroupBox
     p_label: QLabel
     p_setting: QLineEdit
@@ -328,6 +330,7 @@ class DashboardView(QMainWindow):
     subtune_setting: QLineEdit
     subtune_setting_label: QLabel
     subtune_slider: QSlider
+    superloop_analysis: QCheckBox
     sus_level_eu_label: QLabel
     sus_level_label: QLabel
     sus_level_setting: QLineEdit
