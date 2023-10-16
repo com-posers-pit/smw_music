@@ -3698,11 +3698,6 @@ Saves 2.4KB over Redux 1</string>
     <string>Clear</string>
    </property>
   </action>
-  <action name="view_history">
-   <property name="text">
-    <string>View &amp;History</string>
-   </property>
-  </action>
   <action name="open_project_settings">
    <property name="text">
     <string>Project Settings</string>

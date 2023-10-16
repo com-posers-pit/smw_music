@@ -390,18 +390,6 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    # TODO: Remove
-    def on_musicxml_fname_clicked(self) -> None:
-        fname, _ = QFileDialog.getOpenFileName(
-            self._view,
-            caption="MusicXML Input File",
-            filter="MusicXML Files (*.musicxml *.mxl)",
-        )
-        if fname:
-            self._model.on_musicxml_fname_changed(fname)
-
-    ###########################################################################
-
     def on_pack_sample_changed(self) -> None:
         items = self._view.sample_pack_list.selectedItems()
         if items:
@@ -1082,6 +1070,14 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def _on_open_project_settings(self) -> None:
+        settings = self._settings.exec()
+        if settings:
+            # TODO
+            pass
+
+    ###########################################################################
+
     def _on_render_zip_clicked(self) -> None:
         if self._confirm_render:
             do_render = QMessageBox.StandardButton.Yes == QMessageBox.question(
@@ -1202,11 +1198,14 @@ class Dashboard(QWidget):
         view.open_project.triggered.connect(self._open_project)
         view.save_project.triggered.connect(model.on_save)
         view.close_project.triggered.connect(self._on_close_project_clicked)
-        view.open_preferences.triggered.connect(self._open_preferences)
+        view.open_project_settings.triggered.connect(
+            self._on_open_project_settings
+        )
         view.exit_dashboard.triggered.connect(QApplication.quit)
 
         view.undo.triggered.connect(model.on_undo_clicked)
         view.redo.triggered.connect(model.on_redo_clicked)
+        view.open_preferences.triggered.connect(self._open_preferences)
 
         view.show_about.triggered.connect(self._about)
         view.show_about_qt.triggered.connect(QApplication.aboutQt)

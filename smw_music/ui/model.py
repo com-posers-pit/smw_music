@@ -634,12 +634,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_mml_fname_changed(self, fname: str) -> None:
-        self._update_state(mml_fname=fname)
-        self.update_status(f"MML name set to {fname}")
-
-    ###########################################################################
-
     def on_multisample_sample_add_clicked(
         self, name: str, notes: str, notehead: str, output: str, track: bool
     ) -> None:
