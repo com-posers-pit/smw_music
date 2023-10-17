@@ -28,8 +28,6 @@ from smw_music.ui.utils import is_checked
 
 
 class Settings:
-    _dialog: ProjectSettingsView
-
     ###########################################################################
     # Constructor definitions
     ###########################################################################
@@ -38,53 +36,25 @@ class Settings:
         data_lib = resources.files("smw_music.data")
         ui_contents = data_lib / "project_settings.ui"
         dialog: ProjectSettingsView = uic.loadUi(ui_contents)
+
+        dialog.select_musicxml_fname.released.connect(
+            self._on_musicxml_fname_clicked
+        )
+
         self._dialog = dialog
-
-        connections = [
-            (dialog.select_amk_fname, self.on_amk_select_clicked),
-            (
-                dialog.select_sample_pack_dirname,
-                self.on_select_sample_pack_clicked,
-            ),
-            (dialog.select_spcplay, self.on_select_spcplay_clicked),
-        ]
-
-        for button, slot in connections:
-            button.released.connect(slot)
 
     ###########################################################################
     # Slot definitions
     ###########################################################################
 
-    def on_musicxml_fname_clicked(self) -> None:
+    def _on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
             self._view,
             caption="MusicXML Input File",
             filter="MusicXML Files (*.musicxml *.mxl)",
         )
         if fname:
-            self._model.on_musicxml_fname_changed(fname)
-
-    ###########################################################################
-
-    def on_select_sample_pack_clicked(self) -> None:
-        fname = QFileDialog.getExistingDirectory(
-            self._dialog,
-            caption="Sample Pack Directory",
-        )
-        if fname:
-            self._dialog.sample_pack_dirname.setText(fname)
-
-    ###########################################################################
-
-    def on_select_spcplay_clicked(self) -> None:
-        fname, _ = QFileDialog.getOpenFileName(
-            self._dialog,
-            caption="SPC Player Executable",
-            filter="Executable (spcplay.exe)",
-        )
-        if fname:
-            self._dialog.spcplay_fname.setText(fname)
+            self._dialog.musicxml_fname.setText(fname)
 
     ###########################################################################
     # API function definitions

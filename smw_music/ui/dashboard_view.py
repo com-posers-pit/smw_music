@@ -379,4 +379,3 @@ class DashboardView(QMainWindow):
     utilization_pct_free: QLabel
     utilization_samples: QLabel
     utilization_song: QLabel
-    view_history: QAction

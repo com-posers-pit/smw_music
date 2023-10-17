@@ -59,6 +59,7 @@ from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
+from smw_music.ui.settings import Settings
 from smw_music.ui.state import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
@@ -199,23 +200,7 @@ class _TblCol(enum.IntEnum):
 
 
 class Dashboard(QWidget):
-    _checkitout: QMainWindow
-    _camelitout: QMainWindow
     _extension = "prj"
-    _model: Model
-    _preferences: Preferences
-    _view: DashboardView
-    _dyn_widgets: dict[Dyn, _DynamicsWidgets]
-    _artic_widgets: dict[Artic, _ArticWidgets]
-    _sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem]
-    _unsaved: bool
-    _project_name: str | None
-    _keyhist: deque[int]
-    _window_title: str
-    _default_tooltips: dict[QWidget | QAction, str]
-    _samples: dict[tuple[str, str | None], QTreeWidgetItem]
-    _sample_remover: _SampleRemover
-    _confirm_render: bool
 
     ###########################################################################
     # Constructor definitions
@@ -234,6 +219,7 @@ class Dashboard(QWidget):
         self._view.setWindowTitle(self._window_title)
 
         self._preferences = Preferences()
+        self._settings = Settings()
         self._model = Model()
         self._unsaved = False
         self._project_name = None
@@ -977,6 +963,7 @@ class Dashboard(QWidget):
         proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir:
             self._model.create_project(Path(proj_dir))
+            self._on_open_project_settings()
 
     ###########################################################################
 

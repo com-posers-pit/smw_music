@@ -56,8 +56,20 @@ class PreferencesState:
 
 
 @dataclass
+class ProjectSettingsState:
+    musicxml_fname: Path
+    composer: str = ""
+    title: str = ""
+    porter: str = ""
+    game: str = ""
+
+
+###############################################################################
+
+
+@dataclass
 class State:
-    musicxml_fname: Path | None = None
+    project_settings: ProjectSettingsState
     mml_fname: Path | None = None
     loop_analysis: bool = False
     superloop_analysis: bool = False
@@ -75,8 +87,6 @@ class State:
     )
     unsaved: bool = True
     project_name: str | None = None
-    porter: str = ""
-    game: str = ""
     start_measure: int = 1
     section_names: list[str] = field(default_factory=list)
     start_section_idx: int = 0
