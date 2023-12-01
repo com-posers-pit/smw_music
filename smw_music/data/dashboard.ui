@@ -3585,7 +3585,7 @@ Saves 2.4KB over Redux 1</string>
     </property>
     <widget class="QMenu" name="menuRecent_Projects">
      <property name="title">
-      <string>Recent Projects</string>
+      <string>&amp;Recent Projects</string>
      </property>
      <addaction name="separator"/>
      <addaction name="actionClearRecentProjects"/>
@@ -3653,7 +3653,7 @@ Saves 2.4KB over Redux 1</string>
   </action>
   <action name="open_preferences">
    <property name="text">
-    <string>&amp;Preferences</string>
+    <string>Pr&amp;eferences</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+,</string>
@@ -3700,7 +3700,7 @@ Saves 2.4KB over Redux 1</string>
   </action>
   <action name="open_project_settings">
    <property name="text">
-    <string>Project Settings</string>
+    <string>&amp;Project Settings</string>
    </property>
   </action>
  </widget>
