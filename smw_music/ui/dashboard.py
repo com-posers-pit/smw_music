@@ -211,7 +211,7 @@ class Dashboard(QWidget):
 
         self._window_title = f"SPaCeMusicW v{__version__}"
 
-        self._keyhist = deque(maxlen=len(_KONAMI))
+        self._keyhist: deque[int] = deque(maxlen=len(_KONAMI))
         ui_contents = RESOURCES / "dashboard.ui"
 
         self._view: DashboardView = uic.loadUi(ui_contents)
@@ -223,8 +223,9 @@ class Dashboard(QWidget):
         self._model = Model()
         self._unsaved = False
         self._project_name = None
-        self._sample_pack_items = {}
-        self._samples = {}
+        self._sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem] = {}
+        self._samples: dict[tuple[str, str | None], QTreeWidgetItem] = {}
+
         self._confirm_render = True
 
         # h/t: https://forum.qt.io/topic/35999
