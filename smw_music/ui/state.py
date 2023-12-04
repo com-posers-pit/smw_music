@@ -69,7 +69,7 @@ class ProjectSettingsState:
 
 @dataclass
 class State:
-    project_settings: ProjectSettingsState
+    project_settings: ProjectSettingsState | None = None
     mml_fname: Path | None = None
     loop_analysis: bool = False
     superloop_analysis: bool = False
