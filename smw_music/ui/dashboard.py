@@ -57,9 +57,9 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.keyboard import KeyboardEventFilter
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import Preferences
+from smw_music.ui.project_settings import ProjectSettings
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
-from smw_music.ui.settings import Settings
 from smw_music.ui.state import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
@@ -219,7 +219,7 @@ class Dashboard(QWidget):
         self._view.setWindowTitle(self._window_title)
 
         self._preferences = Preferences()
-        self._settings = Settings()
+        self._project_settings = ProjectSettings()
         self._model = Model()
         self._unsaved = False
         self._project_name = None
@@ -522,18 +522,6 @@ class Dashboard(QWidget):
             v.superloop_analysis.setChecked(state.superloop_analysis)
             v.measure_numbers.setChecked(state.measure_numbers)
             v.start_measure.setValue(state.start_measure)
-
-            v.reload_musicxml.setEnabled(bool(state.musicxml_fname))
-
-            standalone_mode = state.project_name is None
-            project_mode = not standalone_mode
-
-            v.generate_and_play.setEnabled(project_mode)
-            v.render_zip.setEnabled(project_mode)
-            v.generate_spc.setEnabled(project_mode)
-            v.play_spc.setEnabled(project_mode)
-            v.save_project.setEnabled(project_mode)
-            v.close_project.setEnabled(project_mode)
 
             # Solo/mute settings
             sample_list = self._view.sample_list
@@ -1059,7 +1047,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_open_project_settings(self) -> None:
-        settings = self._settings.exec()
+        print("opening project settings")
+        settings = self._project_settings.exec()
         if settings:
             # TODO
             pass

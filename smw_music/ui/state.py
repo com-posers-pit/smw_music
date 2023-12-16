@@ -58,6 +58,7 @@ class PreferencesState:
 @dataclass
 class ProjectSettingsState:
     musicxml_fname: Path
+    project_name: str
     composer: str = ""
     title: str = ""
     porter: str = ""
@@ -86,7 +87,6 @@ class State:
         )
     )
     unsaved: bool = True
-    project_name: str | None = None
     start_measure: int = 1
     section_names: list[str] = field(default_factory=list)
     start_section_idx: int = 0
