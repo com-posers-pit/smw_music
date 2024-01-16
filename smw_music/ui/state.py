@@ -42,20 +42,6 @@ class NoSample(SmwMusicException):
 
 
 @dataclass
-class PreferencesState:
-    amk_fname: Path = Path("")
-    spcplay_fname: Path = Path("")
-    sample_pack_dname: Path = Path("")
-    advanced_mode: bool = False
-    dark_mode: bool = False
-    release_check: bool = True
-    confirm_render: bool = True
-
-
-###############################################################################
-
-
-@dataclass
 class ProjectSettingsState:
     musicxml_fname: Path
     project_name: str

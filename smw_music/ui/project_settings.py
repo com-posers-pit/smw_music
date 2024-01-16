@@ -18,8 +18,8 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
+from smw_music.ui.preferences import PreferencesState
 from smw_music.ui.project_settings_view import ProjectSettingsView
-from smw_music.ui.state import PreferencesState
 from smw_music.ui.utils import is_checked
 
 ###############################################################################

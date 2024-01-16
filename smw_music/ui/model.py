@@ -60,18 +60,13 @@ from smw_music.spc700 import (
     SamplePlayer,
     midi_to_nspc,
 )
+from smw_music.ui.preferences import PreferencesState
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
-from smw_music.ui.state import NoSample, PreferencesState, State
+from smw_music.ui.state import NoSample, State
 from smw_music.ui.utilization import decode_utilization, echo_bytes
 from smw_music.utils import brr_size_b, newest_release, version_tuple
-
-###############################################################################
-# Private constant definitions
-###############################################################################
-
-_CURRENT_PREFS_VERSION = 0
 
 ###############################################################################
 # Private Function Definitions
@@ -249,21 +244,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def update_preferences(self, preferences: PreferencesState) -> None:
-        prefs_dict = {
-            "spacemusicw": __version__,
-            "amk": {"path": str(preferences.amk_fname)},
-            "spcplay": {"path": str(preferences.spcplay_fname)},
-            "sample_packs": {"path": str(preferences.sample_pack_dname)},
-            "advanced": preferences.advanced_mode,
-            "dark_mode": preferences.dark_mode,
-            "release_check": preferences.release_check,
-            "confirm_render": preferences.confirm_render,
-            "version": _CURRENT_PREFS_VERSION,
-        }
-
-        with open(self.prefs_fname, "w", encoding="utf8") as fobj:
-            yaml.safe_dump(prefs_dict, fobj)
-
+        preferences.to_file(self.prefs_fname)
         self._load_prefs()
 
     ###########################################################################
@@ -1235,31 +1216,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _load_prefs(self) -> None:
         if self.prefs_fname.exists():
-            with open(self.prefs_fname, "r", encoding="utf8") as fobj:
-                prefs = yaml.safe_load(fobj)
-
-            prefs_version = prefs.get("version", _CURRENT_PREFS_VERSION)
-
-            if prefs_version > _CURRENT_PREFS_VERSION:
-                raise SmwMusicException(
-                    f"Preferences file version is {prefs_version}, tool "
-                    + f"version only supports up to {_CURRENT_PREFS_VERSION}"
-                )
-
-            self.preferences = PreferencesState()
-            self.preferences.amk_fname = Path(prefs["amk"]["path"])
-            self.preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
-            self.preferences.sample_pack_dname = Path(
-                prefs["sample_packs"]["path"]
-            )
-            with suppress(KeyError):
-                self.preferences.advanced_mode = prefs["advanced"]
-            with suppress(KeyError):
-                self.preferences.dark_mode = prefs["dark_mode"]
-            with suppress(KeyError):
-                self.preferences.release_check = prefs["release_check"]
-            with suppress(KeyError):
-                self.preferences.confirm_render = prefs["confirm_render"]
+            self.preferences = PreferencesState.from_file(self.prefs_fname)
 
         self._start_watcher()
 

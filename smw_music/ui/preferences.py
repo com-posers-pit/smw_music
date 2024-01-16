@@ -10,20 +10,91 @@
 ###############################################################################
 
 # Standard library imports
+from contextlib import suppress
+from dataclasses import dataclass
 from importlib import resources
 from pathlib import Path
 
 # Library imports
+import yaml
 from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
+from smw_music import SmwMusicException, __version__
 from smw_music.ui.preferences_view import PreferencesView
-from smw_music.ui.state import PreferencesState
 from smw_music.ui.utils import is_checked
 
 ###############################################################################
+# Private constant definitions
+###############################################################################
+
+_CURRENT_PREFS_VERSION = 0
+
+###############################################################################
 # API class definitions
+###############################################################################
+
+
+@dataclass
+class PreferencesState:
+    amk_fname: Path = Path("")
+    spcplay_fname: Path = Path("")
+    sample_pack_dname: Path = Path("")
+    advanced_mode: bool = False
+    dark_mode: bool = False
+    release_check: bool = True
+    confirm_render: bool = True
+
+    ###########################################################################
+
+    @classmethod
+    def from_file(cls, fname: Path) -> "PreferencesState":
+        with open(fname, "r", encoding="utf8") as fobj:
+            prefs = yaml.safe_load(fobj)
+
+        prefs_version = prefs.get("version", _CURRENT_PREFS_VERSION)
+
+        if prefs_version > _CURRENT_PREFS_VERSION:
+            raise SmwMusicException(
+                f"Preferences file version is {prefs_version}, tool "
+                + f"version only supports up to {_CURRENT_PREFS_VERSION}"
+            )
+
+        preferences = cls()
+        preferences.amk_fname = Path(prefs["amk"]["path"])
+        preferences.spcplay_fname = Path(prefs["spcplay"]["path"])
+        preferences.sample_pack_dname = Path(prefs["sample_packs"]["path"])
+        with suppress(KeyError):
+            preferences.advanced_mode = prefs["advanced"]
+        with suppress(KeyError):
+            preferences.dark_mode = prefs["dark_mode"]
+        with suppress(KeyError):
+            preferences.release_check = prefs["release_check"]
+        with suppress(KeyError):
+            preferences.confirm_render = prefs["confirm_render"]
+
+        return preferences
+
+    ###########################################################################
+
+    def to_file(self, fname: Path) -> None:
+        prefs_dict = {
+            "spacemusicw": __version__,
+            "amk": {"path": str(self.amk_fname)},
+            "spcplay": {"path": str(self.spcplay_fname)},
+            "sample_packs": {"path": str(self.sample_pack_dname)},
+            "advanced": self.advanced_mode,
+            "dark_mode": self.dark_mode,
+            "release_check": self.release_check,
+            "confirm_render": self.confirm_render,
+            "version": _CURRENT_PREFS_VERSION,
+        }
+
+        with open(fname, "w", encoding="utf8") as fobj:
+            yaml.safe_dump(prefs_dict, fobj)
+
+
 ###############################################################################
 
 
@@ -35,7 +106,6 @@ class Preferences:
     ###########################################################################
 
     def __init__(self) -> None:
-
         data_lib = resources.files("smw_music.data")
         ui_contents = data_lib / "preferences.ui"
         dialog: PreferencesView = uic.loadUi(ui_contents)
