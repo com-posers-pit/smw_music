@@ -122,6 +122,12 @@ class State:
     ###########################################################################
 
     @property
+    def loaded(self) -> bool:
+        return self.project_settings is not None
+
+    ###########################################################################
+
+    @property
     def sample(self) -> InstrumentSample:
         return self.samples[self.sample_idx]
 

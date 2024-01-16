@@ -222,7 +222,7 @@ class Dashboard(QWidget):
         self._project_settings = ProjectSettings()
         self._model = Model()
         self._unsaved = False
-        self._project_name = None
+        self._loaded = False
         self._sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem] = {}
         self._samples: dict[tuple[str, str | None], QTreeWidgetItem] = {}
 
@@ -500,12 +500,11 @@ class Dashboard(QWidget):
 
         v = self._view  # pylint: disable=invalid-name
         self._unsaved = state.unsaved
-        self._project_name = state.project_name
+        self._loaded = state.loaded
 
-        if self._project_name is None:
-            title = "[No project]"
-        else:
-            title = f"[{self._project_name}]"
+        title = "[No project]"
+        if self._loaded:
+            title = f"[{state.project_settings.project_name}]"
             if self._unsaved:
                 title += " +"
 
@@ -1140,7 +1139,7 @@ class Dashboard(QWidget):
 
     def _prompt_to_save(self) -> QMessageBox.StandardButton | None:
         reply = None
-        if self._unsaved and self._project_name is not None:
+        if self._loaded and self._unsaved:
             quit_msg = "Save project before closing?"
             reply = QMessageBox.question(
                 self._view,
