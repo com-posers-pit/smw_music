@@ -12,7 +12,6 @@
 # Standard library imports
 from contextlib import suppress
 from dataclasses import dataclass
-from importlib import resources
 from pathlib import Path
 
 # Library imports
@@ -21,7 +20,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music import RESOURCES, SmwMusicException, __version__
 from smw_music.ui.preferences_view import PreferencesView
 from smw_music.ui.utils import is_checked
 
@@ -106,8 +105,7 @@ class Preferences:
     ###########################################################################
 
     def __init__(self) -> None:
-        data_lib = resources.files("smw_music.data")
-        ui_contents = data_lib / "preferences.ui"
+        ui_contents = RESOURCES / "preferences.ui"
         dialog: PreferencesView = uic.loadUi(ui_contents)
         self._dialog = dialog
 
