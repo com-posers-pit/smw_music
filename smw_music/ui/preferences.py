@@ -44,6 +44,7 @@ class PreferencesState:
     dark_mode: bool = False
     release_check: bool = True
     confirm_render: bool = True
+    convert_timeout: int = 10
 
     ###########################################################################
 
@@ -72,6 +73,8 @@ class PreferencesState:
             preferences.release_check = prefs["release_check"]
         with suppress(KeyError):
             preferences.confirm_render = prefs["confirm_render"]
+        with suppress(KeyError):
+            preferences.convert_timeout = prefs["convert_timeout"]
 
         return preferences
 
@@ -87,6 +90,7 @@ class PreferencesState:
             "dark_mode": self.dark_mode,
             "release_check": self.release_check,
             "confirm_render": self.confirm_render,
+            "convert_timeout": self.convert_timeout,
             "version": _CURRENT_PREFS_VERSION,
         }
 
@@ -176,6 +180,7 @@ class Preferences:
         d.dark_mode.setChecked(preferences.dark_mode)
         d.release_check.setChecked(preferences.release_check)
         d.confirm_render.setChecked(preferences.confirm_render)
+        d.convert_timeout.setValue(preferences.convert_timeout)
 
         if self._dialog.exec():
             amk_fname = Path(d.amk_fname.text())
@@ -185,6 +190,7 @@ class Preferences:
             dark_mode = is_checked(d.dark_mode)
             release_check = is_checked(d.release_check)
             confirm_render = is_checked(d.confirm_render)
+            convert_timeout = d.convert_timeout.value()
 
             return PreferencesState(
                 amk_fname,
@@ -194,6 +200,7 @@ class Preferences:
                 dark_mode,
                 release_check,
                 confirm_render,
+                convert_timeout,
             )
 
         return None
