@@ -26,6 +26,25 @@ from . import RESOURCES
 ###############################################################################
 
 
+def test_custom(tmp_path):
+    # Grab the reference file
+    custom = PreferencesState.from_file(
+        RESOURCES / "preferences" / "custom.yaml"
+    )
+
+    assert custom.amk_fname == Path("addmusick.zip")
+    assert custom.spcplay_fname == Path("spcplayer.exe")
+    assert custom.sample_pack_dname == Path("samples")
+    assert custom.advanced_mode is True
+    assert custom.dark_mode is True
+    assert custom.release_check is False
+    assert custom.confirm_render is False
+    assert custom.convert_timeout == 5
+
+
+###############################################################################
+
+
 def test_default(tmp_path):
     # Generate a default preferences object
     prefs = PreferencesState()
@@ -38,6 +57,7 @@ def test_default(tmp_path):
     assert prefs.dark_mode is False
     assert prefs.release_check is True
     assert prefs.confirm_render is True
+    assert prefs.convert_timeout == 10
 
     # Write default preferences to a file
     fname = tmp_path / "default.prefs"
@@ -68,6 +88,7 @@ def test_minimal(tmp_path):
     assert minimal.confirm_render is True
     assert minimal.dark_mode is False
     assert minimal.release_check is True
+    assert minimal.convert_timeout == 10
 
 
 ###############################################################################

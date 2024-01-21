@@ -1,0 +1,13 @@
+advanced: true
+amk:
+  path: "addmusick.zip"
+confirm_render: false
+dark_mode: true
+release_check: false
+convert_timeout: 5
+sample_packs:
+  path: "samples"
+spacemusicw: 0.3.14
+spcplay:
+  path: "spcplayer.exe"
+version: 0

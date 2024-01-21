@@ -4,6 +4,7 @@ amk:
 confirm_render: true
 dark_mode: false
 release_check: true
+convert_timeout: 10
 sample_packs:
   path: ""
 spacemusicw: 0.3.14
