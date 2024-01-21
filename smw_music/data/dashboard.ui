@@ -1918,7 +1918,7 @@
                  <string>Multisample</string>
                 </attribute>
                 <layout class="QGridLayout" name="gridLayout_16">
-                 <item row="1" column="0" rowspan="11">
+                 <item row="1" column="0" rowspan="12">
                   <widget class="QGroupBox" name="multisample_unmapped_box">
                    <property name="title">
                     <string>Unmapped</string>
@@ -2071,6 +2071,13 @@
                   <widget class="QCheckBox" name="multisample_sample_track">
                    <property name="text">
                     <string/>
+                   </property>
+                  </widget>
+                 </item>
+                 <item row="12" column="1" colspan="2">
+                  <widget class="QPushButton" name="multisample_make_drumset">
+                   <property name="text">
+                    <string>Convert to Drumset</string>
                    </property>
                   </widget>
                  </item>

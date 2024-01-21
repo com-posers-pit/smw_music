@@ -202,6 +202,7 @@ class DashboardView(QMainWindow):
     mp_setting_label: QLabel
     mp_slider: QSlider
     multisample_fname: QLineEdit
+    multisample_make_drumset: QPushButton
     multisample_sample_add: QPushButton
     multisample_sample_name: QLineEdit
     multisample_sample_name_label: QLabel
