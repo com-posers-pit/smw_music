@@ -1440,7 +1440,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         self.convert,
                         cwd=self._project_path,
                         stderr=subprocess.STDOUT,
-                        timeout=15,
+                        timeout=self.preferences.convert_timeout,
                     ).decode()
                 except subprocess.CalledProcessError as e:
                     error = True
