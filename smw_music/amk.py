@@ -100,6 +100,24 @@ def create_project(path: Path, project_name: str, amk_zname: Path) -> None:
 ###############################################################################
 
 
+def get_ticks(path: Path, project_name: str) -> list[int]:
+    fname = path / "stats" / f"{project_name}.txt"
+
+    # Filter only lines with "TICKS:" in it
+    with open(fname, "r") as fobj:
+        tick_lines = [line for line in fobj.readlines() if "TICKS:" in line]
+
+    # Split on whitespace to get the tick value, then (because of a bug in
+    # AMK), optionally strip off anything before an 'x'.  Those don't actually
+    # return a hex value.
+    tick_vals = [line.split()[-1].split("x")[-1] for line in tick_lines]
+
+    return list(map(int, tick_vals))
+
+
+###############################################################################
+
+
 # https://www.smwcentral.net/?p=viewthread&t=98793&page=1&pid=1579851#p1579851
 def make_vis_dir(path: Path) -> None:
     os.makedirs(path / "Visualizations", exist_ok=True)
