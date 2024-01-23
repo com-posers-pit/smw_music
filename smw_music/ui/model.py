@@ -1111,8 +1111,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if not self.prefs_fname.exists():
             msg = "Welcome, and thank you for trying SPaCeMusicW."
             msg += "\n\nIt looks like this is your first time using the tool."
-            msg += "\nWe recommend reading through our getting started guide."
-            msg += "\nIt's short, we promise."
+            msg += "\nWe recommend reading through our getting started guide"
+            msg += "\nor watching our tutorials at:"
+            msg += "\nhttps://www.youtube.com/playlist?"
+            msg += "list=PL7ql3YAGsvzHoIEAaDQqvVE3Jlke_nVo7"
 
             self.response_generated.emit(
                 False, "It's dangerous to go alone!  Take this.", msg
