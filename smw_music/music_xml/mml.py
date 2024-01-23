@@ -40,7 +40,6 @@ from smw_music.music_xml.tokens import (
     Tempo,
     Token,
     Triplet,
-    Vibrato,
 )
 
 ###############################################################################
@@ -245,12 +244,6 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     def _(self, token: Triplet) -> None:
         self._in_triplet = token.start
         self._append("{" if token.start else "}")
-
-    ###########################################################################
-
-    @emit.register
-    def _(self, token: Vibrato) -> None:
-        self._append("$DE$01$23$45" if token.start else "VIB_OFF")
 
     ###########################################################################
 
