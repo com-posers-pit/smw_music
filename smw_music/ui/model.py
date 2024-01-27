@@ -208,7 +208,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_state()
         self._update_state(
             project_name=project_name,
-            mml_fname=self._project_path / "music" / f"{project_name}.txt",
         )
 
         # TODO: Unify this project path with what's used in on_save
@@ -1318,7 +1317,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_mml_clicked(self, report: bool = True) -> bool:
-        assert self.state.mml_fname is not None  # nosec: B101
+        assert self.state.loaded  # nosec: B101
 
         title = "MML Generation"
         error = True
@@ -1399,8 +1398,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _on_generate_spc_clicked(self, report: bool = True) -> bool:
         assert self._project_path is not None  # nosec: B101
-        assert self.state.project_name is not None  # nosec: B101
-        assert self.state.mml_fname is not None  # nosec: B101
+        assert self.state.loaded  # nosec: B101
 
         error = False
         msg = ""
@@ -1445,6 +1443,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                         stderr=subprocess.STDOUT,
                         timeout=self.preferences.convert_timeout,
                     ).decode()
+                    # TODO: Add stat parsing and reporting
                 except subprocess.CalledProcessError as e:
                     error = True
                     msg = e.output.decode("utf8")

@@ -567,7 +567,7 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        sample_path: PurePosicPath
+        sample_path: PurePosixPath
             Base path where custom BRR samples are stored
         start_measure: int
             First measure of music to output
@@ -712,7 +712,7 @@ class Song:
             True iff current date/time is included in MML
         echo_config: EchoConfig
             Echo configuration
-        sample_path: PurePosicPath
+        sample_path: PurePosixPath
             Base path where custom BRR samples are stored
         start_measure: int
             First measure of music to output
