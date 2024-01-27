@@ -488,9 +488,7 @@ class Song:
                     rest.note_num = note_no
                     channel_elem.append(rest)
                 if isinstance(subelem, music21.expressions.TextExpression):
-                    annotation = Annotation.from_music_xml(subelem)
-                    if annotation is not None:
-                        channel_elem.append(annotation)
+                    channel_elem.append(Annotation.from_music_xml(subelem))
                 if isinstance(subelem, music21.tempo.MetronomeMark):
                     channel_elem.append(Tempo.from_music_xml(subelem))
                 if isinstance(subelem, music21.clef.Clef):
