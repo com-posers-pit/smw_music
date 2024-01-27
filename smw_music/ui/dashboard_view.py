@@ -25,6 +25,7 @@ from PyQt6.QtWidgets import (
     QSpinBox,
     QSplitter,
     QStatusBar,
+    QTableWidget,
     QTabWidget,
     QTextEdit,
     QTreeWidget,
@@ -39,6 +40,26 @@ from smw_music.ui.keyboard import Keyboard
 class DashboardView(QMainWindow):
     actionClearRecentProjects: QAction
     adsr_box: QFrame
+    advanced_list: QTableWidget
+    advanced_list_box: QGroupBox
+    advanced_mml_box: QWidget
+    advanced_mml_output: QLabel
+    advanced_mml_output_label: QLabel
+    advanced_param1_label: QLabel
+    advanced_param1_setting: QLineEdit
+    advanced_param1_slider: QSlider
+    advanced_param2_label: QLabel
+    advanced_param2_setting: QLineEdit
+    advanced_param2_slider: QSlider
+    advanced_param3_label: QLabel
+    advanced_param3_setting: QLineEdit
+    advanced_param3_slider: QSlider
+    advanced_parameters_box: QWidget
+    advanced_settings_box: QGroupBox
+    advanced_tab: QWidget
+    advanced_type: QComboBox
+    advanced_type_box: QWidget
+    advanced_type_label: QLabel
     apply_suggested_tune: QPushButton
     artic_acc_group: QGroupBox
     artic_acc_length_label: QLabel

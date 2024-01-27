@@ -2088,6 +2088,275 @@
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="advanced_tab">
+           <attribute name="title">
+            <string>Advanced</string>
+           </attribute>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QGroupBox" name="advanced_list_box">
+              <property name="title">
+               <string>Marks</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QTableWidget" name="advanced_list">
+                 <property name="columnCount">
+                  <number>4</number>
+                 </property>
+                 <column>
+                  <property name="text">
+                   <string>Name</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Channel</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Location</string>
+                  </property>
+                 </column>
+                 <column>
+                  <property name="text">
+                   <string>Description</string>
+                  </property>
+                 </column>
+                </widget>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <widget class="QGroupBox" name="advanced_settings_box">
+              <property name="title">
+               <string>Settings</string>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_9">
+               <item>
+                <widget class="QWidget" name="advanced_type_box" native="true">
+                 <layout class="QVBoxLayout" name="verticalLayout_8">
+                  <item>
+                   <widget class="QLabel" name="advanced_type_label">
+                    <property name="text">
+                     <string>Type</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QComboBox" name="advanced_type">
+                    <item>
+                     <property name="text">
+                      <string>Echo Fade</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Glissando</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Global Volume Fade</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Pan Fade</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Pitch Bend</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Pitch Envelope, Attack</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Pitch Envelope, Release</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Tremolo</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Vibrato</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>Volume Fade</string>
+                     </property>
+                    </item>
+                   </widget>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="advanced_parameters_box" native="true">
+                 <layout class="QGridLayout" name="gridLayout_30">
+                  <item row="0" column="2">
+                   <widget class="QLabel" name="advanced_param3_label">
+                    <property name="text">
+                     <string>Parameter 3</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="advanced_param1_label">
+                    <property name="text">
+                     <string>Parameter 1</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="1">
+                   <widget class="QLineEdit" name="advanced_param2_setting">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="0">
+                   <widget class="QLineEdit" name="advanced_param1_setting">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="3" column="2">
+                   <widget class="QLineEdit" name="advanced_param3_setting">
+                    <property name="sizePolicy">
+                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                      <horstretch>0</horstretch>
+                      <verstretch>0</verstretch>
+                     </sizepolicy>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QSlider" name="advanced_param3_slider">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="1">
+                   <widget class="QSlider" name="advanced_param2_slider">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="1">
+                   <widget class="QLabel" name="advanced_param2_label">
+                    <property name="text">
+                     <string>Parameter 2</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="0">
+                   <widget class="QSlider" name="advanced_param1_slider">
+                    <property name="orientation">
+                     <enum>Qt::Vertical</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="3">
+                   <spacer name="horizontalSpacer_10">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <widget class="QWidget" name="advanced_mml_box" native="true">
+                 <layout class="QHBoxLayout" name="horizontalLayout_11">
+                  <item>
+                   <widget class="QLabel" name="advanced_mml_output_label">
+                    <property name="text">
+                     <string>MML</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <widget class="QLabel" name="advanced_mml_output">
+                    <property name="text">
+                     <string/>
+                    </property>
+                   </widget>
+                  </item>
+                  <item>
+                   <spacer name="horizontalSpacer_9">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
+                     <size>
+                      <width>40</width>
+                      <height>20</height>
+                     </size>
+                    </property>
+                   </spacer>
+                  </item>
+                 </layout>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
           <widget class="QWidget" name="global_settings_tab">
            <attribute name="title">
             <string>Global Settings</string>
