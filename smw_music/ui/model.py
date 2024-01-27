@@ -31,7 +31,7 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music import SmwMusicException, __version__, spcmw
 from smw_music.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
@@ -188,7 +188,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._project_path = None
         self._sample_player = SamplePlayer()
 
-        os.makedirs(self.config_dir, exist_ok=True)
+        os.makedirs(spcmw.CONFIG_DIR, exist_ok=True)
 
         self._start_watcher()
 
@@ -236,7 +236,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._check_for_updates()
         self.update_sample_packs()
 
-        self.recent_projects_updated.emit(self.recent_projects)
+        self.recent_projects_updated.emit(spcmw.get_recent_projects())
 
         self.reinforce_state()
         self._emit_quote()
@@ -244,7 +244,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def update_preferences(self, preferences: PreferencesState) -> None:
-        preferences.to_file(self.prefs_fname)
+        preferences.to_file(spcmw.PREFS_FNAME)
         self._load_prefs()
 
     ###########################################################################
@@ -770,7 +770,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_recent_projects_cleared(self) -> None:
-        self.recent_projects = []
+        spcmw.set_recent_projects([])
         self.update_status("Recent projects cleared")
 
     ###########################################################################
@@ -1080,11 +1080,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _append_recent_project(self, fname: Path) -> None:
         fname = fname.resolve()
-        history = self.recent_projects
+        history = spcmw.get_recent_projects()
         if fname in history:
             history.remove(fname)
         history.append(fname)
-        self.recent_projects = history
+        spcmw.set_recent_projects(history)
+        self.recent_projects_updated.emit(spcmw.get_recent_projects())
 
     ###########################################################################
 
@@ -1108,7 +1109,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _check_first_use(self) -> None:
-        if not self.prefs_fname.exists():
+        if not spcmw.PREFS_FNAME.exists():
             msg = "Welcome, and thank you for trying SPaCeMusicW."
             msg += "\n\nIt looks like this is your first time using the tool."
             msg += "\nWe recommend reading through our getting started guide"
@@ -1217,8 +1218,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _load_prefs(self) -> None:
-        if self.prefs_fname.exists():
-            self.preferences = PreferencesState.from_file(self.prefs_fname)
+        if spcmw.PREFS_FNAME.exists():
+            self.preferences = PreferencesState.from_file(spcmw.PREFS_FNAME)
 
         self._start_watcher()
 
@@ -1709,26 +1710,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     @property
-    def config_dir(self) -> Path:
-        app = "xml2mml"
-
-        sys = platform.system()
-        match sys:
-            case "Linux":
-                default = Path(os.environ["HOME"]) / ".config"
-                conf_dir = Path(os.environ.get("XDG_CONFIG_HOME", default))
-            case "Windows":
-                conf_dir = Path(os.environ["APPDATA"])
-            case "Darwin":
-                conf_dir = Path(os.environ["HOME"]) / "Library"
-            case _:
-                raise SmwMusicException(f"Unknown OS {sys}")
-
-        return conf_dir / app
-
-    ###########################################################################
-
-    @property
     def convert(self) -> list[str]:
         # TODO: Put better protections in place for this
         assert self._project_path is not None  # nosec: B101
@@ -1740,47 +1721,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 return [str(self._project_path / "convert.bat")]
             case _:
                 return []
-
-    ###########################################################################
-
-    @property
-    def prefs_fname(self) -> Path:
-        return self.config_dir / "preferences.yaml"
-
-    ###########################################################################
-
-    @property
-    def recent_projects(self) -> list[Path]:
-        fname = self.recent_projects_fname
-        projects = None
-        with suppress(FileNotFoundError):
-            with open(fname, "r", encoding="utf8") as fobj:
-                projects = yaml.safe_load(fobj)
-
-        if projects is None:
-            projects = []
-
-        return [Path(project).resolve() for project in projects]
-
-    ###########################################################################
-
-    @recent_projects.setter
-    def recent_projects(self, projects: list[Path]) -> None:
-        project_limit = 5
-        projects = projects[-project_limit:]
-
-        with open(self.recent_projects_fname, "w", encoding="utf8") as fobj:
-            yaml.safe_dump(
-                [str(project.resolve()) for project in projects], fobj
-            )
-
-        self.recent_projects_updated.emit(projects)
-
-    ###########################################################################
-
-    @property
-    def recent_projects_fname(self) -> Path:
-        return self.config_dir / "projects.yaml"
 
     ###########################################################################
 
