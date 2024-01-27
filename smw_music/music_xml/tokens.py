@@ -471,8 +471,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         True iff this is a grace note
     articulation: Artic
         Articulation style
-    advanced: bool
-        True iff this note is marked for advanced handling
 
     Attributes
     ----------
@@ -493,8 +491,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
         True iff this is a grace note
     articulation: Artic
         Articulation style
-    advanced: bool
-        True iff this note is marked for advanced handling
 
     Todo
     ----
@@ -508,7 +504,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
     tie: str = ""
     grace: bool = False
     articulation: Artic = Artic.NORMAL
-    advanced: bool = False
 
     ###########################################################################
     # API constructor definitions
@@ -544,7 +539,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             articulation = Artic.ACCSTAC if staccato else Artic.ACCENT
         else:
             articulation = Artic.STACCATO if staccato else Artic.NORMAL
-        advanced = music21.articulations.Stopped in articulations
 
         return cls(
             pitch,
@@ -554,7 +548,6 @@ class Note(Token, Playable):  # pylint: disable=too-many-instance-attributes
             elem.tie.type if elem.tie is not None else "",
             elem.duration.isGrace,
             articulation,
-            advanced,
         )
 
     ###########################################################################
