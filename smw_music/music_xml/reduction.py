@@ -14,6 +14,7 @@ from typing import Callable
 
 # Package imports
 from smw_music.music_xml.tokens import (
+    Advanced,
     Annotation,
     Comment,
     CrescDelim,
@@ -268,6 +269,10 @@ def _filter_annotations(tokens: list[Token]) -> list[Token]:
             lambda x: x.startswith("AMK: "),
             lambda x: Annotation(x.removeprefix("AMK:").strip()),
         ),
+        (
+            lambda x: x.startswith("!"),
+            lambda x: Advanced(x.removeprefix("!").strip() or None),
+        ),
     ]
 
     for token in tokens:
@@ -456,7 +461,6 @@ def _strip_tempo(tokens: list[Token]) -> list[Token]:
 
 
 def _superloopify(tokens: list[Token]) -> list[Token]:
-
     elements: list[Token] = []
 
     for token in tokens:
@@ -476,7 +480,7 @@ def _superloopify(tokens: list[Token]) -> list[Token]:
             set2 = elements[cand : (cand + nelem)]
 
             hasloop = False
-            for (el1, el2) in zip(set1, set2):
+            for el1, el2 in zip(set1, set2):
                 ok = False
                 if el1 == el2:
                     ok = True

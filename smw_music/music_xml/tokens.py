@@ -116,6 +116,14 @@ class Token:
 
 
 @dataclass
+class Advanced(Token):
+    name: str | None = None
+
+
+###############################################################################
+
+
+@dataclass
 class Annotation(Token):
     """
     Expressions attached to music notes.
