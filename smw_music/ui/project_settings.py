@@ -18,7 +18,7 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
-from smw_music.ui.preferences import PreferencesState
+from smw_music.spcmw import Preferences
 from smw_music.ui.project_settings_view import ProjectSettingsView
 from smw_music.ui.utils import is_checked
 
@@ -60,7 +60,7 @@ class ProjectSettings:
     # API function definitions
     ###########################################################################
 
-    def exec(self, preferences: PreferencesState) -> PreferencesState | None:
+    def exec(self, preferences: Preferences) -> Preferences | None:
         d = self._dialog  # pylint: disable=invalid-name
 
         fname = preferences.amk_fname
@@ -89,7 +89,7 @@ class ProjectSettings:
             release_check = is_checked(d.release_check)
             confirm_render = is_checked(d.confirm_render)
 
-            return PreferencesState(
+            return Preferences(
                 amk_fname,
                 spcplay_fname,
                 pack_dir,

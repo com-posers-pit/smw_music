@@ -20,6 +20,7 @@ import yaml
 
 # Package imports
 from smw_music import SmwMusicException
+from smw_music.spcmw import Preferences
 
 ###############################################################################
 # Private function definitions
@@ -45,21 +46,47 @@ def _config_dir() -> Path:
 
 
 ###############################################################################
+
+
+def _create_config_dir() -> None:
+    os.makedirs(_CONFIG_DIR, exist_ok=True)
+
+
+###############################################################################
 # API variable definitions
 ###############################################################################
 
 
-CONFIG_DIR = _config_dir()
-PREFS_FNAME = CONFIG_DIR / "preferences.yaml"
-RECENT_PROJECTS_FNAME = CONFIG_DIR / "projects.yaml"
+_CONFIG_DIR = _config_dir()
+_PREFS_FNAME = _CONFIG_DIR / "preferences.yaml"
+_RECENT_PROJECTS_FNAME = _CONFIG_DIR / "projects.yaml"
 
 ###############################################################################
 # API function definitions
 ###############################################################################
 
 
+def first_use() -> bool:
+    return not _PREFS_FNAME.exists()
+
+
+###############################################################################
+
+
+def get_preferences() -> Preferences:
+    if _PREFS_FNAME.exists():
+        rv = Preferences.from_file(_PREFS_FNAME)
+    else:
+        rv = Preferences()
+
+    return rv
+
+
+###############################################################################
+
+
 def get_recent_projects() -> list[Path]:
-    fname = RECENT_PROJECTS_FNAME
+    fname = _RECENT_PROJECTS_FNAME
     projects = None
     with suppress(FileNotFoundError):
         with open(fname, "r", encoding="utf8") as fobj:
@@ -74,12 +101,18 @@ def get_recent_projects() -> list[Path]:
 ###############################################################################
 
 
-def set_recent_projects(projects: list[Path], project_limit: int = 5) -> None:
+def save_preferences(preferences: Preferences) -> None:
+    _create_config_dir()
+    preferences.to_file(_PREFS_FNAME)
+
+
+###############################################################################
+
+
+def save_recent_projects(projects: list[Path], project_limit: int = 5) -> None:
     if project_limit:
         projects = projects[-project_limit:]
 
-    with open(RECENT_PROJECTS_FNAME, "w", encoding="utf8") as fobj:
+    _create_config_dir()
+    with open(_RECENT_PROJECTS_FNAME, "w", encoding="utf8") as fobj:
         yaml.safe_dump([str(project.resolve()) for project in projects], fobj)
-
-
-###########################################################################

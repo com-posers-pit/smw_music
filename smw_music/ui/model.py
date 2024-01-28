@@ -25,7 +25,6 @@ from random import choice
 from typing import Callable
 
 # Library imports
-import yaml
 from music21.pitch import Pitch, PitchException
 from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
@@ -60,7 +59,7 @@ from smw_music.spc700 import (
     SamplePlayer,
     midi_to_nspc,
 )
-from smw_music.ui.preferences import PreferencesState
+from smw_music.spcmw import Preferences
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
@@ -166,7 +165,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     )
 
     song: Song | None
-    preferences: PreferencesState
+    preferences: Preferences
     _history: list[State]
     _undo_level: int
     _sample_packs: dict[str, SamplePack]
@@ -181,14 +180,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.song = None
-        self.preferences = PreferencesState()
+        self.preferences = spcmw.get_preferences()
         self._history = [State()]
         self._undo_level = 0
         self._sample_packs = {}
         self._project_path = None
         self._sample_player = SamplePlayer()
-
-        os.makedirs(spcmw.CONFIG_DIR, exist_ok=True)
 
         self._start_watcher()
 
@@ -242,8 +239,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def update_preferences(self, preferences: PreferencesState) -> None:
-        preferences.to_file(spcmw.PREFS_FNAME)
+    def update_preferences(self, preferences: Preferences) -> None:
+        spcmw.save_preferences(preferences)
         self._load_prefs()
 
     ###########################################################################
@@ -769,7 +766,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_recent_projects_cleared(self) -> None:
-        spcmw.set_recent_projects([])
+        spcmw.save_recent_projects([])
         self.update_status("Recent projects cleared")
 
     ###########################################################################
@@ -1083,7 +1080,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if fname in history:
             history.remove(fname)
         history.append(fname)
-        spcmw.set_recent_projects(history)
+        spcmw.save_recent_projects(history)
         self.recent_projects_updated.emit(spcmw.get_recent_projects())
 
     ###########################################################################
@@ -1108,7 +1105,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _check_first_use(self) -> None:
-        if not spcmw.PREFS_FNAME.exists():
+        if spcmw.first_use():
             msg = "Welcome, and thank you for trying SPaCeMusicW."
             msg += "\n\nIt looks like this is your first time using the tool."
             msg += "\nWe recommend reading through our getting started guide"
@@ -1217,11 +1214,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _load_prefs(self) -> None:
-        if spcmw.PREFS_FNAME.exists():
-            self.preferences = PreferencesState.from_file(spcmw.PREFS_FNAME)
+        self.preferences = spcmw.get_preferences()
 
         self._start_watcher()
 
+        # TODO: Update this
         self.preferences_changed.emit(
             self.preferences.advanced_mode,
             bool(self.preferences.amk_fname.name),
