@@ -57,7 +57,7 @@ from smw_music.ui.dashboard_view import DashboardView
 from smw_music.ui.keyboard import KeyboardEventFilter
 from smw_music.ui.model import Model
 from smw_music.ui.preferences import PreferencesDlg
-from smw_music.ui.project_settings import ProjectSettings
+from smw_music.ui.project_settings import ProjectSettingsDlg
 from smw_music.ui.quotes import labeouf
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import (
@@ -219,7 +219,7 @@ class Dashboard(QWidget):
         self._view.setWindowTitle(self._window_title)
 
         self._preferences = PreferencesDlg()
-        self._project_settings = ProjectSettings()
+        self._project_settings = ProjectSettingsDlg()
         self._model = Model()
         self._unsaved = False
         self._loaded = False

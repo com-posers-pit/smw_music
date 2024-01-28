@@ -41,8 +41,7 @@ class PreferencesDlg:
     ###########################################################################
 
     def __init__(self) -> None:
-        ui_contents = RESOURCES / "preferences.ui"
-        dialog: PreferencesView = uic.loadUi(ui_contents)
+        dialog: PreferencesView = uic.loadUi(RESOURCES / "preferences.ui")
         self._dialog = dialog
 
         connections = [

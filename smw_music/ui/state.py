@@ -46,7 +46,7 @@ class NoSample(SmwMusicException):
 
 
 @dataclass
-class ProjectSettingsState:
+class ProjectSettings:
     musicxml_fname: Path
     project_name: str
     composer: str = ""
@@ -60,7 +60,7 @@ class ProjectSettingsState:
 
 @dataclass
 class State:
-    project_settings: ProjectSettingsState | None = None
+    project_settings: ProjectSettings | None = None
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True

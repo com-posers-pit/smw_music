@@ -19,7 +19,7 @@ from pathlib import Path
 import yaml
 
 # Package imports
-from smw_music import SmwMusicException
+from smw_music import SmwMusicException, amk
 from smw_music.spcmw import Preferences
 
 ###############################################################################
@@ -63,6 +63,16 @@ _RECENT_PROJECTS_FNAME = _CONFIG_DIR / "projects.yaml"
 
 ###############################################################################
 # API function definitions
+###############################################################################
+
+
+def create_project(path: Path, project_name: str | None = None) -> None:
+    if project_name is None:
+        project_name = path.name
+
+    amk.create_project(path, project_name, get_preferences().amk_fname)
+
+
 ###############################################################################
 
 

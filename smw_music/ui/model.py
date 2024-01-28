@@ -34,7 +34,6 @@ from smw_music import SmwMusicException, __version__, spcmw
 from smw_music.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
-    create_project,
     decode_utilization,
     update_sample_groups_file,
 )
@@ -198,10 +197,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, path: Path, project_name: str | None = None
     ) -> None:
         self._project_path = path
-        if project_name is None:
-            project_name = path.name
-
-        create_project(path, project_name, self.preferences.amk_fname)
+        spcmw.create_project(path, project_name)
 
         self._update_state()
         self._update_state(

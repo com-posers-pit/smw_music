@@ -18,8 +18,8 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
+from smw_music import RESOURCES
 from smw_music.spcmw import Preferences
-from smw_music.ui.project_settings_view import ProjectSettingsView
 from smw_music.ui.utils import is_checked
 
 ###############################################################################
@@ -27,21 +27,17 @@ from smw_music.ui.utils import is_checked
 ###############################################################################
 
 
-class ProjectSettings:
+class ProjectSettingsDlg:
     ###########################################################################
     # Constructor definitions
     ###########################################################################
 
     def __init__(self) -> None:
-        data_lib = resources.files("smw_music.data")
-        ui_contents = data_lib / "project_settings.ui"
-        dialog: ProjectSettingsView = uic.loadUi(ui_contents)
+        self._dialog = uic.loadUi(RESOURCES / "project_settings.ui")
 
-        dialog.select_musicxml_fname.released.connect(
+        self._dialog.select_musicxml_fname.released.connect(
             self._on_musicxml_fname_clicked
         )
-
-        self._dialog = dialog
 
     ###########################################################################
     # Slot definitions

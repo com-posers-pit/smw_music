@@ -7,6 +7,7 @@
 
 from .preferences import Preferences
 from .spcmw import (
+    create_project,
     first_use,
     get_preferences,
     get_recent_projects,
