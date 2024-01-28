@@ -35,6 +35,7 @@ from smw_music.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
     create_project,
+    decode_utilization,
     update_sample_groups_file,
 )
 from smw_music.music_xml import MusicXmlException
@@ -64,7 +65,7 @@ from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.save import load, save
 from smw_music.ui.state import NoSample, State
-from smw_music.ui.utilization import decode_utilization, echo_bytes
+from smw_music.ui.utilization import echo_bytes
 from smw_music.utils import brr_size_b, newest_release, version_tuple
 
 ###############################################################################

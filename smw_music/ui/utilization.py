@@ -8,43 +8,13 @@
 # Imports
 ###############################################################################
 
-# Standard library imports
-from dataclasses import dataclass, field
-from enum import Enum
-from pathlib import Path
-
 # Library imports
-import numpy as np
-import numpy.typing as npt
-from PIL import Image
 from PyQt6.QtGui import QPainter
 from PyQt6.QtWidgets import QLabel
 
 # Package imports
+from smw_music.amk import Utilization
 from smw_music.ui.utils import Color
-
-###############################################################################
-
-
-class _UsageType(Enum):
-    VARIABLES = (255, 0, 0)
-    ENGINE = (255, 255, 0)
-    SONG = (0, 128, 0)
-    SAMPLE_TABLE = (0, 255, 0)
-    ECHO = (160, 0, 160)
-    ECHO_PAD = (63, 63, 63)
-    FREE = (0, 0, 0)
-
-
-###############################################################################
-# Private Function Definitions
-###############################################################################
-
-
-def _count_matches(arr: npt.NDArray[np.uint8], val: _UsageType) -> int:
-    (matches,) = np.where((arr == val.value).all(axis=1))
-    return len(matches)
-
 
 ###############################################################################
 # Private variable Definitions
@@ -73,98 +43,7 @@ _LIGHT_MODE = {
 _colors = _DARK_MODE
 
 ###############################################################################
-# API Class Definitions
-###############################################################################
-
-
-@dataclass
-class Utilization:
-    variables: int
-    engine: int
-    song: int
-    sample_table: int
-    samples: int
-    echo: int
-    echo_pad: int
-
-    size: int = field(init=False, default=65536)
-
-    ###########################################################################
-    # API property definitions
-    ###########################################################################
-
-    @property
-    def free(self) -> int:
-        return self.size - self.util
-
-    ###########################################################################
-
-    @property
-    def util(self) -> int:
-        return (
-            self.variables
-            + self.engine
-            + self.song
-            + self.sample_table
-            + self.samples
-            + self.echo
-            + self.echo_pad
-        )
-
-
-###############################################################################
 # API Function Definitions
-###############################################################################
-
-
-def decode_utilization(png_name: Path) -> Utilization:
-    with Image.open(png_name) as png:
-        img = np.array(png.convert("RGB").getdata())
-
-    variables = _count_matches(img, _UsageType.VARIABLES)
-    engine = _count_matches(img, _UsageType.ENGINE)
-    song = _count_matches(img, _UsageType.SONG)
-    sample_table = _count_matches(img, _UsageType.SAMPLE_TABLE)
-    echo = _count_matches(img, _UsageType.ECHO)
-    echo_pad = _count_matches(img, _UsageType.ECHO_PAD)
-    free = _count_matches(img, _UsageType.FREE)
-    samples = (
-        len(img)
-        - variables
-        - engine
-        - song
-        - sample_table
-        - echo
-        - echo_pad
-        - free
-    )
-
-    return Utilization(
-        variables=variables,
-        engine=engine,
-        song=song,
-        sample_table=sample_table,
-        samples=samples,
-        echo=echo,
-        echo_pad=echo_pad,
-    )
-
-
-###############################################################################
-
-
-def default_utilization() -> Utilization:
-    return Utilization(
-        variables=1102,
-        engine=9938,
-        song=119,
-        sample_table=80,
-        samples=12815,
-        echo=4,
-        echo_pad=252,
-    )
-
-
 ###############################################################################
 
 

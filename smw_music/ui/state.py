@@ -18,10 +18,14 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music import SmwMusicException
-from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
+from smw_music.amk import (
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    Utilization,
+    default_utilization,
+)
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
-from smw_music.ui.utilization import Utilization, default_utilization
 
 ###############################################################################
 # API constant definitions
