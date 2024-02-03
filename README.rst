@@ -3,7 +3,7 @@ SMW Music README
 
 |bandit-status| |lint-status| |mypy-status| |test-status| |coverage-status|
 |package-version| |python-version| |rtd-status| |package-status| |reuse|
-|license| |python-style|
+|license-tag| |python-style|
 
 Library and utilities for generating AddMusicK-compatible MML files from
 MusicXML.
@@ -76,7 +76,7 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-A copy of the AGPL v3.0 is available `here <License_>`_
+A copy of the AGPL v3.0 is available `here <AGPL License_>`__.
 
 Acknowledgements
 ----------------
@@ -89,7 +89,7 @@ Acknowledgements
 .. # Links
 .. _Examples: https://smw-music.readthedocs.io/en/latest/examples.html
 .. _The SMW Music Python Project Authors: https://github.com/com-posers-pit/smw_music/blob/develop/AUTHORS.rst
-.. _License: https://github.com/com-posers-pit/smw_music/blob/develop/LICENSES/AGPL-3.0-only.txt
+.. _AGPL License: https://github.com/com-posers-pit/smw_music/blob/develop/LICENSES/AGPL-3.0-only.txt
 .. _Contributor Guide:  https://github.com/com-posers-pit/smw_music/blob/develop/CONTRIBUTING.rst
 .. _AddMusicK: https://www.smwcentral.net/?p=section&a=details&id=24994
 .. _SMW music porting tutorial: https://www.smwcentral.net/?p=viewthread&t=89606
@@ -113,7 +113,7 @@ Acknowledgements
 .. |test-status| image:: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml/badge.svg
    :target: https://github.com/com-posers-pit/smw_music/actions/workflows/test.yml
    :alt: Unit test status
-.. |license| image:: https://img.shields.io/pypi/l/smw_music
+.. |license-tag| image:: https://img.shields.io/pypi/l/smw_music
    :target: https://pypi.org/project/smw_music
    :alt: PyPI - License
 .. |reuse| image:: https://api.reuse.software/badge/github.com/com-posers-pit/smw_music
