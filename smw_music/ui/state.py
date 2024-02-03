@@ -11,7 +11,6 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from pathlib import Path
 
 # Library imports
 from music21.pitch import Pitch
@@ -26,6 +25,7 @@ from smw_music.amk import (
 )
 from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
+from smw_music.spcmw import ProjectInfo
 
 ###############################################################################
 # API constant definitions
@@ -46,21 +46,8 @@ class NoSample(SmwMusicException):
 
 
 @dataclass
-class ProjectSettings:
-    musicxml_fname: Path
-    project_name: str
-    composer: str = ""
-    title: str = ""
-    porter: str = ""
-    game: str = ""
-
-
-###############################################################################
-
-
-@dataclass
 class State:
-    project_settings: ProjectSettings | None = None
+    project_settings: ProjectInfo | None = None
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True

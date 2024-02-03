@@ -46,7 +46,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Package imports
-from smw_music import COPYRIGHT_YEAR, RESOURCES, __version__
+from smw_music import COPYRIGHT_YEAR, RESOURCES, __version__, spcmw
 from smw_music.music_xml.echo import EchoCh
 from smw_music.music_xml.instrument import Artic
 from smw_music.music_xml.instrument import Dynamics as Dyn
@@ -200,8 +200,6 @@ class _TblCol(enum.IntEnum):
 
 
 class Dashboard(QWidget):
-    _extension = "prj"
-
     ###########################################################################
     # Constructor definitions
     ###########################################################################
@@ -1047,10 +1045,9 @@ class Dashboard(QWidget):
 
     def _on_open_project_settings(self) -> None:
         print("opening project settings")
-        settings = self._project_settings.exec()
+        settings = self._project_settings.exec(self._project_settings)
         if settings:
-            # TODO
-            pass
+            print(settings)
 
     ###########################################################################
 
@@ -1123,7 +1120,7 @@ class Dashboard(QWidget):
 
     def _open_project(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
-            self._view, "Project File", filter=f"*.{self._extension}"
+            self._view, "Project File", filter=f"*.{spcmw.EXTENSION}"
         )
         if fname:
             self._model.on_load(Path(fname))

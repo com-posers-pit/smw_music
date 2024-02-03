@@ -10,7 +10,6 @@
 ###############################################################################
 
 # Standard library imports
-from importlib import resources
 from pathlib import Path
 
 # Library imports
@@ -19,8 +18,8 @@ from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
 from smw_music import RESOURCES
-from smw_music.spcmw import Preferences
-from smw_music.ui.utils import is_checked
+from smw_music.spcmw import ProjectInfo
+from smw_music.ui.project_settings_view import ProjectSettingsView
 
 ###############################################################################
 # API class definitions
@@ -33,7 +32,9 @@ class ProjectSettingsDlg:
     ###########################################################################
 
     def __init__(self) -> None:
-        self._dialog = uic.loadUi(RESOURCES / "project_settings.ui")
+        self._dialog: ProjectSettingsView = uic.loadUi(
+            RESOURCES / "project_settings.ui"
+        )
 
         self._dialog.select_musicxml_fname.released.connect(
             self._on_musicxml_fname_clicked
@@ -56,43 +57,27 @@ class ProjectSettingsDlg:
     # API function definitions
     ###########################################################################
 
-    def exec(self, preferences: Preferences) -> Preferences | None:
+    def exec(self, settings: ProjectInfo) -> ProjectInfo | None:
         d = self._dialog  # pylint: disable=invalid-name
 
-        fname = preferences.amk_fname
-        text = str(fname) if fname.parts else ""
-        d.amk_fname.setText(text)
-
-        fname = preferences.spcplay_fname
-        text = str(fname) if fname.parts else ""
-        d.spcplay_fname.setText(text)
-
-        fname = preferences.sample_pack_dname
-        text = str(fname) if fname.parts else ""
-        d.sample_pack_dirname.setText(text)
-
-        d.advanced_mode.setChecked(preferences.advanced_mode)
-        d.dark_mode.setChecked(preferences.dark_mode)
-        d.release_check.setChecked(preferences.release_check)
-        d.confirm_render.setChecked(preferences.confirm_render)
+        d.composer.setText(settings.composer)
+        d.game_name.setText(settings.game)
+        d.musicxml_fname.setText(str(settings.musicxml_fname))
+        d.porter_name.setText(settings.porter)
+        d.title.setText(settings.title)
 
         if self._dialog.exec():
-            amk_fname = Path(d.amk_fname.text())
-            spcplay_fname = Path(d.spcplay_fname.text())
-            pack_dir = Path(d.sample_pack_dirname.text())
-            advanced_mode = is_checked(d.advanced_mode)
-            dark_mode = is_checked(d.dark_mode)
-            release_check = is_checked(d.release_check)
-            confirm_render = is_checked(d.confirm_render)
+            musicxml_fname = Path(d.musicxml_fname.text())
+            if not musicxml_fname.exists():
+                musicxml_fname = Path("")
 
-            return Preferences(
-                amk_fname,
-                spcplay_fname,
-                pack_dir,
-                advanced_mode,
-                dark_mode,
-                release_check,
-                confirm_render,
+            return ProjectInfo(
+                musicxml_fname,
+                settings.project_name,
+                d.composer.text(),
+                d.title.text(),
+                d.porter_name.text(),
+                d.game_name.text(),
             )
 
         return None
