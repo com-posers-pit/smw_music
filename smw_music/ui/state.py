@@ -23,15 +23,8 @@ from smw_music.amk import (
     Utilization,
     default_utilization,
 )
-from smw_music.music_xml.echo import EchoConfig
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
-from smw_music.spcmw import ProjectInfo
-
-###############################################################################
-# API constant definitions
-###############################################################################
-
-N_BUILTIN_SAMPLES = 20
+from smw_music.spcmw import ProjectInfo, ProjectSettings
 
 ###############################################################################
 # API class definitions
@@ -47,23 +40,9 @@ class NoSample(SmwMusicException):
 
 @dataclass
 class State:
-    project_settings: ProjectInfo | None = None
-    loop_analysis: bool = False
-    superloop_analysis: bool = False
-    measure_numbers: bool = True
-    instruments: dict[str, InstrumentConfig] = field(
-        default_factory=lambda: {}
-    )
-    global_volume: int = 128
-    global_legato: bool = True
-    global_echo_enable: bool = True
-    echo: EchoConfig = field(
-        default_factory=lambda: EchoConfig(
-            set(), (0, 0), (False, False), 0, 0, False, 0
-        )
-    )
+    info: ProjectInfo | None = None
+    settings: ProjectSettings = ProjectSettings()
     unsaved: bool = True
-    start_measure: int = 1
     section_names: list[str] = field(default_factory=list)
     start_section_idx: int = 0
 
@@ -71,21 +50,8 @@ class State:
     aram_util: Utilization = field(default_factory=default_utilization)
     aram_custom_sample_b: int = 0
     calculated_tune: tuple[float, tuple[int, float]] = (0, (0, 0))
-    builtin_sample_group: BuiltinSampleGroup = BuiltinSampleGroup.OPTIMIZED
-    builtin_sample_sources: list[BuiltinSampleSource] = field(
-        default_factory=lambda: N_BUILTIN_SAMPLES
-        * [BuiltinSampleSource.OPTIMIZED]
-    )
 
     _sample_idx: tuple[str, str] | None = None
-
-    ###########################################################################
-    # Data model method definitions
-    ###########################################################################
-
-    def __post_init__(self) -> None:
-        self._normalize_followers()
-        self._normalize_sample_sources()
 
     ###########################################################################
     # Property definitions
@@ -99,7 +65,7 @@ class State:
 
     @property
     def loaded(self) -> bool:
-        return self.project_settings is not None
+        return self.info is not None
 
     ###########################################################################
 
@@ -143,36 +109,3 @@ class State:
                 samples[(inst_name, sample_name)] = sample
 
         return samples
-
-    ###########################################################################
-    # Private method definitions
-    ###########################################################################
-
-    def _normalize_followers(self) -> None:
-        for inst in self.instruments.values():
-            for sample in inst.multisamples.values():
-                sample.track_settings(inst.sample)
-
-    ###########################################################################
-
-    def _normalize_sample_sources(self) -> None:
-        # Use a short alias to the state variable
-        sources = self.builtin_sample_sources
-        nelem = len(self.builtin_sample_sources)
-
-        match self.builtin_sample_group:
-            case BuiltinSampleGroup.DEFAULT:
-                sources[:] = nelem * [BuiltinSampleSource.DEFAULT]
-            case BuiltinSampleGroup.OPTIMIZED:
-                sources[:] = nelem * [BuiltinSampleSource.OPTIMIZED]
-            case BuiltinSampleGroup.REDUX1:
-                sources[:] = nelem * [BuiltinSampleSource.OPTIMIZED]
-                sources[0x0D] = BuiltinSampleSource.EMPTY
-                sources[0x0F] = BuiltinSampleSource.EMPTY
-                sources[0x11] = BuiltinSampleSource.EMPTY
-            case BuiltinSampleGroup.REDUX2:
-                sources[:] = nelem * [BuiltinSampleSource.OPTIMIZED]
-                sources[0x0D] = BuiltinSampleSource.EMPTY
-                sources[0x0F] = BuiltinSampleSource.EMPTY
-                sources[0x11] = BuiltinSampleSource.EMPTY
-                sources[0x13] = BuiltinSampleSource.EMPTY
