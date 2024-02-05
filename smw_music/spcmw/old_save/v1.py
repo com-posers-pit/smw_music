@@ -35,16 +35,14 @@ from smw_music.music_xml.instrument import (
     SampleSource,
 )
 from smw_music.spc700 import Envelope, GainMode
-from smw_music.spcmw.project import Project, ProjectInfo
-
-# from smw_music.ui.old_save import v0
+from smw_music.ui.old_save import v0
 from smw_music.ui.state import BuiltinSampleGroup, BuiltinSampleSource, State
 
 ###############################################################################
 # Private constant definitions
 ###############################################################################
 
-_CURRENT_SAVE_VERSION = 2
+_CURRENT_SAVE_VERSION = 1
 
 ###############################################################################
 # Private type definitions
@@ -52,6 +50,7 @@ _CURRENT_SAVE_VERSION = 2
 
 
 class _EchoDict(TypedDict):
+    enables: list[int]
     vol_mag: list[float]
     vol_inv: list[bool]
     delay: int
@@ -214,6 +213,7 @@ def _load_sample(inst: _SampleDict) -> InstrumentSample:
 
 def _save_echo(echo: EchoConfig) -> _EchoDict:
     return {
+        "enables": list(x.value for x in echo.enables),
         "vol_mag": list(echo.vol_mag),
         "vol_inv": list(echo.vol_inv),
         "delay": echo.delay,
@@ -336,9 +336,7 @@ def load(fname: Path) -> tuple[State, Path | None]:
         _update_convert_scripts(fname.parent)
 
     if save_version < _CURRENT_SAVE_VERSION:
-        # TODO: Reimplement old loading
-        # rv = _upgrade_save(fname)
-        pass
+        rv = _upgrade_save(fname)
     else:
         project = contents["song"]
         sdict = contents["state"]
@@ -398,57 +396,3 @@ def load(fname: Path) -> tuple[State, Path | None]:
         rv = state, None
 
     return rv
-
-
-###############################################################################
-
-
-def save(fname: Path, project: Project) -> None:
-    proj_dir = fname.parent.resolve()
-    info = ProjectInfo() if project.info is None else project.info
-    musicxml = info.musicxml_fname
-    if musicxml:
-        musicxml = musicxml.resolve()
-        with suppress(ValueError):
-            musicxml = musicxml.relative_to(proj_dir)
-
-    contents = {
-        # Meta info
-        "tool_version": __version__,
-        "save_version": _CURRENT_SAVE_VERSION,
-        "time": f"{datetime.datetime.utcnow()}",
-        # ProjectInfo
-        "musicxml": str(musicxml),
-        "project_name": info.project_name,
-        "composer": info.composer,
-        "title": info.title,
-        "porter": info.porter,
-        "game": info.game,
-        # ProjectSettings
-    }
-
-    #        "state": {
-    #            "musicxml_fname": None if musicxml is None else str(musicxml),
-    #            "mml_fname": None if mml is None else str(mml),
-    #            "loop_analysis": state.loop_analysis,
-    #            "measure_numbers": state.measure_numbers,
-    #            "global_volume": state.global_volume,
-    #            "global_legato": state.global_legato,
-    #            "global_echo_enable": state.global_echo_enable,
-    #            "echo": _save_echo(state.echo),
-    #            "instruments": {
-    #                k: _save_instrument(v) for k, v in state.instruments.items()
-    #            },
-    #            "porter": state.porter,
-    #            "game": state.game,
-    #            "start_measure": state.start_measure,
-    #            "builtin_sample_group": state.builtin_sample_group.value,
-    #            "builtin_sample_sources": [
-    #                x.value for x in state.builtin_sample_sources
-    #            ],
-    #        },
-    #    }
-
-    with open(fname, "w", encoding="utf8") as fobj:
-        yaml.safe_dump(contents, fobj)
-    state.unsaved = False
