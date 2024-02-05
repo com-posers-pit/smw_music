@@ -17,7 +17,7 @@ import sys
 
 # Package imports
 from smw_music import __version__
-from smw_music.music_xml import EchoConfig, Song
+from smw_music.music_xml import Song
 
 ###############################################################################
 # API function definitions
@@ -25,47 +25,11 @@ from smw_music.music_xml import EchoConfig, Song
 
 
 def main(arg_list: list[str] | None = None) -> None:
-    """Entrypoint for Music XML -> AMK Converter."""
+    """Entrypoint for SPCMW command line tool."""
     if arg_list is None:
         arg_list = sys.argv[1:]
-    parser = argparse.ArgumentParser(
-        description=f"Music XML -> AMK Converter v{__version__}"
-    )
-    parser.add_argument("music_xml", type=str, help="Source Music XML file")
-    parser.add_argument("amk", type=str, help="Output AMK file")
-    parser.add_argument(
-        "--disable_global_legato",
-        action="store_false",
-        help="Disable the global legato setting",
-        dest="enable_global_legato",
-    )
-    parser.add_argument(
-        "--loop_analysis",
-        action="store_true",
-        help="Enable loop optimizations",
-    )
-    parser.add_argument(
-        "--superloop_analysis",
-        action="store_true",
-        help="Enable superloop optimizations",
-    )
-    parser.add_argument(
-        "--measure_numbers",
-        action="store_true",
-        help="Emit measure numbers",
-    )
-    parser.add_argument(
-        "--disable_dt",
-        action="store_false",
-        help="Disable including datetime in MML file",
-        dest="enable_dt",
-    )
-    parser.add_argument(
-        "--echo",
-        help="Echo configuration",
-        type=EchoConfig.from_csv,
-        default=None,
-    )
+    parser = argparse.ArgumentParser(description=f"SPCMW CLI v{__version__}")
+    parser.add_argument("spcmw", type=str, help="SPCMW Project File")
 
     args = parser.parse_args(arg_list)
 

@@ -17,14 +17,9 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music import SmwMusicException
-from smw_music.amk import (
-    BuiltinSampleGroup,
-    BuiltinSampleSource,
-    Utilization,
-    default_utilization,
-)
+from smw_music.amk import Utilization, default_utilization
 from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
-from smw_music.spcmw import ProjectInfo, ProjectSettings
+from smw_music.spcmw import Project
 
 ###############################################################################
 # API class definitions
@@ -40,8 +35,7 @@ class NoSample(SmwMusicException):
 
 @dataclass
 class State:
-    info: ProjectInfo | None = None
-    settings: ProjectSettings = ProjectSettings()
+    project: Project = Project()
     unsaved: bool = True
     section_names: list[str] = field(default_factory=list)
     start_section_idx: int = 0

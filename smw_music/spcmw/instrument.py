@@ -213,6 +213,7 @@ class InstrumentSample:
     start: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
     tuning: Tuning = field(default_factory=Tuning)
     track: bool = False
+    echo: bool = False
 
     _instrument_idx: int = field(default=0, init=False)
 
@@ -370,36 +371,7 @@ class InstrumentConfig:
         name = name.lower()
 
         if name == "drumset":
-            # Weinberg:
-            # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
-            sample_defs = [
-                ("CR3_", Pitch("C6"), NoteHead.X, 22),
-                ("CR2_", Pitch("B5"), NoteHead.X, 22),
-                ("CR", Pitch("A5"), NoteHead.X, 22),
-                ("CH", Pitch("G5"), NoteHead.X, 22),
-                ("RD", Pitch("F5"), NoteHead.X, 22),
-                ("OH", Pitch("E5"), NoteHead.X, 22),
-                ("RD2_", Pitch("D5"), NoteHead.X, 22),
-                ("HT", Pitch("E5"), NoteHead.NORMAL, 24),
-                ("MT", Pitch("D5"), NoteHead.NORMAL, 23),
-                ("SN", Pitch("C5"), NoteHead.NORMAL, 10),
-                ("LT", Pitch("A4"), NoteHead.NORMAL, 21),
-                ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
-            ]
-
-            multisamples = {
-                name: InstrumentSample(
-                    llim=pitch,
-                    ulim=pitch,
-                    start=pitch,
-                    notehead=notehead,
-                    builtin_sample_index=idx,
-                )
-                for name, pitch, notehead, idx in sample_defs
-            }
-
-            # TODO: address this mypy error
-            inst = cls(multisamples=multisamples, **kwargs)  # type: ignore
+            inst = cls.make_percussion(name, **kwargs)
         else:
             # Default instrument mapping, from Wakana's tutorial
             inst_map = {
@@ -420,6 +392,43 @@ class InstrumentConfig:
             inst.sample.builtin_sample_index = inst_map.get(name, 0)
 
         return inst
+
+    ###########################################################################
+
+    @classmethod
+    def make_percussion(
+        cls, name: str, **kwargs: int | set[Dynamics] | bool
+    ) -> "InstrumentConfig":
+        # Weinberg:
+        # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
+        sample_defs = [
+            ("CR3_", Pitch("C6"), NoteHead.X, 22),
+            ("CR2_", Pitch("B5"), NoteHead.X, 22),
+            ("CR", Pitch("A5"), NoteHead.X, 22),
+            ("CH", Pitch("G5"), NoteHead.X, 22),
+            ("RD", Pitch("F5"), NoteHead.X, 22),
+            ("OH", Pitch("E5"), NoteHead.X, 22),
+            ("RD2_", Pitch("D5"), NoteHead.X, 22),
+            ("HT", Pitch("E5"), NoteHead.NORMAL, 24),
+            ("MT", Pitch("D5"), NoteHead.NORMAL, 23),
+            ("SN", Pitch("C5"), NoteHead.NORMAL, 10),
+            ("LT", Pitch("A4"), NoteHead.NORMAL, 21),
+            ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
+        ]
+
+        multisamples = {
+            name: InstrumentSample(
+                llim=pitch,
+                ulim=pitch,
+                start=pitch,
+                notehead=notehead,
+                builtin_sample_index=idx,
+            )
+            for name, pitch, notehead, idx in sample_defs
+        }
+
+        # TODO: address this mypy error
+        return cls(multisamples=multisamples, **kwargs)  # type: ignore
 
     ###########################################################################
     # API method definitions

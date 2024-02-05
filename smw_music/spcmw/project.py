@@ -14,7 +14,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 
 # Package imports
-from smw_music.music_xml.echo import EchoConfig
+from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
+from smw_music.spcmw.echo import EchoConfig
+from smw_music.spcmw.instrument import InstrumentConfig, InstrumentSample
 
 ###############################################################################
 # API constant definitions
@@ -83,49 +85,6 @@ class ProjectSettings:
     ###########################################################################
 
     @property
-    def instrument(self) -> InstrumentConfig:
-        return self.instruments[self.sample_idx[0]]
-
-    ###########################################################################
-
-    @property
-    def loaded(self) -> bool:
-        return self.project_settings is not None
-
-    ###########################################################################
-
-    @property
-    def sample(self) -> InstrumentSample:
-        return self.samples[self.sample_idx]
-
-    ###########################################################################
-
-    @sample.setter
-    def sample(self, sample: InstrumentSample) -> None:
-        inst_name, sample_name = self.sample_idx
-        inst = self.instruments[inst_name]
-        if sample_name:
-            inst.multisamples[sample_name] = sample
-        else:
-            inst.sample = sample
-
-    ###########################################################################
-
-    @property
-    def sample_idx(self) -> tuple[str, str]:
-        if self._sample_idx is None:
-            raise NoSample()
-        return self._sample_idx
-
-    ###########################################################################
-
-    @sample_idx.setter
-    def sample_idx(self, sample_idx: tuple[str, str]) -> None:
-        self._sample_idx = sample_idx
-
-    ###########################################################################
-
-    @property
     def samples(self) -> dict[tuple[str, str], InstrumentSample]:
         samples = {}
 
@@ -170,5 +129,9 @@ class ProjectSettings:
 
 
 ###############################################################################
-# API function definitions
-###############################################################################
+
+
+@dataclass
+class Project:
+    info: ProjectInfo | None = None
+    settings: ProjectSettings = ProjectSettings()
