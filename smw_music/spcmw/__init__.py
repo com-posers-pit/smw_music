@@ -6,7 +6,7 @@
 """Dashboard preferences."""
 
 from .preferences import Preferences
-from .project import EXTENSION, ProjectInfo
+from .project import EXTENSION, Project, ProjectInfo, ProjectSettings
 from .spcmw import (
     create_project,
     first_use,
@@ -21,6 +21,8 @@ from .spcmw import (
 __all__ = [
     "Preferences",
     "ProjectInfo",
+    "ProjectSettings",
+    "Project",
     "EXTENSION",
     "create_project",
     "first_use",

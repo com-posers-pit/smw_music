@@ -13,7 +13,6 @@
 
 # Standard library imports
 from dataclasses import dataclass
-from enum import IntEnum
 
 ###############################################################################
 # Private function definitions

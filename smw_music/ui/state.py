@@ -38,6 +38,7 @@ class State:
     project: Project = Project()
     unsaved: bool = True
     section_names: list[str] = field(default_factory=list)
+    start_measure: int = 1
     start_section_idx: int = 0
 
     unmapped: set[tuple[Pitch, str]] = field(default_factory=set)

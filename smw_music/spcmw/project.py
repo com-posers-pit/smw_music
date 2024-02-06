@@ -10,20 +10,95 @@
 ###############################################################################
 
 # Standard library imports
+from contextlib import suppress
 from dataclasses import dataclass, field
+from datetime import datetime
 from pathlib import Path
 
+# Library imports
+import yaml
+
 # Package imports
+from smw_music import __version__
 from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
-from smw_music.spcmw.echo import EchoConfig
-from smw_music.spcmw.instrument import InstrumentConfig, InstrumentSample
+
+from .echo import EchoConfig
+from .instrument import InstrumentConfig, InstrumentSample
+from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 ###############################################################################
 # API constant definitions
 ###############################################################################
 
+CURRENT_SAVE_VERSION = 2
 EXTENSION = "spcmw"
 N_BUILTIN_SAMPLES = 20
+
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _save_echo(echo: EchoConfig) -> EchoDict:
+    return {
+        "vol_mag": list(echo.vol_mag),
+        "vol_inv": list(echo.vol_inv),
+        "delay": echo.delay,
+        "fb_mag": echo.fb_mag,
+        "fb_inv": echo.fb_inv,
+        "fir_filt": echo.fir_filt,
+    }
+
+
+###############################################################################
+
+
+def _save_instrument(inst: InstrumentConfig) -> InstrumentDict:
+    return {
+        "mute": inst.mute,
+        "solo": inst.solo,
+        "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
+    }
+
+
+###############################################################################
+
+
+def _save_sample(sample: InstrumentSample) -> SampleDict:
+    return {
+        "octave_shift": sample.octave_shift,
+        "dynamics": {k.value: v for k, v in sample.dynamics.items()},
+        "interpolate_dynamics": sample.dyn_interpolate,
+        "articulations": {
+            k.value: [v.length, v.volume] for k, v in sample.artics.items()
+        },
+        "pan_enabled": sample.pan_enabled,
+        "pan_setting": sample.pan_setting,
+        "pan_l_invert": sample.pan_invert[0],
+        "pan_r_invert": sample.pan_invert[1],
+        "sample_source": sample.sample_source.value,
+        "builtin_sample_index": sample.builtin_sample_index,
+        "pack_sample": [sample.pack_sample[0], str(sample.pack_sample[1])],
+        "brr_fname": str(sample.brr_fname),
+        "adsr_mode": sample.envelope.adsr_mode,
+        "attack_setting": sample.envelope.attack_setting,
+        "decay_setting": sample.envelope.decay_setting,
+        "sus_level_setting": sample.envelope.sus_level_setting,
+        "sus_rate_setting": sample.envelope.sus_rate_setting,
+        "gain_mode": sample.envelope.gain_mode.value,
+        "gain_setting": sample.envelope.gain_setting,
+        "tune_setting": sample.tune_setting,
+        "subtune_setting": sample.subtune_setting,
+        "mute": sample.mute,
+        "solo": sample.solo,
+        "ulim": str(sample.ulim),
+        "llim": str(sample.llim),
+        "notehead": str(sample.notehead),
+        "start": str(sample.start),
+        "track": bool(sample.track),
+    }
+
 
 ###############################################################################
 # API class definitions
@@ -61,11 +136,9 @@ class ProjectSettings:
     global_legato: bool = True
     echo: EchoConfig = field(
         default_factory=lambda: EchoConfig(
-            set(), (0, 0), (False, False), 0, 0, False, 0
+            (0, 0), (False, False), 0, 0, False, 0
         )
     )
-    start_measure: int = 1
-
     builtin_sample_group: BuiltinSampleGroup = BuiltinSampleGroup.OPTIMIZED
     builtin_sample_sources: list[BuiltinSampleSource] = field(
         default_factory=lambda: N_BUILTIN_SAMPLES
@@ -134,4 +207,47 @@ class ProjectSettings:
 @dataclass
 class Project:
     info: ProjectInfo | None = None
-    settings: ProjectSettings = ProjectSettings()
+    settings: ProjectSettings = field(default_factory=ProjectSettings)
+
+    ###########################################################################
+
+    def save(self, fname: Path) -> None:
+        proj_dir = fname.parent.resolve()
+        info = ProjectInfo() if self.info is None else self.info
+        settings = self.settings
+        musicxml = info.musicxml_fname
+        if musicxml:
+            musicxml = musicxml.resolve()
+            with suppress(ValueError):
+                musicxml = musicxml.relative_to(proj_dir)
+
+        contents: ProjectDict = {
+            # Meta info
+            "tool_version": __version__,
+            "save_version": CURRENT_SAVE_VERSION,
+            "time": f"{datetime.utcnow()}",
+            # ProjectInfo
+            "musicxml": str(musicxml),
+            "project_name": info.project_name,
+            "composer": info.composer,
+            "title": info.title,
+            "porter": info.porter,
+            "game": info.game,
+            # ProjectSettings
+            "loop_analysis": settings.loop_analysis,
+            "superloop_analysis": settings.superloop_analysis,
+            "measure_numbers": settings.measure_numbers,
+            "global_volume": settings.global_volume,
+            "global_legato": settings.global_legato,
+            "echo": _save_echo(settings.echo),
+            "instruments": {
+                k: _save_instrument(v) for k, v in settings.instruments.items()
+            },
+            "builtin_sample_group": settings.builtin_sample_group.value,
+            "builtin_sample_sources": [
+                x.value for x in settings.builtin_sample_sources
+            ],
+        }
+
+        with open(fname, "w", encoding="utf8") as fobj:
+            yaml.safe_dump(contents, fobj)
