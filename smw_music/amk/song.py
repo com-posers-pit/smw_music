@@ -21,19 +21,7 @@ from mako.template import Template  # type: ignore
 
 # Package imports
 from smw_music import __version__
-from smw_music.music_xml.channel import Channel
-from smw_music.music_xml.echo import EchoConfig
-from smw_music.music_xml.instrument import (
-    Dynamics,
-    InstrumentConfig,
-    InstrumentSample,
-    NoteHead,
-    SampleSource,
-    dedupe_notes,
-)
-from smw_music.music_xml.reduction import reduce, remove_unused_instruments
-from smw_music.music_xml.shared import CRLF, MusicXmlException
-from smw_music.music_xml.tokens import (
+from smw_music.music_xml import (
     Annotation,
     Clef,
     CrescDelim,
@@ -52,6 +40,19 @@ from smw_music.music_xml.tokens import (
     Token,
     Triplet,
 )
+
+from .channel import Channel
+from .echo import EchoConfig
+from .instrument import (
+    Dynamics,
+    InstrumentConfig,
+    InstrumentSample,
+    NoteHead,
+    SampleSource,
+    dedupe_notes,
+)
+from .reduction import reduce, remove_unused_instruments
+from .shared import CRLF, MusicXmlException
 
 ###############################################################################
 # Private function definitions
