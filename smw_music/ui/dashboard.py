@@ -47,33 +47,28 @@ from PyQt6.QtWidgets import (
 
 # Package imports
 from smw_music import COPYRIGHT_YEAR, RESOURCES, __version__, spcmw
-from smw_music.music_xml.echo import EchoCh
-from smw_music.music_xml.instrument import Artic
-from smw_music.music_xml.instrument import Dynamics as Dyn
-from smw_music.music_xml.instrument import SampleSource, TuneSource
-from smw_music.spc700 import Envelope, GainMode
-from smw_music.ui.dashboard_ui import update_sample_opt
-from smw_music.ui.dashboard_view import DashboardView
-from smw_music.ui.keyboard import KeyboardEventFilter
-from smw_music.ui.model import Model
-from smw_music.ui.preferences import PreferencesDlg
-from smw_music.ui.project_settings import ProjectSettingsDlg
-from smw_music.ui.quotes import labeouf
-from smw_music.ui.sample import SamplePack
-from smw_music.ui.state import (
+from smw_music.amk import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
     BuiltinSampleSource,
-    NoSample,
-    State,
 )
-from smw_music.ui.utilization import (
-    Utilization,
-    paint_utilization,
-    setup_utilization,
-)
-from smw_music.ui.utils import is_checked, to_checkstate
+from smw_music.spc700 import Envelope, GainMode
+from smw_music.spcmw import Artic
+from smw_music.spcmw import Dynamics as Dyn
+from smw_music.spcmw import SampleSource, TuneSource
 from smw_music.utils import brr_size, hexb, pct
+
+from .dashboard_ui import update_sample_opt
+from .dashboard_view import DashboardView
+from .keyboard import KeyboardEventFilter
+from .model import Model
+from .preferences import PreferencesDlg
+from .project_settings import ProjectSettingsDlg
+from .quotes import labeouf
+from .sample import SamplePack
+from .state import NoSample, State
+from .utilization import Utilization, paint_utilization, setup_utilization
+from .utils import is_checked, to_checkstate
 
 ###############################################################################
 # Private function definitions
@@ -567,14 +562,6 @@ class Dashboard(QWidget):
             v.global_legato.setChecked(state.global_legato)
 
             v.echo_enable.setChecked(state.global_echo_enable)
-            v.echo_ch0.setChecked(EchoCh.CH0 in state.echo.enables)
-            v.echo_ch1.setChecked(EchoCh.CH1 in state.echo.enables)
-            v.echo_ch2.setChecked(EchoCh.CH2 in state.echo.enables)
-            v.echo_ch3.setChecked(EchoCh.CH3 in state.echo.enables)
-            v.echo_ch4.setChecked(EchoCh.CH4 in state.echo.enables)
-            v.echo_ch5.setChecked(EchoCh.CH5 in state.echo.enables)
-            v.echo_ch6.setChecked(EchoCh.CH6 in state.echo.enables)
-            v.echo_ch7.setChecked(EchoCh.CH7 in state.echo.enables)
             v.echo_filter_0.setChecked(state.echo.fir_filt == 0)
             v.echo_filter_1.setChecked(state.echo.fir_filt == 1)
 
@@ -763,14 +750,6 @@ class Dashboard(QWidget):
             (v.global_volume_setting, m.on_global_volume_changed),
             (v.global_legato, m.on_global_legato_changed),
             (v.echo_enable, m.on_global_echo_en_changed),
-            (v.echo_ch0, partial(m.on_echo_en_changed, EchoCh.CH0)),
-            (v.echo_ch1, partial(m.on_echo_en_changed, EchoCh.CH1)),
-            (v.echo_ch2, partial(m.on_echo_en_changed, EchoCh.CH2)),
-            (v.echo_ch3, partial(m.on_echo_en_changed, EchoCh.CH3)),
-            (v.echo_ch4, partial(m.on_echo_en_changed, EchoCh.CH4)),
-            (v.echo_ch5, partial(m.on_echo_en_changed, EchoCh.CH5)),
-            (v.echo_ch6, partial(m.on_echo_en_changed, EchoCh.CH6)),
-            (v.echo_ch7, partial(m.on_echo_en_changed, EchoCh.CH7)),
             (v.echo_filter_0, m.on_filter_0_toggled),
             (v.echo_left_slider, m.on_echo_left_changed),
             (v.echo_left_setting, m.on_echo_left_changed),

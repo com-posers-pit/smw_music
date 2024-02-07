@@ -19,14 +19,7 @@ from typing import Iterable, Iterator, TypeVar, cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml.instrument import (
-    InstrumentConfig,
-    NoteHead,
-    dedupe_notes,
-)
-from smw_music.music_xml.mml import MmlExporter
-from smw_music.music_xml.shared import CRLF, notelen_str
-from smw_music.music_xml.tokens import (
+from smw_music.music_xml import (
     Clef,
     Error,
     Instrument,
@@ -36,6 +29,10 @@ from smw_music.music_xml.tokens import (
     Token,
     flatten,
 )
+from smw_music.music_xml.shared import CRLF, notelen_str
+from smw_music.spcmw.instrument import InstrumentConfig, NoteHead, dedupe_notes
+
+from .mml import MmlExporter
 
 ###############################################################################
 # Private variable/constant definitions

@@ -20,7 +20,12 @@ import yaml
 
 # Package imports
 from smw_music import __version__
-from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource, EchoConfig
+from smw_music.amk import (
+    N_BUILTIN_SAMPLES,
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    EchoConfig,
+)
 
 from .instrument import InstrumentConfig, InstrumentSample
 from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
@@ -31,7 +36,6 @@ from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 CURRENT_SAVE_VERSION = 2
 EXTENSION = "spcmw"
-N_BUILTIN_SAMPLES = 20
 
 
 ###############################################################################

@@ -5,6 +5,17 @@
 
 """Dashboard preferences."""
 
+from .instrument import (
+    Artic,
+    ArticSetting,
+    Dynamics,
+    InstrumentConfig,
+    InstrumentSample,
+    NoteHead,
+    SampleSource,
+    TuneSource,
+    Tuning,
+)
 from .preferences import Preferences
 from .project import EXTENSION, Project, ProjectInfo, ProjectSettings
 from .spcmw import (
@@ -19,6 +30,15 @@ from .spcmw import (
 ###############################################################################
 
 __all__ = [
+    "Artic",
+    "ArticSetting",
+    "Dynamics",
+    "InstrumentConfig",
+    "InstrumentSample",
+    "NoteHead",
+    "SampleSource",
+    "TuneSource",
+    "Tuning",
     "Preferences",
     "ProjectInfo",
     "ProjectSettings",

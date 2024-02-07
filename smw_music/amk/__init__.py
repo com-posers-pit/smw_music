@@ -10,6 +10,7 @@
 ###############################################################################
 
 from .amk import (
+    N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
     BuiltinSampleSource,
     Utilization,
@@ -21,12 +22,14 @@ from .amk import (
     update_sample_groups_file,
 )
 from .echo import EchoConfig
+from .song import Song
 
 ###############################################################################
 # API declaration
 ###############################################################################
 
 __all__ = [
+    "N_BUILTIN_SAMPLES",
     "BuiltinSampleGroup",
     "BuiltinSampleSource",
     "Utilization",
@@ -37,4 +40,5 @@ __all__ = [
     "make_vis_dir",
     "update_sample_groups_file",
     "EchoConfig",
+    "Song",
 ]

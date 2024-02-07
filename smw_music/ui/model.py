@@ -34,23 +34,12 @@ from smw_music import SmwMusicException, __version__, spcmw
 from smw_music.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
+    EchoConfig,
+    Song,
     decode_utilization,
     update_sample_groups_file,
 )
 from smw_music.music_xml import MusicXmlException
-from smw_music.music_xml.echo import EchoCh, EchoConfig
-from smw_music.music_xml.instrument import (
-    Artic,
-    ArticSetting,
-    Dynamics,
-    InstrumentConfig,
-    InstrumentSample,
-    NoteHead,
-    SampleSource,
-    TuneSource,
-    Tuning,
-)
-from smw_music.music_xml.song import Song
 from smw_music.spc700 import (
     SAMPLE_FREQ,
     Brr,
@@ -59,10 +48,20 @@ from smw_music.spc700 import (
     SamplePlayer,
     midi_to_nspc,
 )
-from smw_music.spcmw import Preferences
+from smw_music.spcmw import (
+    Artic,
+    ArticSetting,
+    Dynamics,
+    InstrumentConfig,
+    InstrumentSample,
+    NoteHead,
+    Preferences,
+    SampleSource,
+    TuneSource,
+    Tuning,
+)
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
-from smw_music.ui.save import load, save
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utilization import echo_bytes
 from smw_music.utils import brr_size_b, newest_release, version_tuple
@@ -400,17 +399,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_echo_en_changed(self, chan: EchoCh, state: bool) -> None:
-        enables = deepcopy(self.state.echo.enables)
-        if state:
-            enables.add(chan)
-        else:
-            enables.remove(chan)
-        self._update_echo_state(enables=enables)
-        self.update_status(f"Echo {str(chan)} {_endis(state)}")
-
-    ###########################################################################
-
     def on_echo_feedback_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
         self._update_echo_state(fb_mag=setting)
@@ -560,7 +548,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         try:
-            save_state, backup_fname = load(fname)
+            # TODO: Update load
+            # save_state, backup_fname = load(fname)
             if backup_fname is not None:
                 self.response_generated.emit(
                     False,
@@ -858,7 +847,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if path is not None and project is not None:
             fname = path / (project + ".prj")
-            save(fname, self.state)
+            self.state.project.save(fname)
             self.reinforce_state()
             self.update_status("Project saved")
 
@@ -1470,7 +1459,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if path is not None and project is not None:
             fname = path / (project + ".prj.bak")
-            save(fname, self.state)
+            self.state.project.save(fname)
 
     ###########################################################################
 
@@ -1576,12 +1565,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _update_echo_state(
         self,
-        **kwargs: set[EchoCh]
-        | tuple[float, float]
-        | tuple[bool, bool]
-        | int
-        | float
-        | bool,
+        **kwargs: tuple[float, float] | tuple[bool, bool] | int | float | bool,
     ) -> None:
         # TODO: remove ignore
         new_echo = replace(self.state.echo, **kwargs)  # type: ignore
@@ -1676,7 +1660,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         state = self.state
         aram_util = state.aram_util
 
-        delay = state.echo.delay if state.global_echo_enable else 0
+        delay = state.project.settings.echo.delay
         aram_util.echo, aram_util.echo_pad = echo_bytes(delay)
 
         aram_util.samples += self.sample_bytes - state.aram_custom_sample_b
@@ -1723,7 +1707,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         total_size = 0
         # TODO: Unify sample size calcs
-        for sample in self.state.samples.values():
+        for sample in self.state.project.settings.samples.values():
             size = 0
             if sample.sample_source == SampleSource.SAMPLEPACK:
                 is_pack = True

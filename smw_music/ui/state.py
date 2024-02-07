@@ -18,8 +18,7 @@ from music21.pitch import Pitch
 # Package imports
 from smw_music import SmwMusicException
 from smw_music.amk import Utilization, default_utilization
-from smw_music.music_xml.instrument import InstrumentConfig, InstrumentSample
-from smw_music.spcmw import Project
+from smw_music.spcmw import InstrumentConfig, InstrumentSample, Project
 
 ###############################################################################
 # API class definitions
@@ -35,7 +34,7 @@ class NoSample(SmwMusicException):
 
 @dataclass
 class State:
-    project: Project = Project()
+    project: Project = field(default_factory=Project)
     unsaved: bool = True
     section_names: list[str] = field(default_factory=list)
     start_measure: int = 1
@@ -99,7 +98,7 @@ class State:
     def samples(self) -> dict[tuple[str, str], InstrumentSample]:
         samples = {}
 
-        for inst_name, inst in self.instruments.items():
+        for inst_name, inst in self.project.settings.instruments.items():
             for sample_name, sample in inst.samples.items():
                 samples[(inst_name, sample_name)] = sample
 

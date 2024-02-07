@@ -16,8 +16,10 @@ from typing import cast
 from PyQt6.QtWidgets import QComboBox, QLabel
 
 # Package imports
-from smw_music.ui.dashboard_view import DashboardView
-from smw_music.ui.state import BuiltinSampleGroup, BuiltinSampleSource, State
+from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
+
+from .dashboard_view import DashboardView
+from .state import State
 
 ###############################################################################
 # API function definitions

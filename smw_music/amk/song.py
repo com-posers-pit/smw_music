@@ -40,10 +40,8 @@ from smw_music.music_xml import (
     Token,
     Triplet,
 )
-
-from .channel import Channel
-from .echo import EchoConfig
-from .instrument import (
+from smw_music.music_xml.shared import CRLF, MusicXmlException
+from smw_music.spcmw.instrument import (
     Dynamics,
     InstrumentConfig,
     InstrumentSample,
@@ -51,8 +49,10 @@ from .instrument import (
     SampleSource,
     dedupe_notes,
 )
+
+from .channel import Channel
+from .echo import EchoConfig
 from .reduction import reduce, remove_unused_instruments
-from .shared import CRLF, MusicXmlException
 
 ###############################################################################
 # Private function definitions
