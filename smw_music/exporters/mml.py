@@ -39,31 +39,12 @@ from smw_music.music_xml import (
     Token,
     Triplet,
 )
-from smw_music.spcmw.instrument import InstrumentConfig, InstrumentSample
+from smw_music.spcmw import InstrumentConfig, InstrumentSample
 
-from .common import CRLF, notelen_str
+from .common import CRLF, Exporter, notelen_str
 
 ###############################################################################
 # API class definitions
-###############################################################################
-
-
-class Exporter:
-    directives: list[str]
-
-    def _append(self, directive: str) -> None:
-        self.directives.append(directive)
-
-    # This needs to be included to keep mypy from complaining in subclasses
-    @singledispatchmethod
-    def emit(self, token: Token) -> None:
-        raise NotImplementedError
-
-    def generate(self, tokens: list[Token]) -> None:
-        for token in tokens:
-            self.emit(token)
-
-
 ###############################################################################
 
 
