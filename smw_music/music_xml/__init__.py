@@ -9,7 +9,7 @@
 # Imports
 ###############################################################################
 
-from .shared import MusicXmlException
+from .common import MusicXmlException
 from .tokens import (
     Advanced,
     Annotation,

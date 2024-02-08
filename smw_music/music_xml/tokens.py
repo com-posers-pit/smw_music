@@ -17,8 +17,7 @@ from enum import Enum, auto
 import music21
 from music21.pitch import Pitch
 
-# Package imports
-from smw_music.music_xml.shared import MusicXmlException
+from .common import MusicXmlException
 
 ###############################################################################
 # Private variable/constant definitions

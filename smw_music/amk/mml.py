@@ -18,8 +18,7 @@ from functools import singledispatchmethod
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml.shared import CRLF, notelen_str
-from smw_music.music_xml.tokens import (
+from smw_music.music_xml import (
     Annotation,
     Artic,
     Clef,
@@ -41,6 +40,8 @@ from smw_music.music_xml.tokens import (
     Triplet,
 )
 from smw_music.spcmw.instrument import InstrumentConfig, InstrumentSample
+
+from .common import CRLF, notelen_str
 
 ###############################################################################
 # API class definitions

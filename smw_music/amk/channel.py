@@ -29,9 +29,9 @@ from smw_music.music_xml import (
     Token,
     flatten,
 )
-from smw_music.music_xml.shared import CRLF, notelen_str
 from smw_music.spcmw.instrument import InstrumentConfig, NoteHead, dedupe_notes
 
+from .common import CRLF, notelen_str
 from .mml import MmlExporter
 
 ###############################################################################
