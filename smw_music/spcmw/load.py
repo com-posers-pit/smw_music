@@ -19,7 +19,7 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music import SmwMusicException
-from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource, EchoConfig
+from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.music_xml.instrument import (
     Artic,
     ArticSetting,
@@ -29,7 +29,7 @@ from smw_music.music_xml.instrument import (
     NoteHead,
     SampleSource,
 )
-from smw_music.spc700 import Envelope, GainMode
+from smw_music.spc700 import EchoConfig, Envelope, GainMode
 
 from .old_save import v0, v1
 from .project import (

@@ -21,7 +21,6 @@ from .amk import (
     make_vis_dir,
     update_sample_groups_file,
 )
-from .echo import EchoConfig
 from .song import Song
 
 ###############################################################################

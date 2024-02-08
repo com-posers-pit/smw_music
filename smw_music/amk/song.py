@@ -41,6 +41,7 @@ from smw_music.music_xml import (
     Token,
     Triplet,
 )
+from smw_music.spc700 import EchoConfig
 from smw_music.spcmw.instrument import (
     Dynamics,
     InstrumentConfig,
@@ -52,7 +53,6 @@ from smw_music.spcmw.instrument import (
 
 from .channel import Channel
 from .common import CRLF
-from .echo import EchoConfig
 from .reduction import reduce, remove_unused_instruments
 
 ###############################################################################

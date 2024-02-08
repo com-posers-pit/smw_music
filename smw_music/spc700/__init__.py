@@ -6,8 +6,11 @@
 """SPC700 Logic"""
 
 ###############################################################################
+# Imports
+###############################################################################
 
 from .brr import BLOCK_SIZE, SAMPLES_PER_BLOCK, Brr, BrrException, extract_brrs
+from .echo import EchoConfig
 from .nspc import calc_tune, midi_to_nspc, set_pitch
 from .sample_player import SamplePlayer
 from .spc700 import (
@@ -22,3 +25,30 @@ from .spc700 import (
     generate_incbent,
     generate_inclin,
 )
+
+###############################################################################
+# API declaration
+###############################################################################
+
+__all__ = [
+    "BLOCK_SIZE",
+    "SAMPLES_PER_BLOCK",
+    "Brr",
+    "BrrException",
+    "extract_brrs",
+    "EchoConfig",
+    "calc_tune",
+    "midi_to_nspc",
+    "set_pitch",
+    "SamplePlayer",
+    "PITCH_REG_SCALE",
+    "SAMPLE_FREQ",
+    "Envelope",
+    "GainMode",
+    "generate_adsr",
+    "generate_decexp",
+    "generate_declin",
+    "generate_direct_gain",
+    "generate_incbent",
+    "generate_inclin",
+]

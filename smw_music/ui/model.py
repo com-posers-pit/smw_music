@@ -34,7 +34,6 @@ from smw_music import SmwMusicException, __version__, spcmw
 from smw_music.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
-    EchoConfig,
     Song,
     decode_utilization,
     update_sample_groups_file,
@@ -43,6 +42,7 @@ from smw_music.music_xml import MusicXmlException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
     Brr,
+    EchoConfig,
     Envelope,
     GainMode,
     SamplePlayer,

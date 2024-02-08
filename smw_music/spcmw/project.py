@@ -24,8 +24,8 @@ from smw_music.amk import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
     BuiltinSampleSource,
-    EchoConfig,
 )
+from smw_music.spc700 import EchoConfig
 
 from .instrument import InstrumentConfig, InstrumentSample
 from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
