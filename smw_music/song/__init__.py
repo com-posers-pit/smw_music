@@ -9,7 +9,9 @@
 # Imports
 ###############################################################################
 
-from .common import MusicXmlException, NoteHead
+from .channel import Channel
+from .common import NoteHead, SongException
+from .song import Song
 from .tokens import (
     Advanced,
     Annotation,
@@ -42,8 +44,10 @@ from .tokens import (
 ###############################################################################
 
 __all__ = [
-    "MusicXmlException",
+    "Channel",
+    "SongException",
     "NoteHead",
+    "Song",
     "Advanced",
     "Annotation",
     "Artic",

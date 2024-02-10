@@ -17,7 +17,7 @@ from enum import Enum, auto
 import music21
 from music21.pitch import Pitch
 
-from .common import MusicXmlException
+from .common import SongException
 
 ###############################################################################
 # Private variable/constant definitions
@@ -307,7 +307,7 @@ class Dynamic(Token):
             "fff",
             "ffff",
         ]:
-            raise MusicXmlException(f"Invalid dynamic level {dyn}")
+            raise SongException(f"Invalid dynamic level {dyn}")
 
     ###########################################################################
     # API property definitions

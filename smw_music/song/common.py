@@ -41,13 +41,6 @@ class Dynamics(IntEnum):
 ###############################################################################
 
 
-class MusicXmlException(Exception):
-    """Parent class for MusicXML exceptions."""
-
-
-###############################################################################
-
-
 class NoteHead(StrEnum):
     NORMAL = "normal"
     X = "x"
@@ -89,6 +82,13 @@ class NoteHead(StrEnum):
     @property
     def symbol(self) -> str:
         return self._SYMBOL_UNMAP[self]
+
+
+###############################################################################
+
+
+class SongException(Exception):
+    """Parent class for MusicXML exceptions."""
 
 
 ###############################################################################
