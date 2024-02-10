@@ -38,7 +38,7 @@ from smw_music.amk import (
     decode_utilization,
     update_sample_groups_file,
 )
-from smw_music.music_xml import MusicXmlException
+from smw_music.song import MusicXmlException, NoteHead
 from smw_music.spc700 import (
     SAMPLE_FREQ,
     Brr,
@@ -54,7 +54,6 @@ from smw_music.spcmw import (
     Dynamics,
     InstrumentConfig,
     InstrumentSample,
-    NoteHead,
     Preferences,
     SampleSource,
     TuneSource,

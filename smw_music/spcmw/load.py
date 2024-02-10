@@ -20,7 +20,7 @@ from music21.pitch import Pitch
 # Package imports
 from smw_music import SmwMusicException
 from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
-from smw_music.music_xml.instrument import (
+from smw_music.song.instrument import (
     Artic,
     ArticSetting,
     Dynamics,

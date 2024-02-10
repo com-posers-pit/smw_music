@@ -8,26 +8,36 @@
 ###############################################################################
 
 # Standard library imports
+from dataclasses import dataclass, field
 from functools import singledispatchmethod
 
 # Package imports
-from smw_music.music_xml import Token
+from smw_music.song import Token
+from smw_music.spcmw import Project
 
 ###############################################################################
 # API class definitions
 ###############################################################################
 
 
+@dataclass
 class Exporter:
-    directives: list[str]
+    project: Project
+    directives: list[str] = field(default_factory=list, init=False)
+
+    ###########################################################################
 
     def _append(self, directive: str) -> None:
         self.directives.append(directive)
+
+    ###########################################################################
 
     # This needs to be included to keep mypy from complaining in subclasses
     @singledispatchmethod
     def emit(self, token: Token) -> None:
         raise NotImplementedError
+
+    ###########################################################################
 
     def generate(self, tokens: list[Token]) -> None:
         for token in tokens:

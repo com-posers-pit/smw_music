@@ -9,7 +9,7 @@
 # Imports
 ###############################################################################
 
-from .common import MusicXmlException
+from .common import MusicXmlException, NoteHead
 from .tokens import (
     Advanced,
     Annotation,
@@ -43,6 +43,7 @@ from .tokens import (
 
 __all__ = [
     "MusicXmlException",
+    "NoteHead",
     "Advanced",
     "Annotation",
     "Artic",

@@ -18,8 +18,8 @@ import yaml
 
 # Package imports
 from smw_music import SmwMusicException
-from smw_music.music_xml.echo import EchoCh, EchoConfig
-from smw_music.music_xml.instrument import (
+from smw_music.song.echo import EchoCh, EchoConfig
+from smw_music.song.instrument import (
     Artic,
     ArticSetting,
     Dynamics,

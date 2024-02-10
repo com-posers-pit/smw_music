@@ -10,15 +10,17 @@
 ###############################################################################
 
 # Standard library imports
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from functools import singledispatchmethod
+from pathlib import Path
 
 # Library imports
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml import (
+from smw_music.song import (
     Annotation,
     Artic,
     Clef,
@@ -59,7 +61,7 @@ class SlurState(Enum):
 
 @dataclass
 class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
-    instruments: dict[str, InstrumentConfig]
+    instruments: dict[str, InstrumentConfig] = field(default_factory=dict)
     octave: int = 4
     default_note_len: int = 8
     grace: bool = False
@@ -69,7 +71,6 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     legato: bool = False
     articulation: Artic = Artic.NORMAL
     last_percussion: str = ""
-    directives: list[str] = field(default_factory=list)
 
     _instrument: InstrumentConfig = field(init=False)
     _active_sample_name: str = field(init=False)
@@ -304,6 +305,122 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         self._stop_legato()
         self._in_loop = False
 
+    ###########################################################################
+
+    def export(self, fname: Path | None = None) -> str:
+        proj = deepcopy(self.project)
+
+        # If starting after the first measure, disable loop analysis because
+        # things might be badly broken
+        if proj.start_measure != 1:
+            proj.loop_analysis = False
+            proj.superloop_analysis = False
+
+        self._reduce(proj.loop_analysis, proj.superloop_analysis)
+
+        # TODO: A bit of a hack to allow starting at a later measure
+        if proj.start_measure != 1:
+            for channel in self._reduced_channels:
+                to_drop = proj.start_measure - 1
+                tokens: list[Token] = []
+                for n, token in enumerate(channel.tokens):
+                    if isinstance(
+                        token, (Dynamic, Instrument, Measure, Tempo, Repeat)
+                    ):
+                        tokens.append(token)
+                        if isinstance(token, Measure):
+                            to_drop -= 1
+                    if to_drop == 0:
+                        tokens.extend(channel.tokens[n + 1 :])
+                        break
+                channel.tokens = tokens
+
+        self._validate()
+        channels = [
+            x.generate_mml(self.instruments, proj.measure_numbers)
+            for x in self._reduced_channels
+        ]
+
+        build_dt = ""
+        if include_dt:
+            build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
+
+        instruments = copy.deepcopy(self.instruments)
+        inst_samples: dict[str, InstrumentSample] = {}
+
+        for inst_name, inst in instruments.items():
+            if inst.multisample:
+                inst_samples.update(inst.multisamples)
+            else:
+                inst_samples[inst_name] = inst.samples[""]
+
+        samples: list[tuple[str, str, int]] = []
+        sample_id = 30
+
+        for sample in inst_samples.values():
+            if sample.sample_source == SampleSource.SAMPLEPACK:
+                fname = str(
+                    PurePosixPath(sample.pack_sample[0])
+                    / sample.pack_sample[1]
+                )
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
+                sample_id += 1
+            if sample.sample_source == SampleSource.BRR:
+                fname = sample.brr_fname.name
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
+                sample_id += 1
+
+        # Overwrite muted/soloed instrument sample numbers
+        solo = any(sample.solo for sample in inst_samples.values())
+        mute = any(sample.mute for sample in inst_samples.values())
+        solo |= any(inst.solo for inst in instruments.values())
+        mute |= any(inst.mute for inst in instruments.values())
+
+        if solo or mute:
+            samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
+
+            for inst_sample in inst_samples.values():
+                if inst_sample.mute or (solo and not inst_sample.solo):
+                    inst_sample.sample_source = SampleSource.OVERRIDE
+                    inst_sample.instrument_idx = sample_id
+
+            # Not necessary, but we keep it for consistency's sake
+            sample_id += 1
+
+        tmpl = Template(RESOURCES / "mml.txt")  # nosec B702
+
+        rv = tmpl.render(
+            version=__version__,
+            global_legato=global_legato,
+            song=self,
+            channels=channels,
+            datetime=build_dt,
+            echo_config=echo_config,
+            inst_samples=inst_samples,
+            custom_samples=samples,
+            dynamics=list(Dynamics),
+            sample_path=str(sample_path),
+            sample_groups=sample_groups,
+        )
+
+        rv = rv.replace(" ^", "^")
+        rv = rv.replace(" ]", "]")
+
+        # This last bit removes any empty lines at the end (these don't
+        # normally show up, but can if the last section in the last staff is
+        # empty.
+        rv = str(rv).rstrip() + CRLF
+
+        if fname is not None:
+            with open(fname, "wb") as fobj:
+                fobj.write(rv.encode("ascii", "ignore"))
+
+        return rv
+
+    ###########################################################################
+    # Private method definitions
     ###########################################################################
 
     def _start_legato(self) -> None:

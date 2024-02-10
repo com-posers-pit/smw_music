@@ -10,8 +10,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from enum import IntEnum, StrEnum, auto
-from functools import cache
+from enum import IntEnum, auto
 from pathlib import Path
 from typing import cast
 
@@ -19,38 +18,9 @@ from typing import cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml.tokens import Note
+from smw_music.song import Note, NoteHead
 from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
-
-###############################################################################
-# Private variable definitions
-###############################################################################
-
-
-@cache
-def _symbol_map() -> dict[str, "NoteHead"]:
-    return {
-        "normal": NoteHead.NORMAL,
-        "x": NoteHead.X,
-        "o": NoteHead.O,
-        "+": NoteHead.PLUS,
-        "⮾": NoteHead.TENSOR,
-        "▲": NoteHead.TRIUP,
-        "▼": NoteHead.TRIDOWN,
-        "/": NoteHead.SLASH,
-        "\\": NoteHead.BACKSLASH,
-        "◆": NoteHead.DIAMOND,
-    }
-
-
-###############################################################################
-
-
-@cache
-def _symbol_unmap() -> dict["NoteHead", str]:
-    return {v: k for k, v in _symbol_map().items()}
-
 
 ###############################################################################
 # API class definitions
@@ -82,55 +52,6 @@ class ArticSetting:
     @property
     def setting(self) -> int:
         return (0x7 & self.length) << 4 | (0xF & self.volume)
-
-
-###############################################################################
-
-
-class Dynamics(IntEnum):
-    PPPP = auto()
-    PPP = auto()
-    PP = auto()
-    P = auto()
-    MP = auto()
-    MF = auto()
-    F = auto()
-    FF = auto()
-    FFF = auto()
-    FFFF = auto()
-
-    ###########################################################################
-
-    def __str__(self) -> str:
-        return self.name
-
-
-###############################################################################
-
-
-class NoteHead(StrEnum):
-    NORMAL = "normal"
-    X = "x"
-    O = "o"  # noqa: E741
-    PLUS = "cross"
-    TENSOR = "circle-x"
-    TRIUP = "triangle"
-    TRIDOWN = "inverted triangle"
-    SLASH = "slashed"
-    BACKSLASH = "back slashed"
-    DIAMOND = "diamond"
-
-    ###########################################################################
-
-    @classmethod
-    def from_symbol(cls, symbol: str) -> "NoteHead":
-        return _symbol_map()[symbol]
-
-    ###########################################################################
-
-    @property
-    def symbol(self) -> str:
-        return _symbol_unmap()[self]
 
 
 ###############################################################################

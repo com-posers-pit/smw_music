@@ -17,7 +17,7 @@ import sys
 
 # Package imports
 from smw_music import __version__
-from smw_music.music_xml.song import Song
+from smw_music.song import Song
 
 ###############################################################################
 # Private function definitions

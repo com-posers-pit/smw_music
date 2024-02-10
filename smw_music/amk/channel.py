@@ -19,7 +19,7 @@ from typing import Iterable, Iterator, TypeVar, cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.music_xml import (
+from smw_music.song import (
     Clef,
     Error,
     Instrument,

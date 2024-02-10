@@ -13,7 +13,7 @@
 from typing import Callable
 
 # Package imports
-from smw_music.music_xml.tokens import (
+from smw_music.song import (
     Advanced,
     Annotation,
     Comment,
