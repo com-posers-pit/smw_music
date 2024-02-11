@@ -488,6 +488,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_state_changed(self, state: State, update_instruments: bool) -> None:
+        settings = state.project.settings
+
         if update_instruments:
             self._update_instruments(state)
 

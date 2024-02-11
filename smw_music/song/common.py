@@ -10,7 +10,8 @@
 ###############################################################################
 
 # Standard library imports
-from enum import IntEnum, StrEnum, auto, nonmember
+from enum import StrEnum, auto, nonmember
+from typing import cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -20,7 +21,7 @@ from music21.pitch import Pitch
 ###############################################################################
 
 
-class Dynamics(IntEnum):
+class Dynamics(StrEnum):
     PPPP = auto()
     PPP = auto()
     PP = auto()
@@ -32,10 +33,52 @@ class Dynamics(IntEnum):
     FFF = auto()
     FFFF = auto()
 
+    _NEXT = cast(
+        dict["Dynamics", "Dynamics"],
+        nonmember(
+            {
+                PPPP: PPP,
+                PPP: PP,
+                PP: P,
+                P: MP,
+                MP: MF,
+                MF: F,
+                F: FF,
+                FF: FFF,
+                FFF: FFFF,
+                FFFF: FFFF,
+            }
+        ),
+    )
+    _PREV = cast(
+        dict["Dynamics", "Dynamics"],
+        nonmember(
+            {
+                PPPP: PPPP,
+                PPP: PPPP,
+                PP: PPP,
+                P: PP,
+                MP: P,
+                MF: MP,
+                F: MF,
+                FF: F,
+                FFF: FF,
+                FFFF: FFF,
+            }
+        ),
+    )
+
     ###########################################################################
 
-    def __str__(self) -> str:
-        return self.name
+    @property
+    def next(self) -> "Dynamics":
+        return self._NEXT[self]
+
+    ###########################################################################
+
+    @property
+    def prev(self) -> "Dynamics":
+        return self._PREV[self]
 
 
 ###############################################################################
@@ -55,21 +98,27 @@ class NoteHead(StrEnum):
 
     ###########################################################################
 
-    _SYMBOL_MAP = nonmember(
-        {
-            "normal": NORMAL,
-            "x": X,
-            "o": O,
-            "+": PLUS,
-            "⮾": TENSOR,
-            "▲": TRIUP,
-            "▼": TRIDOWN,
-            "/": SLASH,
-            "\\": BACKSLASH,
-            "◆": DIAMOND,
-        }
+    _SYMBOL_MAP = cast(
+        dict[str, "NoteHead"],
+        nonmember(
+            {
+                "normal": NORMAL,
+                "x": X,
+                "o": O,
+                "+": PLUS,
+                "⮾": TENSOR,
+                "▲": TRIUP,
+                "▼": TRIDOWN,
+                "/": SLASH,
+                "\\": BACKSLASH,
+                "◆": DIAMOND,
+            }
+        ),
     )
-    _SYMBOL_UNMAP = nonmember({v: k for k, v in _SYMBOL_MAP.items()})
+    _SYMBOL_UNMAP = cast(
+        dict["NoteHead", "str"],
+        nonmember({v: k for k, v in _SYMBOL_MAP.items()}),
+    )
 
     ###########################################################################
 

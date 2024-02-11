@@ -15,7 +15,11 @@ import urllib.request
 from contextlib import suppress
 from math import isclose
 from pathlib import Path
+from typing import Iterable, TypeVar
 from zipfile import ZipFile
+
+# TODO: Replace this with a generic function in python 3.12 only
+T = TypeVar("T")
 
 ###############################################################################
 # API function definitions
@@ -42,8 +46,9 @@ def brr_size_b(fsize: int) -> int:
 ###############################################################################
 
 
-def filter_type(dtype: type, lst: list) -> list:
-    return [x for x in lst if isinstance(x, dtype)]
+# TODO: Output type should match dtype, not the list type
+def filter_type(dtype: type | Iterable[type], lst: list[T]) -> list[T]:
+    return list(filter(lambda x: isinstance(x, dtype), lst))
 
 
 ###############################################################################

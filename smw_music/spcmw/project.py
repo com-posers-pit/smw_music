@@ -137,6 +137,7 @@ class ProjectSettings:
     )
     global_volume: int = 128
     global_legato: bool = True
+    global_echo: bool = True
     echo: EchoConfig = field(
         default_factory=lambda: EchoConfig(
             (0, 0), (False, False), 0, 0, False, 0
@@ -242,6 +243,7 @@ class Project:
             "measure_numbers": settings.measure_numbers,
             "global_volume": settings.global_volume,
             "global_legato": settings.global_legato,
+            "global_echo": settings.global_echo,
             "echo": _save_echo(settings.echo),
             "instruments": {
                 k: _save_instrument(v) for k, v in settings.instruments.items()

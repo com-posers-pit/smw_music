@@ -28,7 +28,7 @@ def _print_ast(song: Song, channel_num: int | None) -> None:
     for n, channel in enumerate(song.channels):
         if n == channel_num or channel_num is None:
             print(f"Channel {n}")
-            for token in channel.tokens:
+            for token in channel:
                 print(f"  {token}")
 
 

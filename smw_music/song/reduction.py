@@ -15,6 +15,7 @@ from typing import Callable
 # Package imports
 from smw_music.utils import filter_type
 
+from .common import Dynamics
 from .tokens import (
     Advanced,
     Annotation,
@@ -144,7 +145,7 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
 
     triplet = False
     drop_dyn = False
-    dyn = Dynamic("mf")  # just assume we start here, totally bogus
+    dyn = Dynamic(Dynamics.MF)  # just assume we start here, totally bogus
     for n, token in enumerate(tokens):
         drop = False
 

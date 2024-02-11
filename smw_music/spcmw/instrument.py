@@ -18,7 +18,7 @@ from typing import cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.song import Note, NoteHead
+from smw_music.song import Dynamics, Note, NoteHead
 from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
 

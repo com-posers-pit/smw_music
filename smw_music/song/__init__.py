@@ -9,8 +9,7 @@
 # Imports
 ###############################################################################
 
-from .channel import Channel
-from .common import NoteHead, SongException
+from .common import Dynamics, NoteHead, SongException
 from .song import Song
 from .tokens import (
     Advanced,
@@ -44,8 +43,8 @@ from .tokens import (
 ###############################################################################
 
 __all__ = [
-    "Channel",
     "SongException",
+    "Dynamics",
     "NoteHead",
     "Song",
     "Advanced",

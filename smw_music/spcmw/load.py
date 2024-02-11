@@ -20,17 +20,16 @@ from music21.pitch import Pitch
 # Package imports
 from smw_music import SmwMusicException
 from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
-from smw_music.song.instrument import (
-    Artic,
-    ArticSetting,
-    Dynamics,
-    InstrumentConfig,
-    InstrumentSample,
-    NoteHead,
-    SampleSource,
-)
+from smw_music.song import Dynamics, NoteHead
 from smw_music.spc700 import EchoConfig, Envelope, GainMode
 
+from .instrument import (
+    Artic,
+    ArticSetting,
+    InstrumentConfig,
+    InstrumentSample,
+    SampleSource,
+)
 from .old_save import v0, v1
 from .project import (
     CURRENT_SAVE_VERSION,
@@ -156,7 +155,7 @@ def load(fname: Path) -> tuple[Project, Path | None]:
     if save_version < CURRENT_SAVE_VERSION:
         rv = _upgrade_save(fname)
     else:
-        musicxml = Path(contents["musicxml_fname"])
+        musicxml = Path(contents["musicxml"])
 
         proj_dir = fname.parent.resolve()
 
@@ -183,6 +182,7 @@ def load(fname: Path) -> tuple[Project, Path | None]:
                 },
                 contents["global_volume"],
                 contents["global_legato"],
+                contents["global_echo"],
                 _load_echo(contents["echo"]),
                 BuiltinSampleGroup(contents["builtin_sample_group"]),
                 list(

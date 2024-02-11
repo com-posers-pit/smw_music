@@ -40,7 +40,7 @@ class InstrumentDict(TypedDict):
 
 class SampleDict(TypedDict):
     octave_shift: int
-    dynamics: dict[int, int]
+    dynamics: dict[str, int]
     interpolate_dynamics: bool
     articulations: dict[int, list[int]]
     pan_enabled: bool
@@ -85,8 +85,9 @@ class ProjectDict(TypedDict):
     loop_analysis: bool
     superloop_analysis: bool
     measure_numbers: bool
-    global_volume: bool
+    global_volume: int
     global_legato: bool
+    global_echo: bool
     echo: EchoDict
     instruments: dict[str, InstrumentDict]
     builtin_sample_group: int

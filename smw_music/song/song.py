@@ -12,6 +12,7 @@
 # Standard library imports
 from functools import cached_property
 from pathlib import Path
+from typing import cast
 
 # Library imports
 import music21 as m21
@@ -50,7 +51,7 @@ def _extract_channels(stream: m21.stream.base.Score) -> list[list[Token]]:
 
     sections = _find_rehearsal_marks(stream)
 
-    for elem in filter_type(m21.stream.Part, stream):
+    for elem in filter_type(m21.stream.Part, stream[:]):
         part = _parse_part(elem, sections, len(parts))
         part = remove_unused_instruments(part)
         parts.append(part)
@@ -61,7 +62,7 @@ def _extract_channels(stream: m21.stream.base.Score) -> list[list[Token]]:
 ###############################################################################
 
 
-def _extract_metadata(stream: m21.stream.base.Score) -> dict[str]:
+def _extract_metadata(stream: m21.stream.base.Score) -> dict[str, str]:
     metadata = {}
     for elem in filter_type(m21.metadata.Metadata, stream.flat):
         metadata["composer"] = elem.composer or ""
@@ -79,7 +80,7 @@ def _find_rehearsal_marks(
     stream: m21.stream.Score,
 ) -> dict[int, RehearsalMark]:
     marks = {}
-    for elem in filter_type(m21.stream.Part, stream):
+    for elem in filter_type(m21.stream.Part, stream[:]):
         for measure in filter_type(m21.stream.Measure, elem):
             for subelem in filter_type(m21.expressions.RehearsalMark, measure):
                 marks[measure.number] = RehearsalMark.from_music_xml(subelem)
@@ -95,7 +96,7 @@ def _get_cresc(
 ) -> tuple[list[list[int]], list[bool]]:
     cresc: list[list[int]] = [[], []]
     cresc_list = filter_type(
-        (m21.dynamics.Crescendo, m21.dynamics.Diminuendo), part
+        (m21.dynamics.Crescendo, m21.dynamics.Diminuendo), part[:]
     )
     cresc[0] = [x.getFirst().id for x in cresc_list]
     cresc[1] = [x.getLast().id for x in cresc_list]
@@ -121,7 +122,7 @@ def _get_lines(part: m21.stream.Part) -> list[list[int]]:
 
 def _get_slurs(part: m21.stream.Part) -> list[list[int]]:
     slurs: list[list[int]] = [[], []]
-    slur_list = filter_type(m21.spanner.Slur, part)
+    slur_list = filter_type(m21.spanner.Slur, part[:])
 
     slurs[0] = [x.getFirst().id for x in slur_list]
     slurs[1] = [x.getLast().id for x in slur_list]
@@ -370,7 +371,8 @@ class Song:
         instruments = set()
         for channel in self.channels:
             for inst in filter_type(Instrument, channel):
-                instruments.add(inst)
+                # TODO: Cast shouldn't be needed
+                instruments.add(cast(Instrument, inst).name)
 
         return sorted(instruments)
 

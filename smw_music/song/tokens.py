@@ -17,7 +17,7 @@ from enum import Enum, auto
 import music21
 from music21.pitch import Pitch
 
-from .common import SongException
+from .common import Dynamics, SongException
 
 ###############################################################################
 # Private variable/constant definitions
@@ -252,16 +252,16 @@ class Dynamic(Token):
 
     Parameters
     ----------
-    level: str
+    level: Dynamics
         dynamic level (pppp, ppp, pp, p, mp, mf, f, ff, fff, ffff)
 
     Attributes
     ----------
-    level: str
+    level: Dynamics
         dynamic level
     """
 
-    level: str
+    level: Dynamics
 
     ###########################################################################
     # API constructor definitions
@@ -282,31 +282,11 @@ class Dynamic(Token):
         Dynamic
             A new Dynamic object with its level set to the volume scalare
             squared
-
-        Todo
-        ----
-        Confirm this heuristic is good enough, or parameterize
         """
-        return cls(elem.value)
-
-    ###########################################################################
-    # Data model method definitions
-    ###########################################################################
-
-    def __post_init__(self) -> None:
-        dyn = self.level
-        if dyn.lower() not in [
-            "pppp",
-            "ppp",
-            "pp",
-            "p",
-            "mp",
-            "mf",
-            "f",
-            "ff",
-            "fff",
-            "ffff",
-        ]:
+        dyn = elem.value.lower()
+        try:
+            return cls(Dynamics(dyn))
+        except ValueError:
             raise SongException(f"Invalid dynamic level {dyn}")
 
     ###########################################################################
@@ -314,36 +294,14 @@ class Dynamic(Token):
     ###########################################################################
 
     @property
-    def down(self) -> str:
-        return {
-            "pppp": "pppp",
-            "ppp": "pppp",
-            "pp": "ppp",
-            "p": "pp",
-            "mp": "p",
-            "mf": "mp",
-            "f": "mf",
-            "ff": "f",
-            "fff": "ff",
-            "ffff": "fff",
-        }[self.level]
+    def down(self) -> "Dynamic":
+        return Dynamic(self.level.prev)
 
     ###########################################################################
 
     @property
-    def up(self) -> str:
-        return {
-            "pppp": "ppp",
-            "ppp": "pp",
-            "pp": "p",
-            "p": "mp",
-            "mp": "mf",
-            "mf": "f",
-            "f": "ff",
-            "ff": "fff",
-            "fff": "ffff",
-            "ffff": "ffff",
-        }[self.level]
+    def up(self) -> "Dynamic":
+        return Dynamic(self.level.next)
 
 
 ###############################################################################

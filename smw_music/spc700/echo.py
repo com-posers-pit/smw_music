@@ -80,13 +80,6 @@ class EchoConfig:
     ###########################################################################
 
     @property
-    def channel_reg(self) -> int:
-        """Return the echo enabled channel (EON) register."""
-        return sum(2**x.value for x in self.enables)
-
-    ###########################################################################
-
-    @property
     def left_vol_reg(self) -> int:
         """Return the echo left volume (EVOL(L)) register."""
         return _mag_inv_to_int(self.vol_mag[0], self.vol_inv[0])
