@@ -42,6 +42,13 @@ def brr_size_b(fsize: int) -> int:
 ###############################################################################
 
 
+def filter_type(dtype: type, lst: list) -> list:
+    return [x for x in lst if isinstance(x, dtype)]
+
+
+###############################################################################
+
+
 def hexb(val: int) -> str:
     return f"${val:02X}"
 

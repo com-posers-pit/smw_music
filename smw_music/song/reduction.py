@@ -13,7 +13,9 @@
 from typing import Callable
 
 # Package imports
-from smw_music.song import (
+from smw_music.utils import filter_type
+
+from .tokens import (
     Advanced,
     Annotation,
     Comment,
@@ -183,6 +185,7 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                     if isinstance(nxt, Playable) and cresc_done:
                         drop_dyn = False
                         break
+                # TODO: Move this out to AMK-specific logic
                 duration = min(duration, 255)  # Limit for now
                 rv.append(Crescendo(duration, target, token.cresc))
 
@@ -376,7 +379,7 @@ def _reference_loop(tokens: list[Token], loop: Loop) -> list[Token]:
 
 
 def _reference_loops(tokens: list[Token]) -> list[Token]:
-    loops = [token for token in tokens if isinstance(token, Loop)]
+    loops = filter_type(Loop, tokens)
 
     for loop in loops:
         tokens = _reference_loop(tokens, loop)
