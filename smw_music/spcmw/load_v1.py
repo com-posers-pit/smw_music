@@ -22,7 +22,7 @@ import yaml
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music import SmwMusicException
 from smw_music.amk import make_vis_dir
 from smw_music.song.echo import EchoCh, EchoConfig
 from smw_music.song.instrument import (

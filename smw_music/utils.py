@@ -15,7 +15,7 @@ import urllib.request
 from contextlib import suppress
 from math import isclose
 from pathlib import Path
-from typing import Iterable, TypeVar
+from typing import Any, Tuple, Type, TypeVar
 from zipfile import ZipFile
 
 # TODO: Replace this with a generic function in python 3.12 only
@@ -46,8 +46,7 @@ def brr_size_b(fsize: int) -> int:
 ###############################################################################
 
 
-# TODO: Output type should match dtype, not the list type
-def filter_type(dtype: type | Iterable[type], lst: list[T]) -> list[T]:
+def filter_type(dtype: Type[T] | Tuple[Type[T]], lst: list[Any]) -> list[T]:
     return list(filter(lambda x: isinstance(x, dtype), lst))
 
 

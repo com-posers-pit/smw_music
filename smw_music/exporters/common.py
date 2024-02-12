@@ -8,7 +8,6 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass, field
 from functools import singledispatchmethod
 
 # Package imports
@@ -20,10 +19,14 @@ from smw_music.spcmw import Project
 ###############################################################################
 
 
-@dataclass
 class Exporter:
     project: Project
-    directives: list[str] = field(default_factory=list, init=False)
+
+    ###########################################################################
+
+    def __init__(self, project: Project) -> None:
+        self.project = project
+        self.directives: list[str] = []
 
     ###########################################################################
 

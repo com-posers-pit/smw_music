@@ -34,7 +34,7 @@ class Dynamics(StrEnum):
     FFFF = auto()
 
     _NEXT = cast(
-        dict["Dynamics", "Dynamics"],
+        dict[str, str],
         nonmember(
             {
                 PPPP: PPP,
@@ -51,7 +51,7 @@ class Dynamics(StrEnum):
         ),
     )
     _PREV = cast(
-        dict["Dynamics", "Dynamics"],
+        dict[str, str],
         nonmember(
             {
                 PPPP: PPPP,
@@ -72,13 +72,13 @@ class Dynamics(StrEnum):
 
     @property
     def next(self) -> "Dynamics":
-        return self._NEXT[self]
+        return Dynamics(self._NEXT[self])
 
     ###########################################################################
 
     @property
     def prev(self) -> "Dynamics":
-        return self._PREV[self]
+        return Dynamics(self._PREV[self])
 
 
 ###############################################################################
@@ -99,7 +99,7 @@ class NoteHead(StrEnum):
     ###########################################################################
 
     _SYMBOL_MAP = cast(
-        dict[str, "NoteHead"],
+        dict[str, str],
         nonmember(
             {
                 "normal": NORMAL,
@@ -116,21 +116,20 @@ class NoteHead(StrEnum):
         ),
     )
     _SYMBOL_UNMAP = cast(
-        dict["NoteHead", "str"],
-        nonmember({v: k for k, v in _SYMBOL_MAP.items()}),
+        dict[str, str], nonmember({v: k for k, v in _SYMBOL_MAP.items()})
     )
 
     ###########################################################################
 
     @classmethod
     def from_symbol(cls, symbol: str) -> "NoteHead":
-        return cls._SYMBOL_MAP[symbol]
+        return cls(cls._SYMBOL_MAP[symbol])
 
     ###########################################################################
 
     @property
     def symbol(self) -> str:
-        return self._SYMBOL_UNMAP[self]
+        return self._SYMBOL_UNMAP[self.value]
 
 
 ###############################################################################

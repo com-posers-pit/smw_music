@@ -17,7 +17,8 @@ import sys
 
 # Package imports
 from smw_music import __version__
-from smw_music.song import Song
+from smw_music.exporters import MmlExporter
+from smw_music.spcmw import load
 
 ###############################################################################
 # API function definitions
@@ -33,15 +34,7 @@ def main(arg_list: list[str] | None = None) -> None:
 
     args = parser.parse_args(arg_list)
 
-    Song.from_music_xml(args.music_xml).to_mml_file(
-        args.amk,
-        args.enable_global_legato,
-        args.loop_analysis,
-        args.superloop_analysis,
-        args.measure_numbers,
-        args.enable_dt,
-        args.echo,
-    )
+    MmlExporter(load(args.spcmw)).export()
 
 
 ###############################################################################

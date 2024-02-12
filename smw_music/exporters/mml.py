@@ -59,7 +59,6 @@ class SlurState(Enum):
 ###############################################################################
 
 
-@dataclass
 class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     instruments: dict[str, InstrumentConfig] = field(default_factory=dict)
     octave: int = 4
@@ -307,7 +306,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
 
     ###########################################################################
 
-    def export(self, fname: Path | None = None) -> str:
+    def export(self) -> str:
         proj = deepcopy(self.project)
 
         # If starting after the first measure, disable loop analysis because

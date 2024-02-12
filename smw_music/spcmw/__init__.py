@@ -16,6 +16,7 @@ from .instrument import (
     TuneSource,
     Tuning,
 )
+from .load import load
 from .preferences import Preferences
 from .project import EXTENSION, Project, ProjectInfo, ProjectSettings
 from .spcmw import (
@@ -39,6 +40,7 @@ __all__ = [
     "SampleSource",
     "TuneSource",
     "Tuning",
+    "load",
     "Preferences",
     "ProjectInfo",
     "ProjectSettings",

@@ -12,7 +12,6 @@
 # Standard library imports
 from functools import cached_property
 from pathlib import Path
-from typing import cast
 
 # Library imports
 import music21 as m21
@@ -81,8 +80,10 @@ def _find_rehearsal_marks(
 ) -> dict[int, RehearsalMark]:
     marks = {}
     for elem in filter_type(m21.stream.Part, stream[:]):
-        for measure in filter_type(m21.stream.Measure, elem):
-            for subelem in filter_type(m21.expressions.RehearsalMark, measure):
+        for measure in filter_type(m21.stream.Measure, elem[:]):
+            for subelem in filter_type(
+                m21.expressions.RehearsalMark, measure[:]
+            ):
                 marks[measure.number] = RehearsalMark.from_music_xml(subelem)
             break
     return marks
@@ -371,8 +372,7 @@ class Song:
         instruments = set()
         for channel in self.channels:
             for inst in filter_type(Instrument, channel):
-                # TODO: Cast shouldn't be needed
-                instruments.add(cast(Instrument, inst).name)
+                instruments.add(inst.name)
 
         return sorted(instruments)
 
