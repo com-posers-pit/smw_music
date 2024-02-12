@@ -488,7 +488,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_state_changed(self, state: State, update_instruments: bool) -> None:
-        settings = state.project.settings
+        project = state.project
+        settings = project.settings
 
         if update_instruments:
             self._update_instruments(state)
@@ -499,7 +500,8 @@ class Dashboard(QWidget):
 
         title = "[No project]"
         if self._loaded:
-            title = f"[{state.project_settings.project_name}]"
+            assert project.info is not None
+            title = f"[{project.info.project_name}]"
             if self._unsaved:
                 title += " +"
 
@@ -512,9 +514,9 @@ class Dashboard(QWidget):
             for child in self._view_widgets:
                 stack.enter_context(QSignalBlocker(child))
 
-            v.loop_analysis.setChecked(state.loop_analysis)
-            v.superloop_analysis.setChecked(state.superloop_analysis)
-            v.measure_numbers.setChecked(state.measure_numbers)
+            v.loop_analysis.setChecked(settings.loop_analysis)
+            v.superloop_analysis.setChecked(settings.superloop_analysis)
+            v.measure_numbers.setChecked(settings.measure_numbers)
             v.start_measure.setValue(state.start_measure)
 
             # Solo/mute settings
@@ -558,39 +560,41 @@ class Dashboard(QWidget):
                 v.tuning_recommendation.setText(f"${tune:02x} ${subtune:02x}")
 
             # Global settings
-            v.global_volume_slider.setValue(state.global_volume)
-            v.global_volume_setting.setText(pct(state.global_volume))
-            v.global_volume_setting_label.setText(hexb(state.global_volume))
-            v.global_legato.setChecked(state.global_legato)
+            v.global_volume_slider.setValue(settings.global_volume)
+            v.global_volume_setting.setText(pct(settings.global_volume))
+            v.global_volume_setting_label.setText(hexb(settings.global_volume))
+            v.global_legato.setChecked(settings.global_legato)
 
-            v.echo_enable.setChecked(state.global_echo_enable)
-            v.echo_filter_0.setChecked(state.echo.fir_filt == 0)
-            v.echo_filter_1.setChecked(state.echo.fir_filt == 1)
+            v.echo_enable.setChecked(settings.global_echo)
+            v.echo_filter_0.setChecked(settings.echo.fir_filt == 0)
+            v.echo_filter_1.setChecked(settings.echo.fir_filt == 1)
 
             v.echo_left_slider.setValue(
-                int(v.echo_left_slider.maximum() * state.echo.vol_mag[0])
+                int(v.echo_left_slider.maximum() * settings.echo.vol_mag[0])
             )
-            v.echo_left_setting.setText(pct(state.echo.vol_mag[0], 1.0))
-            v.echo_left_surround.setChecked(state.echo.vol_inv[0])
-            v.echo_left_setting_label.setText(hexb(state.echo.left_vol_reg))
+            v.echo_left_setting.setText(pct(settings.echo.vol_mag[0], 1.0))
+            v.echo_left_surround.setChecked(settings.echo.vol_inv[0])
+            v.echo_left_setting_label.setText(hexb(settings.echo.left_vol_reg))
             v.echo_right_slider.setValue(
-                int(v.echo_right_slider.maximum() * state.echo.vol_mag[1])
+                int(v.echo_right_slider.maximum() * settings.echo.vol_mag[1])
             )
-            v.echo_right_setting.setText(pct(state.echo.vol_mag[1], 1.0))
-            v.echo_right_surround.setChecked(state.echo.vol_inv[1])
-            v.echo_right_setting_label.setText(hexb(state.echo.right_vol_reg))
+            v.echo_right_setting.setText(pct(settings.echo.vol_mag[1], 1.0))
+            v.echo_right_surround.setChecked(settings.echo.vol_inv[1])
+            v.echo_right_setting_label.setText(
+                hexb(settings.echo.right_vol_reg)
+            )
             v.echo_feedback_slider.setValue(
-                int(v.echo_feedback_slider.maximum() * state.echo.fb_mag)
+                int(v.echo_feedback_slider.maximum() * settings.echo.fb_mag)
             )
-            v.echo_feedback_setting.setText(pct(state.echo.fb_mag, 1.0))
-            v.echo_feedback_surround.setChecked(state.echo.fb_inv)
-            v.echo_feedback_setting_label.setText(hexb(state.echo.fb_reg))
-            v.echo_delay_slider.setValue(state.echo.delay)
-            v.echo_delay_setting.setText(hexb(state.echo.delay))
-            v.echo_delay_setting_label.setText(f"{16*state.echo.delay}ms")
+            v.echo_feedback_setting.setText(pct(settings.echo.fb_mag, 1.0))
+            v.echo_feedback_surround.setChecked(settings.echo.fb_inv)
+            v.echo_feedback_setting_label.setText(hexb(settings.echo.fb_reg))
+            v.echo_delay_slider.setValue(settings.echo.delay)
+            v.echo_delay_setting.setText(hexb(settings.echo.delay))
+            v.echo_delay_setting_label.setText(f"{16*settings.echo.delay}ms")
 
             for widget in self._echo_widgets:
-                widget.setEnabled(state.global_echo_enable)
+                widget.setEnabled(settings.global_echo)
 
             v.start_section.setSizeAdjustPolicy(
                 QComboBox.SizeAdjustPolicy.AdjustToContents
@@ -1249,7 +1253,7 @@ class Dashboard(QWidget):
             widget.clear()
             self._samples.clear()
 
-            for inst_name, inst in state.instruments.items():
+            for inst_name, inst in state.project.settings.instruments.items():
                 parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 
@@ -1302,10 +1306,11 @@ class Dashboard(QWidget):
     def _update_sample_config(
         self, state: State, sample_idx: tuple[str, str]
     ) -> None:
+        settings = state.project.settings
         v = self._view  # pylint: disable=invalid-name
 
-        sel_inst = state.instruments[sample_idx[0]]
-        sel_sample = state.samples[sample_idx]
+        sel_inst = settings.instruments[sample_idx[0]]
+        sel_sample = settings.samples[sample_idx]
         env = sel_sample.envelope
 
         v.interpolate.setChecked(sel_sample.dyn_interpolate)
@@ -1463,14 +1468,6 @@ class Dashboard(QWidget):
     def _echo_widgets(self) -> list[QWidget]:
         v = self._view  # pylint: disable=invalid-name
         return [
-            v.echo_ch0,
-            v.echo_ch1,
-            v.echo_ch2,
-            v.echo_ch3,
-            v.echo_ch4,
-            v.echo_ch5,
-            v.echo_ch6,
-            v.echo_ch7,
             v.echo_filter_0,
             v.echo_filter_1,
             v.echo_left_slider,

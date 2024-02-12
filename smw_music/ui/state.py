@@ -53,7 +53,7 @@ class State:
 
     @property
     def instrument(self) -> InstrumentConfig:
-        return self.instruments[self.sample_idx[0]]
+        return self.project.settings.instruments[self.sample_idx[0]]
 
     ###########################################################################
 

@@ -112,15 +112,6 @@ class DashboardView(QMainWindow):
     decay_slider: QSlider
     dynamics_spacer: QWidget
     dynamics_widget: QWidget
-    echo_ch0: QCheckBox
-    echo_ch1: QCheckBox
-    echo_ch2: QCheckBox
-    echo_ch3: QCheckBox
-    echo_ch4: QCheckBox
-    echo_ch5: QCheckBox
-    echo_ch6: QCheckBox
-    echo_ch7: QCheckBox
-    echo_channels_label: QLabel
     echo_control_widget: QWidget
     echo_delay_label: QLabel
     echo_delay_setting: QLineEdit

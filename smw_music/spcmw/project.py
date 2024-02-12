@@ -342,7 +342,7 @@ class Project:
     ###########################################################################
 
     @classmethod
-    def load(cls, fname: Path) -> ["Project", Path | None]:
+    def load(cls, fname: Path) -> tuple["Project", Path | None]:
         with open(fname, "r", encoding="utf8") as fobj:
             contents: ProjectDict = yaml.safe_load(fobj)
 

@@ -18,7 +18,7 @@ import sys
 # Package imports
 from smw_music import __version__
 from smw_music.exporters import MmlExporter
-from smw_music.spcmw import load
+from smw_music.spcmw import Project
 
 ###############################################################################
 # API function definitions
@@ -34,7 +34,8 @@ def main(arg_list: list[str] | None = None) -> None:
 
     args = parser.parse_args(arg_list)
 
-    MmlExporter(load(args.spcmw)).export()
+    project, _ = Project.load(args.spcmw)
+    MmlExporter(project).export()
 
 
 ###############################################################################

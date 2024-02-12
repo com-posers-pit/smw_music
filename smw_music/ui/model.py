@@ -38,7 +38,7 @@ from smw_music.amk import (
     decode_utilization,
     update_sample_groups_file,
 )
-from smw_music.song import MusicXmlException, NoteHead
+from smw_music.song import NoteHead, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
     Brr,
@@ -55,6 +55,7 @@ from smw_music.spcmw import (
     InstrumentConfig,
     InstrumentSample,
     Preferences,
+    Project,
     SampleSource,
     TuneSource,
     Tuning,
@@ -413,26 +414,34 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_echo_left_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
-        self._update_echo_state(vol_mag=(setting, self.state.echo.vol_mag[1]))
+        self._update_echo_state(
+            vol_mag=(setting, self.state.project.settings.echo.vol_mag[1])
+        )
         self.update_status(f"Echo left channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
-        self._update_echo_state(vol_inv=(state, self.state.echo.vol_inv[1]))
+        self._update_echo_state(
+            vol_inv=(state, self.state.project.settings.echo.vol_inv[1])
+        )
         self.update_status(f"Echo left channel surround {_endis(state)}")
 
     ###########################################################################
 
     def on_echo_right_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
-        self._update_echo_state(vol_mag=(self.state.echo.vol_mag[0], setting))
+        self._update_echo_state(
+            vol_mag=(self.state.project.settings.echo.vol_mag[0], setting)
+        )
         self.update_status(f"Echo right channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
-        self._update_echo_state(vol_inv=(self.state.echo.vol_inv[0], state))
+        self._update_echo_state(
+            vol_inv=(self.state.project.settings.echo.vol_inv[0], state)
+        )
         self.update_status(f"Echo right channel surround {_endis(state)}")
 
     ###########################################################################
@@ -547,8 +556,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_load(self, fname: Path) -> None:
         try:
-            # TODO: Update load
-            # save_state, backup_fname = load(fname)
+            project, backup_fname = Project.load(fname)
             if backup_fname is not None:
                 self.response_generated.emit(
                     False,
@@ -571,7 +579,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._append_recent_project(fname)
 
             self._undo_level = 0
-            self._history = [replace(save_state)]
+            self._history = [replace(project)]
             self._project_path = fname.parent
             musicxml = self.state.musicxml_fname
             if musicxml is None:
@@ -1169,7 +1177,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def _load_musicxml(self, musicxml: Path, keep_inst_settings: bool) -> None:
         try:
             self.song = Song.from_music_xml(str(musicxml))
-        except MusicXmlException as e:
+        except SongException as e:
             self.response_generated.emit(
                 True,
                 "Error loading score",
@@ -1351,14 +1359,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     state.superloop_analysis,
                     state.measure_numbers,
                     True,
-                    state.echo if state.global_echo_enable else None,
+                    state.echo if state.project.settings.global_echo else None,
                     PurePosixPath(state.project_name),
                     state.start_measure,
                     sample_group,
                 )
                 self.mml_generated.emit(mml)
                 self.update_status("MML generated")
-            except MusicXmlException as e:
+            except SongException as e:
                 msg = str(e)
             else:
                 bad_samples = self._check_bad_tune()
