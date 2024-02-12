@@ -10,33 +10,20 @@
 ###############################################################################
 
 # Standard library imports
-import datetime
-import shutil
-from contextlib import suppress
-from dataclasses import fields
 from pathlib import Path
-from typing import Callable, TypedDict, cast
+from typing import TypedDict
 
 # Library imports
 import yaml
-from music21.pitch import Pitch
 
 # Package imports
-from smw_music import SmwMusicException
-from smw_music.amk import make_vis_dir
-from smw_music.song.echo import EchoCh, EchoConfig
-from smw_music.song.instrument import (
-    Artic,
-    ArticSetting,
-    Dynamics,
-    InstrumentConfig,
-    InstrumentSample,
-    NoteHead,
-    SampleSource,
+from smw_music.amk import (
+    N_BUILTIN_SAMPLES,
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
 )
-from smw_music.spc700 import Envelope, GainMode
-from smw_music.ui.old_save import v0
-from smw_music.ui.state import BuiltinSampleGroup, BuiltinSampleSource, State
+
+from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 ###############################################################################
 # Private constant definitions
@@ -138,29 +125,15 @@ class _StateDict(TypedDict):
 ###############################################################################
 
 
-def _load_echo(echo: _EchoDict) -> EchoConfig:
-    return EchoConfig(
-        enables=set(EchoCh(x) for x in echo["enables"]),
-        vol_mag=(echo["vol_mag"][0], echo["vol_mag"][1]),
-        vol_inv=(echo["vol_inv"][0], echo["vol_inv"][1]),
-        delay=echo["delay"],
-        fb_mag=echo["fb_mag"],
-        fb_inv=echo["fb_inv"],
-        fir_filt=echo["fir_filt"],
-    )
-
-
-###############################################################################
-
-
-def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
-    rv = InstrumentConfig(
-        mute=inst["mute"],
-        solo=inst["solo"],
-    )
-    # This is a property setter, not a field in the dataclass, so it has to be
-    # set ex post facto
-    rv.samples = {k: _load_sample(v) for k, v in inst["samples"].items()}
+def _load_echo(echo: _EchoDict) -> EchoDict:
+    rv: EchoDict = {
+        "vol_mag": echo["vol_mag"],
+        "vol_inv": echo["vol_inv"],
+        "delay": echo["delay"],
+        "fb_mag": echo["fb_mag"],
+        "fb_inv": echo["fb_inv"],
+        "fir_filt": echo["fir_filt"],
+    }
 
     return rv
 
@@ -168,147 +141,63 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
 ###############################################################################
 
 
-def _load_sample(inst: _SampleDict) -> InstrumentSample:
-    return InstrumentSample(
-        octave_shift=inst["octave_shift"],
-        dynamics={Dynamics(k): v for k, v in inst["dynamics"].items()},
-        dyn_interpolate=inst["interpolate_dynamics"],
-        artics={
-            Artic(k): ArticSetting(v[0], v[1])
-            for k, v in inst["articulations"].items()
+def _load_instrument(inst: _InstrumentDict) -> InstrumentDict:
+    rv: InstrumentDict = {
+        "mute": inst["mute"],
+        "solo": inst["solo"],
+        "samples": {k: _load_sample(v) for k, v in inst["samples"].items()},
+    }
+
+    return rv
+
+
+###############################################################################
+
+
+def _load_sample(sample: _SampleDict) -> SampleDict:
+    rv: SampleDict = {
+        "octave_shift": sample["octave_shift"],
+        "dynamics": {
+            "pppp": sample["dynamics"][0],
+            "ppp": sample["dynamics"][1],
+            "pp": sample["dynamics"][2],
+            "p": sample["dynamics"][3],
+            "mp": sample["dynamics"][4],
+            "mf": sample["dynamics"][5],
+            "f": sample["dynamics"][6],
+            "ff": sample["dynamics"][7],
+            "fff": sample["dynamics"][8],
+            "ffff": sample["dynamics"][9],
         },
-        pan_enabled=inst["pan_enabled"],
-        pan_setting=inst["pan_setting"],
-        pan_invert=(
-            inst.get("pan_l_invert", False),
-            inst.get("pan_r_invert", False),
-        ),
-        sample_source=SampleSource(inst["sample_source"]),
-        builtin_sample_index=inst["builtin_sample_index"],
-        pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
-        brr_fname=Path(inst["brr_fname"]),
-        envelope=Envelope(
-            adsr_mode=inst["adsr_mode"],
-            attack_setting=inst["attack_setting"],
-            decay_setting=inst["decay_setting"],
-            sus_level_setting=inst["sus_level_setting"],
-            sus_rate_setting=inst["sus_rate_setting"],
-            gain_mode=GainMode(inst["gain_mode"]),
-            gain_setting=inst["gain_setting"],
-        ),
-        tune_setting=inst["tune_setting"],
-        subtune_setting=inst["subtune_setting"],
-        mute=inst["mute"],
-        solo=inst["solo"],
-        ulim=Pitch(inst["ulim"]),
-        llim=Pitch(inst["llim"]),
-        notehead=NoteHead(inst["notehead"]),
-        start=Pitch(inst["start"]),
-        track=bool(inst.get("track", False)),
-    )
-
-
-###############################################################################
-
-
-def _save_echo(echo: EchoConfig) -> _EchoDict:
-    return {
-        "enables": list(x.value for x in echo.enables),
-        "vol_mag": list(echo.vol_mag),
-        "vol_inv": list(echo.vol_inv),
-        "delay": echo.delay,
-        "fb_mag": echo.fb_mag,
-        "fb_inv": echo.fb_inv,
-        "fir_filt": echo.fir_filt,
+        "interpolate_dynamics": sample["interpolate_dynamics"],
+        "articulations": sample["articulations"],
+        "pan_enabled": sample["pan_enabled"],
+        "pan_setting": sample["pan_setting"],
+        "pan_l_invert": sample["pan_l_invert"],
+        "pan_r_invert": sample["pan_r_invert"],
+        "sample_source": sample["sample_source"],
+        "builtin_sample_index": sample["builtin_sample_index"],
+        "pack_sample": sample["pack_sample"],
+        "brr_fname": sample["brr_fname"],
+        "adsr_mode": sample["adsr_mode"],
+        "attack_setting": sample["attack_setting"],
+        "decay_setting": sample["decay_setting"],
+        "sus_level_setting": sample["sus_level_setting"],
+        "sus_rate_setting": sample["sus_rate_setting"],
+        "gain_mode": sample["gain_mode"],
+        "gain_setting": sample["gain_setting"],
+        "tune_setting": sample["tune_setting"],
+        "subtune_setting": sample["subtune_setting"],
+        "mute": sample["mute"],
+        "solo": sample["solo"],
+        "llim": sample["ulim"],
+        "ulim": sample["llim"],
+        "notehead": sample["notehead"],
+        "start": sample["start"],
+        "track": sample.get("track", False),
     }
 
-
-###############################################################################
-
-
-def _save_instrument(inst: InstrumentConfig) -> _InstrumentDict:
-    return {
-        "mute": inst.mute,
-        "solo": inst.solo,
-        "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
-    }
-
-
-###############################################################################
-
-
-def _save_sample(sample: InstrumentSample) -> _SampleDict:
-    return {
-        "octave_shift": sample.octave_shift,
-        "dynamics": {k.value: v for k, v in sample.dynamics.items()},
-        "interpolate_dynamics": sample.dyn_interpolate,
-        "articulations": {
-            k.value: [v.length, v.volume] for k, v in sample.artics.items()
-        },
-        "pan_enabled": sample.pan_enabled,
-        "pan_setting": sample.pan_setting,
-        "pan_l_invert": sample.pan_invert[0],
-        "pan_r_invert": sample.pan_invert[1],
-        "sample_source": sample.sample_source.value,
-        "builtin_sample_index": sample.builtin_sample_index,
-        "pack_sample": [sample.pack_sample[0], str(sample.pack_sample[1])],
-        "brr_fname": str(sample.brr_fname),
-        "adsr_mode": sample.envelope.adsr_mode,
-        "attack_setting": sample.envelope.attack_setting,
-        "decay_setting": sample.envelope.decay_setting,
-        "sus_level_setting": sample.envelope.sus_level_setting,
-        "sus_rate_setting": sample.envelope.sus_rate_setting,
-        "gain_mode": sample.envelope.gain_mode.value,
-        "gain_setting": sample.envelope.gain_setting,
-        "tune_setting": sample.tune_setting,
-        "subtune_setting": sample.subtune_setting,
-        "mute": sample.mute,
-        "solo": sample.solo,
-        "ulim": str(sample.ulim),
-        "llim": str(sample.llim),
-        "notehead": str(sample.notehead),
-        "start": str(sample.start),
-        "track": bool(sample.track),
-    }
-
-
-###############################################################################
-
-
-def _upgrade_save(fname: Path) -> tuple[State, Path]:
-    with open(fname, "r", encoding="utf8") as fobj:
-        contents = yaml.safe_load(fobj)
-
-    save_version = contents["save_version"]
-
-    backup = fname.parent / (fname.name + f".v{save_version}")
-    shutil.copy(fname, backup)
-
-    assert save_version == 0  # nosec: B101
-    state = v0.load(fname)
-
-    return state, backup
-
-
-###############################################################################
-
-
-def _update_convert_scripts(dirname: Path) -> None:
-    for fname in ["convert.bat", "convert.sh"]:
-        fpath = dirname / fname
-
-        with open(fpath, "r", encoding="utf8") as fobj:
-            lines = fobj.readlines()
-
-        for n, line in enumerate(lines):
-            if "AddmusicK" in line and "-visualize" not in line:
-                split = line.split('"')
-                split[0] += "-visualize "
-                line = '"'.join(split)
-                lines[n] = line
-
-        with open(fpath, "w", encoding="utf8") as fobj:
-            fobj.write("".join(lines))
+    return rv
 
 
 ###############################################################################
@@ -316,83 +205,48 @@ def _update_convert_scripts(dirname: Path) -> None:
 ###############################################################################
 
 
-def load(fname: Path) -> tuple[State, Path | None]:
-    rv: tuple[State, Path | None]
-
+def load(fname: Path) -> ProjectDict:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: _SaveDict = yaml.safe_load(fobj)
 
-    save_version = contents["save_version"]
-    if save_version > _CURRENT_SAVE_VERSION:
-        raise SmwMusicException(
-            f"Save file version is {save_version}, tool version only "
-            + f"supports up to {_CURRENT_SAVE_VERSION}"
-        )
+    assert contents["save_version"] == _CURRENT_SAVE_VERSION
 
-    # Visualization support added in the middle of support for v1 version
-    # files, so we should try to add it
-    if save_version <= 1:
-        make_vis_dir(fname.parent)
-        _update_convert_scripts(fname.parent)
+    sdict = contents["state"]
+    musicxml_fname: Path | str | None = sdict["musicxml_fname"]
 
-    if save_version < _CURRENT_SAVE_VERSION:
-        rv = _upgrade_save(fname)
+    proj_dir = fname.parent.resolve()
+
+    # Convert to absolute path if needed
+    if musicxml_fname is not None:
+        musicxml_fname = Path(musicxml_fname)
+        if not musicxml_fname.is_absolute():
+            musicxml_fname = proj_dir / musicxml_fname
     else:
-        project = contents["song"]
-        sdict = contents["state"]
-        musicxml: Path | str | None = sdict["musicxml_fname"]
-        mml: Path | str | None = sdict["mml_fname"]
+        musicxml_fname = ""
 
-        proj_dir = fname.parent.resolve()
+    project: ProjectDict = {
+        "tool_version": contents["tool_version"],
+        "save_version": contents["save_version"],
+        "time": contents["time"],
+        "musicxml": str(musicxml_fname),
+        "project_name": contents["song"],
+        "composer": "",
+        "title": "",
+        "porter": sdict["porter"],
+        "game": sdict["game"],
+        "loop_analysis": sdict["loop_analysis"],
+        "superloop_analysis": False,
+        "measure_numbers": sdict["measure_numbers"],
+        "global_volume": sdict["global_volume"],
+        "global_legato": sdict["global_legato"],
+        "global_echo": sdict["global_echo_enable"],
+        "echo": _load_echo(sdict["echo"]),
+        "instruments": {
+            k: _load_instrument(v) for k, v in sdict["instruments"].items()
+        },
+        "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
+        "builtin_sample_sources": N_BUILTIN_SAMPLES
+        * [BuiltinSampleSource.OPTIMIZED.value],
+    }
 
-        # Convert to absolute path if needed
-        if musicxml is not None:
-            musicxml = Path(musicxml)
-            if not musicxml.is_absolute():
-                musicxml = proj_dir / musicxml
-        if mml is not None:
-            mml = Path(mml)
-            if not mml.is_absolute():
-                mml = proj_dir / mml
-
-        state_fields = {x.name: x for x in fields(State)}
-
-        state = State(
-            musicxml_fname=None if musicxml is None else musicxml,
-            mml_fname=None if mml is None else mml,
-            loop_analysis=sdict["loop_analysis"],
-            measure_numbers=sdict["measure_numbers"],
-            global_volume=sdict["global_volume"],
-            global_legato=sdict["global_legato"],
-            global_echo_enable=sdict["global_echo_enable"],
-            echo=_load_echo(sdict["echo"]),
-            instruments={
-                k: _load_instrument(v) for k, v in sdict["instruments"].items()
-            },
-            project_name=project,
-            porter=sdict["porter"],
-            game=sdict["game"],
-            start_measure=sdict.get(
-                "start_measure",
-                cast(int, state_fields["start_measure"].default),
-            ),
-            builtin_sample_group=BuiltinSampleGroup(
-                sdict.get(
-                    "builtin_sample_group",
-                    state_fields["builtin_sample_group"].default,
-                )
-            ),
-            builtin_sample_sources=[
-                BuiltinSampleSource(x)
-                for x in sdict.get(
-                    "builtin_sample_sources",
-                    cast(
-                        Callable[[], list[BuiltinSampleSource]],
-                        state_fields["builtin_sample_sources"].default_factory,
-                    )(),
-                )
-            ],
-        )
-        rv = state, None
-
-    return rv
+    return project

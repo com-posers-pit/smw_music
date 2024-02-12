@@ -10,6 +10,7 @@
 ###############################################################################
 
 # Standard library imports
+import shutil
 from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -24,10 +25,21 @@ from smw_music.amk import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
     BuiltinSampleSource,
+    make_vis_dir,
 )
-from smw_music.spc700 import EchoConfig
+from smw_music.song import Dynamics, NoteHead
+from smw_music.spc700 import EchoConfig, Envelope, GainMode
 
-from .instrument import InstrumentConfig, InstrumentSample
+from . import load_v0, load_v1
+from .common import SpcmwException
+from .instrument import (
+    Artic,
+    ArticSetting,
+    InstrumentConfig,
+    InstrumentSample,
+    Pitch,
+    SampleSource,
+)
 from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 ###############################################################################
@@ -40,6 +52,78 @@ EXTENSION = "spcmw"
 
 ###############################################################################
 # Private function definitions
+###############################################################################
+
+
+def _load_echo(echo: EchoDict) -> EchoConfig:
+    return EchoConfig(
+        vol_mag=(echo["vol_mag"][0], echo["vol_mag"][1]),
+        vol_inv=(echo["vol_inv"][0], echo["vol_inv"][1]),
+        delay=echo["delay"],
+        fb_mag=echo["fb_mag"],
+        fb_inv=echo["fb_inv"],
+        fir_filt=echo["fir_filt"],
+    )
+
+
+###############################################################################
+
+
+def _load_instrument(inst: InstrumentDict) -> InstrumentConfig:
+    rv = InstrumentConfig(
+        mute=inst["mute"],
+        solo=inst["solo"],
+    )
+    # This is a property setter, not a field in the dataclass, so it has to be
+    # set ex post facto
+    rv.samples = {k: _load_sample(v) for k, v in inst["samples"].items()}
+
+    return rv
+
+
+###############################################################################
+
+
+def _load_sample(inst: SampleDict) -> InstrumentSample:
+    return InstrumentSample(
+        octave_shift=inst["octave_shift"],
+        dynamics={Dynamics(k): v for k, v in inst["dynamics"].items()},
+        dyn_interpolate=inst["interpolate_dynamics"],
+        artics={
+            Artic(k): ArticSetting(v[0], v[1])
+            for k, v in inst["articulations"].items()
+        },
+        pan_enabled=inst["pan_enabled"],
+        pan_setting=inst["pan_setting"],
+        pan_invert=(
+            inst.get("pan_l_invert", False),
+            inst.get("pan_r_invert", False),
+        ),
+        sample_source=SampleSource(inst["sample_source"]),
+        builtin_sample_index=inst["builtin_sample_index"],
+        pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
+        brr_fname=Path(inst["brr_fname"]),
+        envelope=Envelope(
+            adsr_mode=inst["adsr_mode"],
+            attack_setting=inst["attack_setting"],
+            decay_setting=inst["decay_setting"],
+            sus_level_setting=inst["sus_level_setting"],
+            sus_rate_setting=inst["sus_rate_setting"],
+            gain_mode=GainMode(inst["gain_mode"]),
+            gain_setting=inst["gain_setting"],
+        ),
+        tune_setting=inst["tune_setting"],
+        subtune_setting=inst["subtune_setting"],
+        mute=inst["mute"],
+        solo=inst["solo"],
+        ulim=Pitch(inst["ulim"]),
+        llim=Pitch(inst["llim"]),
+        notehead=NoteHead(inst["notehead"]),
+        start=Pitch(inst["start"]),
+        track=bool(inst.get("track", False)),
+    )
+
+
 ###############################################################################
 
 
@@ -101,6 +185,48 @@ def _save_sample(sample: InstrumentSample) -> SampleDict:
         "start": str(sample.start),
         "track": bool(sample.track),
     }
+
+
+###############################################################################
+
+
+def _update_convert_scripts(dirname: Path) -> None:
+    for fname in ["convert.bat", "convert.sh"]:
+        fpath = dirname / fname
+
+        with open(fpath, "r", encoding="utf8") as fobj:
+            lines = fobj.readlines()
+
+        for n, line in enumerate(lines):
+            if "AddmusicK" in line and "-visualize" not in line:
+                split = line.split('"')
+                split[0] += "-visualize "
+                line = '"'.join(split)
+                lines[n] = line
+
+        with open(fpath, "w", encoding="utf8") as fobj:
+            fobj.write("".join(lines))
+
+
+###############################################################################
+
+
+def _upgrade_save(fname: Path) -> Path:
+    with open(fname, "r", encoding="utf8") as fobj:
+        contents = yaml.safe_load(fobj)
+
+    save_version = contents["save_version"]
+
+    # Visualization support added in the middle of support for v1 version
+    # files, so we should try to add it
+    if save_version <= 1:
+        make_vis_dir(fname.parent)
+        _update_convert_scripts(fname.parent)
+
+    backup = fname.parent / (fname.name + f".v{save_version}")
+    shutil.copy(fname, backup)
+
+    return backup
 
 
 ###############################################################################
@@ -212,6 +338,63 @@ class ProjectSettings:
 class Project:
     info: ProjectInfo | None = None
     settings: ProjectSettings = field(default_factory=ProjectSettings)
+
+    ###########################################################################
+
+    @classmethod
+    def load(cls, fname: Path) -> ["Project", Path | None]:
+        with open(fname, "r", encoding="utf8") as fobj:
+            contents: ProjectDict = yaml.safe_load(fobj)
+
+        save_version = contents["save_version"]
+        if save_version > CURRENT_SAVE_VERSION:
+            raise SpcmwException(
+                f"Save file version is {save_version}, tool version only "
+                + f"supports up to {CURRENT_SAVE_VERSION}"
+            )
+
+        backup = None
+        if save_version < CURRENT_SAVE_VERSION:
+            backup = _upgrade_save(fname)
+
+            match save_version:
+                case 0:
+                    contents = load_v0.load(fname)
+                case 1:
+                    contents = load_v1.load(fname)
+
+        project = cls(
+            ProjectInfo(
+                Path(contents["musicxml"]),
+                contents["project_name"],
+                contents["composer"],
+                contents["title"],
+                contents["porter"],
+                contents["game"],
+            ),
+            ProjectSettings(
+                contents["loop_analysis"],
+                contents["superloop_analysis"],
+                contents["measure_numbers"],
+                {
+                    k: _load_instrument(v)
+                    for k, v in contents["instruments"].items()
+                },
+                contents["global_volume"],
+                contents["global_legato"],
+                contents["global_echo"],
+                _load_echo(contents["echo"]),
+                BuiltinSampleGroup(contents["builtin_sample_group"]),
+                list(
+                    map(
+                        BuiltinSampleSource,
+                        contents["builtin_sample_sources"],
+                    )
+                ),
+            ),
+        )
+
+        return project, backup
 
     ###########################################################################
 

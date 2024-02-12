@@ -17,18 +17,13 @@ from typing import TypedDict
 import yaml
 
 # Package imports
-from smw_music import SmwMusicException
-from smw_music.song.echo import EchoCh, EchoConfig
-from smw_music.song.instrument import (
-    Artic,
-    ArticSetting,
-    Dynamics,
-    InstrumentConfig,
-    InstrumentSample,
-    SampleSource,
+from smw_music.amk import (
+    N_BUILTIN_SAMPLES,
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
 )
-from smw_music.spc700 import Envelope, GainMode
-from smw_music.ui.state import State
+
+from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 ###############################################################################
 # Private constant definitions
@@ -118,30 +113,15 @@ class _StateDict(TypedDict):
 ###############################################################################
 
 
-def _load_echo(echo: _EchoDict) -> EchoConfig:
-    return EchoConfig(
-        enables=set(EchoCh(x) for x in echo["enables"]),
-        vol_mag=(echo["vol_mag"][0], echo["vol_mag"][1]),
-        vol_inv=(echo["vol_inv"][0], echo["vol_inv"][1]),
-        delay=echo["delay"],
-        fb_mag=echo["fb_mag"],
-        fb_inv=echo["fb_inv"],
-        fir_filt=echo["fir_filt"],
-    )
-
-
-###############################################################################
-
-
-def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
-    rv = InstrumentConfig(
-        mute=inst["mute"],
-        solo=inst["solo"],
-    )
-
-    # This is a property setter, not a field in the dataclass, so it has to be
-    # set ex post facto
-    rv.samples = {"": _load_sample(inst)}
+def _load_echo(echo: _EchoDict) -> EchoDict:
+    rv: EchoDict = {
+        "vol_mag": echo["vol_mag"],
+        "vol_inv": echo["vol_inv"],
+        "delay": echo["delay"],
+        "fb_mag": echo["fb_mag"],
+        "fb_inv": echo["fb_inv"],
+        "fir_filt": echo["fir_filt"],
+    }
 
     return rv
 
@@ -149,42 +129,63 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentConfig:
 ###############################################################################
 
 
-def _load_sample(inst: _InstrumentDict) -> InstrumentSample:
-    rv = InstrumentSample(
-        dynamics={Dynamics(k): v for k, v in inst["dynamics"].items()},
-        dyn_interpolate=inst["interpolate_dynamics"],
-        artics={
-            Artic(k): ArticSetting(v[0], v[1])
-            for k, v in inst["articulations"].items()
+def _load_instrument(inst: _InstrumentDict) -> InstrumentDict:
+    rv: InstrumentDict = {
+        "mute": inst["mute"],
+        "solo": inst["solo"],
+        "samples": {"": _load_sample(inst)},
+    }
+
+    return rv
+
+
+###############################################################################
+
+
+def _load_sample(inst: _InstrumentDict) -> SampleDict:
+    sample: SampleDict = {
+        "octave_shift": inst["octave"],
+        "dynamics": {
+            "pppp": inst["dynamics"][0],
+            "ppp": inst["dynamics"][1],
+            "pp": inst["dynamics"][2],
+            "p": inst["dynamics"][3],
+            "mp": inst["dynamics"][4],
+            "mf": inst["dynamics"][5],
+            "f": inst["dynamics"][6],
+            "ff": inst["dynamics"][7],
+            "fff": inst["dynamics"][8],
+            "ffff": inst["dynamics"][9],
         },
-        pan_enabled=inst["pan_enabled"],
-        pan_setting=inst["pan_setting"],
-        pan_invert=(
-            inst.get("pan_l_invert", False),
-            inst.get("pan_r_invert", False),
-        ),
-        sample_source=SampleSource(inst["sample_source"]),
-        builtin_sample_index=inst["builtin_sample_index"],
-        pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
-        brr_fname=Path(inst["brr_fname"]),
-        envelope=Envelope(
-            adsr_mode=inst["adsr_mode"],
-            attack_setting=inst["attack_setting"],
-            decay_setting=inst["decay_setting"],
-            sus_level_setting=inst["sus_level_setting"],
-            sus_rate_setting=inst["sus_rate_setting"],
-            gain_mode=GainMode(inst["gain_mode"]),
-            gain_setting=inst["gain_setting"],
-        ),
-        tune_setting=inst["tune_setting"],
-        subtune_setting=inst["subtune_setting"],
-        mute=inst["mute"],
-        solo=inst["solo"],
-    )
+        "interpolate_dynamics": inst["interpolate_dynamics"],
+        "articulations": inst["articulations"],
+        "pan_enabled": inst["pan_enabled"],
+        "pan_setting": inst["pan_setting"],
+        "pan_l_invert": inst["pan_l_invert"],
+        "pan_r_invert": inst["pan_r_invert"],
+        "sample_source": inst["sample_source"],
+        "builtin_sample_index": inst["builtin_sample_index"],
+        "pack_sample": inst["pack_sample"],
+        "brr_fname": inst["brr_fname"],
+        "adsr_mode": inst["adsr_mode"],
+        "attack_setting": inst["attack_setting"],
+        "decay_setting": inst["decay_setting"],
+        "sus_level_setting": inst["sus_level_setting"],
+        "sus_rate_setting": inst["sus_rate_setting"],
+        "gain_mode": inst["gain_mode"],
+        "gain_setting": inst["gain_setting"],
+        "tune_setting": inst["tune_setting"],
+        "subtune_setting": inst["subtune_setting"],
+        "mute": inst["mute"],
+        "solo": inst["solo"],
+        "llim": "A0",
+        "ulim": "C7",
+        "notehead": "normal",
+        "start": "A0",
+        "track": False,
+    }
 
-    rv.octave_shift = inst["octave"] - rv.default_octave
-
-    return rv
+    return sample
 
 
 ###############################################################################
@@ -192,45 +193,42 @@ def _load_sample(inst: _InstrumentDict) -> InstrumentSample:
 ###############################################################################
 
 
-def load(fname: Path) -> State:
+def load(fname: Path) -> ProjectDict:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: _SaveDict = yaml.safe_load(fobj)
 
-    save_version = contents["save_version"]
-    if contents["save_version"] > _CURRENT_SAVE_VERSION:
-        raise SmwMusicException(
-            f"Save file version is {save_version}, tool version only "
-            + f"supports up to {_CURRENT_SAVE_VERSION}"
-        )
+    assert contents["save_version"] == _CURRENT_SAVE_VERSION
 
-    project = contents["song"]
     sdict = contents["state"]
     if param_fname := sdict["musicxml_fname"]:
-        musicxml_fname = Path(param_fname).resolve()
+        musicxml_fname = str(Path(param_fname).resolve())
     else:
-        musicxml_fname = None
-    if param_fname := sdict["mml_fname"]:
-        mml_fname = Path(param_fname).resolve()
-    else:
-        mml_fname = None
+        musicxml_fname = ""
 
-    state = State(
-        musicxml_fname=musicxml_fname,
-        mml_fname=mml_fname,
-        loop_analysis=sdict["loop_analysis"],
-        measure_numbers=sdict["measure_numbers"],
-        global_volume=sdict["global_volume"],
-        global_legato=sdict["global_legato"],
-        global_echo_enable=sdict["global_echo_enable"],
-        echo=_load_echo(sdict["echo"]),
-        instruments={
+    project: ProjectDict = {
+        "tool_version": contents["tool_version"],
+        "save_version": contents["save_version"],
+        "time": contents["time"],
+        "musicxml": musicxml_fname,
+        "project_name": contents["song"],
+        "composer": "",
+        "title": "",
+        "porter": sdict["porter"],
+        "game": sdict["game"],
+        "loop_analysis": sdict["loop_analysis"],
+        "superloop_analysis": False,
+        "measure_numbers": sdict["measure_numbers"],
+        "global_volume": sdict["global_volume"],
+        "global_legato": sdict["global_legato"],
+        "global_echo": sdict["global_echo_enable"],
+        "echo": _load_echo(sdict["echo"]),
+        "instruments": {
             inst["name"]: _load_instrument(inst)
             for inst in sdict["instruments"]
         },
-        project_name=project,
-        porter=sdict["porter"],
-        game=sdict["game"],
-        start_measure=sdict.get("start_measure", 1),
-    )
+        "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
+        "builtin_sample_sources": N_BUILTIN_SAMPLES
+        * [BuiltinSampleSource.OPTIMIZED.value],
+    }
 
-    return state
+    return project
