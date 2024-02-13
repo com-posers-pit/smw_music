@@ -36,7 +36,7 @@ _CURRENT_SAVE_VERSION = 0
 ###############################################################################
 
 
-class _EchoDict(TypedDict):
+class _EchoDict_v0(TypedDict):
     enables: list[int]
     vol_mag: list[float]
     vol_inv: list[bool]
@@ -49,7 +49,7 @@ class _EchoDict(TypedDict):
 ###############################################################################
 
 
-class _InstrumentDict(TypedDict):
+class _InstrumentDict_v0(TypedDict):
     name: str
     octave: int
     transpose: int
@@ -81,18 +81,18 @@ class _InstrumentDict(TypedDict):
 ###############################################################################
 
 
-class _SaveDict(TypedDict):
+class _SaveDict_v0(TypedDict):
     tool_version: str
     save_version: int
     song: str
     time: str
-    state: "_StateDict"
+    state: "_StateDict_v0"
 
 
 ###############################################################################
 
 
-class _StateDict(TypedDict):
+class _StateDict_v0(TypedDict):
     musicxml_fname: str
     mml_fname: str
     loop_analysis: bool
@@ -101,8 +101,8 @@ class _StateDict(TypedDict):
     global_volume: bool
     global_legato: bool
     global_echo_enable: bool
-    echo: _EchoDict
-    instruments: list[_InstrumentDict]
+    echo: _EchoDict_v0
+    instruments: list[_InstrumentDict_v0]
     porter: str
     game: str
     start_measure: int
@@ -113,7 +113,7 @@ class _StateDict(TypedDict):
 ###############################################################################
 
 
-def _load_echo(echo: _EchoDict) -> EchoDict:
+def _load_echo_v0(echo: _EchoDict_v0) -> EchoDict:
     rv: EchoDict = {
         "vol_mag": echo["vol_mag"],
         "vol_inv": echo["vol_inv"],
@@ -129,11 +129,11 @@ def _load_echo(echo: _EchoDict) -> EchoDict:
 ###############################################################################
 
 
-def _load_instrument(inst: _InstrumentDict) -> InstrumentDict:
+def _load_instrument_v0(inst: _InstrumentDict_v0) -> InstrumentDict:
     rv: InstrumentDict = {
         "mute": inst["mute"],
         "solo": inst["solo"],
-        "samples": {"": _load_sample(inst)},
+        "samples": {"": _load_sample_v0(inst)},
     }
 
     return rv
@@ -142,7 +142,7 @@ def _load_instrument(inst: _InstrumentDict) -> InstrumentDict:
 ###############################################################################
 
 
-def _load_sample(inst: _InstrumentDict) -> SampleDict:
+def _load_sample_v0(inst: _InstrumentDict_v0) -> SampleDict:
     sample: SampleDict = {
         "octave_shift": inst["octave"],
         "dynamics": {
@@ -193,9 +193,9 @@ def _load_sample(inst: _InstrumentDict) -> SampleDict:
 ###############################################################################
 
 
-def load(fname: Path) -> ProjectDict:
+def load_v0(fname: Path) -> ProjectDict:
     with open(fname, "r", encoding="utf8") as fobj:
-        contents: _SaveDict = yaml.safe_load(fobj)
+        contents: _SaveDict_v0 = yaml.safe_load(fobj)
 
     assert contents["save_version"] == _CURRENT_SAVE_VERSION
 
@@ -221,9 +221,9 @@ def load(fname: Path) -> ProjectDict:
         "global_volume": sdict["global_volume"],
         "global_legato": sdict["global_legato"],
         "global_echo": sdict["global_echo_enable"],
-        "echo": _load_echo(sdict["echo"]),
+        "echo": _load_echo_v0(sdict["echo"]),
         "instruments": {
-            inst["name"]: _load_instrument(inst)
+            inst["name"]: _load_instrument_v0(inst)
             for inst in sdict["instruments"]
         },
         "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
