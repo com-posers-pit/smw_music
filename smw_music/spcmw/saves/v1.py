@@ -11,7 +11,7 @@
 
 # Standard library imports
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 # Library imports
 import yaml
@@ -23,20 +23,14 @@ from smw_music.amk import (
     BuiltinSampleSource,
 )
 
-from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
+from .. import stypes as v2
 
 ###############################################################################
-# Private constant definitions
-###############################################################################
-
-_CURRENT_SAVE_VERSION = 1
-
-###############################################################################
-# Private type definitions
+# API type definitions
 ###############################################################################
 
 
-class _EchoDict_v1(TypedDict):
+class EchoDict(TypedDict):
     enables: list[int]
     vol_mag: list[float]
     vol_inv: list[bool]
@@ -49,24 +43,24 @@ class _EchoDict_v1(TypedDict):
 ###############################################################################
 
 
-class _InstrumentDict_v1(TypedDict):
+class InstrumentDict(TypedDict):
     mute: bool
     solo: bool
-    samples: dict[str, "_SampleDict_v1"]
+    samples: dict[str, "SampleDict"]
 
 
 ###############################################################################
 
 
-class _SampleDict_v1(TypedDict):
+class SampleDict(TypedDict):
     octave_shift: int
     dynamics: dict[int, int]
     interpolate_dynamics: bool
     articulations: dict[int, list[int]]
     pan_enabled: bool
     pan_setting: int
-    pan_l_invert: bool
-    pan_r_invert: bool
+    pan_l_invert: NotRequired[bool]
+    pan_r_invert: NotRequired[bool]
     sample_source: int
     builtin_sample_index: int
     pack_sample: list[str]
@@ -86,24 +80,24 @@ class _SampleDict_v1(TypedDict):
     ulim: str
     notehead: str
     start: str
-    track: bool
+    track: NotRequired[bool]
 
 
 ###############################################################################
 
 
-class _SaveDict_v1(TypedDict):
+class SaveDict(TypedDict):
     tool_version: str
     save_version: int
     song: str
     time: str
-    state: "_StateDict_v1"
+    state: "StateDict"
 
 
 ###############################################################################
 
 
-class _StateDict_v1(TypedDict):
+class StateDict(TypedDict):
     musicxml_fname: str | None
     mml_fname: str | None
     loop_analysis: bool
@@ -111,13 +105,13 @@ class _StateDict_v1(TypedDict):
     global_volume: bool
     global_legato: bool
     global_echo_enable: bool
-    echo: _EchoDict_v1
-    instruments: dict[str, _InstrumentDict_v1]
+    echo: EchoDict
+    instruments: dict[str, InstrumentDict]
     porter: str
     game: str
-    start_measure: int
-    builtin_sample_group: int
-    builtin_sample_sources: list[int]
+    start_measure: NotRequired[int]
+    builtin_sample_group: NotRequired[int]
+    builtin_sample_sources: NotRequired[list[int]]
 
 
 ###############################################################################
@@ -125,8 +119,8 @@ class _StateDict_v1(TypedDict):
 ###############################################################################
 
 
-def _load_echo_v1(echo: _EchoDict_v1) -> EchoDict:
-    rv: EchoDict = {
+def _load_echo(echo: EchoDict) -> v2.EchoDict:
+    rv: v2.EchoDict = {
         "vol_mag": echo["vol_mag"],
         "vol_inv": echo["vol_inv"],
         "delay": echo["delay"],
@@ -141,11 +135,11 @@ def _load_echo_v1(echo: _EchoDict_v1) -> EchoDict:
 ###############################################################################
 
 
-def _load_instrument_v1(inst: _InstrumentDict_v1) -> InstrumentDict:
-    rv: InstrumentDict = {
+def _load_instrument(inst: InstrumentDict) -> v2.InstrumentDict:
+    rv: v2.InstrumentDict = {
         "mute": inst["mute"],
         "solo": inst["solo"],
-        "samples": {k: _load_sample_v1(v) for k, v in inst["samples"].items()},
+        "samples": {k: _load_sample(v) for k, v in inst["samples"].items()},
     }
 
     return rv
@@ -154,8 +148,8 @@ def _load_instrument_v1(inst: _InstrumentDict_v1) -> InstrumentDict:
 ###############################################################################
 
 
-def _load_sample_v1(sample: _SampleDict_v1) -> SampleDict:
-    rv: SampleDict = {
+def _load_sample(sample: SampleDict) -> v2.SampleDict:
+    rv: v2.SampleDict = {
         "octave_shift": sample["octave_shift"],
         "dynamics": {
             "pppp": sample["dynamics"][0],
@@ -173,8 +167,8 @@ def _load_sample_v1(sample: _SampleDict_v1) -> SampleDict:
         "articulations": sample["articulations"],
         "pan_enabled": sample["pan_enabled"],
         "pan_setting": sample["pan_setting"],
-        "pan_l_invert": sample["pan_l_invert"],
-        "pan_r_invert": sample["pan_r_invert"],
+        "pan_l_invert": sample.get("pan_l_invert", False),
+        "pan_r_invert": sample.get("pan_r_invert", False),
         "sample_source": sample["sample_source"],
         "builtin_sample_index": sample["builtin_sample_index"],
         "pack_sample": sample["pack_sample"],
@@ -201,16 +195,11 @@ def _load_sample_v1(sample: _SampleDict_v1) -> SampleDict:
 
 
 ###############################################################################
-# API function definitions
+# API Function definitions
 ###############################################################################
 
 
-def load_v1(fname: Path) -> ProjectDict:
-    with open(fname, "r", encoding="utf8") as fobj:
-        contents: _SaveDict_v1 = yaml.safe_load(fobj)
-
-    assert contents["save_version"] == _CURRENT_SAVE_VERSION
-
+def to_v2(fname: Path, contents: SaveDict) -> v2.ProjectDict:
     sdict = contents["state"]
     musicxml_fname: Path | str | None = sdict["musicxml_fname"]
 
@@ -224,7 +213,7 @@ def load_v1(fname: Path) -> ProjectDict:
     else:
         musicxml_fname = ""
 
-    project: ProjectDict = {
+    project: v2.ProjectDict = {
         "tool_version": contents["tool_version"],
         "save_version": contents["save_version"],
         "time": contents["time"],
@@ -240,9 +229,9 @@ def load_v1(fname: Path) -> ProjectDict:
         "global_volume": sdict["global_volume"],
         "global_legato": sdict["global_legato"],
         "global_echo": sdict["global_echo_enable"],
-        "echo": _load_echo_v1(sdict["echo"]),
+        "echo": _load_echo(sdict["echo"]),
         "instruments": {
-            k: _load_instrument_v1(v) for k, v in sdict["instruments"].items()
+            k: _load_instrument(v) for k, v in sdict["instruments"].items()
         },
         "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
         "builtin_sample_sources": N_BUILTIN_SAMPLES
@@ -250,3 +239,17 @@ def load_v1(fname: Path) -> ProjectDict:
     }
 
     return project
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def load_v1(fname: Path) -> v2.ProjectDict:
+    with open(fname, "r", encoding="utf8") as fobj:
+        contents: SaveDict = yaml.safe_load(fobj)
+
+    assert contents["save_version"] == 1
+
+    return to_v2(fname, contents)

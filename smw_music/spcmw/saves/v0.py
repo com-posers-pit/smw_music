@@ -11,45 +11,20 @@
 
 # Standard library imports
 from pathlib import Path
-from typing import TypedDict
+from typing import NotRequired, TypedDict
 
 # Library imports
 import yaml
 
-# Package imports
-from smw_music.amk import (
-    N_BUILTIN_SAMPLES,
-    BuiltinSampleGroup,
-    BuiltinSampleSource,
-)
-
-from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
+from .. import stypes as v2
+from . import v1
 
 ###############################################################################
-# Private constant definitions
-###############################################################################
-
-_CURRENT_SAVE_VERSION = 0
-
-###############################################################################
-# Private type definitions
+# API type definitions
 ###############################################################################
 
 
-class _EchoDict_v0(TypedDict):
-    enables: list[int]
-    vol_mag: list[float]
-    vol_inv: list[bool]
-    delay: int
-    fb_mag: float
-    fb_inv: bool
-    fir_filt: int
-
-
-###############################################################################
-
-
-class _InstrumentDict_v0(TypedDict):
+class InstrumentDict(TypedDict):
     name: str
     octave: int
     transpose: int
@@ -59,8 +34,8 @@ class _InstrumentDict_v0(TypedDict):
     articulations: dict[int, list[int]]
     pan_enabled: bool
     pan_setting: int
-    pan_l_invert: bool
-    pan_r_invert: bool
+    pan_l_invert: NotRequired[bool]
+    pan_r_invert: NotRequired[bool]
     sample_source: int
     builtin_sample_index: int
     pack_sample: list[str]
@@ -81,18 +56,18 @@ class _InstrumentDict_v0(TypedDict):
 ###############################################################################
 
 
-class _SaveDict_v0(TypedDict):
+class SaveDict(TypedDict):
     tool_version: str
     save_version: int
     song: str
     time: str
-    state: "_StateDict_v0"
+    state: "StateDict"
 
 
 ###############################################################################
 
 
-class _StateDict_v0(TypedDict):
+class StateDict(TypedDict):
     musicxml_fname: str
     mml_fname: str
     loop_analysis: bool
@@ -101,11 +76,11 @@ class _StateDict_v0(TypedDict):
     global_volume: bool
     global_legato: bool
     global_echo_enable: bool
-    echo: _EchoDict_v0
-    instruments: list[_InstrumentDict_v0]
+    echo: v1.EchoDict
+    instruments: list[InstrumentDict]
     porter: str
     game: str
-    start_measure: int
+    start_measure: NotRequired[int]
 
 
 ###############################################################################
@@ -113,27 +88,11 @@ class _StateDict_v0(TypedDict):
 ###############################################################################
 
 
-def _load_echo_v0(echo: _EchoDict_v0) -> EchoDict:
-    rv: EchoDict = {
-        "vol_mag": echo["vol_mag"],
-        "vol_inv": echo["vol_inv"],
-        "delay": echo["delay"],
-        "fb_mag": echo["fb_mag"],
-        "fb_inv": echo["fb_inv"],
-        "fir_filt": echo["fir_filt"],
-    }
-
-    return rv
-
-
-###############################################################################
-
-
-def _load_instrument_v0(inst: _InstrumentDict_v0) -> InstrumentDict:
-    rv: InstrumentDict = {
+def _load_instrument(inst: InstrumentDict) -> v1.InstrumentDict:
+    rv: v1.InstrumentDict = {
         "mute": inst["mute"],
         "solo": inst["solo"],
-        "samples": {"": _load_sample_v0(inst)},
+        "samples": {"": _load_sample(inst)},
     }
 
     return rv
@@ -142,27 +101,16 @@ def _load_instrument_v0(inst: _InstrumentDict_v0) -> InstrumentDict:
 ###############################################################################
 
 
-def _load_sample_v0(inst: _InstrumentDict_v0) -> SampleDict:
-    sample: SampleDict = {
+def _load_sample(inst: InstrumentDict) -> v1.SampleDict:
+    sample: v1.SampleDict = {
         "octave_shift": inst["octave"],
-        "dynamics": {
-            "pppp": inst["dynamics"][0],
-            "ppp": inst["dynamics"][1],
-            "pp": inst["dynamics"][2],
-            "p": inst["dynamics"][3],
-            "mp": inst["dynamics"][4],
-            "mf": inst["dynamics"][5],
-            "f": inst["dynamics"][6],
-            "ff": inst["dynamics"][7],
-            "fff": inst["dynamics"][8],
-            "ffff": inst["dynamics"][9],
-        },
+        "dynamics": {n: inst["dynamics"][n] for n in range(10)},
         "interpolate_dynamics": inst["interpolate_dynamics"],
         "articulations": inst["articulations"],
         "pan_enabled": inst["pan_enabled"],
         "pan_setting": inst["pan_setting"],
-        "pan_l_invert": inst["pan_l_invert"],
-        "pan_r_invert": inst["pan_r_invert"],
+        "pan_l_invert": inst.get("pan_l_invert", False),
+        "pan_r_invert": inst.get("pan_r_invert", False),
         "sample_source": inst["sample_source"],
         "builtin_sample_index": inst["builtin_sample_index"],
         "pack_sample": inst["pack_sample"],
@@ -193,42 +141,53 @@ def _load_sample_v0(inst: _InstrumentDict_v0) -> SampleDict:
 ###############################################################################
 
 
-def load_v0(fname: Path) -> ProjectDict:
-    with open(fname, "r", encoding="utf8") as fobj:
-        contents: _SaveDict_v0 = yaml.safe_load(fobj)
-
-    assert contents["save_version"] == _CURRENT_SAVE_VERSION
-
+def to_v1(fname: Path, contents: SaveDict) -> v1.SaveDict:
     sdict = contents["state"]
     if param_fname := sdict["musicxml_fname"]:
         musicxml_fname = str(Path(param_fname).resolve())
     else:
-        musicxml_fname = ""
+        musicxml_fname = None
+    if param_fname := sdict["mml_fname"]:
+        mml_fname = str(Path(param_fname).resolve())
+    else:
+        mml_fname = None
 
-    project: ProjectDict = {
+    project: v1.SaveDict = {
         "tool_version": contents["tool_version"],
-        "save_version": contents["save_version"],
+        "save_version": 1,  # Override
+        "song": contents["song"],
         "time": contents["time"],
-        "musicxml": musicxml_fname,
-        "project_name": contents["song"],
-        "composer": "",
-        "title": "",
-        "porter": sdict["porter"],
-        "game": sdict["game"],
-        "loop_analysis": sdict["loop_analysis"],
-        "superloop_analysis": False,
-        "measure_numbers": sdict["measure_numbers"],
-        "global_volume": sdict["global_volume"],
-        "global_legato": sdict["global_legato"],
-        "global_echo": sdict["global_echo_enable"],
-        "echo": _load_echo_v0(sdict["echo"]),
-        "instruments": {
-            inst["name"]: _load_instrument_v0(inst)
-            for inst in sdict["instruments"]
+        "state": {
+            "musicxml_fname": musicxml_fname,
+            "mml_fname": mml_fname,
+            "loop_analysis": sdict["loop_analysis"],
+            "measure_numbers": sdict["measure_numbers"],
+            "global_volume": sdict["global_volume"],
+            "global_legato": sdict["global_legato"],
+            "global_echo_enable": sdict["global_echo_enable"],
+            "echo": sdict["echo"],
+            "instruments": {
+                inst["name"]: _load_instrument(inst)
+                for inst in sdict["instruments"]
+            },
+            "porter": sdict["porter"],
+            "game": sdict["game"],
+            "start_measure": sdict.get("start_measure", 1),
         },
-        "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
-        "builtin_sample_sources": N_BUILTIN_SAMPLES
-        * [BuiltinSampleSource.OPTIMIZED.value],
     }
 
     return project
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def load_v0(fname: Path) -> v2.ProjectDict:
+    with open(fname, "r", encoding="utf8") as fobj:
+        contents: SaveDict = yaml.safe_load(fobj)
+
+    assert contents["save_version"] == 0
+
+    return v1.to_v2(fname, to_v1(fname, contents))
