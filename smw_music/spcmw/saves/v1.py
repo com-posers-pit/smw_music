@@ -223,19 +223,21 @@ def to_v2(fname: Path, contents: SaveDict) -> v2.ProjectDict:
         "title": "",
         "porter": sdict["porter"],
         "game": sdict["game"],
-        "loop_analysis": sdict["loop_analysis"],
-        "superloop_analysis": False,
-        "measure_numbers": sdict["measure_numbers"],
-        "global_volume": sdict["global_volume"],
-        "global_legato": sdict["global_legato"],
         "global_echo": sdict["global_echo_enable"],
         "echo": _load_echo(sdict["echo"]),
         "instruments": {
             k: _load_instrument(v) for k, v in sdict["instruments"].items()
         },
-        "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
-        "builtin_sample_sources": N_BUILTIN_SAMPLES
-        * [BuiltinSampleSource.OPTIMIZED.value],
+        "amk_settings": {
+            "measure_numbers": sdict["measure_numbers"],
+            "loop_analysis": sdict["loop_analysis"],
+            "superloop_analysis": False,
+            "global_volume": sdict["global_volume"],
+            "global_legato": sdict["global_legato"],
+            "builtin_sample_group": BuiltinSampleGroup.OPTIMIZED.value,
+            "builtin_sample_sources": N_BUILTIN_SAMPLES
+            * [BuiltinSampleSource.OPTIMIZED.value],
+        },
     }
 
     return project
@@ -246,7 +248,7 @@ def to_v2(fname: Path, contents: SaveDict) -> v2.ProjectDict:
 ###############################################################################
 
 
-def load_v1(fname: Path) -> v2.ProjectDict:
+def load(fname: Path) -> v2.ProjectDict:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: SaveDict = yaml.safe_load(fobj)
 

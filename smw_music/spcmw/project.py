@@ -30,7 +30,6 @@ from smw_music.amk import (
 from smw_music.song import Dynamics, NoteHead
 from smw_music.spc700 import EchoConfig, Envelope, GainMode
 
-from . import load_v0, load_v1
 from .common import SpcmwException
 from .instrument import (
     Artic,
@@ -40,6 +39,7 @@ from .instrument import (
     Pitch,
     SampleSource,
 )
+from .saves import v0, v1
 from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 ###############################################################################
@@ -346,22 +346,21 @@ class Project:
         with open(fname, "r", encoding="utf8") as fobj:
             contents: ProjectDict = yaml.safe_load(fobj)
 
+        backup = None
         save_version = contents["save_version"]
         if save_version > CURRENT_SAVE_VERSION:
             raise SpcmwException(
                 f"Save file version is {save_version}, tool version only "
                 + f"supports up to {CURRENT_SAVE_VERSION}"
             )
-
-        backup = None
-        if save_version < CURRENT_SAVE_VERSION:
+        elif save_version < CURRENT_SAVE_VERSION:
             backup = _upgrade_save(fname)
 
             match save_version:
                 case 0:
-                    contents = load_v0.load(fname)
+                    contents = v0.load(fname)
                 case 1:
-                    contents = load_v1.load(fname)
+                    contents = v1.load(fname)
 
         project = cls(
             ProjectInfo(
@@ -373,22 +372,24 @@ class Project:
                 contents["game"],
             ),
             ProjectSettings(
-                contents["loop_analysis"],
-                contents["superloop_analysis"],
-                contents["measure_numbers"],
+                contents["amk_settings"]["loop_analysis"],
+                contents["amk_settings"]["superloop_analysis"],
+                contents["amk_settings"]["measure_numbers"],
                 {
                     k: _load_instrument(v)
                     for k, v in contents["instruments"].items()
                 },
-                contents["global_volume"],
-                contents["global_legato"],
+                contents["amk_settings"]["global_volume"],
+                contents["amk_settings"]["global_legato"],
                 contents["global_echo"],
                 _load_echo(contents["echo"]),
-                BuiltinSampleGroup(contents["builtin_sample_group"]),
+                BuiltinSampleGroup(
+                    contents["amk_settings"]["builtin_sample_group"]
+                ),
                 list(
                     map(
                         BuiltinSampleSource,
-                        contents["builtin_sample_sources"],
+                        contents["amk_settings"]["builtin_sample_sources"],
                     )
                 ),
             ),
@@ -421,20 +422,22 @@ class Project:
             "porter": info.porter,
             "game": info.game,
             # ProjectSettings
-            "loop_analysis": settings.loop_analysis,
-            "superloop_analysis": settings.superloop_analysis,
-            "measure_numbers": settings.measure_numbers,
-            "global_volume": settings.global_volume,
-            "global_legato": settings.global_legato,
             "global_echo": settings.global_echo,
             "echo": _save_echo(settings.echo),
             "instruments": {
                 k: _save_instrument(v) for k, v in settings.instruments.items()
             },
-            "builtin_sample_group": settings.builtin_sample_group.value,
-            "builtin_sample_sources": [
-                x.value for x in settings.builtin_sample_sources
-            ],
+            "amk_settings": {
+                "loop_analysis": settings.loop_analysis,
+                "superloop_analysis": settings.superloop_analysis,
+                "measure_numbers": settings.measure_numbers,
+                "global_volume": settings.global_volume,
+                "global_legato": settings.global_legato,
+                "builtin_sample_group": settings.builtin_sample_group.value,
+                "builtin_sample_sources": [
+                    x.value for x in settings.builtin_sample_sources
+                ],
+            },
         }
 
         with open(fname, "w", encoding="utf8") as fobj:

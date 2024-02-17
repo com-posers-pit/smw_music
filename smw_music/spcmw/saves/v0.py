@@ -184,7 +184,7 @@ def to_v1(fname: Path, contents: SaveDict) -> v1.SaveDict:
 ###############################################################################
 
 
-def load_v0(fname: Path) -> v2.ProjectDict:
+def load(fname: Path) -> v2.ProjectDict:
     with open(fname, "r", encoding="utf8") as fobj:
         contents: SaveDict = yaml.safe_load(fobj)
 

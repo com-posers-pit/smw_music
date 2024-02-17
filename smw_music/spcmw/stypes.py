@@ -17,6 +17,19 @@ from typing import TypedDict
 ###############################################################################
 
 
+class AmkSettings(TypedDict):
+    measure_numbers: bool
+    loop_analysis: bool
+    superloop_analysis: bool
+    global_volume: int
+    global_legato: bool
+    builtin_sample_group: int
+    builtin_sample_sources: list[int]
+
+
+###############################################################################
+
+
 class EchoDict(TypedDict):
     vol_mag: list[float]
     vol_inv: list[bool]
@@ -82,13 +95,7 @@ class ProjectDict(TypedDict):
     title: str
     porter: str
     game: str
-    loop_analysis: bool
-    superloop_analysis: bool
-    measure_numbers: bool
-    global_volume: int
-    global_legato: bool
     global_echo: bool
     echo: EchoDict
     instruments: dict[str, InstrumentDict]
-    builtin_sample_group: int
-    builtin_sample_sources: list[int]
+    amk_settings: AmkSettings
