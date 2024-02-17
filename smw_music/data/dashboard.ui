@@ -2142,6 +2142,11 @@
                    <widget class="QComboBox" name="advanced_type">
                     <item>
                      <property name="text">
+                      <string>Nothing</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
                       <string>Echo Fade</string>
                      </property>
                     </item>
