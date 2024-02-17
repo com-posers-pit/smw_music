@@ -22,6 +22,7 @@ from smw_music.utils import filter_type
 from .reduction import remove_unused_instruments
 from .tokens import (
     Annotation,
+    ChannelDelim,
     Clef,
     CrescDelim,
     Dynamic,
@@ -390,3 +391,15 @@ class Song:
                 rv[token.mark] = measure
 
         return rv
+
+    ###########################################################################
+
+    @cached_property
+    def tokens(self) -> list[Token]:
+        tokens = list[Token] = []
+
+        for channel in self.channels:
+            tokens.extend(channel)
+            tokens.append(ChannelDelim)
+
+        return tokens
