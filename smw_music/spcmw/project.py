@@ -30,6 +30,7 @@ from smw_music.amk import (
 from smw_music.song import Dynamics, NoteHead
 from smw_music.spc700 import EchoConfig, Envelope, GainMode
 
+from . import advanced
 from .common import SpcmwException
 from .instrument import (
     Artic,
@@ -40,7 +41,7 @@ from .instrument import (
     SampleSource,
 )
 from .saves import v0, v1
-from .stypes import EchoDict, InstrumentDict, ProjectDict, SampleDict
+from .stypes import AdvDict, EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 ###############################################################################
 # API constant definitions
@@ -52,6 +53,69 @@ EXTENSION = "spcmw"
 
 ###############################################################################
 # Private function definitions
+###############################################################################
+
+
+def _load_adv(adv: AdvDict) -> advanced.Advanced:
+    match adv["adv_type"]:
+        case advanced.AdvType.NOP.value:
+            return advanced.Nop()
+        case advanced.AdvType.ECHO_FADE.value:
+            return advanced.EchoFade(
+                duration=adv["params"][0],
+                final_volume=(adv["params"][1], adv["params"][2]),
+            )
+        case advanced.AdvType.GLISSANDO.value:
+            return advanced.Glissando(
+                duration=adv["params"][0], semitones=adv["params"][1]
+            )
+        case advanced.AdvType.GVOLUME_FADE.value:
+            return advanced.GVolumeFade(
+                duration=adv["params"][0], volume=adv["params"][1]
+            )
+        case advanced.AdvType.PAN_FADE.value:
+            return advanced.PanFade(
+                duration=adv["params"][0], pan=adv["params"][1]
+            )
+        case advanced.AdvType.PITCH_BEND.value:
+            return advanced.PitchBend(
+                delay=adv["params"][0],
+                duration=adv["params"][1],
+                offset=adv["params"][2],
+            )
+        case advanced.AdvType.PITCH_ENV_ATT.value:
+            return advanced.PitchEnvAtt(
+                delay=adv["params"][0],
+                duration=adv["params"][1],
+                semitones=adv["params"][2],
+            )
+        case advanced.AdvType.PITCH_ENV_REL.value:
+            return advanced.PitchEnvRel(
+                delay=adv["params"][0],
+                duration=adv["params"][1],
+                semitones=adv["params"][2],
+            )
+        case advanced.AdvType.TREMOLO.value:
+            return advanced.Tremolo(
+                delay=adv["params"][0],
+                duration=adv["params"][1],
+                amplitude=adv["params"][2],
+            )
+        case advanced.AdvType.VIBRATO.value:
+            return advanced.Vibrato(
+                delay=adv["params"][0],
+                duration=adv["params"][1],
+                amplitude=adv["params"][2],
+            )
+        case advanced.AdvType.VOLUME_FADE.value:
+            return advanced.VolumeFade(
+                duration=adv["params"][0],
+                volume=adv["params"][1],
+            )
+        case _:
+            return advanced.Advanced()
+
+
 ###############################################################################
 
 
@@ -122,6 +186,40 @@ def _load_sample(inst: SampleDict) -> InstrumentSample:
         start=Pitch(inst["start"]),
         track=bool(inst.get("track", False)),
     )
+
+
+###############################################################################
+
+
+def _save_adv(adv: advanced.Advanced) -> AdvDict:
+    types = advanced.AdvType
+    match adv:
+        case advanced.EchoFade(dur, final_volume):
+            dval = (types.ECHO_FADE, [dur, final_volume[0], final_volume[1]])
+        case advanced.Glissando(dur, semitones):
+            dval = (types.GLISSANDO, [dur, semitones])
+        case advanced.GVolumeFade(dur, volume):
+            dval = (types.GLISSANDO, [dur, volume])
+        case advanced.Nop:
+            dval = (types.NOP, [])
+        case advanced.PanFade(dur, pan):
+            dval = (types.PAN_FADE, [dur, pan])
+        case advanced.PitchBend(delay, dur, offset):
+            dval = (types.PITCH_BEND, [delay, dur, offset])
+        case advanced.PitchEnvAtt(delay, dur, semitones):
+            dval = (types.PITCH_ENV_ATT, [delay, dur, semitones])
+        case advanced.PitchEnvRel(delay, dur, semitones):
+            dval = (types.PITCH_ENV_REL, [delay, dur, semitones])
+        case advanced.Tremolo(delay, dur, ampl):
+            dval = (types.TREMOLO, [delay, dur, ampl])
+        case advanced.Vibrato(delay, dur, ampl):
+            dval = (types.VIBRATO, [delay, dur, ampl])
+        case advanced.VolumeFade(dur, vol):
+            dval = (types.VIBRATO, [dur, vol])
+        case _:
+            dval = (types.NOP, [])
+
+    return {"adv_type": dval[0].value, "params": dval[1]}
 
 
 ###############################################################################
@@ -274,6 +372,7 @@ class ProjectSettings:
         default_factory=lambda: N_BUILTIN_SAMPLES
         * [BuiltinSampleSource.OPTIMIZED]
     )
+    advanced: dict[str, advanced.Advanced] = field(default_factory=dict)
 
     ###########################################################################
     # Data model method definitions
@@ -426,6 +525,9 @@ class Project:
             "echo": _save_echo(settings.echo),
             "instruments": {
                 k: _save_instrument(v) for k, v in settings.instruments.items()
+            },
+            "advanced": {
+                k: _save_adv(v) for k, v in settings.advanced.items()
             },
             "amk_settings": {
                 "loop_analysis": settings.loop_analysis,

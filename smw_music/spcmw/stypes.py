@@ -17,6 +17,14 @@ from typing import TypedDict
 ###############################################################################
 
 
+class AdvDict(TypedDict):
+    adv_type: int
+    params: list[int]
+
+
+###############################################################################
+
+
 class AmkSettings(TypedDict):
     measure_numbers: bool
     loop_analysis: bool
@@ -98,4 +106,5 @@ class ProjectDict(TypedDict):
     global_echo: bool
     echo: EchoDict
     instruments: dict[str, InstrumentDict]
+    advanced: dict[str, AdvDict]
     amk_settings: AmkSettings

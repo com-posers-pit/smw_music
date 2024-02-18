@@ -238,6 +238,7 @@ def to_v2(fname: Path, contents: SaveDict) -> v2.ProjectDict:
             "builtin_sample_sources": N_BUILTIN_SAMPLES
             * [BuiltinSampleSource.OPTIMIZED.value],
         },
+        "advanced": {},
     }
 
     return project
