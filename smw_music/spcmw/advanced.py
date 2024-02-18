@@ -37,7 +37,7 @@ class AdvType(IntEnum):
 
 @dataclass
 class Advanced:
-    name: str
+    pass
 
 
 ###############################################################################
@@ -53,7 +53,7 @@ class EchoFade(Advanced):
 
 
 @dataclass
-class Gliassando(Advanced):
+class Glissando(Advanced):
     duration: int
     semitones: int
 
@@ -64,7 +64,7 @@ class Gliassando(Advanced):
 @dataclass
 class GVolumeFade(Advanced):
     duration: int
-    semitones: int
+    volume: int
 
 
 ###############################################################################
@@ -81,7 +81,7 @@ class Nop(Advanced):
 @dataclass
 class PanFade(Advanced):
     duration: int
-    final_value: int
+    pan: int
 
 
 ###############################################################################
