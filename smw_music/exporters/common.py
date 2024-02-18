@@ -8,10 +8,11 @@
 ###############################################################################
 
 # Standard library imports
+from copy import deepcopy
 from functools import singledispatchmethod
 
 # Package imports
-from smw_music.song import Token
+from smw_music.song import Song, Token
 from smw_music.spcmw import Project
 
 ###############################################################################
@@ -20,18 +21,33 @@ from smw_music.spcmw import Project
 
 
 class Exporter:
-    project: Project
+    ###########################################################################
+    # Constructor definitions
+    ###########################################################################
+
+    def __init__(self, project: Project, song: Song | None = None) -> None:
+        if song is None:
+            info = project.info
+            assert info is not None
+            self.song = Song.from_music_xml(info.musicxml_fname)
+        else:
+            self.song = deepcopy(song)
+        self.project = deepcopy(project)
 
     ###########################################################################
 
-    def __init__(self, project: Project) -> None:
-        self.project = project
-        self.directives: list[str] = []
+    @classmethod
+    def convert(cls, project: Project) -> None:
+        exp = cls(project)
+        exp.reduce()
+        exp.prepare()
+        exp.generate()
+        exp.finalize()
 
     ###########################################################################
 
-    def _append(self, directive: str) -> None:
-        self.directives.append(directive)
+    def finalize(self) -> None:
+        pass
 
     ###########################################################################
 
@@ -42,6 +58,16 @@ class Exporter:
 
     ###########################################################################
 
-    def generate(self, tokens: list[Token]) -> None:
-        for token in tokens:
+    def generate(self) -> None:
+        for token in self.song.tokens:
             self.emit(token)
+
+    ###########################################################################
+
+    def prepare(self) -> None:
+        pass
+
+    ###########################################################################
+
+    def reduce(self) -> None:
+        pass
