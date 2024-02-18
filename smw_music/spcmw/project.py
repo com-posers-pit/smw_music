@@ -21,7 +21,7 @@ import yaml
 
 # Package imports
 from smw_music import __version__
-from smw_music.amk import (
+from smw_music.ext_tools.amk import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
     BuiltinSampleSource,

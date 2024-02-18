@@ -17,7 +17,7 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music import SmwMusicException
-from smw_music.amk import Utilization, default_utilization
+from smw_music.ext_tools.amk import Utilization, default_utilization
 from smw_music.spcmw import InstrumentConfig, InstrumentSample, Project
 
 ###############################################################################

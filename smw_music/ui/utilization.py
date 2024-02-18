@@ -13,7 +13,7 @@ from PyQt6.QtGui import QPainter
 from PyQt6.QtWidgets import QLabel
 
 # Package imports
-from smw_music.amk import Utilization
+from smw_music.ext_tools.amk import Utilization
 from smw_music.ui.utils import Color
 
 ###############################################################################

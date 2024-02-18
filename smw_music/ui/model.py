@@ -11,7 +11,6 @@
 
 # Standard library imports
 import os
-import platform
 import shutil
 import subprocess  # nosec 404
 import threading
@@ -31,14 +30,14 @@ from watchdog import events, observers
 
 # Package imports
 from smw_music import SmwMusicException, __version__, spcmw
-from smw_music.amk import (
+from smw_music.ext_tools import spcplay
+from smw_music.ext_tools.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
-    Song,
     decode_utilization,
     update_sample_groups_file,
 )
-from smw_music.song import NoteHead, SongException
+from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
     Brr,
@@ -728,26 +727,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         assert path is not None  # nosec: B101
         assert info is not None  # nosec: B101
 
-        spc_name = f"{info.project_name}.spc"
-        spc_name = str(path / "SPCs" / spc_name)
+        spc = path / "SPCs" / f"{info.project_name}.spc"
 
-        if not os.path.exists(spc_name):
+        if not spc.exists():
             self.response_generated.emit(
                 True, "SPC Play", "SPC file doesn't exist"
             )
         else:
-            spc_name = f"{project}.spc"
-            spc_name = str(path / "SPCs" / spc_name)
-
             # Handles linux and OSX, windows is covered on the next line
-            args = ["wine", str(self.preferences.spcplay_fname), spc_name]
-            if platform.system() == "Windows":
-                args = args[1:]
-
-            threading.Thread(
-                target=subprocess.call,
-                args=(args,),
-            ).start()
+            spcplay.play(self.preferences.spcplay_fname, spc)
 
         self.update_status("SPC played")
 

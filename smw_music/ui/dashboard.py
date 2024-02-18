@@ -47,7 +47,7 @@ from PyQt6.QtWidgets import (
 
 # Package imports
 from smw_music import COPYRIGHT_YEAR, RESOURCES, __version__, spcmw
-from smw_music.amk import (
+from smw_music.ext_tools.amk import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,
     BuiltinSampleSource,

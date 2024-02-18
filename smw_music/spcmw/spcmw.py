@@ -19,7 +19,8 @@ from pathlib import Path
 import yaml
 
 # Package imports
-from smw_music import SmwMusicException, amk
+from smw_music import SmwMusicException
+from smw_music.ext_tools import amk
 from smw_music.spcmw import Preferences
 
 ###############################################################################

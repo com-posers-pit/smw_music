@@ -259,7 +259,7 @@ def get_ticks(path: Path, project_name: str) -> list[int]:
 
 # https://www.smwcentral.net/?p=viewthread&t=98793&page=1&pid=1579851#p1579851
 def make_vis_dir(path: Path) -> None:
-    os.makedirs(path / "Visualizations", exist_ok=True)
+    os.makedirs(vis_dir(path), exist_ok=True)
 
 
 ###############################################################################
@@ -309,6 +309,14 @@ def update_sample_groups_file(
         group.extend(["}", ""])
         with open(path / _SAMPLE_GROUP_FNAME, "a", newline="\r\n") as fobj:
             fobj.write("\n".join(group))
+
+
+###############################################################################
+
+
+# https://www.smwcentral.net/?p=viewthread&t=98793&page=1&pid=1579851#p1579851
+def vis_dir(path: Path) -> Path:
+    return path / "Visualizations"
 
 
 ###############################################################################

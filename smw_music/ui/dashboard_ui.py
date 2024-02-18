@@ -16,7 +16,7 @@ from typing import cast
 from PyQt6.QtWidgets import QComboBox, QLabel
 
 # Package imports
-from smw_music.amk import BuiltinSampleGroup, BuiltinSampleSource
+from smw_music.ext_tools.amk import BuiltinSampleGroup, BuiltinSampleSource
 
 from .dashboard_view import DashboardView
 from .state import State
