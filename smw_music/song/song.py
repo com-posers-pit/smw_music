@@ -396,10 +396,10 @@ class Song:
 
     @cached_property
     def tokens(self) -> list[Token]:
-        tokens = list[Token] = []
+        tokens: list[Token] = []
 
         for channel in self.channels:
             tokens.extend(channel)
-            tokens.append(ChannelDelim)
+            tokens.append(ChannelDelim())
 
         return tokens
