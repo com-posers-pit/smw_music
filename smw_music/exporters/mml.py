@@ -10,16 +10,20 @@
 ###############################################################################
 
 # Standard library imports
+import os
+import shutil
 from copy import deepcopy
-from dataclasses import dataclass, field
+from datetime import datetime
 from enum import Enum, auto
 from functools import singledispatchmethod
-from pathlib import Path
+from pathlib import PurePosixPath
 
 # Library imports
+from mako.template import Template  # type: ignore
 from music21.pitch import Pitch
 
 # Package imports
+from smw_music import RESOURCES, __version__, amk
 from smw_music.song import (
     Annotation,
     Artic,
@@ -37,13 +41,19 @@ from smw_music.song import (
     Repeat,
     Rest,
     Slur,
+    Song,
     Tempo,
     Token,
     Triplet,
 )
-from smw_music.spcmw import InstrumentConfig, InstrumentSample
+from smw_music.spcmw import (
+    InstrumentConfig,
+    InstrumentSample,
+    Project,
+    SampleSource,
+)
 
-from .common import CRLF, Exporter, notelen_str
+from .common import Exporter, notelen_str
 
 ###############################################################################
 # API class definitions
@@ -59,23 +69,36 @@ class SlurState(Enum):
 ###############################################################################
 
 
-class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
-    instruments: dict[str, InstrumentConfig] = field(default_factory=dict)
-    octave: int = 4
-    default_note_len: int = 8
-    grace: bool = False
-    measure_numbers: bool = False
-    slur: SlurState = SlurState.SLUR_IDLE
-    tie: bool = False
-    legato: bool = False
-    articulation: Artic = Artic.NORMAL
-    last_percussion: str = ""
+class MmlExporter(Exporter):
+    ###########################################################################
+    # Constructor definitions
+    ###########################################################################
 
-    _instrument: InstrumentConfig = field(init=False)
-    _active_sample_name: str = field(init=False)
-    _active_sample: InstrumentSample = field(init=False)
-    _in_loop: bool = field(default=False, init=False)
-    _in_triplet: bool = field(default=False, init=False)
+    def __init__(self, project: Project, song: Song | None = None) -> None:
+        super().__init__(project, song)
+
+        self.instruments: dict[str, InstrumentConfig]
+        self.octave: int = 4
+        self.default_note_len: int = 8
+        self.grace: bool = False
+        self.measure_numbers: bool = False
+        self.slur: SlurState = SlurState.SLUR_IDLE
+        self.tie: bool = False
+        self.legato: bool = False
+        self.articulation: Artic = Artic.NORMAL
+        self.last_percussion: str = ""
+        self.directives: list[str] = []
+
+        self._instrument: InstrumentConfig
+        self._active_sample_name: str
+        self._active_sample: InstrumentSample
+        self._in_loop: bool
+        self._in_triplet: bool
+
+    ###########################################################################
+
+    def _append(self, directive: str = "\n") -> None:
+        self.directives.append(directive)
 
     ###########################################################################
 
@@ -171,20 +194,20 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
             else:
                 comment = f"; Measures {token.range[0]}-{token.range[-1]}"
 
-        self._append(f"{comment}{CRLF}")
+        self._append(f"{comment}\n")
 
     ###########################################################################
 
     @emit.register
     def _(self, token: RehearsalMark) -> None:
-        self._append(CRLF)
-        self._append(f";===================={CRLF}")
-        self._append(f"; {token.mark}{CRLF}")
-        self._append(f";===================={CRLF}")
-        self._append(CRLF)
+        self._append()
+        self._append(";====================\n")
+        self._append(f"; {token.mark}\n")
+        self._append(";====================\n")
+        self._append()
         if self.default_note_len:
             self._append(notelen_str(self.default_note_len))
-            self._append(CRLF)
+            self._append()
 
     ###########################################################################
 
@@ -307,7 +330,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
     ###########################################################################
 
     def export(self) -> str:
-        proj = deepcopy(self.project)
+        proj = self.project
 
         # If starting after the first measure, disable loop analysis because
         # things might be badly broken
@@ -344,7 +367,7 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        instruments = copy.deepcopy(self.instruments)
+        instruments = deepcopy(self.instruments)
         inst_samples: dict[str, InstrumentSample] = {}
 
         for inst_name, inst in instruments.items():
@@ -410,13 +433,85 @@ class MmlExporter(Exporter):  # pylint: disable=too-many-instance-attributes
         # This last bit removes any empty lines at the end (these don't
         # normally show up, but can if the last section in the last staff is
         # empty.
-        rv = str(rv).rstrip() + CRLF
+        rv = str(rv).rstrip() + "\n"
 
         if fname is not None:
-            with open(fname, "wb") as fobj:
+            with open(fname, "w", newline="\r\n") as fobj:
                 fobj.write(rv.encode("ascii", "ignore"))
 
         return rv
+
+    ###########################################################################
+
+    def prepare(self) -> None:
+        state = self.state
+        fname = self.state.mml_fname  # use self.state so assert is captured
+        assert state.project_name is not None  # nosec: B101
+        assert self._project_path is not None  # nosec: B101
+
+        amk.update_sample_groups_file(
+            self._project_path,
+            state.builtin_sample_group,
+            state.builtin_sample_sources,
+        )
+
+        try:
+            if os.path.exists(fname):
+                shutil.copy2(fname, f"{fname}.bak")
+
+            self.song.instruments = deepcopy(state.instruments)
+
+            self.song.volume = state.global_volume
+            if state.porter:
+                self.song.porter = state.porter
+            if state.game:
+                self.song.game = state.game
+
+            # TODO Move this into the to_mml_file
+            sample_group = "optimized"
+            match state.builtin_sample_group:
+                case amk.BuiltinSampleGroup.DEFAULT:
+                    sample_group = "default"
+                case amk.BuiltinSampleGroup.OPTIMIZED:
+                    sample_group = "optimized"
+                case amk.BuiltinSampleGroup.REDUX1:
+                    sample_group = "redux1"
+                case amk.BuiltinSampleGroup.REDUX2:
+                    sample_group = "redux2"
+                case amk.BuiltinSampleGroup.CUSTOM:
+                    sample_group = "custom"
+
+            mml = self.song.to_mml_file(
+                str(fname),
+                state.global_legato,
+                state.loop_analysis,
+                state.superloop_analysis,
+                state.measure_numbers,
+                True,
+                state.echo if state.project.settings.global_echo else None,
+                PurePosixPath(state.project_name),
+                state.start_measure,
+                sample_group,
+            )
+            self.mml_generated.emit(mml)
+            self.update_status("MML generated")
+        except SongException as e:
+            msg = str(e)
+        else:
+            bad_samples = self._check_bad_tune()
+            if bad_samples:
+                msg = "\n".join(
+                    f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
+                    for inst, samp in bad_samples
+                )
+            else:
+                error = False
+                msg = "Done"
+
+        if report or error:
+            self.response_generated.emit(error, title, msg)
+
+        return not error
 
     ###########################################################################
     # Private method definitions
