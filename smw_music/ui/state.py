@@ -59,7 +59,7 @@ class State:
 
     @property
     def loaded(self) -> bool:
-        return self.info is not None
+        return self.project.info is not None
 
     ###########################################################################
 

@@ -122,6 +122,7 @@ class Utilization:
 ###############################################################################
 
 
+# TODO: Some of this should be in spcmw.amk
 def create_project(path: Path, project_name: str, amk_zname: Path) -> None:
     members = [
         "1DF9",
@@ -267,8 +268,8 @@ def make_vis_dir(path: Path) -> None:
 
 def update_sample_groups_file(
     path: Path,
-    sample_group: "BuiltinSampleGroup",
-    sample_sources: list["BuiltinSampleSource"],
+    sample_group: BuiltinSampleGroup,
+    sample_sources: list[BuiltinSampleSource],
 ) -> None:
     _remove_spcmw_sample_groups(path)
     _append_spcmw_sample_groups(path)

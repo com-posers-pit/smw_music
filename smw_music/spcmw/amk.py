@@ -19,7 +19,7 @@ from pathlib import Path
 ###############################################################################
 
 
-def convert(project_path: Path, timeout: float) -> None:
+def convert(project_path: Path, timeout: float) -> str:
     match platform.system():
         case "Darwin" | "Linux":
             script = ["sh", "convert.sh"]

@@ -1142,7 +1142,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _load_musicxml(self, musicxml: Path, keep_inst_settings: bool) -> None:
         try:
-            self.song = Song.from_music_xml(str(musicxml))
+            self.song = Song.from_music_xml(musicxml)
         except SongException as e:
             self.response_generated.emit(
                 True,
