@@ -723,12 +723,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_play_spc_clicked(self) -> None:
         path = self._project_path
-        project = self.state.project_name
+        info = self.state.project.info
 
         assert path is not None  # nosec: B101
-        assert project is not None  # nosec: B101
+        assert info is not None  # nosec: B101
 
-        spc_name = f"{project}.spc"
+        spc_name = f"{info.project_name}.spc"
         spc_name = str(path / "SPCs" / spc_name)
 
         if not os.path.exists(spc_name):
@@ -881,24 +881,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if sample_name:
             msg = f"{inst_name}.{sample_name}"
-            # TODO: remove ignore
             inst.multisamples[sample_name] = replace(
-                inst.multisamples[sample_name], **update  # type: ignore
+                inst.multisamples[sample_name], **update
             )
             # If a sample's solo/mute is being disabled, disable it in the
             # instrument as well
             if not state:
-                # TODO: remove ignore
-                inst.sample = replace(inst.sample, **update)  # type: ignore
+                inst.sample = replace(inst.sample, **update)
 
         else:
             # Apply an instrument mute/solo to all samples
             msg = f"{inst_name}"
-            # TODO: remove ignore
-            inst.sample = replace(inst.sample, **update)  # type: ignore
+            inst.sample = replace(inst.sample, **update)
             for sample_name, sample in inst.multisamples.items():
-                # TODO: remove ignore
-                inst.multisamples[sample_name] = replace(sample, **update)  # type: ignore
+                inst.multisamples[sample_name] = replace(sample, **update)
 
         self._update_state(instruments=instruments)
 
@@ -1301,11 +1297,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             assert state.project_name is not None  # nosec: B101
             assert self._project_path is not None  # nosec: B101
+            settings = self.state.project.settings
 
             update_sample_groups_file(
                 self._project_path,
-                state.builtin_sample_group,
-                state.builtin_sample_sources,
+                settings.builtin_sample_group,
+                settings.builtin_sample_sources,
             )
 
             try:

@@ -865,7 +865,7 @@ class Dashboard(QWidget):
 
     def _combine_widgets(self) -> None:
         v = self._view  # pylint: disable=invalid-name
-        self._dyn_widgets = {}
+        self._dyn_widgets: dict[Dyn, _DynamicsWidgets] = {}
         dyns = self._dyn_widgets
         dyns[Dyn.PPPP] = _DynamicsWidgets(
             v.pppp_slider, v.pppp_setting, v.pppp_setting_label

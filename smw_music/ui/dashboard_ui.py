@@ -27,7 +27,7 @@ from .state import State
 
 
 def update_sample_opt(view: DashboardView, state: State) -> None:
-    builtin_group = state.builtin_sample_group
+    builtin_group = state.project.settings.builtin_sample_group
     match builtin_group:
         case BuiltinSampleGroup.DEFAULT:
             view.sample_opt_default.setChecked(True)
@@ -40,8 +40,8 @@ def update_sample_opt(view: DashboardView, state: State) -> None:
         case BuiltinSampleGroup.CUSTOM:
             view.sample_opt_custom.setChecked(True)
 
-    enabled = state.builtin_sample_group == BuiltinSampleGroup.CUSTOM
-    for n, source in enumerate(state.builtin_sample_sources):
+    enabled = builtin_group == BuiltinSampleGroup.CUSTOM
+    for n, source in enumerate(state.project.settings.builtin_sample_sources):
         # This one's a little gross
         ctrl: QComboBox = cast(QComboBox, getattr(view, f"sample_opt_{n:02x}"))
         label = cast(QLabel, getattr(view, f"sample_opt_{n:02x}_label"))

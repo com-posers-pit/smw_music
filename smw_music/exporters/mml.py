@@ -370,7 +370,7 @@ class MmlExporter(Exporter):
 
         self._validate()
         channels = [
-            x.generate_mml(self.instruments, proj.measure_numbers)
+            x.generate_mml(self.instruments, proj.settings.measure_numbers)
             for x in self._reduced_channels
         ]
 
