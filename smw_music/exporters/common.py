@@ -62,8 +62,11 @@ class Exporter:
 
     ###########################################################################
 
-    def generate(self) -> None:
-        for token in self.song.tokens:
+    def generate(self, tokens: list[Token] | None = None) -> None:
+        if tokens is None:
+            tokens = self.song.tokens
+
+        for token in tokens:
             self.emit(token)
 
     ###########################################################################

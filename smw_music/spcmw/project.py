@@ -435,6 +435,7 @@ class ProjectSettings:
 
 @dataclass
 class Project:
+    path: Path | None = None
     info: ProjectInfo | None = None
     settings: ProjectSettings = field(default_factory=ProjectSettings)
 
@@ -462,6 +463,7 @@ class Project:
                     contents = v1.load(fname)
 
         project = cls(
+            fname,
             ProjectInfo(
                 Path(contents["musicxml"]),
                 contents["project_name"],

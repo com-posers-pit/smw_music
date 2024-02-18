@@ -479,6 +479,3 @@ class Song:
 #            rv.extend(channel.unmapped(inst_name, instrument))
 #
 #        return dedupe_notes(rv)
-# def notelen_str(notelen: int) -> str:
-#     rv = f"l{notelen}"
-#     return rv

@@ -59,6 +59,7 @@ from smw_music.spcmw import (
     SampleSource,
     TuneSource,
     Tuning,
+    amk_convert,
 )
 from smw_music.ui.quotes import ashtley, quotes
 from smw_music.ui.sample import SamplePack
@@ -1078,25 +1079,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _check_bad_tune(self) -> list[tuple[str, str]]:
-        bad_samples = []
-        for inst_name, inst in self.state.instruments.items():
-            for sample_name, sample in inst.samples.items():
-                check_tune = sample.sample_source in [
-                    SampleSource.BRR,
-                    SampleSource.SAMPLEPACK,
-                ]
-                zero_tune = (sample.tune_setting, sample.subtune_setting) == (
-                    0,
-                    0,
-                )
-                if zero_tune and check_tune:
-                    bad_samples.append((inst_name, sample_name))
-
-        return bad_samples
-
-    ###########################################################################
-
     def _check_first_use(self) -> None:
         if spcmw.first_use():
             msg = "Welcome, and thank you for trying SPaCeMusicW."
@@ -1427,12 +1409,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             if not error:
                 try:
-                    msg = subprocess.check_output(  # nosec B603
-                        self.convert,
-                        cwd=self._project_path,
-                        stderr=subprocess.STDOUT,
-                        timeout=self.preferences.convert_timeout,
-                    ).decode()
+                    msg = amk_convert(
+                        self._project_path, self.preferences.convert_timeout
+                    )
                     # TODO: Add stat parsing and reporting
                 except subprocess.CalledProcessError as e:
                     error = True
@@ -1691,21 +1670,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
     # API property definitions
-    ###########################################################################
-
-    @property
-    def convert(self) -> list[str]:
-        # TODO: Put better protections in place for this
-        assert self._project_path is not None  # nosec: B101
-
-        match platform.system():
-            case "Darwin" | "Linux":
-                return ["sh", "convert.sh"]
-            case "Windows":
-                return [str(self._project_path / "convert.bat")]
-            case _:
-                return []
-
     ###########################################################################
 
     @property

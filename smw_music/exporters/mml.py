@@ -53,7 +53,17 @@ from smw_music.spcmw import (
     SampleSource,
 )
 
-from .common import Exporter, notelen_str
+from .common import Exporter
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def notelen_str(notelen: int) -> str:
+    rv = f"l{notelen}"
+    return rv
+
 
 ###############################################################################
 # API class definitions
@@ -329,21 +339,22 @@ class MmlExporter(Exporter):
 
     ###########################################################################
 
-    def export(self) -> str:
+    def do_export(self) -> str:
         proj = self.project
+        sets = self.project.settings
 
         # If starting after the first measure, disable loop analysis because
         # things might be badly broken
-        if proj.start_measure != 1:
-            proj.loop_analysis = False
-            proj.superloop_analysis = False
+        if sets.start_measure != 1:
+            sets.loop_analysis = False
+            sets.superloop_analysis = False
 
-        self._reduce(proj.loop_analysis, proj.superloop_analysis)
+        self._reduce(sets.loop_analysis, sets.superloop_analysis)
 
         # TODO: A bit of a hack to allow starting at a later measure
-        if proj.start_measure != 1:
+        if sets.start_measure != 1:
             for channel in self._reduced_channels:
-                to_drop = proj.start_measure - 1
+                to_drop = sets.start_measure - 1
                 tokens: list[Token] = []
                 for n, token in enumerate(channel.tokens):
                     if isinstance(
@@ -443,11 +454,22 @@ class MmlExporter(Exporter):
 
     ###########################################################################
 
+    def finalize(self) -> None:
+        bad_samples = self._check_bad_tune()
+        if bad_samples:
+            msg = "\n".join(
+                f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
+                for inst, samp in bad_samples
+            )
+
+            # TODO: Report errors from bad samples
+            msg
+
+    ###########################################################################
+
     def prepare(self) -> None:
         state = self.state
         fname = self.state.mml_fname  # use self.state so assert is captured
-        assert state.project_name is not None  # nosec: B101
-        assert self._project_path is not None  # nosec: B101
 
         amk.update_sample_groups_file(
             self._project_path,
@@ -455,63 +477,25 @@ class MmlExporter(Exporter):
             state.builtin_sample_sources,
         )
 
-        try:
-            if os.path.exists(fname):
-                shutil.copy2(fname, f"{fname}.bak")
+        if os.path.exists(fname):
+            shutil.copy2(fname, f"{fname}.bak")
 
-            self.song.instruments = deepcopy(state.instruments)
+        # TODO Move this into the to_mml_file
+        sample_group = "optimized"
+        match state.builtin_sample_group:
+            case amk.BuiltinSampleGroup.DEFAULT:
+                sample_group = "default"
+            case amk.BuiltinSampleGroup.OPTIMIZED:
+                sample_group = "optimized"
+            case amk.BuiltinSampleGroup.REDUX1:
+                sample_group = "redux1"
+            case amk.BuiltinSampleGroup.REDUX2:
+                sample_group = "redux2"
+            case amk.BuiltinSampleGroup.CUSTOM:
+                sample_group = "custom"
 
-            self.song.volume = state.global_volume
-            if state.porter:
-                self.song.porter = state.porter
-            if state.game:
-                self.song.game = state.game
-
-            # TODO Move this into the to_mml_file
-            sample_group = "optimized"
-            match state.builtin_sample_group:
-                case amk.BuiltinSampleGroup.DEFAULT:
-                    sample_group = "default"
-                case amk.BuiltinSampleGroup.OPTIMIZED:
-                    sample_group = "optimized"
-                case amk.BuiltinSampleGroup.REDUX1:
-                    sample_group = "redux1"
-                case amk.BuiltinSampleGroup.REDUX2:
-                    sample_group = "redux2"
-                case amk.BuiltinSampleGroup.CUSTOM:
-                    sample_group = "custom"
-
-            mml = self.song.to_mml_file(
-                str(fname),
-                state.global_legato,
-                state.loop_analysis,
-                state.superloop_analysis,
-                state.measure_numbers,
-                True,
-                state.echo if state.project.settings.global_echo else None,
-                PurePosixPath(state.project_name),
-                state.start_measure,
-                sample_group,
-            )
-            self.mml_generated.emit(mml)
-            self.update_status("MML generated")
-        except SongException as e:
-            msg = str(e)
-        else:
-            bad_samples = self._check_bad_tune()
-            if bad_samples:
-                msg = "\n".join(
-                    f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
-                    for inst, samp in bad_samples
-                )
-            else:
-                error = False
-                msg = "Done"
-
-        if report or error:
-            self.response_generated.emit(error, title, msg)
-
-        return not error
+        # TODO: Feed sample group back into export logic
+        self.do_export()
 
     ###########################################################################
     # Private method definitions
@@ -563,6 +547,25 @@ class MmlExporter(Exporter):
                     note_length = f"={duration - grace_length}"
 
         return note_length
+
+    ###########################################################################
+
+    def _check_bad_tune(self) -> list[tuple[str, str]]:
+        bad_samples = []
+        for inst_name, inst in self.project.settings.instruments.items():
+            for sample_name, sample in inst.samples.items():
+                check_tune = sample.sample_source in [
+                    SampleSource.BRR,
+                    SampleSource.SAMPLEPACK,
+                ]
+                zero_tune = (sample.tune_setting, sample.subtune_setting) == (
+                    0,
+                    0,
+                )
+                if zero_tune and check_tune:
+                    bad_samples.append((inst_name, sample_name))
+
+        return bad_samples
 
     ###########################################################################
 
@@ -637,7 +640,6 @@ class MmlExporter(Exporter):
 #
 # def _most_common(container: Iterable[_T]) -> _T:
 #     return Counter(container).most_common(1)[0][0]
-#
 #
 # ###############################################################################
 # # API class definitions
