@@ -36,13 +36,17 @@ class Exporter:
 
     ###########################################################################
 
+    def export(self) -> None:
+        self.reduce()
+        self.prepare()
+        self.generate()
+        self.finalize()
+
+    ###########################################################################
+
     @classmethod
-    def convert(cls, project: Project) -> None:
-        exp = cls(project)
-        exp.reduce()
-        exp.prepare()
-        exp.generate()
-        exp.finalize()
+    def export_project(cls, project: Project) -> None:
+        cls(project).export()
 
     ###########################################################################
 
