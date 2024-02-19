@@ -334,6 +334,7 @@ def _upgrade_save(fname: Path) -> Path:
 
 @dataclass
 class ProjectInfo:
+    project_dir: Path = Path("")
     musicxml_fname: Path = Path("")
     project_name: str = ""
     composer: str = ""
@@ -356,6 +357,7 @@ class ProjectSettings:
     loop_analysis: bool = False
     superloop_analysis: bool = False
     measure_numbers: bool = True
+    start_measure: int = 1
     instruments: dict[str, InstrumentConfig] = field(
         default_factory=lambda: {}
     )
@@ -435,9 +437,8 @@ class ProjectSettings:
 
 @dataclass
 class Project:
-    path: Path | None = None
-    info: ProjectInfo | None = None
-    settings: ProjectSettings = field(default_factory=ProjectSettings)
+    info: ProjectInfo
+    settings: ProjectSettings
 
     ###########################################################################
 
@@ -463,8 +464,8 @@ class Project:
                     contents = v1.load(fname)
 
         project = cls(
-            fname,
             ProjectInfo(
+                fname,
                 Path(contents["musicxml"]),
                 contents["project_name"],
                 contents["composer"],
@@ -500,10 +501,10 @@ class Project:
 
     ###########################################################################
 
-    def save(self, fname: Path) -> None:
-        proj_dir = fname.parent.resolve()
-        info = ProjectInfo() if self.info is None else self.info
+    def save(self) -> None:
+        info = self.info
         settings = self.settings
+        proj_dir = info.project_fname.parent.resolve()
         musicxml = info.musicxml_fname
         if musicxml:
             musicxml = musicxml.resolve()
@@ -544,5 +545,5 @@ class Project:
             },
         }
 
-        with open(fname, "w", encoding="utf8") as fobj:
+        with open(info.project_fname, "w", encoding="utf8") as fobj:
             yaml.safe_dump(contents, fobj)

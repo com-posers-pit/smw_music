@@ -470,10 +470,10 @@ class MmlExporter(Exporter):
 
     def prepare(self) -> None:
         state = self.state
-        fname = self.state.mml_fname  # use self.state so assert is captured
+        fname = state.mml_fname
 
         amk.update_sample_groups_file(
-            self._project_path,
+            self.project.info.project_fname,
             state.builtin_sample_group,
             state.builtin_sample_sources,
         )

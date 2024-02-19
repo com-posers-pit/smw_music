@@ -14,12 +14,11 @@ import os
 import shutil
 import subprocess  # nosec 404
 import threading
-import zipfile
 from contextlib import suppress
 from copy import deepcopy
 from dataclasses import fields, replace
 from glob import glob
-from pathlib import Path, PurePosixPath
+from pathlib import Path
 from random import choice
 from typing import Callable
 
@@ -30,12 +29,12 @@ from watchdog import events, observers
 
 # Package imports
 from smw_music import SmwMusicException, __version__, spcmw
+from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
 from smw_music.ext_tools.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
     decode_utilization,
-    update_sample_groups_file,
 )
 from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
@@ -772,35 +771,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_render_zip_clicked(self) -> None:
         self.update_status("Zip file generated")
-
-        path = self._project_path
-        project = self.state.project_name
-
-        assert path is not None  # nosec: B101
-        assert project is not None  # nosec: B101
-
-        # Turn off the preview features
-        self.state.start_measure = 1
-        for sample in self.state.samples.values():
-            sample.mute = False
-            sample.solo = False
-        self.reinforce_state()
-
-        self.on_generate_mml_clicked(False)
-        self.on_generate_spc_clicked(False)
-
-        proj = Path(project)
-        mml_fname = path / "music" / proj.with_suffix(".txt")
-        spc_fname = path / "SPCs" / proj.with_suffix(".spc")
-        sample_path = path / "samples" / project
-
-        zname = str(path / (project + ".zip"))
-        with zipfile.ZipFile(zname, "w") as zobj:
-            zobj.write(mml_fname, mml_fname.name)
-            zobj.write(spc_fname, spc_fname.name)
-            for brr in glob("**/*.brr", root_dir=sample_path, recursive=True):
-                zobj.write(sample_path / brr, arcname=str(proj / brr))
-
+        zname = spcmw.amk.render_zip(self.state.project)
         self.response_generated.emit(
             False, "Zip Render", f"Zip file {zname} rendered"
         )
@@ -1273,78 +1244,23 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_mml_clicked(self, report: bool = True) -> bool:
-        assert self.state.loaded  # nosec: B101
-
         title = "MML Generation"
         error = True
-        state = self.state
-        fname = self.state.mml_fname  # use self.state so assert is captured
-        if self.song is None:
-            msg = "Song not loaded"
-            self.mml_generated.emit("\n".join(ashtley))
+
+        try:
+            MmlExporter.export_project(self.state.project)
+        except SongException as e:
+            msg = str(e)
         else:
-            assert state.project_name is not None  # nosec: B101
-            assert self._project_path is not None  # nosec: B101
-            settings = self.state.project.settings
-
-            update_sample_groups_file(
-                self._project_path,
-                settings.builtin_sample_group,
-                settings.builtin_sample_sources,
-            )
-
-            try:
-                if os.path.exists(fname):
-                    shutil.copy2(fname, f"{fname}.bak")
-
-                self.song.instruments = deepcopy(state.instruments)
-
-                self.song.volume = state.global_volume
-                if state.porter:
-                    self.song.porter = state.porter
-                if state.game:
-                    self.song.game = state.game
-
-                # TODO Move this into the to_mml_file
-                sample_group = "optimized"
-                match state.builtin_sample_group:
-                    case BuiltinSampleGroup.DEFAULT:
-                        sample_group = "default"
-                    case BuiltinSampleGroup.OPTIMIZED:
-                        sample_group = "optimized"
-                    case BuiltinSampleGroup.REDUX1:
-                        sample_group = "redux1"
-                    case BuiltinSampleGroup.REDUX2:
-                        sample_group = "redux2"
-                    case BuiltinSampleGroup.CUSTOM:
-                        sample_group = "custom"
-
-                mml = self.song.to_mml_file(
-                    str(fname),
-                    state.global_legato,
-                    state.loop_analysis,
-                    state.superloop_analysis,
-                    state.measure_numbers,
-                    True,
-                    state.echo if state.project.settings.global_echo else None,
-                    PurePosixPath(state.project_name),
-                    state.start_measure,
-                    sample_group,
+            bad_samples = self._check_bad_tune()
+            if bad_samples:
+                msg = "\n".join(
+                    f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
+                    for inst, samp in bad_samples
                 )
-                self.mml_generated.emit(mml)
-                self.update_status("MML generated")
-            except SongException as e:
-                msg = str(e)
             else:
-                bad_samples = self._check_bad_tune()
-                if bad_samples:
-                    msg = "\n".join(
-                        f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
-                        for inst, samp in bad_samples
-                    )
-                else:
-                    error = False
-                    msg = "Done"
+                error = False
+                msg = "Done"
 
         if report or error:
             self.response_generated.emit(error, title, msg)

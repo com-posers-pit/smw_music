@@ -266,6 +266,27 @@ def make_vis_dir(path: Path) -> None:
 ###############################################################################
 
 
+def mml_dir(proj_dir: Path) -> Path:
+    return proj_dir / "music"
+
+
+###############################################################################
+
+
+def samples_dir(proj_dir: Path) -> Path:
+    return proj_dir / "samples"
+
+
+###############################################################################
+
+
+def spc_dir(proj_dir: Path) -> Path:
+    return proj_dir / "SPCs"
+
+
+###############################################################################
+
+
 def update_sample_groups_file(
     path: Path,
     sample_group: BuiltinSampleGroup,
@@ -316,8 +337,8 @@ def update_sample_groups_file(
 
 
 # https://www.smwcentral.net/?p=viewthread&t=98793&page=1&pid=1579851#p1579851
-def vis_dir(path: Path) -> Path:
-    return path / "Visualizations"
+def vis_dir(proj_dir: Path) -> Path:
+    return proj_dir / "Visualizations"
 
 
 ###############################################################################
