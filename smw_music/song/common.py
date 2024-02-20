@@ -123,7 +123,7 @@ class NoteHead(StrEnum):
 
     @classmethod
     def from_symbol(cls, symbol: str) -> "NoteHead":
-        return cls(cls._SYMBOL_MAP[symbol])
+        return cls(cast(dict[str, str], cls._SYMBOL_MAP)[symbol])
 
     ###########################################################################
 
