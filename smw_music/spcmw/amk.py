@@ -50,14 +50,6 @@ def mml_fname(proj: Project) -> Path:
 ###############################################################################
 
 
-def project_fname(proj: Project) -> Path:
-    nfo = proj.info
-    return (nfo.project_dir / nfo.project_name).with_suffix(".spcmw")
-
-
-###############################################################################
-
-
 def render_zip(project: Project) -> Path:
     info = project.info
     sets = project.settings
@@ -95,6 +87,15 @@ def samples_dir(proj: Project) -> Path:
 
 
 def spc_fname(proj: Project) -> Path:
-    nfo = proj.info
-    spc = (amk.spc_dir(nfo.project_dir) / nfo.project_name).with_suffix(".spc")
+    pdir, pname = proj.info.project_dir, proj.info.project_name
+    spc = (amk.vis_dir(pdir) / pname).with_suffix(".spc")
     return spc
+
+
+###############################################################################
+
+
+def vis_fname(proj: Project) -> Path:
+    pdir, pname = proj.info.project_dir, proj.info.project_name
+    png = (amk.vis_dir(pdir) / pname).with_suffix(".png")
+    return png

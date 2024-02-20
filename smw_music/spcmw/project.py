@@ -348,6 +348,12 @@ class ProjectInfo:
     def is_valid(self) -> bool:
         return self.musicxml_fname.exists()
 
+    ###########################################################################
+
+    @property
+    def project_fname(self) -> Path:
+        return (self.project_dir / self.project_name).with_suffix(".spcmw")
+
 
 ###############################################################################
 
@@ -501,7 +507,7 @@ class Project:
 
     ###########################################################################
 
-    def save(self) -> None:
+    def save(self, fname: Path | None = None, backup: bool = False) -> None:
         info = self.info
         settings = self.settings
         proj_dir = info.project_fname.parent.resolve()
@@ -545,5 +551,10 @@ class Project:
             },
         }
 
-        with open(info.project_fname, "w", encoding="utf8") as fobj:
+        if fname is None:
+            fname = self.info.project_fname
+        if backup:
+            fname = fname.with_suffix("bak")
+
+        with open(fname, "w", encoding="utf8") as fobj:
             yaml.safe_dump(contents, fobj)

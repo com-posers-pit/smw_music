@@ -57,7 +57,7 @@ from smw_music.spcmw import (
     SampleSource,
     TuneSource,
     Tuning,
-    amk_convert,
+    amk,
 )
 from smw_music.ui.quotes import quotes
 from smw_music.ui.sample import SamplePack
@@ -771,7 +771,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_render_zip_clicked(self) -> None:
         self.update_status("Zip file generated")
-        zname = spcmw.amk.render_zip(self.state.project)
+        zname = amk.render_zip(self.state.project)
         self.response_generated.emit(
             False, "Zip Render", f"Zip file {zname} rendered"
         )
@@ -809,14 +809,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_save(self) -> None:
         self._save_backup()
 
-        path = self._project_path
-        project = self.state.project_name
-
-        if path is not None and project is not None:
-            fname = path / (project + ".prj")
-            self.state.project.save(fname)
-            self.reinforce_state()
-            self.update_status("Project saved")
+        self.state.project.save()
+        self.reinforce_state()
+        self.update_status("Project saved")
 
     ###########################################################################
 
@@ -1310,7 +1305,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             if not error:
                 try:
-                    msg = amk_convert(
+                    msg = amk.convert(
                         self._project_path, self.preferences.convert_timeout
                     )
                     # TODO: Add stat parsing and reporting
@@ -1341,12 +1336,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _save_backup(self) -> None:
-        path = self._project_path
-        project = self.state.project_name
-
-        if path is not None and project is not None:
-            fname = path / (project + ".prj.bak")
-            self.state.project.save(fname)
+        self.state.project.save(backup=True)
 
     ###########################################################################
 

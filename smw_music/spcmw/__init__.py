@@ -5,7 +5,7 @@
 
 """Dashboard preferences."""
 
-from .amk import convert as amk_convert
+from . import amk
 from .instrument import (
     Artic,
     ArticSetting,
@@ -31,7 +31,7 @@ from .spcmw import (
 ###############################################################################
 
 __all__ = [
-    "amk_convert",
+    "amk",
     "Artic",
     "ArticSetting",
     "Dynamics",
