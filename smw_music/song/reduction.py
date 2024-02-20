@@ -178,8 +178,8 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                     if isinstance(nxt, CrescDelim) and not nxt.start:
                         cresc_done = True
                     if isinstance(nxt, Dynamic) and cresc_done:
-                        if dyn.level != nxt.level:
-                            target = nxt.level
+                        if dyn != nxt:
+                            target = nxt
                         else:
                             drop_dyn = False
                         break
@@ -188,7 +188,7 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                         break
                 # TODO: Move this out to AMK-specific logic
                 duration = min(duration, 255)  # Limit for now
-                rv.append(Crescendo(duration, target, token.cresc))
+                rv.append(Crescendo(duration, str(target), token.cresc))
 
         if not drop:
             rv.append(token)
