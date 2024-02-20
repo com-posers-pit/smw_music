@@ -59,7 +59,7 @@ from smw_music.spcmw import (
     Tuning,
     amk_convert,
 )
-from smw_music.ui.quotes import ashtley, quotes
+from smw_music.ui.quotes import quotes
 from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utilization import echo_bytes

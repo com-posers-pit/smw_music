@@ -328,17 +328,6 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    # TODO: Remove
-    def on_mml_fname_clicked(self) -> None:
-        fname, _ = QFileDialog.getSaveFileName(
-            self._view, caption="MML Output File", filter="MML Files (*.txt)"
-        )
-
-        if fname:
-            self._model.on_mml_fname_changed(fname)
-
-    ###########################################################################
-
     def on_mml_generated(self, mml: str) -> None:
         self._view.mml_view.setText(mml)
 

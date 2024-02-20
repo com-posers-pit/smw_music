@@ -97,9 +97,10 @@ def _get_cresc(
     part: m21.stream.Part,
 ) -> tuple[list[list[int]], list[bool]]:
     cresc: list[list[int]] = [[], []]
-    cresc_list = filter_type(
-        (m21.dynamics.Crescendo, m21.dynamics.Diminuendo), part[:]
-    )
+    cresc_list: list[
+        m21.dynamics.Crescendo | m21.dynamics.Diminuendo
+    ] = filter_type((m21.dynamics.Crescendo, m21.dynamics.Diminuendo), part[:])
+
     cresc[0] = [x.getFirst().id for x in cresc_list]
     cresc[1] = [x.getLast().id for x in cresc_list]
     cresc_type = [isinstance(x, m21.dynamics.Crescendo) for x in cresc_list]

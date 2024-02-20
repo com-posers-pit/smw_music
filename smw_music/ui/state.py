@@ -72,7 +72,7 @@ class State:
     @sample.setter
     def sample(self, sample: InstrumentSample) -> None:
         inst_name, sample_name = self.sample_idx
-        inst = self.instruments[inst_name]
+        inst = self.project.settings.instruments[inst_name]
         if sample_name:
             inst.multisamples[sample_name] = sample
         else:
