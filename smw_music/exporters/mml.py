@@ -32,6 +32,7 @@ from smw_music.song import (
     CrescDelim,
     Crescendo,
     Dynamic,
+    Dynamics,
     Instrument,
     Loop,
     LoopDelim,
@@ -340,8 +341,7 @@ class MmlExporter(Exporter):
 
     ###########################################################################
 
-    def do_export(self) -> str:
-        proj = self.project
+    def do_export(self, include_dt: bool = True) -> str:
         sets = self.project.settings
 
         # If starting after the first measure, disable loop analysis because
@@ -371,7 +371,7 @@ class MmlExporter(Exporter):
 
         self._validate()
         channels = [
-            x.generate_mml(self.instruments, proj.settings.measure_numbers)
+            x.generate_mml(self.instruments, sets.measure_numbers)
             for x in self._reduced_channels
         ]
 
@@ -425,18 +425,32 @@ class MmlExporter(Exporter):
 
         tmpl = Template(RESOURCES / "mml.txt")  # nosec B702
 
-        rv = tmpl.render(
+        # TODO Move this into the to_mml_file
+        sample_group = "optimized"
+        match sets.builtin_sample_group:
+            case amk.BuiltinSampleGroup.DEFAULT:
+                sample_group = "default"
+            case amk.BuiltinSampleGroup.OPTIMIZED:
+                sample_group = "optimized"
+            case amk.BuiltinSampleGroup.REDUX1:
+                sample_group = "redux1"
+            case amk.BuiltinSampleGroup.REDUX2:
+                sample_group = "redux2"
+            case amk.BuiltinSampleGroup.CUSTOM:
+                sample_group = "custom"
+
+        rv: str = tmpl.render(
             version=__version__,
-            global_legato=global_legato,
+            global_legato=sets.global_legato,
             song=self,
             channels=channels,
             datetime=build_dt,
-            echo_config=echo_config,
+            echo_config=sets.echo,
             inst_samples=inst_samples,
             custom_samples=samples,
             dynamics=list(Dynamics),
-            sample_path=str(sample_path),
-            sample_groups=sample_groups,
+            sample_path=str(amk.samples_dir(self.project)),
+            sample_groups=sample_group,
         )
 
         rv = rv.replace(" ^", "^")
@@ -449,7 +463,7 @@ class MmlExporter(Exporter):
 
         if fname is not None:
             with open(fname, "w", newline="\r\n") as fobj:
-                fobj.write(rv.encode("ascii", "ignore"))
+                fobj.write(rv)
 
         return rv
 
@@ -480,20 +494,6 @@ class MmlExporter(Exporter):
 
         if os.path.exists(fname):
             shutil.copy2(fname, f"{fname}.bak")
-
-        # TODO Move this into the to_mml_file
-        sample_group = "optimized"
-        match state.builtin_sample_group:
-            case amk.BuiltinSampleGroup.DEFAULT:
-                sample_group = "default"
-            case amk.BuiltinSampleGroup.OPTIMIZED:
-                sample_group = "optimized"
-            case amk.BuiltinSampleGroup.REDUX1:
-                sample_group = "redux1"
-            case amk.BuiltinSampleGroup.REDUX2:
-                sample_group = "redux2"
-            case amk.BuiltinSampleGroup.CUSTOM:
-                sample_group = "custom"
 
         # TODO: Feed sample group back into export logic
         self.do_export()

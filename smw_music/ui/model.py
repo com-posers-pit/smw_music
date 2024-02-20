@@ -34,6 +34,7 @@ from smw_music.ext_tools import spcplay
 from smw_music.ext_tools.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
+    convert,
     decode_utilization,
 )
 from smw_music.song import NoteHead, Song, SongException
@@ -580,14 +581,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._undo_level = 0
             self._history = [replace(project)]
             self._project_path = fname.parent
-            musicxml = self.state.musicxml_fname
-            if musicxml is None:
-                self.song = None
-            else:
-                self._load_musicxml(musicxml, True)
+            self._load_musicxml(project.info.musicxml_fname, True)
 
             self.reinforce_state()
-            self.update_status(f"Opened project {self.state.project_name}")
+            self.update_status(
+                f"Opened project {self.state.project.info.project_name}"
+            )
 
     ###########################################################################
 
@@ -622,7 +621,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         with suppress(NoSample):
             inst, sample = state.sample_idx
             if sample:
-                instruments = deepcopy(state.instruments)
+                instruments = deepcopy(state.project.settings.instruments)
                 keys = sorted(instruments[inst].multisamples.keys())
                 instruments[inst].multisamples.pop(sample)
 
@@ -653,7 +652,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_musicxml_fname_changed(self, fname: str) -> None:
         file_path = Path(fname)
-        if file_path == self.state.musicxml_fname:
+        if file_path == self.state.project.info.musicxml_fname:
             return
 
         self._load_musicxml(file_path, False)
@@ -761,8 +760,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        assert self.state.musicxml_fname is not None  # nosec: B101
-        self._load_musicxml(self.state.musicxml_fname, True)
+        self._load_musicxml(self.state.project.info.musicxml_fname, True)
 
         self.reinforce_state()
         self.update_status("MusicXML reloaded")
@@ -799,7 +797,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_sample_opt_source_changed(
         self, idx: int, source: BuiltinSampleSource
     ) -> None:
-        sources = self.state.builtin_sample_sources.copy()
+        sources = self.state.project.settings.builtin_sample_sources.copy()
         sources[idx] = source
         self._update_state(builtin_sample_sources=sources)
         self.update_status(f"Builtin sample {idx:02x} set to {source}")
@@ -827,7 +825,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, sample_idx: tuple[str, str], solo: bool, state: bool
     ) -> None:
         inst_name, sample_name = sample_idx
-        instruments = deepcopy(self.state.instruments)
+        instruments = deepcopy(self.state.project.settings.instruments)
         inst = instruments[inst_name]
 
         field = "solo" if solo else "mute"
@@ -1121,12 +1119,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 # Reconcile instrument settings
                 for inst_name, song_inst in self.song.instruments.items():
                     with suppress(KeyError):
-                        state_inst = self.state.instruments[inst_name]
+                        state_inst = self.state.project.settings.instruments[
+                            inst_name
+                        ]
                         song_inst.solo = state_inst.solo
                         song_inst.mute = state_inst.mute
                         song_inst.samples = state_inst.samples
 
-            self.state.instruments = deepcopy(self.song.instruments)
+            self.state.project.settings.instruments = deepcopy(
+                self.song.instruments
+            )
 
             self.state.start_section_idx = 0
             self.state.section_names = ["Capo"] + list(
@@ -1222,7 +1224,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         inst, _ = state.sample_idx
 
-        instruments = deepcopy(state.instruments)
+        instruments = deepcopy(state.project.settings.instruments)
         instruments[inst].multisamples[name] = sample
         self._update_state(
             update_instruments=True,
@@ -1265,24 +1267,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_spc_clicked(self, report: bool = True) -> bool:
-        assert self._project_path is not None  # nosec: B101
         assert self.state.loaded  # nosec: B101
 
         error = False
         msg = ""
 
-        if not os.path.exists(self.state.mml_fname):
+        # TODO: Move this to spcmw.amk?
+        if not amk.mml_fname(self.state.project).exists():
             error = True
             msg = "MML not generated"
         else:
-            samples_path = (
-                self._project_path / "samples" / self.state.project_name
-            )
+            samples_path = amk.samples_dir(self.state.project)
 
             shutil.rmtree(samples_path, ignore_errors=True)
             os.makedirs(samples_path, exist_ok=True)
 
-            for inst in self.state.instruments.values():
+            for inst in self.state.project.settings.instruments.values():
                 for sample in inst.samples.values():
                     if sample.sample_source == SampleSource.BRR:
                         shutil.copy2(sample.brr_fname, samples_path)
@@ -1305,7 +1305,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             if not error:
                 try:
-                    msg = amk.convert(
+                    msg = convert(
                         self._project_path, self.preferences.convert_timeout
                     )
                     # TODO: Add stat parsing and reporting
@@ -1414,7 +1414,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 name = state.sample_idx[0]
 
                 unmapped = self.song.unmapped_notes(
-                    name, state.instruments[name]
+                    name, state.project.settings.instruments[name]
                 )
 
                 self.state.unmapped = {
@@ -1547,16 +1547,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_utilization_from_amk(self) -> None:
-        assert self._project_path is not None  # nosec: B101
-
-        # TODO: Unify this with make_vis_dir
-        png = (
-            self._project_path
-            / "Visualizations"
-            / f"{self.state.project_name}.png"
-        )
-
-        self.state.aram_util = decode_utilization(png)
+        util = decode_utilization(amk.vis_fname(self.state.project))
+        self.state.aram_util = util
         self.state.aram_custom_sample_b = self.sample_bytes
 
     ###########################################################################
