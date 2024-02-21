@@ -380,7 +380,7 @@ class ProjectSettings:
         default_factory=lambda: N_BUILTIN_SAMPLES
         * [BuiltinSampleSource.OPTIMIZED]
     )
-    advanced: dict[str, advanced.Advanced] = field(default_factory=dict)
+    adv_settings: dict[str, advanced.Advanced] = field(default_factory=dict)
 
     ###########################################################################
     # Data model method definitions
@@ -536,7 +536,7 @@ class Project:
             "instruments": {
                 k: _save_instrument(v) for k, v in settings.instruments.items()
             },
-            "advanced": {
+            "adv_settings": {
                 k: _save_adv(v) for k, v in settings.advanced.items()
             },
             "amk_settings": {
