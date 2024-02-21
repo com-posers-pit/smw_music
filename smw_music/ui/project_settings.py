@@ -46,7 +46,7 @@ class ProjectSettingsDlg:
 
     def _on_musicxml_fname_clicked(self) -> None:
         fname, _ = QFileDialog.getOpenFileName(
-            self._view,
+            self._dialog,
             caption="MusicXML Input File",
             filter="MusicXML Files (*.musicxml *.mxl)",
         )
@@ -72,6 +72,7 @@ class ProjectSettingsDlg:
                 musicxml_fname = Path("")
 
             return ProjectInfo(
+                settings.project_dir,
                 musicxml_fname,
                 settings.project_name,
                 d.composer.text(),

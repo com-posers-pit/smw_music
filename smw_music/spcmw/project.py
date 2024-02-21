@@ -483,6 +483,7 @@ class Project:
                 contents["amk_settings"]["loop_analysis"],
                 contents["amk_settings"]["superloop_analysis"],
                 contents["amk_settings"]["measure_numbers"],
+                1,  # start_measure
                 {
                     k: _load_instrument(v)
                     for k, v in contents["instruments"].items()
