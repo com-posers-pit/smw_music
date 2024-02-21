@@ -34,7 +34,6 @@ from smw_music.ext_tools import spcplay
 from smw_music.ext_tools.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
-    convert,
     decode_utilization,
 )
 from smw_music.song import NoteHead, Song, SongException
@@ -1271,18 +1270,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         error = False
         msg = ""
+        project = self.state.project
 
         # TODO: Move this to spcmw.amk?
-        if not amk.mml_fname(self.state.project).exists():
+        if not amk.mml_fname(project).exists():
             error = True
             msg = "MML not generated"
         else:
-            samples_path = amk.samples_dir(self.state.project)
+            samples_path = amk.samples_dir(project)
 
             shutil.rmtree(samples_path, ignore_errors=True)
             os.makedirs(samples_path, exist_ok=True)
 
-            for inst in self.state.project.settings.instruments.values():
+            for inst in project.settings.instruments.values():
                 for sample in inst.samples.values():
                     if sample.sample_source == SampleSource.BRR:
                         shutil.copy2(sample.brr_fname, samples_path)
@@ -1305,8 +1305,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             if not error:
                 try:
-                    msg = convert(
-                        self._project_path, self.preferences.convert_timeout
+                    msg = amk.convert(
+                        project,
+                        self.preferences.convert_timeout,
                     )
                     # TODO: Add stat parsing and reporting
                 except subprocess.CalledProcessError as e:

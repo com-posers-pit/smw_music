@@ -26,7 +26,8 @@ from .project import Project
 ###############################################################################
 
 
-def convert(project_path: Path, timeout: float) -> str:
+def convert(project: Project, timeout: float) -> str:
+    project_path = project.info.project_dir
     match platform.system():
         case "Darwin" | "Linux":
             script = ["sh", "convert.sh"]
