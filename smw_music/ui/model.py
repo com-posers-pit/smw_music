@@ -718,19 +718,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_play_spc_clicked(self) -> None:
-        info = self.state.project.info
-
-        assert path is not None  # nosec: B101
-        assert info is not None  # nosec: B101
-
-        spc = path / "SPCs" / f"{info.project_name}.spc"
+        spc = amk.spc_fname(self.state.project)
 
         if not spc.exists():
             self.response_generated.emit(
                 True, "SPC Play", "SPC file doesn't exist"
             )
         else:
-            # Handles linux and OSX, windows is covered on the next line
             spcplay.play(self.preferences.spcplay_fname, spc)
 
         self.update_status("SPC played")
