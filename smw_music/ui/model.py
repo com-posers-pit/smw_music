@@ -123,6 +123,13 @@ class _SamplePackWatcher(events.FileSystemEventHandler):
 ###############################################################################
 
 
+class NoState(SmwMusicException):
+    pass
+
+
+###############################################################################
+
+
 class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(
         (State, bool),
@@ -179,7 +186,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         super().__init__()
         self.song = None
         self.preferences = spcmw.get_preferences()
-        self._history = [State()]
+        self._history = []
         self._undo_level = 0
         self._sample_packs = {}
         self._project_path = None
@@ -1584,4 +1591,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @property
     def state(self) -> State:
+        if self._undo_level < 1:
+            raise NoState()
+
         return self._history[-1 - self._undo_level]
