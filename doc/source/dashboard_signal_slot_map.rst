@@ -30,6 +30,7 @@ Dashboard
       model.recent_projects_updated --> dashboard.on_recent_projects_updated
       model.status_updated --> dashboard.on_status_updated
       model.songinfo_changed --> dashboard.on_songinfo_changed
+      model.song_loaded --> dashboard.on_song_loaded
 
 .. note::
    The ``on_recent_projects_updated`` slot creates new actions, which are

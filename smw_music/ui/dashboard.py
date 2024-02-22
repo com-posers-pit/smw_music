@@ -36,6 +36,7 @@ from PyQt6.QtWidgets import (
     QListWidgetItem,
     QMainWindow,
     QMenu,
+    QMenuBar,
     QMessageBox,
     QPushButton,
     QRadioButton,
@@ -470,6 +471,29 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_song_loaded(self, loaded: bool) -> None:
+        widgets = set(
+            x
+            for x in self._view_widgets
+            if not isinstance(x, (QMenu, QMenuBar, QAction))
+        )
+        v = self._view
+        widgets |= set(
+            [
+                v.save_project,
+                v.close_project,
+                v.open_project_settings,
+                v.undo,
+                v.redo,
+            ]
+        )
+
+        for child in widgets:
+            with QSignalBlocker(child):
+                child.setEnabled(loaded)
+
+    ###########################################################################
+
     def on_songinfo_changed(self, msg: str) -> None:
         self._view.song_info_view.setText(msg)
 
@@ -848,6 +872,7 @@ class Dashboard(QWidget):
         )
         m.status_updated.connect(self.on_status_updated)
         m.songinfo_changed.connect(self.on_songinfo_changed)
+        m.song_loaded.connect(self.on_song_loaded)
 
     ###########################################################################
 

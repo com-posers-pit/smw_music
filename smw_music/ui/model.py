@@ -162,6 +162,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     songinfo_changed = pyqtSignal(
         str, arguments=["songinfo"]  # type: ignore[call-arg]
     )
+    song_loaded = pyqtSignal(bool, arguments=["loaded"])
 
     song: Song | None
     preferences: Preferences
@@ -178,7 +179,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def __init__(self) -> None:
         super().__init__()
-        self.song = None
         self.preferences = spcmw.get_preferences()
         self._history = []
         self._undo_level = 0
@@ -232,6 +232,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self.reinforce_state()
         self._emit_quote()
+        self.song_loaded.emit(False)
 
     ###########################################################################
 
@@ -576,6 +577,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 True, "Invalid project file", "Could not find project file"
             )
         else:
+            self.song_loaded.emit(True)
+
             self._append_recent_project(fname)
 
             self._undo_level = 0
@@ -855,10 +858,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_start_measure_changed(self, value: int) -> None:
-        # TODO: This early-return can probably be handled better
-        if self.song is None:
-            return
-
         section_idx = 0
         for idx, sec_measure in enumerate(self.song.rehearsal_marks.values()):
             if sec_measure <= value:
@@ -872,10 +871,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_start_section_activated(self, section_idx: int) -> None:
-        # TODO: This early-return can probably be handled better
-        if self.song is None:
-            return
-
         name = self.state.section_names[section_idx]
 
         if section_idx == 0:
@@ -1323,6 +1318,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         update_instruments: bool = False,
         state_change: bool = True,
     ) -> None:
+        # Handle this differently
+        if not self.loaded:
+            return
+
         state = self.state
 
         state.unsaved = state_change
@@ -1513,6 +1512,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
     # API property definitions
+    ###########################################################################
+
+    @property
+    def loaded(self) -> bool:
+        loaded = False
+        with suppress(NoState):
+            self.state
+            loaded = True
+        return loaded
+
     ###########################################################################
 
     @property
