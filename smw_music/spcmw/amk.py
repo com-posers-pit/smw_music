@@ -164,5 +164,5 @@ def spc_fname(proj: Project) -> Path:
 ###############################################################################
 
 
-def utilization(project: Project) -> int:
+def utilization(project: Project) -> amk.Utilization:
     return amk.decode_utilization(_vis_fname(project))

@@ -103,7 +103,7 @@ class State:
 
     @cached_property
     def section_names(self) -> list[str]:
-        return ["Capo"] + self.song.rehearsal_marks
+        return ["Capo"] + list(self.song.rehearsal_marks.keys())
 
     ###########################################################################
 

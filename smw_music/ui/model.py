@@ -1269,7 +1269,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         try:
             msg = amk.generate_spc(
-                self.state.project, self.preferences.convert_timeout
+                self.state.project,
+                self._sample_packs,
+                self.preferences.convert_timeout,
             )
         except SmwMusicException as e:
             error = True

@@ -537,7 +537,7 @@ class Project:
                 k: _save_instrument(v) for k, v in settings.instruments.items()
             },
             "adv_settings": {
-                k: _save_adv(v) for k, v in settings.advanced.items()
+                k: _save_adv(v) for k, v in settings.adv_settings.items()
             },
             "amk_settings": {
                 "loop_analysis": settings.loop_analysis,

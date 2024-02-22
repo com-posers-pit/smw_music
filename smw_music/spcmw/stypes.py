@@ -106,5 +106,5 @@ class ProjectDict(TypedDict):
     global_echo: bool
     echo: EchoDict
     instruments: dict[str, InstrumentDict]
-    advanced: dict[str, AdvDict]
+    adv_settings: dict[str, AdvDict]
     amk_settings: AmkSettings
