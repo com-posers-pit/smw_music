@@ -11,8 +11,6 @@
 
 # Standard library imports
 import os
-import shutil
-import subprocess  # nosec 404
 import threading
 from contextlib import suppress
 from copy import deepcopy
@@ -31,11 +29,7 @@ from watchdog import events, observers
 from smw_music import SmwMusicException, __version__, spcmw
 from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
-from smw_music.ext_tools.amk import (
-    BuiltinSampleGroup,
-    BuiltinSampleSource,
-    decode_utilization,
-)
+from smw_music.ext_tools.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
@@ -54,13 +48,13 @@ from smw_music.spcmw import (
     InstrumentSample,
     Preferences,
     Project,
+    SamplePack,
     SampleSource,
     TuneSource,
     Tuning,
     amk,
 )
 from smw_music.ui.quotes import quotes
-from smw_music.ui.sample import SamplePack
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utilization import echo_bytes
 from smw_music.utils import brr_size_b, newest_release, version_tuple
@@ -1270,56 +1264,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _on_generate_spc_clicked(self, report: bool = True) -> bool:
-        assert self.state.loaded  # nosec: B101
-
         error = False
         msg = ""
-        project = self.state.project
 
-        # TODO: Move this to spcmw.amk?
-        if not amk.mml_fname(project).exists():
+        try:
+            msg = amk.generate_spc(
+                self.state.project, self.preferences.convert_timeout
+            )
+        except SmwMusicException as e:
             error = True
-            msg = "MML not generated"
-        else:
-            samples_path = amk.samples_dir(project)
-
-            shutil.rmtree(samples_path, ignore_errors=True)
-            os.makedirs(samples_path, exist_ok=True)
-
-            for inst in project.settings.instruments.values():
-                for sample in inst.samples.values():
-                    if sample.sample_source == SampleSource.BRR:
-                        shutil.copy2(sample.brr_fname, samples_path)
-                    if sample.sample_source == SampleSource.SAMPLEPACK:
-                        pack_name, pack_path = sample.pack_sample
-                        target = samples_path / pack_name / pack_path
-                        os.makedirs(target.parents[0], exist_ok=True)
-                        with open(target, "wb") as fobj:
-                            try:
-                                fobj.write(
-                                    self._sample_packs[pack_name][
-                                        pack_path
-                                    ].data
-                                )
-                            except KeyError:
-                                error = True
-                                msg += (
-                                    f"Could not find sample pack {pack_name}\n"
-                                )
-
-            if not error:
-                try:
-                    msg = amk.convert(
-                        project,
-                        self.preferences.convert_timeout,
-                    )
-                    # TODO: Add stat parsing and reporting
-                except subprocess.CalledProcessError as e:
-                    error = True
-                    msg = e.output.decode("utf8")
-                except subprocess.TimeoutExpired:
-                    error = True
-                    msg = "Conversion timed out"
+            msg = e.args[0]
 
         if report or error:
             self.response_generated.emit(error, "SPC Generated", msg)
@@ -1552,8 +1506,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_utilization_from_amk(self) -> None:
-        util = decode_utilization(amk.vis_fname(self.state.project))
-        self.state.aram_util = util
+        self.state.aram_util = amk.utilization(self.state.project)
         self.state.aram_custom_sample_b = self.sample_bytes
 
     ###########################################################################

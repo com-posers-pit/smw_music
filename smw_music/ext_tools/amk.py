@@ -241,7 +241,7 @@ def default_utilization() -> Utilization:
 
 
 def get_ticks(path: Path, project_name: str) -> list[int]:
-    fname = path / "stats" / f"{project_name}.txt"
+    fname = (stats_dir(path) / project_name).with_suffix("txt")
 
     # Filter only lines with "TICKS:" in it
     with open(fname, "r") as fobj:
@@ -282,6 +282,13 @@ def samples_dir(proj_dir: Path) -> Path:
 
 def spc_dir(proj_dir: Path) -> Path:
     return proj_dir / "SPCs"
+
+
+###############################################################################
+
+
+def stats_dir(proj_dir: Path) -> Path:
+    return proj_dir / "stats"
 
 
 ###############################################################################

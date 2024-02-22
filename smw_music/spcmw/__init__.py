@@ -19,6 +19,7 @@ from .instrument import (
 )
 from .preferences import Preferences
 from .project import EXTENSION, Project, ProjectInfo, ProjectSettings
+from .sample import Sample, SamplePack, SampleParams
 from .spcmw import (
     create_project,
     first_use,
@@ -46,6 +47,9 @@ __all__ = [
     "ProjectSettings",
     "Project",
     "EXTENSION",
+    "Sample",
+    "SamplePack",
+    "SampleParams",
     "create_project",
     "first_use",
     "get_preferences",

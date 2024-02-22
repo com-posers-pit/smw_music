@@ -55,7 +55,7 @@ from smw_music.ext_tools.amk import (
 from smw_music.spc700 import Envelope, GainMode
 from smw_music.spcmw import Artic
 from smw_music.spcmw import Dynamics as Dyn
-from smw_music.spcmw import SampleSource, TuneSource
+from smw_music.spcmw import SamplePack, SampleSource, TuneSource
 from smw_music.utils import brr_size, hexb, pct
 
 from .dashboard_ui import update_sample_opt
@@ -65,7 +65,6 @@ from .model import Model
 from .preferences import PreferencesDlg
 from .project_settings import ProjectSettingsDlg
 from .quotes import labeouf
-from .sample import SamplePack
 from .state import NoSample, State
 from .utilization import Utilization, paint_utilization, setup_utilization
 from .utils import is_checked, to_checkstate
