@@ -43,9 +43,8 @@ def convert(project: Project, timeout: float) -> str:
 
 
 def mml_fname(proj: Project) -> Path:
-    nfo = proj.info
-    mml = (amk.mml_dir(nfo.project_dir) / nfo.project_name).with_suffix(".txt")
-    return mml
+    pdir, pname = proj.info.project_dir, proj.info.project_name
+    return (amk.mml_dir(pdir) / pname).with_suffix(".txt")
 
 
 ###############################################################################
@@ -89,8 +88,7 @@ def samples_dir(proj: Project) -> Path:
 
 def spc_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
-    spc = (amk.vis_dir(pdir) / pname).with_suffix(".spc")
-    return spc
+    return (amk.spc_dir(pdir) / pname).with_suffix(".spc")
 
 
 ###############################################################################
@@ -98,5 +96,4 @@ def spc_fname(proj: Project) -> Path:
 
 def vis_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
-    png = (amk.vis_dir(pdir) / pname).with_suffix(".png")
-    return png
+    return (amk.vis_dir(pdir) / pname).with_suffix(".png")
