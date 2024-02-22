@@ -11,6 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
+from functools import cached_property
 
 # Library imports
 from music21.pitch import Pitch
@@ -18,6 +19,7 @@ from music21.pitch import Pitch
 # Package imports
 from smw_music import SmwMusicException
 from smw_music.ext_tools.amk import Utilization, default_utilization
+from smw_music.song import Song
 from smw_music.spcmw import InstrumentConfig, InstrumentSample, Project
 
 ###############################################################################
@@ -34,9 +36,8 @@ class NoSample(SmwMusicException):
 
 @dataclass
 class State:
-    project: Project = field(default_factory=Project)
+    project: Project
     unsaved: bool = True
-    section_names: list[str] = field(default_factory=list)
     start_measure: int = 1
     start_section_idx: int = 0
 
@@ -54,12 +55,6 @@ class State:
     @property
     def instrument(self) -> InstrumentConfig:
         return self.project.settings.instruments[self.sample_idx[0]]
-
-    ###########################################################################
-
-    @property
-    def loaded(self) -> bool:
-        return self.project.info is not None
 
     ###########################################################################
 
@@ -103,3 +98,15 @@ class State:
                 samples[(inst_name, sample_name)] = sample
 
         return samples
+
+    ###########################################################################
+
+    @cached_property
+    def section_names(self) -> list[str]:
+        return ["Capo"] + self.song.rehearsal_marks
+
+    ###########################################################################
+
+    @cached_property
+    def song(self) -> Song:
+        return Song.from_music_xml(self.project.info.musicxml_fname)

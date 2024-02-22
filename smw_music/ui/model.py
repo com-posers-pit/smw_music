@@ -1130,9 +1130,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             )
 
             self.state.start_section_idx = 0
-            self.state.section_names = ["Capo"] + list(
-                self.song.rehearsal_marks.keys()
-            )
 
             if self._on_generate_mml_clicked(False):
                 self._on_generate_spc_clicked(False)
