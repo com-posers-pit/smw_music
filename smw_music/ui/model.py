@@ -169,7 +169,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     _history: list[State]
     _undo_level: int
     _sample_packs: dict[str, SamplePack]
-    _project_path: Path | None
     _sample_watcher: observers.Observer
     _sample_player: SamplePlayer
 
@@ -183,7 +182,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._history = []
         self._undo_level = 0
         self._sample_packs = {}
-        self._project_path = None
         self._sample_player = SamplePlayer()
 
         self._start_watcher()
@@ -195,7 +193,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def create_project(
         self, path: Path, project_name: str | None = None
     ) -> None:
-        self._project_path = path
         spcmw.create_project(path, project_name)
 
         self._update_state()
@@ -211,7 +208,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def close_project(self) -> None:
-        self._project_path = None
+        self.song_loaded.emit(False)
         self._update_state(update_instruments=True)
         self.update_status("Project closed")
 
@@ -583,7 +580,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             self._undo_level = 0
             self._history = [replace(project)]
-            self._project_path = fname.parent
             self._load_musicxml(project.info.musicxml_fname, True)
 
             self.reinforce_state()
@@ -722,7 +718,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_play_spc_clicked(self) -> None:
-        path = self._project_path
         info = self.state.project.info
 
         assert path is not None  # nosec: B101
