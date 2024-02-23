@@ -472,7 +472,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_song_loaded(self, loaded: bool) -> None:
-        widgets = set(
+        widgets: set[QWidget | QAction] = set(
             x
             for x in self._view_widgets
             if not isinstance(x, (QMenu, QMenuBar, QAction))
@@ -1117,8 +1117,9 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _open_project(self) -> None:
+        exts = f"*.{spcmw.EXTENSION} *.{spcmw.OLD_EXTENSION}"
         fname, _ = QFileDialog.getOpenFileName(
-            self._view, "Project File", filter=f"*.{spcmw.EXTENSION}"
+            self._view, "Project File", filter=f"SPCMW Project Files ({exts})"
         )
         if fname:
             self._model.on_load(Path(fname))

@@ -49,6 +49,7 @@ from .stypes import AdvDict, EchoDict, InstrumentDict, ProjectDict, SampleDict
 
 CURRENT_SAVE_VERSION = 2
 EXTENSION = "spcmw"
+OLD_EXTENSION = "prj"
 
 
 ###############################################################################

@@ -18,7 +18,13 @@ from .instrument import (
     Tuning,
 )
 from .preferences import Preferences
-from .project import EXTENSION, Project, ProjectInfo, ProjectSettings
+from .project import (
+    EXTENSION,
+    OLD_EXTENSION,
+    Project,
+    ProjectInfo,
+    ProjectSettings,
+)
 from .sample import Sample, SamplePack, SampleParams
 from .spcmw import (
     create_project,
@@ -47,6 +53,7 @@ __all__ = [
     "ProjectSettings",
     "Project",
     "EXTENSION",
+    "OLD_EXTENSION",
     "Sample",
     "SamplePack",
     "SampleParams",
