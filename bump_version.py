@@ -29,7 +29,7 @@ def _bump_version(version, codename):
     _overwrite("pyproject.toml", key, f'{key}"{version}"')
 
     key = "__version__ = "
-    _overwrite("smw_music/__init__.py", key, f'{key}"{version}"')
+    _overwrite("smw_music/common.py", key, f'{key}"{version}"')
 
     key = "assert __version__ == "
     _overwrite("tests/test_smw_music.py", key, f'{key}"{version}"')

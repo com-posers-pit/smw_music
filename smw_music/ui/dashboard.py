@@ -57,7 +57,7 @@ from smw_music.spc700 import Envelope, GainMode
 from smw_music.spcmw import Artic
 from smw_music.spcmw import Dynamics as Dyn
 from smw_music.spcmw import SamplePack, SampleSource, TuneSource
-from smw_music.utils import brr_size, hexb, pct
+from smw_music.utils import brr_size, codename, hexb, pct
 
 from .dashboard_ui import update_sample_opt
 from .dashboard_view import DashboardView
@@ -629,12 +629,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _about(self) -> None:
-        with (RESOURCES / "codenames.csv").open() as fobj:
-            for row in csv.reader(fobj):
-                codename = row[-1]
-
         title = "About MusicXML -> MML"
-        text = f"Version: {__version__} ({codename})"
+        text = f"Version: {__version__} ({codename()})"
         text += f"\nCopyright Ⓒ {COPYRIGHT_YEAR} The SMW Music Python Project "
         text += "Authors"
         text += "\nHomepage: https://github.com/com-posers-pit/smw_music"
@@ -1137,14 +1133,13 @@ class Dashboard(QWidget):
         reply = None
         if self._loaded and self._unsaved:
             quit_msg = "Save project before closing?"
+            std = QMessageBox.StandardButton
             reply = QMessageBox.question(
                 self._view,
                 "Save project",
                 quit_msg,
-                QMessageBox.StandardButton.Yes
-                | QMessageBox.StandardButton.No
-                | QMessageBox.StandardButton.Cancel,
-                QMessageBox.StandardButton.Cancel,
+                std.Yes | std.No | std.Cancel,
+                std.Cancel,
             )
 
             if reply == QMessageBox.StandardButton.Yes:
@@ -1480,7 +1475,7 @@ class Dashboard(QWidget):
 
     @property
     def _echo_widgets(self) -> list[QWidget]:
-        v = self._view  # pylint: disable=invalid-name
+        v = self._view
         return [
             v.echo_filter_0,
             v.echo_filter_1,

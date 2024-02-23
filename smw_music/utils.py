@@ -10,13 +10,16 @@
 ###############################################################################
 
 # Standard library imports
-import urllib.error
-import urllib.request
+import csv
 from contextlib import suppress
 from math import isclose
 from pathlib import Path
 from typing import Any, Tuple, Type, TypeVar
+from urllib import error
+from urllib.request import Request, urlopen
 from zipfile import ZipFile
+
+from .common import RESOURCES
 
 # TODO: Replace this with a generic function in python 3.12 only
 T = TypeVar("T")
@@ -46,6 +49,17 @@ def brr_size_b(fsize: int) -> int:
 ###############################################################################
 
 
+def codename() -> str:
+    with (RESOURCES / "codenames.csv").open() as fobj:
+        for row in csv.reader(fobj):
+            codename = row[-1]
+
+    return codename
+
+
+###############################################################################
+
+
 def filter_type(dtype: Type[T] | Tuple[Type[T]], lst: list[Any]) -> list[T]:
     return list(filter(lambda x: isinstance(x, dtype), lst))
 
@@ -61,12 +75,10 @@ def hexb(val: int) -> str:
 
 
 def newest_release() -> tuple[str, tuple[int, int, int]] | None:
-    req = urllib.request.Request(
+    req = Request(
         "https://github.com/com-posers-pit/smw_music/releases/latest"
     )
-    with suppress(urllib.error.HTTPError), urllib.request.urlopen(
-        req
-    ) as resp:  # nosec: B310
+    with suppress(error.HTTPError), urlopen(req) as resp:  # nosec: B310
         url = resp.geturl()
         return (url, version_tuple(url.split("/")[-1].lstrip("v")))
     return None
