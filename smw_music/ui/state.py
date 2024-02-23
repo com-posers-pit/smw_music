@@ -11,7 +11,6 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
-from functools import cached_property
 
 # Library imports
 from music21.pitch import Pitch
@@ -19,7 +18,6 @@ from music21.pitch import Pitch
 # Package imports
 from smw_music.common import SmwMusicException
 from smw_music.ext_tools.amk import Utilization, default_utilization
-from smw_music.song import Song
 from smw_music.spcmw import InstrumentConfig, InstrumentSample, Project
 
 ###############################################################################
@@ -45,6 +43,7 @@ class State:
     aram_util: Utilization = field(default_factory=default_utilization)
     aram_custom_sample_b: int = 0
     calculated_tune: tuple[float, tuple[int, float]] = (0, (0, 0))
+    section_names: list[str] = field(default_factory=list)
 
     _sample_idx: tuple[str, str] | None = None
 
@@ -98,15 +97,3 @@ class State:
                 samples[(inst_name, sample_name)] = sample
 
         return samples
-
-    ###########################################################################
-
-    @cached_property
-    def section_names(self) -> list[str]:
-        return ["Capo"] + list(self.song.rehearsal_marks.keys())
-
-    ###########################################################################
-
-    @cached_property
-    def song(self) -> Song:
-        return Song.from_music_xml(self.project.info.musicxml_fname)
