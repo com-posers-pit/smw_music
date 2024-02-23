@@ -42,7 +42,7 @@ from PyQt6.QtWidgets import (
 )
 
 # Package imports
-from smw_music import __version__
+from smw_music.common import __version__
 
 ###############################################################################
 # Private function definitions

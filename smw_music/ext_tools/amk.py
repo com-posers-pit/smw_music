@@ -26,7 +26,7 @@ from mako.template import Template  # type: ignore
 from PIL import Image
 
 # Package imports
-from smw_music import RESOURCES
+from smw_music.common import RESOURCES
 from smw_music.utils import zip_top
 
 ###############################################################################

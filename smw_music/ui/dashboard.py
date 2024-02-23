@@ -10,7 +10,6 @@
 ###############################################################################
 
 # Standard library imports
-import csv
 import enum
 from collections import deque
 from contextlib import ExitStack, suppress
@@ -47,7 +46,8 @@ from PyQt6.QtWidgets import (
 )
 
 # Package imports
-from smw_music import COPYRIGHT_YEAR, RESOURCES, __version__, spcmw
+import smw_music.spcmw as spcmw
+from smw_music.common import COPYRIGHT_YEAR, RESOURCES, __version__
 from smw_music.ext_tools.amk import (
     N_BUILTIN_SAMPLES,
     BuiltinSampleGroup,

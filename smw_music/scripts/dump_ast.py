@@ -16,7 +16,7 @@ import argparse
 import sys
 
 # Package imports
-from smw_music import __version__
+from smw_music.common import __version__
 from smw_music.song import Song
 
 ###############################################################################

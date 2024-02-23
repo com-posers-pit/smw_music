@@ -17,7 +17,7 @@ import sys
 from pathlib import Path
 
 # Package imports
-from smw_music import __version__
+from smw_music.common import __version__
 from smw_music.spc700 import Brr
 
 ###############################################################################

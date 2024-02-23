@@ -17,7 +17,7 @@ from functools import cached_property
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music import SmwMusicException
+from smw_music.common import SmwMusicException
 from smw_music.ext_tools.amk import Utilization, default_utilization
 from smw_music.song import Song
 from smw_music.spcmw import InstrumentConfig, InstrumentSample, Project

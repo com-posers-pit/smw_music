@@ -17,10 +17,11 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
-from smw_music import RESOURCES
+from smw_music.common import RESOURCES
 from smw_music.spcmw import Preferences
-from smw_music.ui.preferences_view import PreferencesView
-from smw_music.ui.utils import is_checked
+
+from .preferences_view import PreferencesView
+from .utils import is_checked
 
 ###############################################################################
 # Private constant definitions

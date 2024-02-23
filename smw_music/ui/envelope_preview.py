@@ -15,8 +15,9 @@ from PyQt6.QtGui import QBrush
 from PyQt6.QtWidgets import QHBoxLayout, QWidget
 
 # Package imports
-from smw_music import spc700
-from smw_music.ui.utils import Color
+import smw_music.spc700 as spc700
+
+from .utils import Color
 
 ###############################################################################
 # API class definitions

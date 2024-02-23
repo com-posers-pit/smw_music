@@ -26,7 +26,8 @@ from PyQt6.QtCore import QObject, pyqtSignal
 from watchdog import events, observers
 
 # Package imports
-from smw_music import SmwMusicException, __version__, spcmw
+import smw_music.spcmw as spcmw
+from smw_music.common import SmwMusicException, __version__
 from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
 from smw_music.ext_tools.amk import BuiltinSampleGroup, BuiltinSampleSource

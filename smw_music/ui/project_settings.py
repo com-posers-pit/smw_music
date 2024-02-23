@@ -17,9 +17,10 @@ from PyQt6 import uic
 from PyQt6.QtWidgets import QFileDialog
 
 # Package imports
-from smw_music import RESOURCES
+from smw_music.common import RESOURCES
 from smw_music.spcmw import ProjectInfo
-from smw_music.ui.project_settings_view import ProjectSettingsView
+
+from .project_settings_view import ProjectSettingsView
 
 ###############################################################################
 # API class definitions

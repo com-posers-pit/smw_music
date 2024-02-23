@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Callable, MutableMapping
 
 # Package imports
-from smw_music import __version__
+from smw_music.common import __version__
 from smw_music.spc700 import BLOCK_SIZE, Brr, extract_brrs
 
 ###############################################################################

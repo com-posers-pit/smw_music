@@ -44,7 +44,7 @@ import numpy.typing as npt
 from scipy.signal import find_peaks, lfilter, lfiltic  # type: ignore
 
 # Package imports
-from smw_music import SmwMusicException
+from smw_music.common import SmwMusicException
 
 from .nspc import calc_tune
 from .spc700 import PITCH_REG_SCALE, SAMPLE_FREQ, Envelope

@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Package imports
-from smw_music import SmwMusicException
+from smw_music.common import SmwMusicException
 
 ###############################################################################
 # API class definitions

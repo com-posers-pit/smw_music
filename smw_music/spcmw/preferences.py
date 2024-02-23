@@ -18,7 +18,7 @@ from pathlib import Path
 import yaml
 
 # Package imports
-from smw_music import SmwMusicException, __version__
+from smw_music.common import SmwMusicException, __version__
 
 ###############################################################################
 # Private constant definitions
