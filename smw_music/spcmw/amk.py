@@ -17,7 +17,6 @@ import stat
 import subprocess
 import zipfile
 from copy import deepcopy
-from enum import Enum, auto
 from glob import glob
 from pathlib import Path
 
@@ -25,54 +24,16 @@ from pathlib import Path
 from mako.template import Template  # type: ignore
 
 # Package imports
-from smw_music.common import RESOURCES, SpcmwException
+from smw_music.common import RESOURCES
 from smw_music.ext_tools import amk
 
+from .common import SpcmwException
 from .instrument import SampleSource
 from .project import Project
 from .sample import SamplePack
 
 ###############################################################################
-# Private constant definitions
-###############################################################################
-
-_SAMPLE_GROUP_FNAME = "Addmusic_sample groups.txt"
-
-###############################################################################
-# API Class definitions
-###############################################################################
-
-
-class BuiltinSampleGroup(Enum):
-    DEFAULT = auto()
-    OPTIMIZED = auto()
-    REDUX1 = auto()
-    REDUX2 = auto()
-    CUSTOM = auto()
-
-
-###############################################################################
-
-
-class BuiltinSampleSource(Enum):
-    DEFAULT = auto()
-    OPTIMIZED = auto()
-    EMPTY = auto()
-
-
-###############################################################################
 # Private function definitions
-###############################################################################
-
-
-def _append_spcmw_sample_groups(path: Path) -> None:
-    # Append new sample groups
-    with (RESOURCES / "sample_groups.txt").open("r") as fobj_in, open(
-        path / _SAMPLE_GROUP_FNAME, "a", newline="\r\n"
-    ) as fobj_out:
-        fobj_out.write(fobj_in.read())
-
-
 ###############################################################################
 
 
@@ -140,24 +101,6 @@ def _mml_fname(proj: Project) -> Path:
 ###############################################################################
 
 
-def _remove_spcmw_sample_groups(path: Path) -> None:
-    builtin_group_count = 3  # {default, optimized, AMM}
-
-    sep = "}"
-    fname = path / _SAMPLE_GROUP_FNAME
-    with open(fname) as fobj:
-        contents = [x for x in fobj.read().split(sep) if x]
-
-    contents = contents[:builtin_group_count]
-    contents.append("\n")
-
-    with open(fname, "w", newline="\r\n") as fobj:
-        fobj.write(sep.join(contents))
-
-
-###############################################################################
-
-
 def _vis_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
     return (amk.vis_dir(pdir) / pname).with_suffix(".png")
@@ -170,9 +113,6 @@ def _vis_fname(proj: Project) -> Path:
 
 def create_project(path: Path, project_name: str, amk_zname: Path) -> None:
     amk.create_project(path, project_name, amk_zname)
-
-    # Append new sample groups
-    _append_spcmw_sample_groups(path)
 
     # Create the conversion scripts
     _create_conversion_scripts(path, project_name)
@@ -251,55 +191,6 @@ def samples_dir(proj: Project) -> Path:
 def spc_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
     return (amk.spc_dir(pdir) / pname).with_suffix(".spc")
-
-
-###############################################################################
-
-
-def update_sample_groups_file(
-    path: Path,
-    sample_group: BuiltinSampleGroup,
-    sample_sources: list[BuiltinSampleSource],
-) -> None:
-    _remove_spcmw_sample_groups(path)
-    _append_spcmw_sample_groups(path)
-
-    if sample_group == BuiltinSampleGroup.CUSTOM:
-        smap = [
-            '00 SMW @0.brr"!',
-            '01 SMW @1.brr"!',
-            '02 SMW @2.brr"!',
-            '03 SMW @3.brr"!',
-            '04 SMW @4.brr"!',
-            '05 SMW @8.brr"!',
-            '06 SMW @22.brr"!',
-            '07 SMW @5.brr"!',
-            '08 SMW @6.brr"!',
-            '09 SMW @7.brr"!',
-            '0A SMW @9.brr"!',
-            '0B SMW @10.brr"!',
-            '0C SMW @13.brr"!',
-            '0D SMW @14.brr"',
-            '0E SMW @29.brr"!',
-            '0F SMW @21.brr"',
-            '10 SMW @12.brr"!',
-            '11 SMW @17.brr"',
-            '12 SMW @15.brr"!',
-            '13 SMW Thunder.brr"!',
-        ]
-
-        group = ["", "#custom", "{"]
-        for src, sample in zip(sample_sources, smap):
-            match src:
-                case BuiltinSampleSource.DEFAULT:
-                    group.append(f'\t"default/{sample}')
-                case BuiltinSampleSource.OPTIMIZED:
-                    group.append(f'\t"optimized/{sample}')
-                case BuiltinSampleSource.EMPTY:
-                    group.append('\t"EMPTY.brr"')
-        group.extend(["}", ""])
-        with open(path / _SAMPLE_GROUP_FNAME, "a", newline="\r\n") as fobj:
-            fobj.write("\n".join(group))
 
 
 ###############################################################################

@@ -15,7 +15,7 @@ import os
 import shutil
 import zipfile
 from dataclasses import dataclass, field
-from enum import Enum
+from enum import Enum, auto
 from pathlib import Path
 
 # Library imports
@@ -24,7 +24,14 @@ import numpy.typing as npt
 from PIL import Image
 
 # Package imports
+from smw_music.common import RESOURCES
 from smw_music.utils import zip_top
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+_SAMPLE_GROUP_FNAME = "Addmusic_sample groups.txt"
 
 ###############################################################################
 # API constant definitions
@@ -51,6 +58,23 @@ class _UsageType(Enum):
 ###############################################################################
 # API class definitions
 ###############################################################################
+
+
+class BuiltinSampleGroup(Enum):
+    DEFAULT = auto()
+    OPTIMIZED = auto()
+    REDUX1 = auto()
+    REDUX2 = auto()
+    CUSTOM = auto()
+
+
+###############################################################################
+
+
+class BuiltinSampleSource(Enum):
+    DEFAULT = auto()
+    OPTIMIZED = auto()
+    EMPTY = auto()
 
 
 @dataclass
@@ -95,6 +119,9 @@ class Utilization:
 
 def create_project(path: Path, project_name: str, amk_zname: Path) -> None:
     _unpack_amk(path, amk_zname)
+
+    # Append new sample groups
+    _append_spcmw_sample_groups(path)
 
     # Add visualizations directory
     make_vis_dir(path)
@@ -211,6 +238,55 @@ def stats_dir(proj_dir: Path) -> Path:
 ###############################################################################
 
 
+def update_sample_groups_file(
+    path: Path,
+    sample_group: BuiltinSampleGroup,
+    sample_sources: list[BuiltinSampleSource],
+) -> None:
+    _remove_spcmw_sample_groups(path)
+    _append_spcmw_sample_groups(path)
+
+    if sample_group == BuiltinSampleGroup.CUSTOM:
+        smap = [
+            '00 SMW @0.brr"!',
+            '01 SMW @1.brr"!',
+            '02 SMW @2.brr"!',
+            '03 SMW @3.brr"!',
+            '04 SMW @4.brr"!',
+            '05 SMW @8.brr"!',
+            '06 SMW @22.brr"!',
+            '07 SMW @5.brr"!',
+            '08 SMW @6.brr"!',
+            '09 SMW @7.brr"!',
+            '0A SMW @9.brr"!',
+            '0B SMW @10.brr"!',
+            '0C SMW @13.brr"!',
+            '0D SMW @14.brr"',
+            '0E SMW @29.brr"!',
+            '0F SMW @21.brr"',
+            '10 SMW @12.brr"!',
+            '11 SMW @17.brr"',
+            '12 SMW @15.brr"!',
+            '13 SMW Thunder.brr"!',
+        ]
+
+        group = ["", "#custom", "{"]
+        for src, sample in zip(sample_sources, smap):
+            match src:
+                case BuiltinSampleSource.DEFAULT:
+                    group.append(f'\t"default/{sample}')
+                case BuiltinSampleSource.OPTIMIZED:
+                    group.append(f'\t"optimized/{sample}')
+                case BuiltinSampleSource.EMPTY:
+                    group.append('\t"EMPTY.brr"')
+        group.extend(["}", ""])
+        with open(path / _SAMPLE_GROUP_FNAME, "a", newline="\r\n") as fobj:
+            fobj.write("\n".join(group))
+
+
+###############################################################################
+
+
 # https://www.smwcentral.net/?p=viewthread&t=98793&page=1&pid=1579851#p1579851
 def vis_dir(proj_dir: Path) -> Path:
     return proj_dir / "Visualizations"
@@ -221,9 +297,38 @@ def vis_dir(proj_dir: Path) -> Path:
 ###############################################################################
 
 
+def _append_spcmw_sample_groups(path: Path) -> None:
+    # Append new sample groups
+    with (RESOURCES / "sample_groups.txt").open("r") as fobj_in, open(
+        path / _SAMPLE_GROUP_FNAME, "a", newline="\r\n"
+    ) as fobj_out:
+        fobj_out.write(fobj_in.read())
+
+
+###############################################################################
+
+
 def _count_matches(arr: npt.NDArray[np.uint8], val: _UsageType) -> int:
     (matches,) = np.where((arr == val.value).all(axis=1))
     return len(matches)
+
+
+###############################################################################
+
+
+def _remove_spcmw_sample_groups(path: Path) -> None:
+    builtin_group_count = 3  # {default, optimized, AMM}
+
+    sep = "}"
+    fname = path / _SAMPLE_GROUP_FNAME
+    with open(fname) as fobj:
+        contents = [x for x in fobj.read().split(sep) if x]
+
+    contents = contents[:builtin_group_count]
+    contents.append("\n")
+
+    with open(fname, "w", newline="\r\n") as fobj:
+        fobj.write(sep.join(contents))
 
 
 ###############################################################################

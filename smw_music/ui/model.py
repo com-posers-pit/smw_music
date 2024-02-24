@@ -30,6 +30,7 @@ import smw_music.spcmw as spcmw
 from smw_music.common import SmwMusicException, __version__
 from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
+from smw_music.ext_tools.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
@@ -55,7 +56,6 @@ from smw_music.spcmw import (
     amk,
     get_preferences,
 )
-from smw_music.spcmw.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.ui.quotes import quotes
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utilization import echo_bytes

@@ -21,10 +21,14 @@ import yaml
 
 # Package imports
 from smw_music.common import __version__
-from smw_music.ext_tools.amk import N_BUILTIN_SAMPLES, make_vis_dir
+from smw_music.ext_tools.amk import (
+    N_BUILTIN_SAMPLES,
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    make_vis_dir,
+)
 from smw_music.song import Dynamics, NoteHead
 from smw_music.spc700 import EchoConfig, Envelope, GainMode
-from smw_music.spcmw.amk import BuiltinSampleGroup, BuiltinSampleSource
 
 from .advanced import (
     Advanced,
@@ -206,7 +210,7 @@ def _save_adv(adv: Advanced) -> AdvDict:
             dval = (types.GLISSANDO, [dur, semitones])
         case GVolumeFade(dur, volume):
             dval = (types.GLISSANDO, [dur, volume])
-        case Nop:
+        case Nop():
             dval = (types.NOP, [])
         case PanFade(dur, pan):
             dval = (types.PAN_FADE, [dur, pan])
