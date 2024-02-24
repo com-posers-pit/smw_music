@@ -58,14 +58,14 @@ class ProjectSettingsDlg:
     # API function definitions
     ###########################################################################
 
-    def exec(self, settings: ProjectInfo) -> ProjectInfo | None:
+    def exec(self, info: ProjectInfo) -> ProjectInfo | None:
         d = self._dialog
 
-        d.composer.setText(settings.composer)
-        d.game_name.setText(settings.game)
-        d.musicxml_fname.setText(str(settings.musicxml_fname))
-        d.porter_name.setText(settings.porter)
-        d.title.setText(settings.title)
+        d.composer.setText(info.composer)
+        d.game_name.setText(info.game)
+        d.musicxml_fname.setText(str(info.musicxml_fname))
+        d.porter_name.setText(info.porter)
+        d.title.setText(info.title)
 
         if self._dialog.exec():
             musicxml_fname = Path(d.musicxml_fname.text())
@@ -73,9 +73,9 @@ class ProjectSettingsDlg:
                 musicxml_fname = Path("")
 
             return ProjectInfo(
-                settings.project_dir,
+                info.project_dir,
                 musicxml_fname,
-                settings.project_name,
+                info.project_name,
                 d.composer.text(),
                 d.title.text(),
                 d.porter_name.text(),
