@@ -14,7 +14,7 @@ import os
 import threading
 from contextlib import suppress
 from copy import deepcopy
-from dataclasses import fields, replace
+from dataclasses import replace
 from glob import glob
 from pathlib import Path
 from random import choice
@@ -128,8 +128,8 @@ class NoState(SmwMusicException):
 
 class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal(
-        (State, bool),
-        arguments=["state", "update_instruments"],  # type: ignore[call-arg]
+        (bool),
+        arguments=["update_instruments"],  # type: ignore[call-arg]
     )
     preferences_changed = pyqtSignal(
         (bool, bool, bool, bool, bool),
@@ -195,17 +195,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def create_project(
         self, path: Path, project_name: str | None = None
     ) -> None:
-        spcmw.create_project(path, project_name)
+        project = spcmw.create_project(path, project_name)
+        self._append_recent_project(project.info.project_fname)
 
-        self._update_state()
-        self._update_state(
-            project_name=project_name,
-        )
+        self._update_state(State(project))
 
-        # TODO: Unify this project path with what's used in on_save
-        self._append_recent_project(path / (project_name + ".prj"))
         self.update_status(f"Created project {project_name}")
-        self.on_save()
+        # TODO
+        # self.on_save()
 
     ###########################################################################
 
@@ -1276,9 +1273,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _rollback_undo(self) -> None:
-        while self._undo_level:
-            self._history.pop()
-            self._undo_level -= 1
+        self._history.clear()
+        self._undo_level = 0
 
     ###########################################################################
 
@@ -1371,7 +1367,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.state.unmapped = {
                     (pitch, str(head)) for pitch, head in unmapped
                 }
-        self.state_changed.emit(self.state, update_instruments)
+        self.state_changed.emit(update_instruments)
 
     ###########################################################################
 
@@ -1443,42 +1439,19 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _update_state(
         self,
+        new_state: State,
         update_instruments: bool = False,
-        **kwargs: str
-        | bool
-        | InstrumentConfig
-        | dict[str, InstrumentConfig]
-        | None
-        | EchoConfig
-        | int
-        | tuple[str, str | None]
-        | Path
-        | BuiltinSampleGroup
-        | list[BuiltinSampleSource],
     ) -> None:
-        if kwargs:
-            # TODO: This is a goofy way to split setting fields and properties.
-            # Needs revisiting.
-            attrs = {}
-            props = {}
-            state_fields = [x.name for x in fields(self.state)]
-            for k, v in kwargs.items():
-                if k in state_fields:
-                    attrs[k] = v
-                else:
-                    props[k] = v
+        do_update = True
+        with suppress(NoState):
+            if new_state == self.state:
+                do_update = False
 
-            new_state = replace(self.state, **attrs)  # type: ignore
-
-            for key, val in props.items():
-                setattr(new_state, key, val)
-        else:
-            new_state = State()
-
-        if new_state != self.state:
+        if do_update:
             self._rollback_undo()
 
-            self._save_backup()
+            # TODO
+            # self._save_backup()
             self._history.append(new_state)
             self._signal_state_change(update_instruments)
 
@@ -1546,7 +1519,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @property
     def state(self) -> State:
-        if self._undo_level < 1:
+        try:
+            return self._history[-1 - self._undo_level]
+        except IndexError:
             raise NoState()
-
-        return self._history[-1 - self._undo_level]

@@ -46,7 +46,6 @@ from PyQt6.QtWidgets import (
 )
 
 # Package imports
-import smw_music.spcmw as spcmw
 from smw_music.common import COPYRIGHT_YEAR, RESOURCES, __version__
 from smw_music.ext_tools.amk import (
     N_BUILTIN_SAMPLES,
@@ -54,9 +53,10 @@ from smw_music.ext_tools.amk import (
     BuiltinSampleSource,
 )
 from smw_music.spc700 import Envelope, GainMode
-from smw_music.spcmw import Artic
+from smw_music.spcmw import EXTENSION, OLD_EXTENSION, Artic
 from smw_music.spcmw import Dynamics as Dyn
 from smw_music.spcmw import SamplePack, SampleSource, TuneSource
+from smw_music.spcmw.project import ProjectInfo, ProjectSettings
 from smw_music.utils import brr_size, codename, hexb, pct
 
 from .dashboard_ui import update_sample_opt
@@ -499,9 +499,9 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_state_changed(self, state: State, update_instruments: bool) -> None:
-        project = state.project
-        settings = project.settings
+    def on_state_changed(self, update_instruments: bool) -> None:
+        state = self.state
+        settings = self.proj_settings
 
         if update_instruments:
             self._update_instruments(state)
@@ -512,8 +512,7 @@ class Dashboard(QWidget):
 
         title = "[No project]"
         if self._loaded:
-            assert project.info is not None
-            title = f"[{project.info.project_name}]"
+            title = f"[{self.proj_info.project_name}]"
             if self._unsaved:
                 title += " +"
 
@@ -942,8 +941,9 @@ class Dashboard(QWidget):
     def _create_project(self) -> None:
         proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir:
-            self._on_open_project_settings()
+            # Directly execute this so future calls block until completion
             self._model.create_project(Path(proj_dir))
+            self._on_open_project_settings()
 
     ###########################################################################
 
@@ -1038,8 +1038,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_open_project_settings(self) -> None:
-        print("opening project settings")
-        settings = self._project_settings.exec(self._project_settings)
+        settings = self._project_settings.exec(self.state.project.info)
         if settings:
             print(settings)
 
@@ -1113,7 +1112,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _open_project(self) -> None:
-        exts = f"*.{spcmw.EXTENSION} *.{spcmw.OLD_EXTENSION}"
+        exts = f"*.{EXTENSION} *.{OLD_EXTENSION}"
         fname, _ = QFileDialog.getOpenFileName(
             self._view, "Project File", filter=f"SPCMW Project Files ({exts})"
         )
@@ -1495,6 +1494,22 @@ class Dashboard(QWidget):
             v.echo_delay_setting,
             v.echo_delay_setting_label,
         ]
+
+    ###########################################################################
+
+    @property
+    def proj_info(self) -> ProjectInfo:
+        return self.state.project.info
+
+    ###########################################################################
+
+    @property
+    def proj_settings(self) -> ProjectSettings:
+        return self.state.project.settings
+
+    @property
+    def state(self) -> State:
+        return self._model.state
 
     ###########################################################################
 
