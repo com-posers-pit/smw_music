@@ -459,6 +459,15 @@ class Project:
     ###########################################################################
 
     @classmethod
+    def new_project(cls, path: Path, name: str) -> "Project":
+        return cls(
+            ProjectInfo(project_dir=path, project_name=name),
+            ProjectSettings(),
+        )
+
+    ###########################################################################
+
+    @classmethod
     def load(cls, fname: Path) -> tuple["Project", Path | None]:
         with open(fname, "r", encoding="utf8") as fobj:
             contents: ProjectDict = yaml.safe_load(fobj)

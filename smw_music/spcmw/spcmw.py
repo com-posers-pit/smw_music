@@ -23,6 +23,7 @@ from smw_music.common import SmwMusicException
 from smw_music.spcmw.preferences import Preferences
 
 from . import amk
+from .project import Project
 
 ###############################################################################
 # Private function definitions
@@ -68,11 +69,12 @@ _RECENT_PROJECTS_FNAME = _CONFIG_DIR / "projects.yaml"
 ###############################################################################
 
 
-def create_project(path: Path, project_name: str | None = None) -> None:
+def create_project(path: Path, project_name: str | None = None) -> Project:
     if project_name is None:
         project_name = path.name
 
     amk.create_project(path, project_name, get_preferences().amk_fname)
+    return Project.new_project(path, project_name)
 
 
 ###############################################################################
