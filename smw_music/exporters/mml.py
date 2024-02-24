@@ -423,7 +423,7 @@ class MmlExporter(Exporter):
             # Not necessary, but we keep it for consistency's sake
             sample_id += 1
 
-        tmpl = Template(RESOURCES / "mml.txt")  # nosec B702
+        tmpl = Template(filename=str(RESOURCES / "mml.txt"))  # nosec B702
 
         # TODO Move this into the to_mml_file
         sample_group = "optimized"

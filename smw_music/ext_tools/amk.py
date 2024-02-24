@@ -176,7 +176,7 @@ def create_project(path: Path, project_name: str, amk_zname: Path) -> None:
 
     # Create the conversion scripts
     for tmpl_name in ["convert.bat", "convert.sh"]:
-        tmpl = Template(RESOURCES / tmpl_name)  # nosec B702
+        tmpl = Template(filename=str(RESOURCES / tmpl_name))  # nosec B702
         script = tmpl.render(project=project_name)
         target = path / tmpl_name
 
