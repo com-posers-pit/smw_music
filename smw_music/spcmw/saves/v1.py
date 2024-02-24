@@ -17,11 +17,8 @@ from typing import NotRequired, TypedDict
 import yaml
 
 # Package imports
-from smw_music.ext_tools.amk import (
-    N_BUILTIN_SAMPLES,
-    BuiltinSampleGroup,
-    BuiltinSampleSource,
-)
+from smw_music.ext_tools.amk import N_BUILTIN_SAMPLES
+from smw_music.spcmw.amk import BuiltinSampleGroup, BuiltinSampleSource
 
 from .. import stypes as v2
 

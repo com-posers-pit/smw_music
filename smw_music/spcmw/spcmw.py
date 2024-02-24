@@ -20,8 +20,9 @@ import yaml
 
 # Package imports
 from smw_music.common import SmwMusicException
-from smw_music.ext_tools import amk
-from smw_music.spcmw import Preferences
+from smw_music.spcmw.preferences import Preferences
+
+from . import amk
 
 ###############################################################################
 # Private function definitions

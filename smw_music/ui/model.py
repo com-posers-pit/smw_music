@@ -30,7 +30,6 @@ import smw_music.spcmw as spcmw
 from smw_music.common import SmwMusicException, __version__
 from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
-from smw_music.ext_tools.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
@@ -54,7 +53,9 @@ from smw_music.spcmw import (
     TuneSource,
     Tuning,
     amk,
+    get_preferences,
 )
+from smw_music.spcmw.amk import BuiltinSampleGroup, BuiltinSampleSource
 from smw_music.ui.quotes import quotes
 from smw_music.ui.state import NoSample, State
 from smw_music.ui.utilization import echo_bytes
@@ -179,7 +180,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def __init__(self) -> None:
         super().__init__()
-        self.preferences = spcmw.get_preferences()
+        self.preferences = get_preferences()
         self._history = []
         self._undo_level = 0
         self._sample_packs = {}
@@ -1123,7 +1124,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _load_prefs(self) -> None:
-        self.preferences = spcmw.get_preferences()
+        self.preferences = get_preferences()
 
         self._start_watcher()
 

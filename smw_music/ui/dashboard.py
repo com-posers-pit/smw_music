@@ -942,8 +942,8 @@ class Dashboard(QWidget):
     def _create_project(self) -> None:
         proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir:
-            self._model.create_project(Path(proj_dir))
             self._on_open_project_settings()
+            self._model.create_project(Path(proj_dir))
 
     ###########################################################################
 

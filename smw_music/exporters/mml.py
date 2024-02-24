@@ -24,7 +24,6 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music.common import RESOURCES, __version__
-from smw_music.ext_tools import amk
 from smw_music.song import (
     Annotation,
     Artic,
@@ -53,6 +52,7 @@ from smw_music.spcmw import (
     InstrumentSample,
     Project,
     SampleSource,
+    amk,
 )
 
 from .common import Exporter
