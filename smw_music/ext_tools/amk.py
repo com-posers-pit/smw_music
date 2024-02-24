@@ -166,7 +166,7 @@ def create_project(path: Path, project_name: str, amk_zname: Path) -> None:
     fname = path / "music/originals/09 Bonus End.txt"
     with open(fname, "rb") as fobj:
         data = fobj.read()
-    actual_md5 = hashlib.md5(data).hexdigest()  # nosec: B324
+    actual_md5 = hashlib.new("md5", data, usedforsecurity=False).hexdigest()
     if actual_md5 == expected_md5:
         contents = data.split(b"\n")
         contents = contents[:15] + contents[16:]

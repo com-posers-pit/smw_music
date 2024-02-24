@@ -5,6 +5,7 @@
 
 [tool.bandit]
 exclude_dirs = ["tests"]
+skips = ["B101", "B404"] # Disable "assert bad" and "import subprocess bad"
 
 [tool.black]
 line-length = 79
