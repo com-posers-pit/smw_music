@@ -375,7 +375,7 @@ class Dashboard(QWidget):
         spcplayer_valid: bool,
         dark_mode: bool,
     ) -> None:
-        v = self._view  # pylint: disable=invalid-name
+        v = self._view
 
         sheet = qdarkstyle.load_stylesheet(qt_api="pyqt6") if dark_mode else ""
         cast(QApplication, QApplication.instance()).setStyleSheet(sheet)
@@ -506,7 +506,7 @@ class Dashboard(QWidget):
         if update_instruments:
             self._update_instruments(state)
 
-        v = self._view  # pylint: disable=invalid-name
+        v = self._view
         self._unsaved = state.unsaved
         self._loaded = state.loaded
 
@@ -667,8 +667,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _attach_signals(self) -> None:  # pylint: disable=too-many-statements
-        m = self._model  # pylint: disable=invalid-name
-        v = self._view  # pylint: disable=invalid-name
+        m = self._model
+        v = self._view
 
         # Short aliases to avoid line wrapping
         alen = m.on_artic_length_changed
@@ -873,7 +873,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _combine_widgets(self) -> None:
-        v = self._view  # pylint: disable=invalid-name
+        v = self._view
         self._dyn_widgets: dict[Dyn, _DynamicsWidgets] = {}
         dyns = self._dyn_widgets
         dyns[Dyn.PPPP] = _DynamicsWidgets(
@@ -948,7 +948,7 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _fix_edit_widths(self) -> None:
-        v = self._view  # pylint: disable=invalid-name
+        v = self._view
         widgets: list[QLineEdit] = [
             v.pppp_setting,
             v.ppp_setting,
@@ -1316,7 +1316,7 @@ class Dashboard(QWidget):
         self, state: State, sample_idx: tuple[str, str]
     ) -> None:
         settings = state.project.settings
-        v = self._view  # pylint: disable=invalid-name
+        v = self._view
 
         sel_inst = settings.instruments[sample_idx[0]]
         sel_sample = settings.samples[sample_idx]

@@ -59,7 +59,7 @@ class ProjectSettingsDlg:
     ###########################################################################
 
     def exec(self, settings: ProjectInfo) -> ProjectInfo | None:
-        d = self._dialog  # pylint: disable=invalid-name
+        d = self._dialog
 
         d.composer.setText(settings.composer)
         d.game_name.setText(settings.game)

@@ -90,7 +90,7 @@ convention = "numpy"
 add-ignore = "D105"
 
 [tool.pylint.FORMAT]
-good-names = "e,n,rv"
+good-names = "e,n,m,rv,d,v"
 
 [tool.pylint.MASTER]
 extension-pkg-allow-list = "PyQt6"

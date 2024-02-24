@@ -94,7 +94,7 @@ class PreferencesDlg:
     ###########################################################################
 
     def exec(self, preferences: Preferences) -> Preferences | None:
-        d = self._dialog  # pylint: disable=invalid-name
+        d = self._dialog
 
         fname = preferences.amk_fname
         text = str(fname) if fname.parts else ""
