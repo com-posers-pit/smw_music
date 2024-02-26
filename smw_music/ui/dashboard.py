@@ -1301,10 +1301,7 @@ class Dashboard(QWidget):
     def _update_project_settings(
         self, info: ProjectInfo
     ) -> ProjectInfo | None:
-        new_info = self._project_settings.exec(info)
-        if new_info:
-            return new_info
-        return None
+        return self._project_settings.exec(info)
 
     ###########################################################################
 

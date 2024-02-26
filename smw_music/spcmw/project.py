@@ -347,7 +347,7 @@ def _upgrade_save(fname: Path) -> Path:
 class ProjectInfo:
     project_dir: Path
     project_name: str
-    musicxml_fname: Path = Path("")
+    musicxml_fname: Path | None = None
     composer: str = ""
     title: str = ""
     porter: str = ""
@@ -357,6 +357,8 @@ class ProjectInfo:
 
     @property
     def is_valid(self) -> bool:
+        if self.musicxml_fname is None:
+            return False
         return self.musicxml_fname.exists()
 
     ###########################################################################
@@ -480,11 +482,14 @@ class Project:
                 case 1:
                     contents = v1.load(fname)
 
+        musicxml_field = contents["musicxml"]
+        musicxml = Path(musicxml_field) if musicxml_field else None
+
         project = cls(
             ProjectInfo(
                 fname.parent,
                 contents["project_name"],
-                Path(contents["musicxml"]),
+                musicxml,
                 contents["composer"],
                 contents["title"],
                 contents["porter"],
@@ -524,10 +529,11 @@ class Project:
         settings = self.settings
         proj_dir = info.project_fname.parent.resolve()
         musicxml = info.musicxml_fname
-        if musicxml:
-            musicxml = musicxml.resolve()
+        if musicxml is None:
+            musicxml_field = ""
+        else:
             with suppress(ValueError):
-                musicxml = musicxml.relative_to(proj_dir)
+                musicxml_field = str(musicxml.resolve().relative_to(proj_dir))
 
         contents: ProjectDict = {
             # Meta info
@@ -535,7 +541,7 @@ class Project:
             "save_version": CURRENT_SAVE_VERSION,
             "time": f"{datetime.utcnow()}",
             # ProjectInfo
-            "musicxml": str(musicxml),
+            "musicxml": musicxml_field,
             "project_name": info.project_name,
             "composer": info.composer,
             "title": info.title,

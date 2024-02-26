@@ -62,16 +62,20 @@ class ProjectSettingsDlg:
     def exec(self, info: ProjectInfo) -> ProjectInfo | None:
         d = self._dialog
 
+        musicxml = str(info.musicxml_fname or "")
+
         d.composer.setText(info.composer)
         d.game_name.setText(info.game)
-        d.musicxml_fname.setText(str(info.musicxml_fname))
+        d.musicxml_fname.setText(musicxml)
         d.porter_name.setText(info.porter)
         d.title.setText(info.title)
 
         if self._dialog.exec():
-            musicxml_fname = Path(d.musicxml_fname.text())
-            if not musicxml_fname.exists():
-                musicxml_fname = Path("")
+            musicxml = d.musicxml_fname.text()
+            if musicxml:
+                musicxml_fname = Path(musicxml)
+            else:
+                musicxml_fname = None
 
             return replace(
                 info,

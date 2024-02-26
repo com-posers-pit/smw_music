@@ -202,8 +202,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._update_state(State(project))
 
         self.update_status(f"Created project {project.info.project_name}")
-        # TODO
-        # self.on_save()
+        self.on_save()
 
     ###########################################################################
 
@@ -647,18 +646,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # if state:
         #     self._update_sample_state(sample_source=SampleSource.MULTISAMPLE)
         #     self.update_status("Sample source set to multisample")
-
-    ###########################################################################
-
-    def on_musicxml_fname_changed(self, fname: str) -> None:
-        file_path = Path(fname)
-        if file_path == self.state.project.info.musicxml_fname:
-            return
-
-        self._load_musicxml(file_path, False)
-
-        self._update_state(True, musicxml_fname=file_path)
-        self.update_status(f"MusicXML name set to {fname}")
 
     ###########################################################################
 
