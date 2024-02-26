@@ -107,6 +107,14 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>select_musicxml_fname</tabstop>
+  <tabstop>musicxml_fname</tabstop>
+  <tabstop>composer</tabstop>
+  <tabstop>title</tabstop>
+  <tabstop>porter_name</tabstop>
+  <tabstop>game_name</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
