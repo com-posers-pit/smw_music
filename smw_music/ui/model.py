@@ -35,7 +35,6 @@ from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
     Brr,
-    EchoConfig,
     Envelope,
     GainMode,
     SamplePlayer,
@@ -45,10 +44,10 @@ from smw_music.spcmw import (
     Artic,
     ArticSetting,
     Dynamics,
-    InstrumentConfig,
     InstrumentSample,
     Preferences,
     Project,
+    ProjectInfo,
     SamplePack,
     SampleSource,
     TuneSource,
@@ -164,7 +163,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     songinfo_changed = pyqtSignal(
         str, arguments=["songinfo"]  # type: ignore[call-arg]
     )
-    song_loaded = pyqtSignal(bool, arguments=["loaded"])
+    song_loaded = pyqtSignal(
+        bool,
+        arguments=["loaded"],  # type: ignore[call-arg]
+    )
 
     song: Song | None
     preferences: Preferences
@@ -192,21 +194,21 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     # API method definitions
     ###########################################################################
 
-    def create_project(
-        self, path: Path, project_name: str | None = None
-    ) -> None:
-        project = spcmw.create_project(path, project_name)
+    def create_project(self, info: ProjectInfo) -> None:
+        project = spcmw.create_project(info)
         self._append_recent_project(project.info.project_fname)
 
+        self.state = None
         self._update_state(State(project))
 
-        self.update_status(f"Created project {project_name}")
+        self.update_status(f"Created project {project.info.project_name}")
         # TODO
         # self.on_save()
 
     ###########################################################################
 
     def close_project(self) -> None:
+        self.state = None
         self.song_loaded.emit(False)
         self._update_state(update_instruments=True)
         self.update_status("Project closed")
@@ -1273,8 +1275,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _rollback_undo(self) -> None:
-        self._history.clear()
-        self._undo_level = 0
+        while self._undo_level:
+            self._history.pop()
+            self._undo_level -= 1
 
     ###########################################################################
 
@@ -1309,6 +1312,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if not self.loaded:
             return
 
+        # TODO
+        # self._signal_state_change_Helper(update_instruments, state_change)
+        self.state_changed.emit(update_instruments)
+
+    def _signal_state_change_helper(
+        self, update_instruments: bool = False, state_change: bool = True
+    ):
         state = self.state
 
         state.unsaved = state_change
@@ -1367,7 +1377,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 self.state.unmapped = {
                     (pitch, str(head)) for pitch, head in unmapped
                 }
-        self.state_changed.emit(update_instruments)
 
     ###########################################################################
 
@@ -1523,3 +1532,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return self._history[-1 - self._undo_level]
         except IndexError:
             raise NoState()
+
+    ###########################################################################
+
+    @state.setter
+    def state(self, val: State | None) -> None:
+        if val is None:
+            self._history.clear()
+            self._undo_level = 0
+        else:
+            self._history.append(val)

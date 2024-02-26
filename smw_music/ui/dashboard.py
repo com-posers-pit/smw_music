@@ -65,7 +65,6 @@ from .keyboard import KeyboardEventFilter
 from .model import Model
 from .preferences import PreferencesDlg
 from .project_settings import ProjectSettingsDlg
-from .quotes import labeouf
 from .state import NoSample, State
 from .utilization import Utilization, paint_utilization, setup_utilization
 from .utils import is_checked, to_checkstate
@@ -214,8 +213,6 @@ class Dashboard(QWidget):
         self._preferences = PreferencesDlg()
         self._project_settings = ProjectSettingsDlg()
         self._model = Model()
-        self._unsaved = False
-        self._loaded = False
         self._sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem] = {}
         self._samples: dict[tuple[str, str | None], QTreeWidgetItem] = {}
 
@@ -251,7 +248,6 @@ class Dashboard(QWidget):
         self._combine_widgets()
         self._setup_instrument_table()
         self._attach_signals()
-        self._view.generate_and_play.setToolTip(labeouf[0])
 
         self._default_tooltips = {
             widget: widget.toolTip() for widget in self._view_widgets
@@ -500,19 +496,17 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_state_changed(self, update_instruments: bool) -> None:
-        state = self.state
-        settings = self.proj_settings
+        state = self._state
+        settings = self._proj_settings
 
         if update_instruments:
             self._update_instruments(state)
 
         v = self._view
-        self._unsaved = state.unsaved
-        self._loaded = state.loaded
 
         title = "[No project]"
         if self._loaded:
-            title = f"[{self.proj_info.project_name}]"
+            title = f"[{self._proj_info.project_name}]"
             if self._unsaved:
                 title += " +"
 
@@ -683,7 +677,6 @@ class Dashboard(QWidget):
             (v.generate_spc, m.on_generate_spc_clicked),
             (v.play_spc, m.on_play_spc_clicked),
             (v.generate_and_play, m.on_generate_and_play_clicked),
-            (v.generate_and_play, self._update_generate_and_play_tooltip),
             (v.reload_musicxml, m.on_reload_musicxml_clicked),
             (v.render_zip, self._on_render_zip_clicked),
             # Instrument settings
@@ -941,9 +934,13 @@ class Dashboard(QWidget):
     def _create_project(self) -> None:
         proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir:
-            # Directly execute this so future calls block until completion
-            self._model.create_project(Path(proj_dir))
-            self._on_open_project_settings()
+            proj_dir = Path(proj_dir)
+            info = self._update_project_settings(
+                ProjectInfo(proj_dir, proj_dir.name)
+            )
+            if info is not None:
+                # Directly execute this so future calls block until completion
+                self._model.create_project(info)
 
     ###########################################################################
 
@@ -1038,21 +1035,21 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_open_project_settings(self) -> None:
-        settings = self._project_settings.exec(self.state.project.info)
-        if settings:
-            print(settings)
+        info = self._update_project_settings(self._proj_info)
+        if info is not None:
+            # TODO: Update project info
+            pass
 
     ###########################################################################
 
     def _on_render_zip_clicked(self) -> None:
+        do_render = True
         if self._confirm_render:
             do_render = QMessageBox.StandardButton.Yes == QMessageBox.question(
                 self._view,
                 "Render",
-                "Do you want to generate a zip for upload?",
+                "Generate a zip for upload?",
             )
-        else:
-            do_render = True
 
         if do_render:
             self._model.on_render_zip_clicked()
@@ -1196,9 +1193,7 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _update_envelope(  # pylint: disable=too-many-arguments
-        self, env: Envelope
-    ) -> None:
+    def _update_envelope(self, env: Envelope) -> None:
         view = self._view
         prev = self._view.envelope_preview
 
@@ -1239,14 +1234,6 @@ class Dashboard(QWidget):
             val = min(31, view.gain_slider.value())
             view.gain_slider.setValue(val)
             view.gain_slider.setMaximum(31)
-
-    ###########################################################################
-
-    def _update_generate_and_play_tooltip(self) -> None:
-        widget = self._view.generate_and_play
-        tooltip = widget.toolTip()
-        idx = (labeouf.index(tooltip) + 1) % len(labeouf)
-        widget.setToolTip(labeouf[idx])
 
     ###########################################################################
 
@@ -1308,6 +1295,16 @@ class Dashboard(QWidget):
         v.multisample_sample_track.setChecked(track)
 
         self._update_unmapped(state)
+
+    ###########################################################################
+
+    def _update_project_settings(
+        self, info: ProjectInfo
+    ) -> ProjectInfo | None:
+        new_info = self._project_settings.exec(info)
+        if new_info:
+            return new_info
+        return None
 
     ###########################################################################
 
@@ -1498,21 +1495,34 @@ class Dashboard(QWidget):
     ###########################################################################
 
     @property
-    def proj_info(self) -> ProjectInfo:
-        return self.state.project.info
+    def _loaded(self) -> bool:
+        return self._model.loaded
 
     ###########################################################################
 
     @property
-    def proj_settings(self) -> ProjectSettings:
-        return self.state.project.settings
+    def _proj_info(self) -> ProjectInfo:
+        return self._state.project.info
+
+    ###########################################################################
 
     @property
-    def state(self) -> State:
+    def _proj_settings(self) -> ProjectSettings:
+        return self._state.project.settings
+
+    ###########################################################################
+
+    @property
+    def _state(self) -> State:
         return self._model.state
 
     ###########################################################################
 
+    @property
+    def _unsaved(self) -> bool:
+        return self._state.unsaved
+
+    ###########################################################################
     @cached_property
     def _view_widgets(self) -> list[QWidget | QAction]:
         widgets = vars(self._view).values()

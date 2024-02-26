@@ -344,9 +344,9 @@ def _upgrade_save(fname: Path) -> Path:
 
 @dataclass
 class ProjectInfo:
-    project_dir: Path = Path("")
+    project_dir: Path
+    project_name: str
     musicxml_fname: Path = Path("")
-    project_name: str = ""
     composer: str = ""
     title: str = ""
     porter: str = ""
@@ -454,16 +454,7 @@ class ProjectSettings:
 @dataclass
 class Project:
     info: ProjectInfo
-    settings: ProjectSettings
-
-    ###########################################################################
-
-    @classmethod
-    def new_project(cls, path: Path, name: str) -> "Project":
-        return cls(
-            ProjectInfo(project_dir=path, project_name=name),
-            ProjectSettings(),
-        )
+    settings: ProjectSettings = field(default_factory=ProjectSettings)
 
     ###########################################################################
 
@@ -490,9 +481,9 @@ class Project:
 
         project = cls(
             ProjectInfo(
-                fname,
-                Path(contents["musicxml"]),
+                fname.parent,
                 contents["project_name"],
+                Path(contents["musicxml"]),
                 contents["composer"],
                 contents["title"],
                 contents["porter"],
