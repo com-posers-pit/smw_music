@@ -10,6 +10,7 @@
 ###############################################################################
 
 # Standard library imports
+from dataclasses import replace
 from pathlib import Path
 
 # Library imports
@@ -72,14 +73,13 @@ class ProjectSettingsDlg:
             if not musicxml_fname.exists():
                 musicxml_fname = Path("")
 
-            return ProjectInfo(
-                info.project_dir,
-                musicxml_fname,
-                info.project_name,
-                d.composer.text(),
-                d.title.text(),
-                d.porter_name.text(),
-                d.game_name.text(),
+            return replace(
+                info,
+                musicxml_fname=musicxml_fname,
+                composer=d.composer.text(),
+                title=d.title.text(),
+                porter=d.porter_name.text(),
+                game=d.game_name.text(),
             )
 
         return None
