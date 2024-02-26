@@ -29,6 +29,14 @@ T = TypeVar("T")
 ###############################################################################
 
 
+def append_suffix(fname: Path, suffix: str) -> Path:
+    # h/t: https://stackoverflow.com/questions/49380572
+    return fname.parent / (fname.name + suffix)
+
+
+###############################################################################
+
+
 def brr_size(fsize: int) -> str:
     rounding = 5
     rounded_size_kb = rounding * round(

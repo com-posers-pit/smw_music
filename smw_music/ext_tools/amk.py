@@ -25,7 +25,7 @@ from PIL import Image
 
 # Package imports
 from smw_music.common import RESOURCES
-from smw_music.utils import zip_top
+from smw_music.utils import append_suffix, zip_top
 
 ###############################################################################
 # Private constant definitions
@@ -185,7 +185,7 @@ def default_utilization() -> Utilization:
 
 
 def get_ticks(path: Path, project_name: str) -> list[int]:
-    fname = (stats_dir(path) / project_name).with_suffix("txt")
+    fname = append_suffix(stats_dir(path) / project_name, ".txt")
 
     # Filter only lines with "TICKS:" in it
     with open(fname, "r") as fobj:

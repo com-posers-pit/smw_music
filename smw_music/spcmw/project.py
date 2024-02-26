@@ -29,6 +29,7 @@ from smw_music.ext_tools.amk import (
 )
 from smw_music.song import Dynamics, NoteHead
 from smw_music.spc700 import EchoConfig, Envelope, GainMode
+from smw_music.utils import append_suffix
 
 from .advanced import (
     Advanced,
@@ -362,7 +363,7 @@ class ProjectInfo:
 
     @property
     def project_fname(self) -> Path:
-        return (self.project_dir / self.project_name).with_suffix(".spcmw")
+        return append_suffix(self.project_dir / self.project_name, ".spcmw")
 
 
 ###############################################################################
@@ -565,7 +566,7 @@ class Project:
         if fname is None:
             fname = self.info.project_fname
         if backup:
-            fname = fname.with_suffix("bak")
+            fname = append_suffix(fname, ".bak")
 
         with open(fname, "w", encoding="utf8") as fobj:
             yaml.safe_dump(contents, fobj)

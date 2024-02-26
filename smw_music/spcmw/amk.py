@@ -26,6 +26,7 @@ from mako.template import Template  # type: ignore
 # Package imports
 from smw_music.common import RESOURCES
 from smw_music.ext_tools import amk
+from smw_music.utils import append_suffix
 
 from .common import SpcmwException
 from .instrument import SampleSource
@@ -95,7 +96,7 @@ def _create_conversion_scripts(path: Path, project_name: str) -> None:
 
 def _mml_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
-    return (amk.mml_dir(pdir) / pname).with_suffix(".txt")
+    return append_suffix(amk.mml_dir(pdir) / pname, ".txt")
 
 
 ###############################################################################
@@ -103,7 +104,7 @@ def _mml_fname(proj: Project) -> Path:
 
 def _vis_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
-    return (amk.vis_dir(pdir) / pname).with_suffix(".png")
+    return append_suffix(amk.vis_dir(pdir) / pname, ".png")
 
 
 ###############################################################################
@@ -167,7 +168,7 @@ def render_zip(project: Project) -> Path:
     samples = samples_dir(project)
     project_name = Path(info.project_name)
 
-    zname = info.project_dir / project_name.with_suffix(".zip")
+    zname = append_suffix(info.project_dir / project_name, ".zip")
     with zipfile.ZipFile(zname, "w") as zobj:
         zobj.write(mml, mml.name)
         zobj.write(spc, spc.name)
@@ -190,7 +191,7 @@ def samples_dir(proj: Project) -> Path:
 
 def spc_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
-    return (amk.spc_dir(pdir) / pname).with_suffix(".spc")
+    return append_suffix(amk.spc_dir(pdir) / pname, ".spc")
 
 
 ###############################################################################
