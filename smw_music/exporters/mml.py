@@ -24,6 +24,10 @@ from music21.pitch import Pitch
 
 # Package imports
 from smw_music.common import RESOURCES, __version__
+from smw_music.ext_tools.amk import (
+    BuiltinSampleGroup,
+    update_sample_groups_file,
+)
 from smw_music.song import (
     Annotation,
     Artic,
@@ -52,8 +56,8 @@ from smw_music.spcmw import (
     InstrumentSample,
     Project,
     SampleSource,
-    amk,
 )
+from smw_music.spcmw.amk import samples_dir
 
 from .common import Exporter
 
@@ -428,15 +432,15 @@ class MmlExporter(Exporter):
         # TODO Move this into the to_mml_file
         sample_group = "optimized"
         match sets.builtin_sample_group:
-            case amk.BuiltinSampleGroup.DEFAULT:
+            case BuiltinSampleGroup.DEFAULT:
                 sample_group = "default"
-            case amk.BuiltinSampleGroup.OPTIMIZED:
+            case BuiltinSampleGroup.OPTIMIZED:
                 sample_group = "optimized"
-            case amk.BuiltinSampleGroup.REDUX1:
+            case BuiltinSampleGroup.REDUX1:
                 sample_group = "redux1"
-            case amk.BuiltinSampleGroup.REDUX2:
+            case BuiltinSampleGroup.REDUX2:
                 sample_group = "redux2"
-            case amk.BuiltinSampleGroup.CUSTOM:
+            case BuiltinSampleGroup.CUSTOM:
                 sample_group = "custom"
 
         rv: str = tmpl.render(
@@ -449,7 +453,7 @@ class MmlExporter(Exporter):
             inst_samples=inst_samples,
             custom_samples=samples,
             dynamics=list(Dynamics),
-            sample_path=str(amk.samples_dir(self.project)),
+            sample_path=str(samples_dir(self.project)),
             sample_groups=sample_group,
         )
 
@@ -486,7 +490,7 @@ class MmlExporter(Exporter):
         state = self.state
         fname = state.mml_fname
 
-        amk.update_sample_groups_file(
+        update_sample_groups_file(
             self.project.info.project_fname,
             state.builtin_sample_group,
             state.builtin_sample_sources,
