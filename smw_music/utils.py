@@ -12,10 +12,11 @@
 # Standard library imports
 import csv
 from contextlib import suppress
+from http.client import RemoteDisconnected
 from math import isclose
 from pathlib import Path
 from typing import Any, Tuple, Type, TypeVar
-from urllib import error
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from zipfile import ZipFile
 
@@ -86,7 +87,9 @@ def newest_release() -> tuple[str, tuple[int, int, int]] | None:
     req = Request(
         "https://github.com/com-posers-pit/smw_music/releases/latest"
     )
-    with suppress(error.HTTPError), urlopen(req) as resp:  # nosec: B310
+    with suppress(HTTPError, RemoteDisconnected), urlopen(
+        req
+    ) as resp:  # nosec: B310
         url = resp.geturl()
         return (url, version_tuple(url.split("/")[-1].lstrip("v")))
     return None
