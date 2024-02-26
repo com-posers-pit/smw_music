@@ -32,7 +32,7 @@ class NoSample(SmwMusicException):
 ###############################################################################
 
 
-@dataclass
+@dataclass(frozen=True)
 class State:
     project: Project
     unsaved: bool = True
