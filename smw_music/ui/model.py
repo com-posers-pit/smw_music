@@ -163,10 +163,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     songinfo_changed = pyqtSignal(
         str, arguments=["songinfo"]  # type: ignore[call-arg]
     )
-    song_loaded = pyqtSignal(
-        bool,
-        arguments=["loaded"],  # type: ignore[call-arg]
-    )
 
     song: Song | None
     preferences: Preferences
@@ -208,7 +204,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def close_project(self) -> None:
         self.state = None
-        self.song_loaded.emit(False)
         self._update_state(update_instruments=True)
         self.update_status("Project closed")
 
@@ -229,7 +224,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self.reinforce_state()
         self._emit_quote()
-        self.song_loaded.emit(False)
 
     ###########################################################################
 
@@ -574,8 +568,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 True, "Invalid project file", "Could not find project file"
             )
         else:
-            self.song_loaded.emit(True)
-
             self._append_recent_project(fname)
 
             self._undo_level = 0
@@ -1295,17 +1287,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         update_instruments: bool = False,
         state_change: bool = True,
     ) -> None:
-        # Handle this differently
-        if not self.loaded:
-            return
-
-        # TODO
         # self._signal_state_change_Helper(update_instruments, state_change)
         self.state_changed.emit(update_instruments)
 
     def _signal_state_change_helper(
         self, update_instruments: bool = False, state_change: bool = True
-    ):
+    ) -> None:
         state = self.state
 
         state.unsaved = state_change
@@ -1448,7 +1435,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             # TODO
             # self._save_backup()
-            self._history.append(new_state)
+            self.state = new_state
             self._signal_state_change(update_instruments)
 
     ###########################################################################

@@ -94,6 +94,14 @@ def _create_conversion_scripts(path: Path, project_name: str) -> None:
 ###############################################################################
 
 
+def _generate_manifest(proj: Project) -> None:
+    # TODO
+    pass
+
+
+###############################################################################
+
+
 def _mml_fname(proj: Project) -> Path:
     pdir, pname = proj.info.project_dir, proj.info.project_name
     return append_suffix(amk.mml_dir(pdir) / pname, ".txt")
@@ -145,7 +153,7 @@ def generate_spc(
         raise SpcmwException("Conversion timed out") from e
 
     # TODO: Add stat parsing and reporting
-    # TODO: Generate manifest
+    _generate_manifest(project)
 
     return msg
 

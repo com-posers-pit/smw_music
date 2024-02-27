@@ -467,51 +467,25 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_song_loaded(self, loaded: bool) -> None:
-        widgets: set[QWidget | QAction] = set(
-            x
-            for x in self._view_widgets
-            if not isinstance(x, (QMenu, QMenuBar, QAction))
-        )
-        v = self._view
-        widgets |= set(
-            [
-                v.save_project,
-                v.close_project,
-                v.open_project_settings,
-                v.undo,
-                v.redo,
-            ]
-        )
-
-        for child in widgets:
-            with QSignalBlocker(child):
-                child.setEnabled(loaded)
-
-    ###########################################################################
-
     def on_songinfo_changed(self, msg: str) -> None:
         self._view.song_info_view.setText(msg)
 
     ###########################################################################
 
     def on_state_changed(self, update_instruments: bool) -> None:
+        self._update_title()
+        self._enable_widgets()
+
+        if not self._loaded:
+            return
+
+        v = self._view
+
         state = self._state
         settings = self._proj_settings
 
         if update_instruments:
             self._update_instruments(state)
-
-        v = self._view
-
-        title = "[No project]"
-        if self._loaded:
-            title = f"[{self._proj_info.project_name}]"
-            if self._unsaved:
-                title += " +"
-
-        title += f" - {self._window_title}"
-        v.setWindowTitle(title)
 
         self._utilization_updated(state.aram_util)
 
@@ -860,7 +834,6 @@ class Dashboard(QWidget):
         )
         m.status_updated.connect(self.on_status_updated)
         m.songinfo_changed.connect(self.on_songinfo_changed)
-        m.song_loaded.connect(self.on_song_loaded)
 
     ###########################################################################
 
@@ -932,15 +905,23 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _create_project(self) -> None:
-        proj_dir, _ = QFileDialog.getSaveFileName(self._view, "Project")
-        if proj_dir:
-            proj_dir = Path(proj_dir)
+        proj_dir_s, _ = QFileDialog.getSaveFileName(self._view, "Project")
+        if proj_dir_s:
+            proj_dir = Path(proj_dir_s)
             info = self._update_project_settings(
                 ProjectInfo(proj_dir, proj_dir.name)
             )
             if info is not None:
                 # Directly execute this so future calls block until completion
                 self._model.create_project(info)
+
+    ###########################################################################
+
+    def _enable_widgets(self) -> None:
+        loaded = self._loaded
+        for child in self._loaded_widgets:
+            with QSignalBlocker(child):
+                child.setEnabled(loaded)
 
     ###########################################################################
 
@@ -1440,6 +1421,20 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def _update_title(self) -> None:
+        v = self._view
+
+        title = "[No project]"
+        if self._loaded:
+            title = f"[{self._proj_info.project_name}]"
+            if self._unsaved:
+                title += " +"
+
+        title += f" - {self._window_title}"
+        v.setWindowTitle(title)
+
+    ###########################################################################
+
     def _update_unmapped(self, state: State) -> None:
         widget = self._view.multisample_unmapped_list
         widget.clear()
@@ -1497,6 +1492,28 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    @cached_property
+    def _loaded_widgets(self) -> list[QWidget | QAction]:
+        widgets: set[QWidget | QAction] = set(
+            x
+            for x in self._view_widgets
+            if not isinstance(x, (QMenu, QMenuBar, QAction))
+        )
+        v = self._view
+        widgets |= set(
+            [
+                v.save_project,
+                v.close_project,
+                v.open_project_settings,
+                v.undo,
+                v.redo,
+            ]
+        )
+
+        return list(widgets)
+
+    ###########################################################################
+
     @property
     def _proj_info(self) -> ProjectInfo:
         return self._state.project.info
@@ -1517,7 +1534,7 @@ class Dashboard(QWidget):
 
     @property
     def _unsaved(self) -> bool:
-        return self._state.unsaved
+        return self._state.unsaved if self._loaded else False
 
     ###########################################################################
     @cached_property
