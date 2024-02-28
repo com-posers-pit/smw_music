@@ -178,6 +178,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.preferences = get_preferences()
+        self.saved = True
         self.song = None
         self._history: list[State] = []
         self._undo_level = 0
@@ -570,9 +571,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             self._append_recent_project(fname)
 
-            self.state = None
-            self.state = State(project)
-            self._load_musicxml()
+            self._load_musicxml(project)
 
             self.reinforce_state()
             self.update_status(
@@ -781,6 +780,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._save_backup()
 
         self.state.project.save()
+        self.saved = True
         self.reinforce_state()
         self.update_status("Project saved")
 
@@ -1069,8 +1069,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _load_musicxml(self) -> None:
-        musicxml = self.state.project.info.musicxml_fname
+    def _load_musicxml(self, project: Project) -> None:
+        self.state = None
+        self.state = State(project)
+
+        musicxml = project.info.musicxml_fname
         if musicxml is None:
             self.song = None
             return
@@ -1084,10 +1087,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 f"Could not open score {musicxml}: {str(e)}",
             )
         else:
-            # TODO: Pickup here
-            self.songinfo_changed.emit("")
-
-            self.state.start_section_idx = 0
+            self.songinfo_changed.emit("TODO")
 
             if self._on_generate_mml_clicked(False):
                 self._on_generate_spc_clicked(False)
@@ -1318,7 +1318,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         update_instruments: bool = False,
         state_change: bool = True,
     ) -> None:
-        # self._signal_state_change_Helper(update_instruments, state_change)
+        # self._signal_state_change_helper(update_instruments, state_change)
         self.state_changed.emit(update_instruments)
 
     def _signal_state_change_helper(
@@ -1326,7 +1326,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ) -> None:
         state = self.state
 
-        state.unsaved = state_change
+        state.saved = not state_change
         self.state.unmapped = set()
 
         self._update_aram_util()

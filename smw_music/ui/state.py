@@ -35,7 +35,6 @@ class NoSample(SmwMusicException):
 @dataclass(frozen=True)
 class State:
     project: Project
-    unsaved: bool = True
     start_measure: int = 1
     start_section_idx: int = 0
 

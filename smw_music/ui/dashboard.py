@@ -1108,7 +1108,7 @@ class Dashboard(QWidget):
 
     def _prompt_to_save(self) -> QMessageBox.StandardButton | None:
         reply = None
-        if self._loaded and self._unsaved:
+        if self._loaded and not self._saved:
             quit_msg = "Save project before closing?"
             std = QMessageBox.StandardButton
             reply = QMessageBox.question(
@@ -1427,7 +1427,7 @@ class Dashboard(QWidget):
         title = "[No project]"
         if self._loaded:
             title = f"[{self._proj_info.project_name}]"
-            if self._unsaved:
+            if not self._saved:
                 title += " +"
 
         title += f" - {self._window_title}"
@@ -1533,8 +1533,8 @@ class Dashboard(QWidget):
     ###########################################################################
 
     @property
-    def _unsaved(self) -> bool:
-        return self._state.unsaved if self._loaded else False
+    def _saved(self) -> bool:
+        return self._model.saved if self._loaded else False
 
     ###########################################################################
     @cached_property
