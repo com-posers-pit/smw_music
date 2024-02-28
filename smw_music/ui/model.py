@@ -118,6 +118,13 @@ class _SamplePackWatcher(events.FileSystemEventHandler):
 ###############################################################################
 
 
+class NoSong(SmwMusicException):
+    pass
+
+
+###############################################################################
+
+
 class NoState(SmwMusicException):
     pass
 
@@ -164,14 +171,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         str, arguments=["songinfo"]  # type: ignore[call-arg]
     )
 
-    song: Song | None
-    preferences: Preferences
-    _history: list[State]
-    _undo_level: int
-    _sample_packs: dict[str, SamplePack]
-    _sample_watcher: observers.Observer
-    _sample_player: SamplePlayer
-
     ###########################################################################
     # Constructor definitions
     ###########################################################################
@@ -179,9 +178,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def __init__(self) -> None:
         super().__init__()
         self.preferences = get_preferences()
-        self._history = []
+        self.song = None
+        self._history: list[State] = []
         self._undo_level = 0
-        self._sample_packs = {}
+        self._sample_packs: dict[str, SamplePack] = {}
         self._sample_player = SamplePlayer()
 
         self._start_watcher()
@@ -570,9 +570,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         else:
             self._append_recent_project(fname)
 
-            self._undo_level = 0
-            self._history = [replace(project)]
-            self._load_musicxml(project.info.musicxml_fname, True)
+            self.state = None
+            self.state = State(project)
+            self._load_musicxml()
 
             self.reinforce_state()
             self.update_status(
@@ -732,7 +732,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        self._load_musicxml(self.state.project.info.musicxml_fname, True)
+        # self._load_musicxml(self.state.project.info.musicxml_fname, True)
+        self._reload_musicxml(self.state.project.info.musicxml_fname, True)
 
         self.reinforce_state()
         self.update_status("MusicXML reloaded")
@@ -1068,9 +1069,39 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _load_musicxml(self, musicxml: Path, keep_inst_settings: bool) -> None:
+    def _load_musicxml(self) -> None:
+        musicxml = self.state.project.info.musicxml_fname
+        if musicxml is None:
+            self.song = None
+            return
+
         try:
-            self.song = Song.from_music_xml(musicxml)
+            self.song = Song.from_music_xml(str(musicxml))
+        except SongException as e:
+            self.response_generated.emit(
+                True,
+                "Error loading score",
+                f"Could not open score {musicxml}: {str(e)}",
+            )
+        else:
+            # TODO: Pickup here
+            self.songinfo_changed.emit("")
+
+            self.state.start_section_idx = 0
+
+            if self._on_generate_mml_clicked(False):
+                self._on_generate_spc_clicked(False)
+
+    ###########################################################################
+
+    def _reload_musicxml(self) -> None:
+        musicxml = self.state.project.info.musicxml_fname
+        if musicxml is None:
+            self.song = None
+            return
+
+        try:
+            self.song = Song.from_music_xml(str(musicxml))
         except SongException as e:
             self.response_generated.emit(
                 True,
@@ -1497,6 +1528,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 total_size += size
 
         return total_size
+
+    ###########################################################################
+
+    @property
+    def song(self) -> Song:
+        if self._song is None:
+            raise NoSong()
+        return self._song
+
+    ###########################################################################
+
+    @song.setter
+    def song(self, val: Song | None) -> None:
+        self._song = val
 
     ###########################################################################
 
