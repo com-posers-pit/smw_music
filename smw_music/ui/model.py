@@ -236,8 +236,24 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def update_project_info(self, info: ProjectInfo) -> None:
+        old_info = self.state.project.info
         self._update_info(info)
-        self.update_status(f"Change project info to {info}")
+        changed = []
+        if old_info.project_name != info.project_name:
+            changed.append(f"project name to {info.project_name}")
+        if old_info.musicxml_fname != info.musicxml_fname:
+            changed.append(f"MusicXML to {str(info.musicxml_fname)}")
+        if old_info.composer != info.composer:
+            changed.append(f"composer to {info.composer}")
+        if old_info.title != info.title:
+            changed.append(f"title to {info.title}")
+        if old_info.porter != info.porter:
+            changed.append(f"porter to {info.porter}")
+        if old_info.game != info.game:
+            changed.append(f"game to {info.game}")
+
+        if changed:
+            self.update_status(f"Change {', '.join(changed)}")
 
     ###########################################################################
 
