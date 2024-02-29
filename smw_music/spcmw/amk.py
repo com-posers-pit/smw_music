@@ -19,6 +19,7 @@ import zipfile
 from copy import deepcopy
 from glob import glob
 from pathlib import Path
+from typing import Callable
 
 # Library imports
 from mako.template import Template  # type: ignore
@@ -94,6 +95,16 @@ def _create_conversion_scripts(path: Path, project_name: str) -> None:
 ###############################################################################
 
 
+def _fname_gen(
+    proj: Project, subdir: Callable[[Path], Path], ext: str
+) -> Path:
+    pdir, pname = proj.info.project_dir, proj.info.project_name
+    return append_suffix(subdir(pdir) / pname, ext)
+
+
+###############################################################################
+
+
 def _generate_manifest(proj: Project) -> None:
     # TODO
     pass
@@ -103,16 +114,14 @@ def _generate_manifest(proj: Project) -> None:
 
 
 def _mml_fname(proj: Project) -> Path:
-    pdir, pname = proj.info.project_dir, proj.info.project_name
-    return append_suffix(amk.mml_dir(pdir) / pname, ".txt")
+    return _fname_gen(proj, amk.mml_dir, ".txt")
 
 
 ###############################################################################
 
 
 def _vis_fname(proj: Project) -> Path:
-    pdir, pname = proj.info.project_dir, proj.info.project_name
-    return append_suffix(amk.vis_dir(pdir) / pname, ".png")
+    return _fname_gen(proj, amk.vis_dir, ".png")
 
 
 ###############################################################################
@@ -198,8 +207,7 @@ def samples_dir(proj: Project) -> Path:
 
 
 def spc_fname(proj: Project) -> Path:
-    pdir, pname = proj.info.project_dir, proj.info.project_name
-    return append_suffix(amk.spc_dir(pdir) / pname, ".spc")
+    return _fname_gen(proj, amk.spc_dir, ".spc")
 
 
 ###############################################################################
