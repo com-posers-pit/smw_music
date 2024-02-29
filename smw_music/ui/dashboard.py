@@ -211,7 +211,7 @@ class Dashboard(QWidget):
         self._view.setWindowTitle(self._window_title)
 
         self._preferences = PreferencesDlg()
-        self._project_settings = ProjectSettingsDlg()
+        self._project_info = ProjectSettingsDlg()
         self._model = Model()
         self._sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem] = {}
         self._samples: dict[tuple[str, str | None], QTreeWidgetItem] = {}
@@ -908,7 +908,7 @@ class Dashboard(QWidget):
         proj_dir_s, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir_s:
             proj_dir = Path(proj_dir_s)
-            info = self._update_project_settings(
+            info = self._update_project_info(
                 ProjectInfo(proj_dir, proj_dir.name)
             )
             if info is not None:
@@ -1016,10 +1016,9 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def _on_open_project_settings(self) -> None:
-        info = self._update_project_settings(self._proj_info)
+        info = self._update_project_info(self._proj_info)
         if info is not None:
-            # TODO: Update project info
-            pass
+            self._model.update_project_info(info)
 
     ###########################################################################
 
@@ -1279,10 +1278,8 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _update_project_settings(
-        self, info: ProjectInfo
-    ) -> ProjectInfo | None:
-        return self._project_settings.exec(info)
+    def _update_project_info(self, info: ProjectInfo) -> ProjectInfo | None:
+        return self._project_info.exec(info)
 
     ###########################################################################
 

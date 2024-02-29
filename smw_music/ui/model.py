@@ -48,6 +48,7 @@ from smw_music.spcmw import (
     Preferences,
     Project,
     ProjectInfo,
+    ProjectSettings,
     SamplePack,
     SampleSource,
     TuneSource,
@@ -231,6 +232,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def update_preferences(self, preferences: Preferences) -> None:
         spcmw.save_preferences(preferences)
         self._load_prefs()
+
+    ###########################################################################
+
+    def update_project_info(self, info: ProjectInfo) -> None:
+        self._update_info(info)
+        self.update_status(f"Change project info to {info}")
 
     ###########################################################################
 
@@ -530,7 +537,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_global_volume_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
-        self._update_state(global_volume=setting)
+        self._update_settings(
+            replace(self.state.project.settings, global_volume=setting)
+        )
         self.update_status(f"Global volume set to {setting}")
 
     ###########################################################################
@@ -1418,6 +1427,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _update_info(self, info: ProjectInfo) -> None:
+        project = replace(self.state.project, info=info)
+        self._update_state(replace(self.state, project=project))
+
+    ###########################################################################
+
     def _update_sample_state(
         self,
         force_update: bool = False,
@@ -1448,6 +1463,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
                 self._history.append(new_state)
                 self._signal_state_change()
+
+    ###########################################################################
+
+    def _update_settings(self, settings: ProjectSettings) -> None:
+        project = replace(self.state.project, settings=settings)
+        self._update_state(replace(self.state, project=project))
 
     ###########################################################################
 
