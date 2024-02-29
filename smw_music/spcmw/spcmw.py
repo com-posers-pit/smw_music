@@ -30,8 +30,8 @@ from .project import Project, ProjectInfo
 ###############################################################################
 
 
-def _config_dir() -> Path:
-    app = "xml2mml"
+def _config_dir(new: bool = True) -> Path:
+    app = "spcmw" if new else "xml2mml"
 
     sys = platform.system()
     match sys:
@@ -56,13 +56,30 @@ def _create_config_dir() -> None:
 
 
 ###############################################################################
+
+
+def _remove_old_config_dir() -> None:
+    # Do this carefully and deliberately rather than using shutil.rmtree
+    if _CONFIG_DIR_OLD.exists():
+        with suppress(FileNotFoundError):
+            os.remove(_PREFS_FNAME_OLD)
+        with suppress(FileNotFoundError):
+            os.remove(_RECENT_PROJECTS_FNAME_OLD)
+        with suppress(FileNotFoundError):
+            os.rmdir(_CONFIG_DIR_OLD)
+
+
+###############################################################################
 # API variable definitions
 ###############################################################################
 
 
 _CONFIG_DIR = _config_dir()
+_CONFIG_DIR_OLD = _config_dir(False)
 _PREFS_FNAME = _CONFIG_DIR / "preferences.yaml"
+_PREFS_FNAME_OLD = _CONFIG_DIR_OLD / "preferences.yaml"
 _RECENT_PROJECTS_FNAME = _CONFIG_DIR / "projects.yaml"
+_RECENT_PROJECTS_FNAME_OLD = _CONFIG_DIR_OLD / "projects.yaml"
 
 ###############################################################################
 # API function definitions
@@ -78,7 +95,7 @@ def create_project(path: Path, info: ProjectInfo) -> Project:
 
 
 def first_use() -> bool:
-    return not _PREFS_FNAME.exists()
+    return not (_PREFS_FNAME.exists() or _PREFS_FNAME_OLD.exists())
 
 
 ###############################################################################
@@ -87,6 +104,8 @@ def first_use() -> bool:
 def get_preferences() -> Preferences:
     if _PREFS_FNAME.exists():
         rv = Preferences.from_file(_PREFS_FNAME)
+    elif _PREFS_FNAME_OLD.exists():
+        rv = Preferences.from_file(_PREFS_FNAME_OLD)
     else:
         rv = Preferences()
 
@@ -97,11 +116,12 @@ def get_preferences() -> Preferences:
 
 
 def get_recent_projects() -> list[Path]:
-    fname = _RECENT_PROJECTS_FNAME
     projects = None
-    with suppress(FileNotFoundError):
-        with open(fname, "r", encoding="utf8") as fobj:
-            projects = yaml.safe_load(fobj)
+    for fname in [_RECENT_PROJECTS_FNAME, _RECENT_PROJECTS_FNAME_OLD]:
+        with suppress(FileNotFoundError):
+            with open(fname, "r", encoding="utf8") as fobj:
+                projects = yaml.safe_load(fobj)
+                break
 
     if projects is None:
         projects = []
@@ -114,6 +134,7 @@ def get_recent_projects() -> list[Path]:
 
 def save_preferences(preferences: Preferences) -> None:
     _create_config_dir()
+    _remove_old_config_dir()
     preferences.to_file(_PREFS_FNAME)
 
 
