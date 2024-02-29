@@ -577,4 +577,6 @@ class Project:
 
     @property
     def project_fname(self) -> Path:
-        return append_suffix(self.project_dir / self.project_name, ".spcmw")
+        return append_suffix(
+            self.project_dir / self.info.project_name, ".spcmw"
+        )

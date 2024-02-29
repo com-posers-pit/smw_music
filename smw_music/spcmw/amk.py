@@ -95,11 +95,8 @@ def _create_conversion_scripts(path: Path, project_name: str) -> None:
 ###############################################################################
 
 
-def _fname_gen(
-    proj: Project, subdir: Callable[[Path], Path], ext: str
-) -> Path:
-    pdir, pname = proj.project_dir, proj.info.project_name
-    return append_suffix(subdir(pdir) / pname, ext)
+def _fname_gen(proj: Project, subdir: Callable[[Path, str], Path]) -> Path:
+    return subdir(proj.project_dir, proj.info.project_name)
 
 
 ###############################################################################
@@ -114,14 +111,14 @@ def _generate_manifest(proj: Project) -> None:
 
 
 def _mml_fname(proj: Project) -> Path:
-    return _fname_gen(proj, amk.mml_dir, ".txt")
+    return _fname_gen(proj, amk.mml_fname)
 
 
 ###############################################################################
 
 
 def _vis_fname(proj: Project) -> Path:
-    return _fname_gen(proj, amk.vis_dir, ".png")
+    return _fname_gen(proj, amk.vis_fname)
 
 
 ###############################################################################
@@ -206,7 +203,14 @@ def samples_dir(proj: Project) -> Path:
 
 
 def spc_fname(proj: Project) -> Path:
-    return _fname_gen(proj, amk.spc_dir, ".spc")
+    return _fname_gen(proj, amk.spc_fname)
+
+
+###############################################################################
+
+
+def stats_fname(proj: Project) -> Path:
+    return _fname_gen(proj, amk.stats_fname)
 
 
 ###############################################################################

@@ -17,6 +17,7 @@ import zipfile
 from dataclasses import dataclass, field
 from enum import Enum, auto
 from pathlib import Path
+from typing import Callable
 
 # Library imports
 import numpy as np
@@ -217,6 +218,13 @@ def mml_dir(proj_dir: Path) -> Path:
 ###############################################################################
 
 
+def mml_fname(proj_dir: Path, proj_name: str) -> Path:
+    return _fname_gen(proj_dir, proj_name, mml_dir, ".txt")
+
+
+###############################################################################
+
+
 def samples_dir(proj_dir: Path) -> Path:
     return proj_dir / "samples"
 
@@ -231,8 +239,22 @@ def spc_dir(proj_dir: Path) -> Path:
 ###############################################################################
 
 
+def spc_fname(proj_dir: Path, proj_name: str) -> Path:
+    return _fname_gen(proj_dir, proj_name, spc_dir, ".spc")
+
+
+###############################################################################
+
+
 def stats_dir(proj_dir: Path) -> Path:
     return proj_dir / "stats"
+
+
+###############################################################################
+
+
+def stats_fname(proj_dir: Path, proj_name: str) -> Path:
+    return _fname_gen(proj_dir, proj_name, stats_dir, ".txt")
 
 
 ###############################################################################
@@ -293,6 +315,18 @@ def vis_dir(proj_dir: Path) -> Path:
 
 
 ###############################################################################
+
+
+def vis_fname(proj_dir: Path, proj_name: str) -> Path:
+    return _fname_gen(proj_dir, proj_name, vis_dir, ".png")
+
+
+###############################################################################
+###############################################################################
+###############################################################################
+
+
+###############################################################################
 # Private function definitions
 ###############################################################################
 
@@ -311,6 +345,15 @@ def _append_spcmw_sample_groups(path: Path) -> None:
 def _count_matches(arr: npt.NDArray[np.uint8], val: _UsageType) -> int:
     (matches,) = np.where((arr == val.value).all(axis=1))
     return len(matches)
+
+
+###############################################################################
+
+
+def _fname_gen(
+    proj_dir: Path, proj_name: str, subdir: Callable[[Path], Path], ext: str
+) -> Path:
+    return append_suffix(subdir(proj_dir) / proj_name, ext)
 
 
 ###############################################################################
