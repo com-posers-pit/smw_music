@@ -236,7 +236,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def update_project_info(self, info: ProjectInfo) -> None:
-        old_info = self.state.project.info
+        old_info = self.info
         self._update_info(info)
         changed = []
         if old_info.project_name != info.project_name:
@@ -431,16 +431,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_echo_left_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
         self._update_echo_state(
-            vol_mag=(setting, self.state.project.settings.echo.vol_mag[1])
+            vol_mag=(setting, self.settings.echo.vol_mag[1])
         )
         self.update_status(f"Echo left channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
-        self._update_echo_state(
-            vol_inv=(state, self.state.project.settings.echo.vol_inv[1])
-        )
+        self._update_echo_state(vol_inv=(state, self.settings.echo.vol_inv[1]))
         self.update_status(f"Echo left channel surround {_endis(state)}")
 
     ###########################################################################
@@ -448,16 +446,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_echo_right_changed(self, val: int | str) -> None:
         setting = _parse_setting(val, 128) / 128
         self._update_echo_state(
-            vol_mag=(self.state.project.settings.echo.vol_mag[0], setting)
+            vol_mag=(self.settings.echo.vol_mag[0], setting)
         )
         self.update_status(f"Echo right channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
-        self._update_echo_state(
-            vol_inv=(self.state.project.settings.echo.vol_inv[0], state)
-        )
+        self._update_echo_state(vol_inv=(self.settings.echo.vol_inv[0], state))
         self.update_status(f"Echo right channel surround {_endis(state)}")
 
     ###########################################################################
@@ -553,9 +549,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_global_volume_changed(self, val: int | str) -> None:
         setting = _parse_setting(val)
-        self._update_settings(
-            replace(self.state.project.settings, global_volume=setting)
-        )
+        self._update_settings(replace(self.settings, global_volume=setting))
         self.update_status(f"Global volume set to {setting}")
 
     ###########################################################################
@@ -599,9 +593,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._load_musicxml(project)
 
             self.reinforce_state()
-            self.update_status(
-                f"Opened project {self.state.project.info.project_name}"
-            )
+            self.update_status(f"Opened project {self.info.project_name}")
 
     ###########################################################################
 
@@ -756,8 +748,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        # self._load_musicxml(self.state.project.info.musicxml_fname, True)
-        self._reload_musicxml(self.state.project.info.musicxml_fname, True)
+        # self._load_musicxml(self.info.musicxml_fname, True)
+        self._reload_musicxml(self.info.musicxml_fname, True)
 
         self.reinforce_state()
         self.update_status("MusicXML reloaded")
@@ -794,7 +786,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_sample_opt_source_changed(
         self, idx: int, source: BuiltinSampleSource
     ) -> None:
-        sources = self.state.project.settings.builtin_sample_sources.copy()
+        sources = self.settings.builtin_sample_sources.copy()
         sources[idx] = source
         self._update_state(builtin_sample_sources=sources)
         self.update_status(f"Builtin sample {idx:02x} set to {source}")
@@ -823,7 +815,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, sample_idx: tuple[str, str], solo: bool, state: bool
     ) -> None:
         inst_name, sample_name = sample_idx
-        instruments = deepcopy(self.state.project.settings.instruments)
+        instruments = deepcopy(self.settings.instruments)
         inst = instruments[inst_name]
 
         field = "solo" if solo else "mute"
@@ -1120,7 +1112,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _reload_musicxml(self) -> None:
-        musicxml = self.state.project.info.musicxml_fname
+        musicxml = self.info.musicxml_fname
         if musicxml is None:
             self.song = None
             return
@@ -1139,16 +1131,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 # Reconcile instrument settings
                 for inst_name, song_inst in self.song.instruments.items():
                     with suppress(KeyError):
-                        state_inst = self.state.project.settings.instruments[
-                            inst_name
-                        ]
+                        state_inst = self.settings.instruments[inst_name]
                         song_inst.solo = state_inst.solo
                         song_inst.mute = state_inst.mute
                         song_inst.samples = state_inst.samples
 
-            self.state.project.settings.instruments = deepcopy(
-                self.song.instruments
-            )
+            self.settings.instruments = deepcopy(self.song.instruments)
 
             self.state.start_section_idx = 0
 
@@ -1530,6 +1518,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     @property
+    def info(self) -> ProjectInfo:
+        return self.project.info
+
+    ###########################################################################
+
+    @property
     def loaded(self) -> bool:
         loaded = False
         with suppress(NoState):
@@ -1540,12 +1534,18 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     @property
+    def project(self) -> Project:
+        return self.state.project
+
+    ###########################################################################
+
+    @property
     def sample_bytes(self) -> int:
         handled: list[tuple[bool, str, Path]] = []
 
         total_size = 0
         # TODO: Unify sample size calcs
-        for sample in self.state.project.settings.samples.values():
+        for sample in self.settings.samples.values():
             size = 0
             if sample.sample_source == SampleSource.SAMPLEPACK:
                 is_pack = True
@@ -1565,6 +1565,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 total_size += size
 
         return total_size
+
+    ###########################################################################
+
+    @property
+    def settings(self) -> ProjectSettings:
+        return self.project.settings
 
     ###########################################################################
 
