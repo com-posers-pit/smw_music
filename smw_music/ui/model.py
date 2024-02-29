@@ -542,7 +542,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_global_legato_changed(self, state: bool) -> None:
-        self._update_state(global_legato=state)
+        self._update_settings(replace(self.settings, global_legato=state))
         self.update_status(f"Global legato {_endis(state)}")
 
     ###########################################################################
