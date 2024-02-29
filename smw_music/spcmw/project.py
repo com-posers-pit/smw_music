@@ -345,7 +345,6 @@ def _upgrade_save(fname: Path) -> Path:
 
 @dataclass
 class ProjectInfo:
-    project_dir: Path
     project_name: str
     musicxml_fname: Path | None = None
     composer: str = ""
@@ -360,12 +359,6 @@ class ProjectInfo:
         if self.musicxml_fname is None:
             return False
         return self.musicxml_fname.exists()
-
-    ###########################################################################
-
-    @property
-    def project_fname(self) -> Path:
-        return append_suffix(self.project_dir / self.project_name, ".spcmw")
 
 
 ###############################################################################
@@ -456,6 +449,7 @@ class ProjectSettings:
 
 @dataclass
 class Project:
+    project_dir: Path
     info: ProjectInfo
     settings: ProjectSettings = field(default_factory=ProjectSettings)
 
@@ -486,8 +480,8 @@ class Project:
         musicxml = Path(musicxml_field) if musicxml_field else None
 
         project = cls(
+            fname.parent,
             ProjectInfo(
-                fname.parent,
                 contents["project_name"],
                 musicxml,
                 contents["composer"],
@@ -527,7 +521,7 @@ class Project:
     def save(self, fname: Path | None = None, backup: bool = False) -> None:
         info = self.info
         settings = self.settings
-        proj_dir = info.project_fname.parent.resolve()
+        proj_dir = self.project_dir.resolve()
         musicxml = info.musicxml_fname
         if musicxml is None:
             musicxml_field = ""
@@ -570,9 +564,17 @@ class Project:
         }
 
         if fname is None:
-            fname = self.info.project_fname
+            fname = self.project_fname
         if backup:
             fname = append_suffix(fname, ".bak")
 
         with open(fname, "w", encoding="utf8") as fobj:
             yaml.safe_dump(contents, fobj)
+
+    ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def project_fname(self) -> Path:
+        return append_suffix(self.project_dir / self.project_name, ".spcmw")

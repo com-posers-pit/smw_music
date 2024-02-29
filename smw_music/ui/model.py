@@ -192,9 +192,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     # API method definitions
     ###########################################################################
 
-    def create_project(self, info: ProjectInfo) -> None:
-        project = spcmw.create_project(info)
-        self._append_recent_project(project.info.project_fname)
+    def create_project(self, proj_dir: Path, info: ProjectInfo) -> None:
+        project = spcmw.create_project(proj_dir, info)
+        self._append_recent_project(project.project_fname)
 
         self.state = None
         self._update_state(State(project))

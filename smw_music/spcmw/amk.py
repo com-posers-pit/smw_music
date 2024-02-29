@@ -40,7 +40,7 @@ from .sample import SamplePack
 
 
 def _convert(project: Project, timeout: float) -> str:
-    project_path = project.info.project_dir
+    project_path = project.project_dir
     match platform.system():
         case "Darwin" | "Linux":
             script = ["sh", "convert.sh"]
@@ -98,7 +98,7 @@ def _create_conversion_scripts(path: Path, project_name: str) -> None:
 def _fname_gen(
     proj: Project, subdir: Callable[[Path], Path], ext: str
 ) -> Path:
-    pdir, pname = proj.info.project_dir, proj.info.project_name
+    pdir, pname = proj.project_dir, proj.info.project_name
     return append_suffix(subdir(pdir) / pname, ext)
 
 
@@ -185,7 +185,7 @@ def render_zip(project: Project) -> Path:
     samples = samples_dir(project)
     project_name = Path(info.project_name)
 
-    zname = append_suffix(info.project_dir / project_name, ".zip")
+    zname = append_suffix(project.project_dir / project_name, ".zip")
     with zipfile.ZipFile(zname, "w") as zobj:
         zobj.write(mml, mml.name)
         zobj.write(spc, spc.name)
@@ -199,8 +199,7 @@ def render_zip(project: Project) -> Path:
 
 
 def samples_dir(proj: Project) -> Path:
-    info = proj.info
-    return amk.samples_dir(info.project_dir) / info.project_name
+    return amk.samples_dir(proj.project_dir) / proj.info.project_name
 
 
 ###############################################################################

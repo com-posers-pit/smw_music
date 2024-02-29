@@ -491,7 +491,7 @@ class MmlExporter(Exporter):
         fname = state.mml_fname
 
         update_sample_groups_file(
-            self.project.info.project_fname,
+            self.project.project_fname,
             state.builtin_sample_group,
             state.builtin_sample_sources,
         )

@@ -69,11 +69,9 @@ _RECENT_PROJECTS_FNAME = _CONFIG_DIR / "projects.yaml"
 ###############################################################################
 
 
-def create_project(info: ProjectInfo) -> Project:
-    amk.create_project(
-        info.project_dir, info.project_name, get_preferences().amk_fname
-    )
-    return Project(info)
+def create_project(path: Path, info: ProjectInfo) -> Project:
+    amk.create_project(path, info.project_name, get_preferences().amk_fname)
+    return Project(path, info)
 
 
 ###############################################################################

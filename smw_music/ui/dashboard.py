@@ -908,12 +908,10 @@ class Dashboard(QWidget):
         proj_dir_s, _ = QFileDialog.getSaveFileName(self._view, "Project")
         if proj_dir_s:
             proj_dir = Path(proj_dir_s)
-            info = self._update_project_info(
-                ProjectInfo(proj_dir, proj_dir.name)
-            )
+            info = self._update_project_info(ProjectInfo(proj_dir.name))
             if info is not None:
                 # Directly execute this so future calls block until completion
-                self._model.create_project(info)
+                self._model.create_project(proj_dir, info)
 
     ###########################################################################
 
