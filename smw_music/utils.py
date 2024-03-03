@@ -69,7 +69,7 @@ def codename() -> str:
 ###############################################################################
 
 
-def filter_type(dtype: Type[T] | Tuple[Type[T]], lst: list[Any]) -> list[T]:
+def filter_type(dtype: Type[T], lst: list[Any]) -> list[T]:
     return list(filter(lambda x: isinstance(x, dtype), lst))
 
 
