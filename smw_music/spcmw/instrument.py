@@ -18,7 +18,7 @@ from typing import cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.song import Dynamics, Note, NoteHead
+from smw_music.song import Dynamics, Note, NoteHead, Song, dynamics
 from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
 
@@ -397,17 +397,44 @@ class InstrumentConfig:
 ###############################################################################
 
 
-def dedupe_notes(
-    notes: list[tuple[Pitch, NoteHead]]
-) -> list[tuple[Pitch, NoteHead]]:
-    rv: list[tuple[Pitch, NoteHead]] = []
-    for in_note in notes:
-        in_pitch, in_head = in_note
-        for out_note in rv:
-            out_pitch, out_head = out_note
-            if in_pitch.isEnharmonic(out_pitch) and in_head == out_head:
-                break
-        else:
-            rv.append(in_note)
+def extract_instruments(song: Song) -> dict[str, InstrumentConfig]:
+    instruments = song.instruments
+    return {
+        inst: InstrumentConfig.from_name(
+            inst,
+            dynamics_present=dynamics(inst),
+        )
+        for inst in instruments
+    }
 
-    return rv
+
+#    def _collect_instruments(self) -> None:
+#        inst_dyns: dict[str, set[Dynamics]] = {}
+#        transposes: dict[str, int] = {}
+#        last_dyn: Dynamics = Dynamics.MF
+#
+#        for channel in self.channels:
+#            for token in channel.tokens:
+#                if isinstance(token, Instrument):
+#                    inst = token.name
+#                    if inst not in inst_dyns:
+#                        inst_dyns[inst] = set()
+#                        transposes[inst] = token.transpose
+#                    inst_dyns[inst].add(last_dyn)
+#                if isinstance(token, Dynamic):
+#                    last_dyn = Dynamics[token.level.upper()]
+#                    inst_dyns[inst].add(last_dyn)
+#                if isinstance(token, Crescendo):
+#                    last_dyn = Dynamics[token.target.upper()]
+#                    inst_dyns[inst].add(last_dyn)
+#
+#        inst_names = sorted(inst_dyns)
+#
+#        self.instruments = {
+#            inst: InstrumentConfig.from_name(
+#                inst,
+#                dynamics_present=inst_dyns[inst],
+#                transpose=transposes[inst],
+#            )
+#            for inst in inst_names
+#        }

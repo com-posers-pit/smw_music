@@ -245,6 +245,7 @@ class Crescendo(Token):
     """
 
     duration: int
+    # TODO: Change to Dynamics
     target: str
     cresc: bool
 

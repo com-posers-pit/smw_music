@@ -9,8 +9,8 @@
 # Imports
 ###############################################################################
 
-from .common import Dynamics, NoteHead, SongException
-from .song import Song
+from .common import Dynamics, NoteHead, SongException, dedupe_notes
+from .song import Song, dynamics
 from .tokens import (
     Advanced,
     Annotation,
@@ -44,10 +44,12 @@ from .tokens import (
 ###############################################################################
 
 __all__ = [
-    "SongException",
     "Dynamics",
     "NoteHead",
+    "SongException",
+    "dedupe_notes",
     "Song",
+    "dynamics",
     "Advanced",
     "Annotation",
     "Artic",

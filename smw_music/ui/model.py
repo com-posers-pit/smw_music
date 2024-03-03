@@ -55,6 +55,7 @@ from smw_music.spcmw import (
     TuneSource,
     Tuning,
     amk,
+    extract_instruments,
     get_preferences,
 )
 from smw_music.ui.quotes import quotes
@@ -1095,6 +1096,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 f"Could not open score {musicxml}: {str(e)}",
             )
         else:
+            self.settings = replace(
+                self.settings, instruments=extract_instruments(self.song)
+            )
             self.songinfo_changed.emit("TODO")
 
             if self._on_generate_mml_clicked(False):
@@ -1521,6 +1525,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    @info.setter
+    def info(self, val: ProjectInfo) -> None:
+        self.project = replace(self.project, info=val)
+
+    ###########################################################################
+
     @property
     def loaded(self) -> bool:
         loaded = False
@@ -1534,6 +1544,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @property
     def project(self) -> Project:
         return self.state.project
+
+    ###########################################################################
+
+    @project.setter
+    def project(self, val: Project) -> None:
+        self.state = replace(self.state, project=val)
 
     ###########################################################################
 

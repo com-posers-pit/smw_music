@@ -16,6 +16,7 @@ from .instrument import (
     SampleSource,
     TuneSource,
     Tuning,
+    extract_instruments,
 )
 from .preferences import Preferences
 from .project import (
@@ -48,6 +49,7 @@ __all__ = [
     "SampleSource",
     "TuneSource",
     "Tuning",
+    "extract_instruments",
     "Preferences",
     "ProjectInfo",
     "ProjectSettings",

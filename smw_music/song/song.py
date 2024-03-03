@@ -19,12 +19,14 @@ import music21 as m21
 # Package imports
 from smw_music.utils import filter_type
 
+from .common import Dynamics
 from .reduction import remove_unused_instruments
 from .tokens import (
     Annotation,
     ChannelDelim,
     Clef,
     CrescDelim,
+    Crescendo,
     Dynamic,
     Error,
     Instrument,
@@ -407,6 +409,32 @@ class Song:
             tokens.append(ChannelDelim())
 
         return tokens
+
+
+###############################################################################
+# API function definitions
+###############################################################################
+
+
+def dynamics(song: Song, inst: Instrument) -> set[Dynamics]:
+    rv: set[Dynamics] = set()
+    match = False
+
+    # TODO: This is a hack,
+    last_dyn = Dynamics.MF
+    for channel in song.tokens:
+        for token in channel.tokens:
+            match token:
+                case Instrument(name, _):
+                    match = inst == name
+                case Dynamic(level):
+                    last_dyn = level
+                case Crescendo(_, target, _):
+                    last_dyn = target
+                case Note():
+                    if match:
+                        rv.add(last_dyn)
+    return rv
 
 
 # TODO: Remove
