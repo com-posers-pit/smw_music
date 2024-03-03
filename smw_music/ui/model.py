@@ -177,7 +177,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._append_recent_project(project.project_fname)
 
         self._reset_state()
-        self._update_state(State(project))
+        self.state = State(project)
 
         self.update_status(f"Created project {project.info.project_name}")
         self.on_save()
@@ -217,7 +217,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def update_project_info(self, info: ProjectInfo) -> None:
         old_info = self.info
-        self._update_info(info)
+        self.info = info
         changed = []
         if old_info.project_name != info.project_name:
             changed.append(f"project name to {info.project_name}")
@@ -608,6 +608,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 except IndexError:
                     new_inst = keys[idx - 1] if idx else ""
 
+                # TODO: Replace
                 self._update_state(
                     update_instruments=True,
                     instruments=instruments,
@@ -697,12 +698,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def on_porter_name_changed(self, val: str) -> None:
-        self._update_state(porter=val)
-        self.update_status(f"Porter name set to {val}")
-
-    ###########################################################################
-
     def on_recent_projects_cleared(self) -> None:
         spcmw.save_recent_projects([])
         self.update_status("Recent projects cleared")
@@ -736,7 +731,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
-        self._update_state(sample_idx=sample_idx)
+        self.state = replace(self.state, sample_idx=sample_idx)
 
         inst, sample = sample_idx
         name = sample or inst
@@ -748,7 +743,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, group: BuiltinSampleGroup, checked: bool
     ) -> None:
         if checked:
-            self._update_state(builtin_sample_group=group)
+            self.settings = replace(self.settings, builtin_sample_group=group)
             self.update_status(f"Builtin group set to {group}")
 
     ###########################################################################
@@ -758,7 +753,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ) -> None:
         sources = self.settings.builtin_sample_sources.copy()
         sources[idx] = source
-        self._update_state(builtin_sample_sources=sources)
+        self.settings = replace(self.settings, builtin_sample_sources=sources)
         self.update_status(f"Builtin sample {idx:02x} set to {source}")
 
     ###########################################################################
@@ -808,7 +803,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             for sample_name, sample in inst.multisamples.items():
                 inst.multisamples[sample_name] = replace(sample, **update)
 
-        self._update_state(instruments=instruments)
+        self.settings = replace(self.settings, instruments=instruments)
 
         self.update_status(f"{msg} {field} {endis(state)}")
 
@@ -822,7 +817,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 # enumeration doesn't account for
                 section_idx = idx + 1
 
-        self._update_state(start_measure=value, start_section_idx=section_idx)
+        self.state = replace(
+            self.state, start_measure=value, start_section_idx=section_idx
+        )
         self.update_status(f"Start measure set to {value}")
 
     ###########################################################################
@@ -836,8 +833,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             measures = list(self.song.rehearsal_marks.values())
             measure = measures[section_idx - 1]
 
-        self._update_state(
-            start_measure=measure, start_section_idx=section_idx
+        self.state = replace(
+            self.state, start_measure=measure, start_section_idx=section_idx
         )
         self.update_status(f"Start section set to {name}")
 
@@ -1066,8 +1063,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return
 
         try:
+            print("try load")
             self.song = Song.from_music_xml(musicxml)
+            print("done load")
         except SongException as e:
+            print(e)
             self.response_generated.emit(
                 True,
                 "Error loading score",
@@ -1077,6 +1077,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.settings = replace(
                 self.settings, instruments=extract_instruments(self.song)
             )
+            print(self.settings.instruments)
+
             self.songinfo_changed.emit("TODO")
 
             if self._on_generate_mml_clicked(False):
@@ -1204,6 +1206,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         instruments = deepcopy(state.project.settings.instruments)
         instruments[inst].multisamples[name] = sample
+        # TODO: Replace                                                                      # T
         self._update_state(
             update_instruments=True,
             instruments=instruments,
@@ -1405,12 +1408,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_info(self, info: ProjectInfo) -> None:
-        project = replace(self.state.project, info=info)
-        self._update_state(replace(self.state, project=project))
-
-    ###########################################################################
-
     def _update_sample_state(
         self,
         force_update: bool = False,
@@ -1459,7 +1456,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             # TODO
             # self._save_backup()
-            self.state = new_state
             self._signal_state_change(update_instruments)
 
     ###########################################################################
@@ -1568,8 +1564,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @settings.setter
     def settings(self, val: ProjectSettings) -> None:
-        project = replace(self.state.project, settings=val)
-        self._update_state(replace(self.state, project=project))
+        self.project = replace(self.project, settings=val)
 
     ###########################################################################
 
@@ -1598,4 +1593,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @state.setter
     def state(self, val: State) -> None:
-        self._history.append(val)
+        update_instruments = False
+        do_update = True
+        with suppress(NoState):
+            if val == self.state:
+                do_update = False
+
+        if do_update:
+            self._rollback_undo()
+
+            # TODO
+            # self._save_backup()
+            self._history.append(val)
+            self._signal_state_change(update_instruments)
