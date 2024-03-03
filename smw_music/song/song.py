@@ -97,9 +97,9 @@ def _get_cresc(
     part: m21.stream.Part,
 ) -> tuple[list[list[int]], list[bool]]:
     cresc: list[list[int]] = [[], []]
-    cresc_list: list[
-        m21.dynamics.Crescendo | m21.dynamics.Diminuendo
-    ] = filter_type((m21.dynamics.Crescendo, m21.dynamics.Diminuendo), part[:])
+    # DynamicWedge is a parent class for Crescendo and Diminuendo, which is
+    # what we want to pull out of the token list
+    cresc_list = filter_type(m21.dynamics.DynamicWedge, part[:])
 
     cresc[0] = [x.getFirst().id for x in cresc_list]
     cresc[1] = [x.getLast().id for x in cresc_list]
