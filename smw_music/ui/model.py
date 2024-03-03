@@ -1096,7 +1096,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return
 
         try:
-            self.song = Song.from_music_xml(str(musicxml))
+            self.song = Song.from_music_xml(musicxml)
         except SongException as e:
             self.response_generated.emit(
                 True,
@@ -1118,7 +1118,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return
 
         try:
-            self.song = Song.from_music_xml(str(musicxml))
+            self.song = Song.from_music_xml(musicxml)
         except SongException as e:
             self.response_generated.emit(
                 True,
