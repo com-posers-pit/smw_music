@@ -12,6 +12,7 @@ from copy import deepcopy
 from functools import singledispatchmethod
 
 # Package imports
+from smw_music.common import SmwMusicException
 from smw_music.song import Song, Token
 from smw_music.spcmw import Project
 
@@ -27,9 +28,10 @@ class Exporter:
 
     def __init__(self, project: Project, song: Song | None = None) -> None:
         if song is None:
-            info = project.info
-            assert info is not None
-            self.song = Song.from_music_xml(info.musicxml_fname)
+            musicxml = project.info.musicxml_fname
+            if musicxml is None:
+                raise SmwMusicException("MusicXML missing from project info")
+            self.song = Song.from_music_xml(musicxml)
         else:
             self.song = deepcopy(song)
         self.project = deepcopy(project)
