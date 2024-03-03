@@ -40,8 +40,30 @@ class Color(Enum):
 ###############################################################################
 
 
+def endis(state: bool) -> str:
+    return "enabled" if state else "disabled"
+
+
+###############################################################################
+
+
 def is_checked(checkbox: QCheckBox) -> bool:
     return checkbox.checkState() == Qt.CheckState.Checked
+
+
+###############################################################################
+
+
+def parse_setting(val: int | str, maxval: int = 255) -> int:
+    if isinstance(val, int):
+        return val
+
+    val = val.strip()
+    if val[-1] == "%":
+        return int(maxval * float(val[:-1]) / 100)
+    if val[0] == "$":
+        return int(val[1:], 16)
+    return int(float(val))
 
 
 ###############################################################################
