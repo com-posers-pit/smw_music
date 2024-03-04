@@ -526,6 +526,7 @@ class Project:
         if musicxml is None:
             musicxml_field = ""
         else:
+            musicxml_field = str(musicxml.resolve())
             with suppress(ValueError):
                 musicxml_field = str(musicxml.resolve().relative_to(proj_dir))
 
