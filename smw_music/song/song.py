@@ -431,44 +431,21 @@ def dynamics(song: Song, inst: Instrument) -> set[Dynamics]:
                     last_dyn = level
                 case Crescendo(_, target, _):
                     last_dyn = target
-                case Note():
-                    if match:
-                        rv.add(last_dyn)
+                case Note() if match:
+                    rv.add(last_dyn)
     return rv
 
 
-# TODO: Remove
-#    def _collect_instruments(self) -> None:
-#        inst_dyns: dict[str, set[Dynamics]] = {}
-#        transposes: dict[str, int] = {}
-#        last_dyn: Dynamics = Dynamics.MF
-#
-#        for channel in self.channels:
-#            for token in channel.tokens:
-#                if isinstance(token, Instrument):
-#                    inst = token.name
-#                    if inst not in inst_dyns:
-#                        inst_dyns[inst] = set()
-#                        transposes[inst] = token.transpose
-#                    inst_dyns[inst].add(last_dyn)
-#                if isinstance(token, Dynamic):
-#                    last_dyn = Dynamics[token.level.upper()]
-#                    inst_dyns[inst].add(last_dyn)
-#                if isinstance(token, Crescendo):
-#                    last_dyn = Dynamics[token.target.upper()]
-#                    inst_dyns[inst].add(last_dyn)
-#
-#        inst_names = sorted(inst_dyns)
-#
-#        self.instruments = {
-#            inst: InstrumentConfig.from_name(
-#                inst,
-#                dynamics_present=inst_dyns[inst],
-#                transpose=transposes[inst],
-#            )
-#            for inst in inst_names
-#        }
-#
+###############################################################################
+
+
+def transpose(song: Song, inst: Instrument) -> int:
+    for token in song.tokens:
+        match token:
+            case Instrument(name, _) if name == inst:
+                return token.transpose
+
+
 #    ###########################################################################
 #
 #    def _reduce(

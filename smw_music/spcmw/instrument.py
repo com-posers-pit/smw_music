@@ -18,7 +18,7 @@ from typing import cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.song import Dynamics, Note, NoteHead, Song, dynamics
+from smw_music.song import Dynamics, Note, NoteHead, Song, dynamics, transpose
 from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
 
@@ -403,38 +403,7 @@ def extract_instruments(song: Song) -> dict[str, InstrumentConfig]:
         inst: InstrumentConfig.from_name(
             inst,
             dynamics_present=dynamics(song, inst),
+            transpose=transpose(song, inst),
         )
         for inst in instruments
     }
-
-
-#    def _collect_instruments(self) -> None:
-#        inst_dyns: dict[str, set[Dynamics]] = {}
-#        transposes: dict[str, int] = {}
-#        last_dyn: Dynamics = Dynamics.MF
-#
-#        for channel in self.channels:
-#            for token in channel.tokens:
-#                if isinstance(token, Instrument):
-#                    inst = token.name
-#                    if inst not in inst_dyns:
-#                        inst_dyns[inst] = set()
-#                        transposes[inst] = token.transpose
-#                    inst_dyns[inst].add(last_dyn)
-#                if isinstance(token, Dynamic):
-#                    last_dyn = Dynamics[token.level.upper()]
-#                    inst_dyns[inst].add(last_dyn)
-#                if isinstance(token, Crescendo):
-#                    last_dyn = Dynamics[token.target.upper()]
-#                    inst_dyns[inst].add(last_dyn)
-#
-#        inst_names = sorted(inst_dyns)
-#
-#        self.instruments = {
-#            inst: InstrumentConfig.from_name(
-#                inst,
-#                dynamics_present=inst_dyns[inst],
-#                transpose=transposes[inst],
-#            )
-#            for inst in inst_names
-#        }
