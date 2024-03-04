@@ -762,7 +762,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_save(self) -> None:
         self._save_backup()
 
-        self.state.project.save()
+        self.project.save()
         self.saved = True
         self.reinforce_state()
         self.update_status("Project saved")
@@ -1078,8 +1078,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             self.songinfo_changed.emit("TODO")
 
-            if self._on_generate_mml_clicked(False):
-                self._on_generate_spc_clicked(False)
+            # TODO: Re-add this
+            # if self._on_generate_mml_clicked(False):
+            #     self._on_generate_spc_clicked(False)
 
     ###########################################################################
 
@@ -1318,6 +1319,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # self._signal_state_change_helper(update_instruments, state_change)
         self.state_changed.emit(update_instruments)
 
+    ###########################################################################
+
     def _signal_state_change_helper(
         self, update_instruments: bool = False, state_change: bool = True
     ) -> None:
@@ -1520,6 +1523,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @project.setter
     def project(self, val: Project) -> None:
+        # Any time we get a new project object, mark unsaved
+        if val != self.project:
+            self.saved = False
         self.state = replace(self.state, project=val)
 
     ###########################################################################
