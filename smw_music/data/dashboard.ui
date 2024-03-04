@@ -3933,6 +3933,9 @@ Saves 2.4KB over Redux 1</string>
    <property name="text">
     <string>&amp;Project Settings</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+.</string>
+   </property>
   </action>
  </widget>
  <customwidgets>
