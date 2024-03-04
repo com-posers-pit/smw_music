@@ -223,6 +223,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             changed.append(f"project name to {info.project_name}")
         if old_info.musicxml_fname != info.musicxml_fname:
             changed.append(f"MusicXML to {str(info.musicxml_fname)}")
+            self._load_musicxml(self.project)
         if old_info.composer != info.composer:
             changed.append(f"composer to {info.composer}")
         if old_info.title != info.title:
@@ -1063,11 +1064,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             return
 
         try:
-            print("try load")
             self.song = Song.from_music_xml(musicxml)
-            print("done load")
         except SongException as e:
-            print(e)
             self.response_generated.emit(
                 True,
                 "Error loading score",
@@ -1077,7 +1075,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.settings = replace(
                 self.settings, instruments=extract_instruments(self.song)
             )
-            print(self.settings.instruments)
 
             self.songinfo_changed.emit("TODO")
 

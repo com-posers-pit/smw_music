@@ -402,7 +402,7 @@ def extract_instruments(song: Song) -> dict[str, InstrumentConfig]:
     return {
         inst: InstrumentConfig.from_name(
             inst,
-            dynamics_present=dynamics(inst),
+            dynamics_present=dynamics(song, inst),
         )
         for inst in instruments
     }

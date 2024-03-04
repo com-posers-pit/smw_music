@@ -420,10 +420,10 @@ def dynamics(song: Song, inst: Instrument) -> set[Dynamics]:
     rv: set[Dynamics] = set()
     match = False
 
-    # TODO: This is a hack,
-    last_dyn = Dynamics.MF
-    for channel in song.tokens:
-        for token in channel.tokens:
+    for channel in song.channels:
+        # TODO: This is a hack,
+        last_dyn = Dynamics.MF
+        for token in channel:
             match token:
                 case Instrument(name, _):
                     match = inst == name
