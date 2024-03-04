@@ -508,7 +508,7 @@ class Dashboard(QWidget):
                 )
                 self._update_sample_config(state, sample_idx)
 
-            self._update_solomute(state)
+            self._update_solomute()
             self._update_multisample(state)
 
             with suppress(NoSample):
@@ -1405,8 +1405,8 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _update_solomute(self, state: State) -> None:
-        for key, sample in state.samples.items():
+    def _update_solomute(self) -> None:
+        for key, sample in self._proj_settings.samples.items():
             solo = to_checkstate(sample.solo)
             mute = to_checkstate(sample.mute)
 
