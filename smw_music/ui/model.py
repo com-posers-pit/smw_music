@@ -1599,8 +1599,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         update_instruments = False
         do_update = True
         with suppress(NoState):
-            if val == self.state:
-                do_update = False
+            do_update = val != self.state
+            update_instruments = val.samples != self.state.samples
 
         if do_update:
             self._rollback_undo()

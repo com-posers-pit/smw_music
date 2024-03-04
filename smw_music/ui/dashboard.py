@@ -485,7 +485,7 @@ class Dashboard(QWidget):
         settings = self._proj_settings
 
         if update_instruments:
-            self._update_instruments(state)
+            self._update_instruments()
 
         self._utilization_updated(state.aram_util)
 
@@ -1215,7 +1215,8 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def _update_instruments(self, state: State) -> None:
+    def _update_instruments(self) -> None:
+        state = self._state
         widget = self._view.sample_list
 
         open_inst = None
@@ -1227,6 +1228,7 @@ class Dashboard(QWidget):
             self._samples.clear()
 
             for inst_name, inst in state.project.settings.instruments.items():
+                print(inst_name)
                 parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 
