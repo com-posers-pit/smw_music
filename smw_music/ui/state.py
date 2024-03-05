@@ -11,6 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
+from typing import cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -72,7 +73,7 @@ class State:
     @property
     def project(self) -> Project:
         if self.loaded:
-            return self._project
+            return cast(Project, self._project)
         raise NoProject()
 
     ###########################################################################

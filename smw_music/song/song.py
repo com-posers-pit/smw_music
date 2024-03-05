@@ -416,7 +416,7 @@ class Song:
 ###############################################################################
 
 
-def dynamics(song: Song, inst: Instrument) -> set[Dynamics]:
+def dynamics(song: Song, inst: str) -> set[Dynamics]:
     rv: set[Dynamics] = set()
     match = False
 
@@ -430,7 +430,7 @@ def dynamics(song: Song, inst: Instrument) -> set[Dynamics]:
                 case Dynamic(level):
                     last_dyn = level
                 case Crescendo(_, target, _):
-                    last_dyn = target
+                    last_dyn = Dynamics(target)
                 case Note() if match:
                     rv.add(last_dyn)
     return rv
@@ -439,11 +439,14 @@ def dynamics(song: Song, inst: Instrument) -> set[Dynamics]:
 ###############################################################################
 
 
-def transpose(song: Song, inst: Instrument) -> int:
+def transpose(song: Song, inst: str) -> int:
+    rv = 0
     for token in song.tokens:
         match token:
             case Instrument(name, _) if name == inst:
-                return token.transpose
+                rv = token.transpose
+                break
+    return rv
 
 
 #    ###########################################################################

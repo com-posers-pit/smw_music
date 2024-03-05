@@ -597,11 +597,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 except IndexError:
                     new_inst = keys[idx - 1] if idx else ""
 
-                # TODO: Replace
-                self._update_state(
-                    update_instruments=True,
-                    instruments=instruments,
-                    sample_idx=(inst, new_inst),
+                # TODO: Verify this is right
+                settings = replace(self.settings, instruments=instruments)
+                project = replace(self.project, settings=settings)
+                self.state = replace(
+                    self.state, _project=project, _sample_idx=(inst, new_inst)
                 )
                 self.update_status(
                     f"Removed sample {sample} from instrument {inst}"
@@ -717,7 +717,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
-        self.state = replace(self.state, sample_idx=sample_idx)
+        self.state = replace(self.state, _sample_idx=sample_idx)
 
         inst, sample = sample_idx
         name = sample or inst
@@ -763,31 +763,39 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_solomute_changed(
-        self, sample_idx: tuple[str, str], solo: bool, state: bool
+        self, sample_idx: tuple[str, str], solo_sel: bool, state: bool
     ) -> None:
         inst_name, sample_name = sample_idx
         instruments = deepcopy(self.settings.instruments)
         inst = instruments[inst_name]
 
-        field = "solo" if solo else "mute"
-        update = {field: state}
+        solo = inst.solo
+        mute = inst.mute
+        if solo_sel:
+            field = "solo"
+            solo = state
+        else:
+            field = "mute"
+            mute = state
 
         if sample_name:
             msg = f"{inst_name}.{sample_name}"
             inst.multisamples[sample_name] = replace(
-                inst.multisamples[sample_name], **update
+                inst.multisamples[sample_name], solo=solo, mute=mute
             )
             # If a sample's solo/mute is being disabled, disable it in the
             # instrument as well
             if not state:
-                inst.sample = replace(inst.sample, **update)
+                inst.sample = replace(inst.sample, solo=solo, mute=mute)
 
         else:
             # Apply an instrument mute/solo to all samples
             msg = f"{inst_name}"
-            inst.sample = replace(inst.sample, **update)
+            inst.sample = replace(inst.sample, solo=solo, mute=mute)
             for sample_name, sample in inst.multisamples.items():
-                inst.multisamples[sample_name] = replace(sample, **update)
+                inst.multisamples[sample_name] = replace(
+                    sample, solo=solo, mute=mute
+                )
 
         self.settings = replace(self.settings, instruments=instruments)
 
@@ -1039,7 +1047,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _load_musicxml(self, project: Project | None) -> None:
+    def _load_musicxml(self, project: Project | None = None) -> None:
         if project is None:
             reload = True
             project = self.project
@@ -1075,40 +1083,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             # TODO: Re-add this
             # if self._on_generate_mml_clicked(False):
             #     self._on_generate_spc_clicked(False)
-
-    ###########################################################################
-
-    def _reload_musicxml(self) -> None:
-        musicxml = self.info.musicxml_fname
-        if musicxml is None:
-            self._reset_song()
-            return
-
-        try:
-            self.song = Song.from_music_xml(musicxml)
-        except SongException as e:
-            self.response_generated.emit(
-                True,
-                "Error loading score",
-                f"Could not open score {musicxml}: {str(e)}",
-            )
-        else:
-            self.songinfo_changed.emit("")
-            if keep_inst_settings:
-                # Reconcile instrument settings
-                for inst_name, song_inst in self.song.instruments.items():
-                    with suppress(KeyError):
-                        state_inst = self.settings.instruments[inst_name]
-                        song_inst.solo = state_inst.solo
-                        song_inst.mute = state_inst.mute
-                        song_inst.samples = state_inst.samples
-
-            self.settings.instruments = deepcopy(self.song.instruments)
-
-            self.state.start_section_idx = 0
-
-            if self._on_generate_mml_clicked(False):
-                self._on_generate_spc_clicked(False)
 
     ###########################################################################
 
@@ -1198,11 +1172,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         instruments = deepcopy(state.project.settings.instruments)
         instruments[inst].multisamples[name] = sample
-        # TODO: Replace                                                                      # T
-        self._update_state(
-            update_instruments=True,
-            instruments=instruments,
-            sample_idx=(inst, name),
+
+        # TODO: Review                                                                      # T
+        settings = replace(self.settings, instruments=instruments)
+        project = replace(self.project, settings=settings)
+        self.state = replace(
+            self.state, _project=project, _sample_idx=(inst, name)
         )
         if new:
             msg = f"Added multisample {name} to {inst}"
