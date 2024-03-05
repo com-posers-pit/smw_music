@@ -150,8 +150,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         super().__init__()
         self.preferences = get_preferences()
         self.saved = True
-        self._history: list[State] = []
-        self._undo_level = 0
         self._reset_state()
         self._reset_song()
         self._sample_packs: dict[str, SamplePack] = {}
@@ -1262,14 +1260,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _reset_state(self, project: Project | None = None) -> None:
-        self._history = []
+        self._history: list[State] = []
         self._undo_level = 0
         self.state = State(project)
 
     ###########################################################################
 
     def _reset_song(self) -> None:
-        self._song = None
+        self._song: Song | None = None
 
     ###########################################################################
 
