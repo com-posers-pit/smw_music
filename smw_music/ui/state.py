@@ -25,6 +25,13 @@ from smw_music.spcmw import InstrumentConfig, InstrumentSample, Project
 ###############################################################################
 
 
+class NoProject(SmwMusicException):
+    pass
+
+
+###############################################################################
+
+
 class NoSample(SmwMusicException):
     pass
 
@@ -34,7 +41,7 @@ class NoSample(SmwMusicException):
 
 @dataclass(frozen=True)
 class State:
-    project: Project
+    _project: Project | None = None
     start_measure: int = 1
     start_section_idx: int = 0
 
@@ -53,6 +60,20 @@ class State:
     @property
     def instrument(self) -> InstrumentConfig:
         return self.project.settings.instruments[self.sample_idx[0]]
+
+    ###########################################################################
+
+    @property
+    def loaded(self) -> bool:
+        return self._project is not None
+
+    ###########################################################################
+
+    @property
+    def project(self) -> Project:
+        if self.loaded:
+            return self._project
+        raise NoProject()
 
     ###########################################################################
 

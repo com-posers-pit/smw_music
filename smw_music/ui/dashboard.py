@@ -55,7 +55,12 @@ from smw_music.ext_tools.amk import (
 from smw_music.spc700 import Envelope, GainMode
 from smw_music.spcmw import EXTENSION, OLD_EXTENSION, Artic
 from smw_music.spcmw import Dynamics as Dyn
-from smw_music.spcmw import SamplePack, SampleSource, TuneSource
+from smw_music.spcmw import (
+    InstrumentSample,
+    SamplePack,
+    SampleSource,
+    TuneSource,
+)
 from smw_music.spcmw.project import ProjectInfo, ProjectSettings
 from smw_music.utils import brr_size, codename, hexb, pct
 
@@ -215,6 +220,7 @@ class Dashboard(QWidget):
         self._model = Model()
         self._sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem] = {}
         self._samples: dict[tuple[str, str | None], QTreeWidgetItem] = {}
+        self._last_samples: dict[tuple[str, str], InstrumentSample] = {}
 
         self._confirm_render = True
 
@@ -472,12 +478,15 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
-    def on_state_changed(self, update_instruments: bool) -> None:
+    def on_state_changed(self) -> None:
         self._update_title()
         self._enable_widgets()
 
         if not self._loaded:
             return
+
+        update_instruments = self._last_samples != self._state.samples
+        self._last_samples = self._state.samples
 
         v = self._view
 
@@ -1228,7 +1237,6 @@ class Dashboard(QWidget):
             self._samples.clear()
 
             for inst_name, inst in state.project.settings.instruments.items():
-                print(inst_name)
                 parent = self._make_sample_item(inst_name, (inst_name, ""))
                 widget.addTopLevelItem(parent)
 
