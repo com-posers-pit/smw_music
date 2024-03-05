@@ -1066,6 +1066,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             )
 
             self.songinfo_changed.emit("TODO")
+            self.saved = True
 
             # TODO: Re-add this
             # if self._on_generate_mml_clicked(False):
