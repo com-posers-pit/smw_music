@@ -23,7 +23,7 @@ from typing import Callable
 # Library imports
 from music21.pitch import Pitch, PitchException
 from PyQt6.QtCore import QObject, pyqtSignal
-from watchdog import events, observers
+from watchdog import observers
 
 # Package imports
 import smw_music.spcmw as spcmw
@@ -61,38 +61,10 @@ from smw_music.spcmw import (
 from smw_music.utils import brr_size_b, newest_release, version_tuple
 
 from .quotes import quotes
+from .sample_packs import SamplePackWatcher
 from .state import NoSample, State
 from .utilization import echo_bytes
 from .utils import endis, parse_setting
-
-###############################################################################
-# Private Class Definitions
-###############################################################################
-
-
-class _SamplePackWatcher(events.FileSystemEventHandler):
-    def __init__(self, model: "Model") -> None:
-        super().__init__()
-        self._model = model
-
-    ###########################################################################
-
-    def on_created(
-        self, event: events.FileCreatedEvent | events.DirCreatedEvent
-    ) -> None:
-        fname = Path(event.src_path).name
-        self._model.update_status(f"Sample pack {fname} added")
-        self._model.update_sample_packs()
-
-    ###########################################################################
-
-    def on_deleted(
-        self, event: events.FileDeletedEvent | events.DirDeletedEvent
-    ) -> None:
-        fname = Path(event.src_path).name
-        self._model.update_status(f"Sample pack {fname} removed")
-        self._model.update_sample_packs()
-
 
 ###############################################################################
 # API Class Definitions
@@ -1352,7 +1324,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self._sample_watcher.daemon = True
 
         self._sample_watcher.schedule(
-            _SamplePackWatcher(self), self.preferences.sample_pack_dname, False
+            SamplePackWatcher(self._update_sample_packs),
+            self.preferences.sample_pack_dname,
+            False,
         )
         self._sample_watcher.start()
 
@@ -1362,6 +1336,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # TODO: remove ignore
         new_env = replace(self.state.sample.envelope, **kwargs)  # type: ignore
         self._update_sample_state(envelope=new_env)
+
+    ###########################################################################
+
+    def _update_sample_packs(self, msg: str) -> None:
+        self.update_status(msg)
+        self.update_sample_packs()
 
     ###########################################################################
 
