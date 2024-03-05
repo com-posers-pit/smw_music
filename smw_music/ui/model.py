@@ -1194,18 +1194,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         try:
             MmlExporter.export_project(self.state.project)
+            error = False
         except SongException as e:
             msg = str(e)
-        else:
-            bad_samples = self._check_bad_tune()
-            if bad_samples:
-                msg = "\n".join(
-                    f"{inst}{f':{samp}' if samp else ''} has 0.0 tuning"
-                    for inst, samp in bad_samples
-                )
-            else:
-                error = False
-                msg = "Done"
 
         if report or error:
             self.response_generated.emit(error, title, msg)
