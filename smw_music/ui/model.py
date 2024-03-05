@@ -550,8 +550,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self._append_recent_project(fname)
 
             self._load_musicxml(project)
+            self.saved = True
 
-            self.reinforce_state()
             self.update_status(f"Opened project {self.info.project_name}")
 
     ###########################################################################
@@ -702,10 +702,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_reload_musicxml_clicked(self) -> None:
-        # self._load_musicxml(self.info.musicxml_fname, True)
-        self._reload_musicxml(self.info.musicxml_fname, True)
-
-        self.reinforce_state()
+        self._load_musicxml()
         self.update_status("MusicXML reloaded")
 
     ###########################################################################
@@ -1042,7 +1039,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _load_musicxml(self, project: Project) -> None:
+    def _load_musicxml(self, project: Project | None) -> None:
+        if project is None:
+            reload = True
+            project = self.project
+        else:
+            reload = False
+
         self._reset_state(project)
 
         musicxml = project.info.musicxml_fname
@@ -1059,12 +1062,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 f"Could not open score {musicxml}: {str(e)}",
             )
         else:
-            self.settings = replace(
-                self.settings, instruments=extract_instruments(self.song)
-            )
+            instruments = extract_instruments(self.song)
+            if reload:
+                for k in instruments:
+                    with suppress(KeyError):
+                        instruments[k] = self.settings.instruments[k]
+
+            self.settings = replace(self.settings, instruments=instruments)
 
             self.songinfo_changed.emit("TODO")
-            self.saved = True
 
             # TODO: Re-add this
             # if self._on_generate_mml_clicked(False):
