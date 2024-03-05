@@ -110,13 +110,6 @@ def _generate_manifest(proj: Project) -> None:
 ###############################################################################
 
 
-def _mml_fname(proj: Project) -> Path:
-    return _fname_gen(proj, amk.mml_fname)
-
-
-###############################################################################
-
-
 def _vis_fname(proj: Project) -> Path:
     return _fname_gen(proj, amk.vis_fname)
 
@@ -141,7 +134,7 @@ def generate_spc(
 ) -> str:
     project = deepcopy(project)
 
-    if not _mml_fname(project).exists():
+    if not mml_fname(project).exists():
         raise SpcmwException("MML not Generated")
 
     samples_path = samples_dir(project)
@@ -177,7 +170,7 @@ def render_zip(project: Project) -> Path:
         sample.mute = False
         sample.solo = False
 
-    mml = _mml_fname(project)
+    mml = mml_fname(project)
     spc = spc_fname(project)
     samples = samples_dir(project)
     project_name = Path(info.project_name)
@@ -197,6 +190,13 @@ def render_zip(project: Project) -> Path:
 
 def samples_dir(proj: Project) -> Path:
     return amk.samples_dir(proj.project_dir) / proj.info.project_name
+
+
+###############################################################################
+
+
+def mml_fname(proj: Project) -> Path:
+    return _fname_gen(proj, amk.mml_fname)
 
 
 ###############################################################################

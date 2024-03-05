@@ -10,6 +10,7 @@
 ###############################################################################
 
 from .common import Dynamics, NoteHead, SongException, dedupe_notes
+from .reduction import reduce, remove_unused_instruments
 from .song import Song, dynamics, transpose
 from .tokens import (
     Advanced,
@@ -51,6 +52,8 @@ __all__ = [
     "Song",
     "dynamics",
     "transpose",
+    "reduce",
+    "remove_unused_instruments",
     "Advanced",
     "Annotation",
     "Artic",

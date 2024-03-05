@@ -457,13 +457,6 @@ def _repeat_analysis(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
-def _strip_tempo(tokens: list[Token]) -> list[Token]:
-    return [tok for tok in tokens if not isinstance(tok, Tempo)]
-
-
-###############################################################################
-
-
 def _superloopify(tokens: list[Token]) -> list[Token]:
     elements: list[Token] = []
 
@@ -537,14 +530,10 @@ def _swap_repeat_annotations(tokens: list[Token]) -> list[Token]:
 ###############################################################################
 
 
+# TODO: A lot of this belongs in the appropriate exporter
 def reduce(
-    tokens: list[Token],
-    loop_analysis: bool,
-    superloop_analysis: bool,
-    remove_tempo: bool,
+    tokens: list[Token], loop_analysis: bool, superloop_analysis: bool
 ) -> list[Token]:
-    if remove_tempo:
-        tokens = _strip_tempo(tokens)
     tokens = _swap_repeat_annotations(tokens)
     tokens = _reorder_measures(tokens)
     tokens = _adjust_triplets(tokens)

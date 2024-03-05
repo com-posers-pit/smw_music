@@ -449,35 +449,6 @@ def transpose(song: Song, inst: str) -> int:
     return rv
 
 
-#    ###########################################################################
-#
-#    def _reduce(
-#        self,
-#        loop_analysis: bool,
-#        superloop_analysis: bool,
-#    ) -> None:
-#        self._reduced_channels = copy.deepcopy(self.channels)
-#
-#        for n, chan in enumerate(self._reduced_channels):
-#            chan.tokens = reduce(
-#                chan.tokens,
-#                loop_analysis,
-#                superloop_analysis,
-#                n != 0,
-#            )
-#
-#    ###########################################################################
-#
-#    def _validate(self) -> None:
-#        errors = []
-#        for n, channel in enumerate(self._reduced_channels):
-#            msgs = channel.check(self.instruments)
-#            for msg in msgs:
-#                errors.append(f"{msg} in staff {n + 1}")
-#
-#        if errors:
-#            raise MusicXmlException("\n".join(errors))
-#
 #    def unmapped_notes(
 #        self, inst_name: str, inst: InstrumentConfig
 #    ) -> list[tuple[music21.pitch.Pitch, NoteHead]]:

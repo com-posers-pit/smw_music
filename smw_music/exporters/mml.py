@@ -50,6 +50,7 @@ from smw_music.song import (
     Tempo,
     Token,
     Triplet,
+    reduce,
 )
 from smw_music.spcmw import (
     InstrumentConfig,
@@ -57,7 +58,7 @@ from smw_music.spcmw import (
     Project,
     SampleSource,
 )
-from smw_music.spcmw.amk import samples_dir
+from smw_music.spcmw.amk import mml_fname, samples_dir
 
 from .common import Exporter
 
@@ -66,9 +67,44 @@ from .common import Exporter
 ###############################################################################
 
 
-def notelen_str(notelen: int) -> str:
+def _notelen_str(notelen: int) -> str:
     rv = f"l{notelen}"
     return rv
+
+
+###############################################################################
+
+
+def _reduce(
+    channels: list[list[Token]], loop_analysis: bool, superloop_analysis: bool
+) -> list[list[Token]]:
+    channels = deepcopy(channels)
+
+    for n, chan in enumerate(channels):
+        channels[n] = reduce(
+            chan,
+            loop_analysis,
+            superloop_analysis,
+        )
+
+    return channels
+
+
+###############################################################################
+
+
+def _validate() -> None:
+    pass
+
+
+#    errors = []
+#    for n, channel in enumerate(self._reduced_channels):
+#        msgs = channel.check(self.instruments)
+#        for msg in msgs:
+#            errors.append(f"{msg} in staff {n + 1}")
+#
+#    if errors:
+#        raise SmwMusicException("\n".join(errors))
 
 
 ###############################################################################
@@ -222,7 +258,7 @@ class MmlExporter(Exporter):
         self._append(";====================\n")
         self._append()
         if self.default_note_len:
-            self._append(notelen_str(self.default_note_len))
+            self._append(_notelen_str(self.default_note_len))
             self._append()
 
     ###########################################################################
@@ -354,14 +390,16 @@ class MmlExporter(Exporter):
             sets.loop_analysis = False
             sets.superloop_analysis = False
 
-        self._reduce(sets.loop_analysis, sets.superloop_analysis)
+        channels = _reduce(
+            self.song.channels, sets.loop_analysis, sets.superloop_analysis
+        )
 
         # TODO: A bit of a hack to allow starting at a later measure
         if sets.start_measure != 1:
-            for channel in self._reduced_channels:
+            for channel in channels:
                 to_drop = sets.start_measure - 1
                 tokens: list[Token] = []
-                for n, token in enumerate(channel.tokens):
+                for n, token in enumerate(channel):
                     if isinstance(
                         token, (Dynamic, Instrument, Measure, Tempo, Repeat)
                     ):
@@ -369,14 +407,15 @@ class MmlExporter(Exporter):
                         if isinstance(token, Measure):
                             to_drop -= 1
                     if to_drop == 0:
-                        tokens.extend(channel.tokens[n + 1 :])
+                        tokens.extend(channel[n + 1 :])
                         break
-                channel.tokens = tokens
+                channel[:] = tokens
 
-        self._validate()
+        # TODO: Finish this
+        _validate()
         channels = [
             x.generate_mml(self.instruments, sets.measure_numbers)
-            for x in self._reduced_channels
+            for x in channels
         ]
 
         build_dt = ""
@@ -487,13 +526,13 @@ class MmlExporter(Exporter):
     ###########################################################################
 
     def prepare(self) -> None:
-        state = self.state
-        fname = state.mml_fname
+        project = self.project
+        fname = mml_fname(project)
 
         update_sample_groups_file(
-            self.project.project_fname,
-            state.builtin_sample_group,
-            state.builtin_sample_sources,
+            project.project_fname,
+            project.settings.builtin_sample_group,
+            project.settings.builtin_sample_sources,
         )
 
         if os.path.exists(fname):
@@ -699,7 +738,7 @@ class MmlExporter(Exporter):
 #         self._update_state_defaults(notelen)
 #
 #         if notelen:
-#             self._exporter.directives = [notelen_str(notelen), CRLF]
+#             self._exporter.directives = [_notelen_str(notelen), CRLF]
 #
 #     ###########################################################################
 #
