@@ -559,7 +559,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         with suppress(NoSample):
             inst, sample = state.sample_idx
             if sample:
-                instruments = deepcopy(state.project.settings.instruments)
+                instruments = deepcopy(self.settings.instruments)
                 keys = sorted(instruments[inst].multisamples.keys())
                 instruments[inst].multisamples.pop(sample)
 
@@ -646,7 +646,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_play_spc_clicked(self) -> None:
-        spc = amk.spc_fname(self.state.project)
+        spc = amk.spc_fname(self.project)
 
         if not spc.exists():
             self.response_generated.emit(
@@ -681,7 +681,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_render_zip_clicked(self) -> None:
         self.update_status("Zip file generated")
-        zname = amk.render_zip(self.state.project)
+        zname = amk.render_zip(self.project)
         self.response_generated.emit(
             False, "Zip Render", f"Zip file {zname} rendered"
         )
@@ -1142,10 +1142,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         inst, _ = state.sample_idx
 
-        instruments = deepcopy(state.project.settings.instruments)
+        instruments = deepcopy(self.settings.instruments)
         instruments[inst].multisamples[name] = sample
 
-        # TODO: Review                                                                      # T
+        # TODO: Review
         settings = replace(self.settings, instruments=instruments)
         project = replace(self.project, settings=settings)
         self.state = replace(
@@ -1165,7 +1165,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         error = True
 
         try:
-            MmlExporter.export_project(self.state.project)
+            MmlExporter.export_project(self.project)
             error = False
         except SongException as e:
             msg = str(e)
@@ -1183,7 +1183,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         try:
             msg = amk.generate_spc(
-                self.state.project,
+                self.project,
                 self._sample_packs,
                 self.preferences.convert_timeout,
             )
@@ -1223,7 +1223,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _save_backup(self) -> None:
-        self.state.project.save(backup=True)
+        self.project.save(backup=True)
 
     ###########################################################################
 
@@ -1305,7 +1305,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 name = state.sample_idx[0]
 
                 unmapped = self.song.unmapped_notes(
-                    name, state.project.settings.instruments[name]
+                    name, self.settings.instruments[name]
                 )
 
                 self.state.unmapped = {
@@ -1399,7 +1399,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         state = self.state
         aram_util = state.aram_util
 
-        delay = state.project.settings.echo.delay
+        delay = self.settings.echo.delay
         aram_util.echo, aram_util.echo_pad = echo_bytes(delay)
 
         aram_util.samples += self.sample_bytes - state.aram_custom_sample_b
@@ -1409,7 +1409,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_utilization_from_amk(self) -> None:
-        self.state.aram_util = amk.utilization(self.state.project)
+        self.state.aram_util = amk.utilization(self.project)
         self.state.aram_custom_sample_b = self.sample_bytes
 
     ###########################################################################
@@ -1529,7 +1529,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if do_update:
             self._rollback_undo()
 
-            # TODO
-            # self._save_backup()
+            self._save_backup()
             self._history.append(val)
             self._signal_state_change()

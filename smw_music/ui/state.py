@@ -11,6 +11,7 @@
 
 # Standard library imports
 from dataclasses import dataclass, field
+from functools import cached_property
 from typing import cast
 
 # Library imports
@@ -92,7 +93,7 @@ class State:
 
     ###########################################################################
 
-    @property
+    @cached_property
     def samples(self) -> dict[tuple[str, str], InstrumentSample]:
         samples = {}
 
