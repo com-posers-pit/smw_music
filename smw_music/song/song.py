@@ -447,15 +447,3 @@ def transpose(song: Song, inst: str) -> int:
                 rv = token.transpose
                 break
     return rv
-
-
-#    def unmapped_notes(
-#        self, inst_name: str, inst: InstrumentConfig
-#    ) -> list[tuple[music21.pitch.Pitch, NoteHead]]:
-#        rv = list()
-#
-#        instrument = inst if inst.multisample else None
-#        for channel in self.channels:
-#            rv.extend(channel.unmapped(inst_name, instrument))
-#
-#        return dedupe_notes(rv)

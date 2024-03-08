@@ -18,9 +18,40 @@ from typing import cast
 from music21.pitch import Pitch
 
 # Package imports
-from smw_music.song import Dynamics, Note, NoteHead, Song, dynamics, transpose
+from smw_music.song import (
+    Dynamics,
+    Instrument,
+    Note,
+    NoteHead,
+    Song,
+    Token,
+    dedupe_notes,
+    dynamics,
+    transpose,
+)
 from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _unmapped_notes(
+    tokens: list[Token], inst_name: str, inst: "InstrumentConfig" | None
+) -> list[tuple[Pitch, NoteHead]]:
+    last_inst = ""
+    notes = list()
+    for token in tokens:
+        match token:
+            case Instrument(name, _):
+                last_inst = name
+            case Note(pitch, _, head, _, _, _, _) if last_inst == inst_name:
+                if (inst is None) or (not inst.emit_note(token)[1]):
+                    notes.append((pitch, NoteHead(head)))
+
+    return notes
+
 
 ###############################################################################
 # API class definitions
@@ -407,3 +438,18 @@ def extract_instruments(song: Song) -> dict[str, InstrumentConfig]:
         )
         for inst in instruments
     }
+
+
+###############################################################################
+
+
+def unmapped_notes(
+    song: Song, name: str, inst: InstrumentConfig
+) -> list[tuple[Pitch, NoteHead]]:
+    rv = list()
+
+    instrument = inst if inst.multisample else None
+    for channel in song.channels:
+        rv.extend(_unmapped_notes(channel, name, instrument))
+
+    return dedupe_notes(rv)

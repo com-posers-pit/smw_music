@@ -17,6 +17,7 @@ from .instrument import (
     TuneSource,
     Tuning,
     extract_instruments,
+    unmapped_notes,
 )
 from .preferences import Preferences
 from .project import (
@@ -50,6 +51,7 @@ __all__ = [
     "TuneSource",
     "Tuning",
     "extract_instruments",
+    "unmapped_notes",
     "Preferences",
     "ProjectInfo",
     "ProjectSettings",

@@ -1250,12 +1250,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _signal_state_change_helper(
-        self, update_instruments: bool = False, state_change: bool = True
-    ) -> None:
+    def _signal_state_change_helper(self) -> None:
         state = self.state
 
-        self.saved = not state_change
         state.unmapped = set()
 
         self._update_aram_util()

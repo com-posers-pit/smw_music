@@ -816,18 +816,3 @@ class MmlExporter(Exporter):
 #         lines = " ".join(self._exporter.directives).splitlines()
 #         return CRLF.join(x.strip() for x in lines)
 #
-#     ###########################################################################
-#
-#     def unmapped(
-#         self, inst_name: str, inst: InstrumentConfig | None
-#     ) -> list[tuple[Pitch, NoteHead]]:
-#         last_inst = ""
-#         notes = list()
-#         for token in self.tokens:
-#             if isinstance(token, Instrument):
-#                 last_inst = token.name
-#             if isinstance(token, Note) and (last_inst == inst_name):
-#                 if (inst is None) or (not inst.emit_note(token)[1]):
-#                     notes.append((token.pitch, NoteHead(token.head)))
-#
-#         return dedupe_notes(notes)
