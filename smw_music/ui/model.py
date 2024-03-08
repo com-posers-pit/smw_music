@@ -39,6 +39,7 @@ from smw_music.spc700 import (
     Envelope,
     GainMode,
     SamplePlayer,
+    echo_bytes,
     midi_to_nspc,
 )
 from smw_music.spcmw import (
@@ -63,7 +64,6 @@ from smw_music.utils import brr_size_b, newest_release, version_tuple
 from .quotes import quotes
 from .sample_packs import SamplePackWatcher
 from .state import NoSample, State
-from .utilization import echo_bytes
 from .utils import endis, parse_setting
 
 ###############################################################################

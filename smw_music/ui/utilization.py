@@ -47,18 +47,6 @@ _colors = _DARK_MODE
 ###############################################################################
 
 
-def echo_bytes(delay: int) -> tuple[int, int]:
-    if delay == 0:
-        rv = (4, 252)
-    else:
-        rv = (2048 * delay, 0)
-
-    return rv
-
-
-###############################################################################
-
-
 def paint_utilization(
     util: Utilization, util_label: QLabel, free_label: QLabel
 ) -> None:

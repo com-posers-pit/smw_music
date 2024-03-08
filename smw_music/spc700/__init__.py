@@ -10,7 +10,7 @@
 ###############################################################################
 
 from .brr import BLOCK_SIZE, SAMPLES_PER_BLOCK, Brr, BrrException, extract_brrs
-from .echo import EchoConfig
+from .echo import EchoConfig, echo_bytes
 from .nspc import calc_tune, midi_to_nspc, set_pitch
 from .sample_player import SamplePlayer
 from .spc700 import (
@@ -37,6 +37,7 @@ __all__ = [
     "BrrException",
     "extract_brrs",
     "EchoConfig",
+    "echo_bytes",
     "calc_tune",
     "midi_to_nspc",
     "set_pitch",
