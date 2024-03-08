@@ -1375,23 +1375,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_state(
-        self,
-        new_state: State,
-    ) -> None:
-        do_update = True
-        if new_state == self.state:
-            do_update = False
-
-        if do_update:
-            self._rollback_undo()
-
-            # TODO
-            # self._save_backup()
-            self._signal_state_change()
-
-    ###########################################################################
-
     def _update_aram_util(self) -> None:
         state = self.state
         aram_util = state.aram_util
@@ -1454,6 +1437,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # Any time we get a new project object, mark unsaved
         if val != self.project:
             self.saved = False
+
         self.state = replace(self.state, _project=val)
 
     ###########################################################################
