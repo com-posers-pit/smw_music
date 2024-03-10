@@ -81,7 +81,7 @@ class BuiltinSampleSource(Enum):
 ###############################################################################
 
 
-@dataclass
+@dataclass(frozen=True)
 class Utilization:
     variables: int
     engine: int
