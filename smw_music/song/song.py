@@ -323,9 +323,6 @@ class Song:
         self.game = game
         self.channels = channels[:8]
 
-        # TODO: Remove
-        # self._collect_instruments()
-
     ###########################################################################
 
     @classmethod

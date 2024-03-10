@@ -30,7 +30,11 @@ import smw_music.spcmw as spcmw
 from smw_music.common import SmwMusicException, __version__
 from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
-from smw_music.ext_tools.amk import BuiltinSampleGroup, BuiltinSampleSource
+from smw_music.ext_tools.amk import (
+    BuiltinSampleGroup,
+    BuiltinSampleSource,
+    Utilization,
+)
 from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
     SAMPLE_FREQ,
@@ -58,6 +62,7 @@ from smw_music.spcmw import (
     amk,
     extract_instruments,
     get_preferences,
+    unmapped_notes,
 )
 from smw_music.utils import brr_size_b, newest_release, version_tuple
 
@@ -113,6 +118,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     songinfo_changed = pyqtSignal(
         str, arguments=["songinfo"]  # type: ignore[call-arg]
     )
+    _sample_watcher: observers.Observer
 
     ###########################################################################
     # Constructor definitions
@@ -122,6 +128,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         super().__init__()
         self.preferences = get_preferences()
         self.saved = True
+        self._check_amk = False
         self._reset_state()
         self._reset_song()
         self._sample_packs: dict[str, SamplePack] = {}
@@ -978,6 +985,98 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def _get_section_names(self) -> list[str]:
+        section_names: list[str] = []
+        with suppress(NoSong):
+            section_names = list(self.song.rehearsal_marks.keys())
+
+        return section_names
+
+    ###########################################################################
+
+    def _get_tune(self, state: State) -> tuple[float, tuple[int, float]]:
+        brr: Brr | None = None
+        with suppress(NoSample):
+            sample = state.sample
+            match sample.sample_source:
+                case SampleSource.SAMPLEPACK:
+                    pack, path = sample.pack_sample
+                    brr = self._sample_packs[pack][path].brr
+                case SampleSource.BRR:
+                    with suppress(FileNotFoundError):
+                        brr = Brr.from_file(sample.brr_fname)
+
+        calculated_tune = (0.0, (0, 0.0))
+        if brr is not None:
+            tuning = state.sample.tuning
+            scale = SAMPLE_FREQ / tuning.sample_freq
+            source = tuning.source
+
+            # When not in advanced mode, always use auto tuning
+            if not self.preferences.advanced_mode:
+                source = TuneSource.AUTO
+
+            match source:
+                case TuneSource.AUTO:
+                    fundamental = brr.fundamental
+                    fundamental /= 2 ** (tuning.semitone_shift / 12)
+                case TuneSource.MANUAL_NOTE:
+                    fundamental = tuning.pitch.frequency * scale
+                case TuneSource.MANUAL_FREQ:
+                    fundamental = tuning.frequency * scale
+
+            calculated_tune = (
+                brr.fundamental,
+                brr.tune(
+                    midi_to_nspc(Pitch("C", octave=4).midi),
+                    tuning.output.frequency,
+                    fundamental,
+                ),
+            )
+
+        return calculated_tune
+
+    ###########################################################################
+
+    def _get_unmapped_notes(self) -> set[tuple[Pitch, str]]:
+        unmapped = set()
+        with suppress(NoSong, NoSample):
+            notes = unmapped_notes(
+                self.song, self.state.sample_idx[0], self.state.instrument
+            )
+            unmapped = {(pitch, str(head)) for pitch, head in notes}
+
+        return unmapped
+
+    ###########################################################################
+
+    def _get_updated_amk_util(self, state: State) -> tuple[Utilization, int]:
+        return amk.utilization(state.project), self.sample_bytes
+
+    ###########################################################################
+
+    def _get_updated_util(self, state: State) -> tuple[Utilization, int]:
+        # Update the echo bytes in the utilization
+        delay = state.project.settings.echo.delay
+        echo, echo_pad = echo_bytes(delay)
+
+        # TODO: Verify this logic, I don't think it's right
+        # Update the sample size, add the new sample length and remove whatever
+        # the previous amount was.
+        samples = (
+            self.state.aram_util.samples
+            + self.sample_bytes  # TODO: fix this
+            - self.state.aram_custom_sample_b
+        )
+
+        util = replace(
+            self.state.aram_util, samples=samples, echo=echo, echo_pad=echo_pad
+        )
+
+        return (util, self.sample_bytes)  # TODO: fix this
+
+    ###########################################################################
+
     def _interpolate(self, level: Dynamics, setting: int) -> None:
         inst = self.state.instrument
         sample = self.state.sample
@@ -1196,7 +1295,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             self.update_status("SPC generated")
 
         if not error:
-            self._update_utilization_from_amk()
+            self._check_amk = True
             self.reinforce_state()
 
         return not error
@@ -1245,69 +1344,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _signal_state_change(self) -> None:
-        # self._signal_state_change_helper(update_instruments, state_change)
         self.state_changed.emit()
-
-    ###########################################################################
-
-    def _signal_state_change_helper(self) -> None:
-        state = self.state
-
-        state.unmapped = set()
-
-        self._update_aram_util()
-
-        brr: Brr | None = None
-        with suppress(NoSample):
-            sample = self.state.sample
-            match sample.sample_source:
-                case SampleSource.SAMPLEPACK:
-                    pack, path = sample.pack_sample
-                    brr = self._sample_packs[pack][path].brr
-                case SampleSource.BRR:
-                    with suppress(FileNotFoundError):
-                        brr = Brr.from_file(sample.brr_fname)
-
-        if brr is not None:
-            tuning = self.state.sample.tuning
-            scale = SAMPLE_FREQ / tuning.sample_freq
-            source = tuning.source
-
-            # When not in advanced mode, always use auto tuning
-            if not self.preferences.advanced_mode:
-                source = TuneSource.AUTO
-
-            match source:
-                case TuneSource.AUTO:
-                    fundamental = brr.fundamental
-                    fundamental /= 2 ** (tuning.semitone_shift / 12)
-                case TuneSource.MANUAL_NOTE:
-                    fundamental = tuning.pitch.frequency * scale
-                case TuneSource.MANUAL_FREQ:
-                    fundamental = tuning.frequency * scale
-
-            self.state.calculated_tune = (
-                brr.fundamental,
-                brr.tune(
-                    midi_to_nspc(Pitch("C", octave=4).midi),
-                    tuning.output.frequency,
-                    fundamental,
-                ),
-            )
-        else:
-            self.state.calculated_tune = (0, (0, 0))
-
-        with suppress(NoSong):
-            if self.song:
-                name = state.sample_idx[0]
-
-                unmapped = self.song.unmapped_notes(
-                    name, self.settings.instruments[name]
-                )
-
-                self.state.unmapped = {
-                    (pitch, str(head)) for pitch, head in unmapped
-                }
 
     ###########################################################################
 
@@ -1326,6 +1363,28 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             False,
         )
         self._sample_watcher.start()
+
+    ###########################################################################
+
+    def _update_derived_state(self, state: State) -> None:
+        unmapped = self._get_unmapped_notes()
+        section_names = self._get_section_names()
+        aram_util, aram_custom_sample_b = self._get_updated_util(state)
+        calculated_tune = self._get_tune(state)
+
+        if self._check_amk:
+            aram_util, aram_custom_sample_b = self._get_updated_amk_util(state)
+
+        state = replace(
+            state,
+            unmapped=unmapped,
+            aram_util=aram_util,
+            aram_custom_sample_b=aram_custom_sample_b,
+            calculated_tune=calculated_tune,
+            section_names=section_names,
+        )
+
+        self._history.append(state)
 
     ###########################################################################
 
@@ -1358,39 +1417,23 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         | Tuning
         | Envelope,
     ) -> None:
-        with suppress(NoSample):
-            old_sample = self.state.sample
-            new_sample = replace(old_sample)
-            for key, val in kwargs.items():
-                setattr(new_sample, key, val)
+        return
+        # TODO
 
-            if (new_sample != old_sample) or force_update:
-                self._rollback_undo()
-
-                new_state = deepcopy(self.state)
-                new_state.sample = new_sample
-
-                self._history.append(new_state)
-                self._signal_state_change()
-
-    ###########################################################################
-
-    def _update_aram_util(self) -> None:
-        state = self.state
-        aram_util = state.aram_util
-
-        delay = self.settings.echo.delay
-        aram_util.echo, aram_util.echo_pad = echo_bytes(delay)
-
-        aram_util.samples += self.sample_bytes - state.aram_custom_sample_b
-
-        state.aram_custom_sample_b = self.sample_bytes
-
-    ###########################################################################
-
-    def _update_utilization_from_amk(self) -> None:
-        self.state.aram_util = amk.utilization(self.project)
-        self.state.aram_custom_sample_b = self.sample_bytes
+    #         with suppress(NoSample):
+    #             old_sample = self.state.sample
+    #             new_sample = replace(old_sample)
+    #             for key, val in kwargs.items():
+    #                 setattr(new_sample, key, val)
+    #
+    #             if (new_sample != old_sample) or force_update:
+    #                 self._rollback_undo()
+    #
+    #                 new_state = deepcopy(self.state)
+    #                 new_state.sample = new_sample
+    #
+    #                 self._history.append(new_state)
+    #                 self._signal_state_change()
 
     ###########################################################################
     # API property definitions
@@ -1442,6 +1485,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    # TODO: This needs to be dependent on a State variable
     @property
     def sample_bytes(self) -> int:
         handled: list[tuple[bool, str, Path]] = []
@@ -1509,7 +1553,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         if do_update:
             self._rollback_undo()
-
+            self._update_derived_state(val)
             self._save_backup()
-            self._history.append(val)
             self._signal_state_change()
