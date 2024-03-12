@@ -38,6 +38,8 @@ _SAMPLE_GROUP_FNAME = "Addmusic_sample groups.txt"
 # API constant definitions
 ###############################################################################
 
+ARTIC_DUR_LIM = 7
+ARTIC_VOL_LIM = 15
 N_BUILTIN_SAMPLES = 20
 
 

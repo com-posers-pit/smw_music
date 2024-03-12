@@ -31,6 +31,8 @@ from smw_music.common import SmwMusicException, __version__
 from smw_music.exporters.mml import MmlExporter
 from smw_music.ext_tools import spcplay
 from smw_music.ext_tools.amk import (
+    ARTIC_DUR_LIM,
+    ARTIC_VOL_LIM,
     BuiltinSampleGroup,
     BuiltinSampleSource,
     Utilization,
@@ -44,6 +46,7 @@ from smw_music.spc700 import (
     GainMode,
     SamplePlayer,
     echo_bytes,
+    limits,
     midi_to_nspc,
 )
 from smw_music.spcmw import (
@@ -245,27 +248,25 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_artic_length_changed(self, artic: Artic, val: int | str) -> None:
-        max_len = 7
         with suppress(NoSample):
             artics = deepcopy(self.state.sample.artics)
-            artics[artic].length = parse_setting(val, max_len)
+            artics[artic].length = parse_setting(val, ARTIC_DUR_LIM)
             self._update_sample_state(artics=artics)
             self.update_status(f"{artic} length set to {val}")
 
     ###########################################################################
 
     def on_artic_volume_changed(self, artic: Artic, val: int | str) -> None:
-        max_vol = 15
         with suppress(NoSample):
             artics = deepcopy(self.state.sample.artics)
-            artics[artic].volume = parse_setting(val, max_vol)
+            artics[artic].volume = parse_setting(val, ARTIC_VOL_LIM)
             self._update_sample_state(artics=artics)
             self.update_status(f"{artic} volume set to {val}")
 
     ###########################################################################
 
     def on_attack_changed(self, val: int | str) -> None:
-        setting = parse_setting(val, 15)
+        setting = parse_setting(val, limits.ADSR_ATT)
         self._update_envelope_state(attack_setting=setting, adsr_mode=True)
         self.update_status(f"Attack set to {setting}")
 
@@ -343,7 +344,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_decay_changed(self, val: int | str) -> None:
-        setting = parse_setting(val, 7)
+        setting = parse_setting(val, limits.ADSR_DEC)
         self._update_envelope_state(decay_setting=setting, adsr_mode=True)
         self.update_status(f"Decay set to {setting}")
 
@@ -403,15 +404,16 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_echo_delay_changed(self, val: int | str) -> None:
-        setting = parse_setting(val, 15)
+        setting = parse_setting(val, limits.ECHO_DELAY)
         self.echo = replace(self.echo, delay=setting)
         self.update_status(f"Echo delay changed to {val}")
 
     ###########################################################################
 
     def on_filter_0_toggled(self, state: bool) -> None:
-        self.echo = replace(self.echo, fir_filt=0 if state else 1)
-        self.update_status(f"Echo filter set to {0 if state else 1}")
+        fir_filt = 0 if state else 1
+        self.echo = replace(self.echo, fir_filt=fir_filt)
+        self.update_status(f"Echo filter set to {fir_filt}")
 
     ###########################################################################
 
@@ -447,9 +449,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_gain_changed(self, val: int | str) -> None:
         with suppress(NoSample):
             mode = self.state.sample.envelope.gain_mode
-            # TODO: Unify this 31 with the others
-            limit = 127 if mode == GainMode.DIRECT else 31
-            setting = parse_setting(val, limit)
+            lim = (
+                limits.DIRECT_GAIN if mode == GainMode.DIRECT else limits.GAIN
+            )
+            setting = parse_setting(val, lim)
             self._update_envelope_state(gain_setting=setting, adsr_mode=False)
             self.update_status("Gain setting changed to {setting}")
 
@@ -827,14 +830,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_sus_level_changed(self, val: int | str) -> None:
-        setting = parse_setting(val, 7)
+        setting = parse_setting(val, limits.ADSR_SUS_LEVEL)
         self._update_envelope_state(sus_level_setting=setting, adsr_mode=True)
         self.update_status(f"Sustain level set to {setting}")
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
-        setting = parse_setting(val, 31)
+        setting = parse_setting(val, limits.ADSR_SUS_RATE)
         self._update_envelope_state(sus_rate_setting=setting, adsr_mode=True)
         self.update_status(f"Decay rate set to {setting}")
 
@@ -1327,6 +1330,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _select_gain(self, state: bool, mode: GainMode, caption: str) -> None:
+        # This shouldn't be called with direct-gain
+        assert mode != GainMode.DIRECT
+
         if state:
             kwargs: dict[str, GainMode | int | bool] = {
                 "gain_mode": mode,
@@ -1334,7 +1340,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             }
             with suppress(NoSample):
                 kwargs["gain_setting"] = min(
-                    31, self.state.sample.envelope.gain_setting
+                    limits.GAIN, self.state.sample.envelope.gain_setting
                 )
 
             # TODO: address this mypy error

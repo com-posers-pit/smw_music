@@ -9,6 +9,7 @@
 # Imports
 ###############################################################################
 
+from . import limits
 from .brr import BLOCK_SIZE, SAMPLES_PER_BLOCK, Brr, BrrException, extract_brrs
 from .echo import EchoConfig, echo_bytes
 from .nspc import calc_tune, midi_to_nspc, set_pitch
@@ -31,6 +32,7 @@ from .spc700 import (
 ###############################################################################
 
 __all__ = [
+    "limits",
     "BLOCK_SIZE",
     "SAMPLES_PER_BLOCK",
     "Brr",
