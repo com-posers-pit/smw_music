@@ -103,7 +103,7 @@ def _fname_gen(proj: Project, subdir: Callable[[Path, str], Path]) -> Path:
 
 
 def _generate_manifest(proj: Project) -> None:
-    # TODO
+    # TODO: Add stat parsing and reporting
     pass
 
 
@@ -151,7 +151,6 @@ def generate_spc(
     except subprocess.TimeoutExpired as e:
         raise SpcmwException("Conversion timed out") from e
 
-    # TODO: Add stat parsing and reporting
     _generate_manifest(project)
 
     return msg
