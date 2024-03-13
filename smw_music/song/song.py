@@ -427,7 +427,7 @@ def dynamics(song: Song, inst: str) -> set[Dynamics]:
                 case Dynamic(level):
                     last_dyn = level
                 case Crescendo(_, target, _):
-                    last_dyn = Dynamics(target)
+                    last_dyn = target
                 case Note() if match:
                     rv.add(last_dyn)
     return rv

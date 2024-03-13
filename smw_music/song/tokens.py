@@ -238,15 +238,14 @@ class Crescendo(Token):
     ----------
     duration: int
         Crecendo length, in beats
-    target: str
+    target: Dynamics
         Target dynamic
     cresc: bool
         True if this is a crescendo; False if a diminuendo.
     """
 
     duration: int
-    # TODO: Change to Dynamics
-    target: str
+    target: Dynamics
     cresc: bool
 
 

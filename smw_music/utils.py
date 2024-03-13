@@ -15,7 +15,7 @@ from contextlib import suppress
 from http.client import RemoteDisconnected
 from math import isclose
 from pathlib import Path
-from typing import Any, Tuple, Type, TypeVar
+from typing import Any, Type, TypeVar
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 from zipfile import ZipFile

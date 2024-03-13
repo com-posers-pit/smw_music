@@ -33,7 +33,6 @@ from .tokens import (
     RehearsalMark,
     Repeat,
     Slur,
-    Tempo,
     Token,
     Triplet,
 )
@@ -188,7 +187,7 @@ def _crescendoify(tokens: list[Token]) -> list[Token]:
                         break
                 # TODO: Move this out to AMK-specific logic
                 duration = min(duration, 255)  # Limit for now
-                rv.append(Crescendo(duration, str(target), token.cresc))
+                rv.append(Crescendo(duration, target.level, token.cresc))
 
         if not drop:
             rv.append(token)
