@@ -53,6 +53,7 @@ from smw_music.spcmw import (
     Artic,
     ArticSetting,
     Dynamics,
+    InstrumentConfig,
     InstrumentSample,
     Preferences,
     Project,
@@ -62,6 +63,7 @@ from smw_music.spcmw import (
     SampleSource,
     TuneSource,
     Tuning,
+    advanced,
     amk,
     extract_instruments,
     get_preferences,
@@ -97,9 +99,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             "dark_mode",
             "confirm_render",
         ],  # type: ignore[call-arg]
-    )
-    instruments_changed = pyqtSignal(
-        list, arguments=["instruments"]  # type: ignore[call-arg]
     )
     recent_projects_updated = pyqtSignal(
         list, arguments=["projects"]  # type: ignore[call-arg]
@@ -156,7 +155,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def close_project(self) -> None:
         self._reset_state()
-        self._signal_state_change()
         self.update_status("Project closed")
 
     ###########################################################################
@@ -211,6 +209,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def update_sample_packs(self) -> None:
         self._sample_packs = {}
 
+        # TODO: Make this work with folders.
         packs = {}
         root_dir = self.preferences.sample_pack_dname
         for fname in glob("*.zip", root_dir=root_dir):
@@ -1267,8 +1266,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         error = True
 
         try:
-            MmlExporter.export_project(self.project)
+            mml = MmlExporter.export_project(self.project)
             error = False
+            self.mml_generated.emit(mml)
         except SongException as e:
             msg = str(e)
 
