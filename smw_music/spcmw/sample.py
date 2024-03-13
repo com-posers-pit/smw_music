@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from glob import iglob
 from pathlib import Path
@@ -112,16 +112,9 @@ class SamplePack:
 ###############################################################################
 
 
-# TODO: combine with Envelope definitions
 @dataclass
 class SampleParams:
-    attack: int = 0
-    decay: int = 0
-    sustain_level: int = 0
-    sustain_rate: int = 0
-    adsr_mode: bool = True
-    gain_mode: GainMode = GainMode.DIRECT
-    gain: int = 0
+    envelope: Envelope = field(default_factory=Envelope)
     tuning: int = 0
     subtuning: int = 0
 
@@ -156,13 +149,15 @@ class SampleParams:
                 gain = 0x7F & regs[2]
 
         return cls(
-            attack,
-            decay,
-            sustain_level,
-            sustain_rate,
-            adsr_mode,
-            gain_mode,
-            gain,
+            Envelope(
+                adsr_mode,
+                attack,
+                decay,
+                sustain_level,
+                sustain_rate,
+                gain_mode,
+                gain,
+            ),
             tuning,
             subtuning,
         )
@@ -198,17 +193,3 @@ class SampleParams:
                 patterns.append(cls.from_pattern(line))
 
         return patterns
-
-    ###########################################################################
-
-    @property
-    def envelope(self) -> Envelope:
-        return Envelope(
-            self.adsr_mode,
-            self.attack,
-            self.decay,
-            self.sustain_level,
-            self.sustain_rate,
-            self.gain_mode,
-            self.gain,
-        )
