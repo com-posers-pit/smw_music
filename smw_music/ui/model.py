@@ -18,7 +18,7 @@ from dataclasses import replace
 from glob import glob
 from pathlib import Path
 from random import choice
-from typing import Callable
+from typing import Callable, TypedDict, Unpack
 
 # Library imports
 from music21.pitch import Pitch, PitchException
@@ -75,6 +75,103 @@ from .quotes import quotes
 from .sample_packs import SamplePackWatcher
 from .state import NoSample, State
 from .utils import endis, parse_setting
+
+###############################################################################
+# Private Class Definitions
+###############################################################################
+
+
+class _EchoT(TypedDict, total=False):
+    vol_mag: tuple[float, float]
+    vol_inv: tuple[bool, bool]
+    delay: int
+    fb_mag: float
+    fb_inv: bool
+    fir_filt: int
+
+
+###############################################################################
+
+
+class _EnvelopeT(TypedDict, total=False):
+    adsr_mode: bool
+    attack_setting: int
+    decay_setting: int
+    sus_level_setting: int
+    sus_rate_setting: int
+    gain_mode: GainMode
+    gain_setting: int
+
+
+###############################################################################
+
+
+class _ProjectT(TypedDict, total=False):
+    pass
+
+
+###############################################################################
+
+
+class _SampleT(TypedDict, total=False):
+    default_octave: int
+    octave_shift: int
+    dynamics: dict[Dynamics, int]
+    dyn_interpolate: bool
+    artics: dict[Artic, ArticSetting]
+    pan_enabled: bool
+    pan_setting: int
+    pan_invert: tuple[bool, bool]
+    sample_source: SampleSource
+    builtin_sample_index: int
+    pack_sample: tuple[str, Path]
+    brr_fname: Path
+    envelope: Envelope
+    tune_setting: int
+    subtune_setting: int
+    mute: bool
+    solo: bool
+    llim: Pitch
+    ulim: Pitch
+    notehead: NoteHead
+    start: Pitch
+    tuning: Tuning
+    track: bool
+    echo: bool
+
+
+###############################################################################
+
+
+class _SettingsT(TypedDict, total=False):
+    loop_analysis: bool
+    superloop_analysis: bool
+    measure_numbers: bool
+    start_measure: int
+    instruments: dict[str, InstrumentConfig]
+    global_volume: int
+    global_legato: bool
+    global_echo: bool
+    echo: EchoConfig
+    builtin_sample_group: BuiltinSampleGroup
+    builtin_sample_sources: list[BuiltinSampleSource]
+    adv_settings: dict[str, advanced.Advanced]
+
+
+###############################################################################
+
+
+class _StateT(TypedDict, total=False):
+    _project: Project | None
+    start_measure: int
+    start_section_idx: int
+    unmapped: set[tuple[Pitch, str]]
+    aram_util: Utilization
+    aram_custom_sample_b: int
+    calculated_tune: tuple[float, tuple[int, float]]
+    section_names: list[str]
+    _sample_idx: tuple[str, str] | None
+
 
 ###############################################################################
 # API Class Definitions
@@ -266,7 +363,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_attack_changed(self, val: int | str) -> None:
         setting = parse_setting(val, limits.ADSR_ATT)
-        self._update_envelope_state(attack_setting=setting, adsr_mode=True)
+        self._update_envelope(attack_setting=setting, adsr_mode=True)
         self.update_status(f"Attack set to {setting}")
 
     ###########################################################################
@@ -322,8 +419,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_brr_setting_changed(self, val: str) -> None:
-        self._update_sample_state(brr_setting=val)
-        self.update_status(f"BRR setting changed to {val}")
+        pass
+        # TODO: Implement this
+        # self._update_sample_state(brr_setting=val)
+        # self.update_status(f"BRR setting changed to {val}")
 
     ###########################################################################
 
@@ -344,7 +443,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_decay_changed(self, val: int | str) -> None:
         setting = parse_setting(val, limits.ADSR_DEC)
-        self._update_envelope_state(decay_setting=setting, adsr_mode=True)
+        self._update_envelope(decay_setting=setting, adsr_mode=True)
         self.update_status(f"Decay set to {setting}")
 
     ###########################################################################
@@ -365,53 +464,53 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_echo_feedback_changed(self, val: int | str) -> None:
         setting = parse_setting(val, 128) / 128
-        self.echo = replace(self.echo, fb_mag=setting)
+        self._update_echo(fb_mag=setting)
         self.update_status(f"Echo feedback magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_feedback_surround_changed(self, state: bool) -> None:
-        self.echo = replace(self.echo, fb_inv=state)
+        self._update_echo(fb_inv=state)
         self.update_status(f"Echo feedback surround {endis(state)}")
 
     ###########################################################################
 
     def on_echo_left_changed(self, val: int | str) -> None:
         setting = parse_setting(val, 128) / 128
-        self.echo = replace(self.echo, vol_mag=(setting, self.echo.vol_mag[1]))
+        self._update_echo(vol_mag=(setting, self.echo.vol_mag[1]))
         self.update_status(f"Echo left channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_left_surround_changed(self, state: bool) -> None:
-        self.echo = replace(self.echo, vol_inv=(state, self.echo.vol_inv[1]))
+        self._update_echo(vol_inv=(state, self.echo.vol_inv[1]))
         self.update_status(f"Echo left channel surround {endis(state)}")
 
     ###########################################################################
 
     def on_echo_right_changed(self, val: int | str) -> None:
         setting = parse_setting(val, 128) / 128
-        self.echo = replace(self.echo, vol_mag=(self.echo.vol_mag[0], setting))
+        self._update_echo(vol_mag=(self.echo.vol_mag[0], setting))
         self.update_status(f"Echo right channel magnitude set to {setting}")
 
     ###########################################################################
 
     def on_echo_right_surround_changed(self, state: bool) -> None:
-        self.echo = replace(self.echo, vol_inv=(self.echo.vol_inv[0], state))
+        self._update_echo(vol_inv=(self.echo.vol_inv[0], state))
         self.update_status(f"Echo right channel surround {endis(state)}")
 
     ###########################################################################
 
     def on_echo_delay_changed(self, val: int | str) -> None:
         setting = parse_setting(val, limits.ECHO_DELAY)
-        self.echo = replace(self.echo, delay=setting)
+        self._update_echo(delay=setting)
         self.update_status(f"Echo delay changed to {val}")
 
     ###########################################################################
 
     def on_filter_0_toggled(self, state: bool) -> None:
         fir_filt = 0 if state else 1
-        self.echo = replace(self.echo, fir_filt=fir_filt)
+        self._update_echo(fir_filt=fir_filt)
         self.update_status(f"Echo filter set to {fir_filt}")
 
     ###########################################################################
@@ -428,9 +527,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_direct_selected(self, state: bool) -> None:
         if state:
-            self._update_envelope_state(
-                gain_mode=GainMode.DIRECT, adsr_mode=False
-            )
+            self._update_envelope(gain_mode=GainMode.DIRECT, adsr_mode=False)
             self.update_status("Direct gain envelope selected")
 
     ###########################################################################
@@ -452,7 +549,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 limits.DIRECT_GAIN if mode == GainMode.DIRECT else limits.GAIN
             )
             setting = parse_setting(val, lim)
-            self._update_envelope_state(gain_setting=setting, adsr_mode=False)
+            self._update_envelope(gain_setting=setting, adsr_mode=False)
             self.update_status("Gain setting changed to {setting}")
 
     ###########################################################################
@@ -476,20 +573,20 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_global_echo_en_changed(self, state: bool) -> None:
-        self.settings = replace(self.settings, global_echo=state)
+        self._update_settings(global_echo=state)
         self.update_status(f"Echo {endis(state)}")
 
     ###########################################################################
 
     def on_global_legato_changed(self, state: bool) -> None:
-        self.settings = replace(self.settings, global_legato=state)
+        self._update_settings(global_legato=state)
         self.update_status(f"Global legato {endis(state)}")
 
     ###########################################################################
 
     def on_global_volume_changed(self, val: int | str) -> None:
         setting = parse_setting(val)
-        self.settings = replace(self.settings, global_volume=setting)
+        self._update_settings(global_volume=setting)
         self.update_status(f"Global volume set to {setting}")
 
     ###########################################################################
@@ -538,13 +635,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_loop_analysis_changed(self, enabled: bool) -> None:
-        self.settings = replace(self.settings, loop_analysis=enabled)
+        self._update_settings(loop_analysis=enabled)
         self.update_status(f"Loop analysis {endis(enabled)}")
 
     ###########################################################################
 
     def on_measure_numbers_changed(self, enabled: bool) -> None:
-        self.settings = replace(self.settings, measure_numbers=enabled)
+        self._update_settings(measure_numbers=enabled)
         self.update_status(f"Measure # reporting {endis(enabled)}")
 
     ###########################################################################
@@ -581,8 +678,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 # TODO: Verify this is right
                 settings = replace(self.settings, instruments=instruments)
                 project = replace(self.project, settings=settings)
-                self.state = replace(
-                    self.state, _project=project, _sample_idx=(inst, new_inst)
+                self._update_state(
+                    _project=project, _sample_idx=(inst, new_inst)
                 )
                 self.update_status(
                     f"Removed sample {sample} from instrument {inst}"
@@ -698,7 +795,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_sample_changed(self, sample_idx: tuple[str, str]) -> None:
-        self.state = replace(self.state, _sample_idx=sample_idx)
+        self._update_state(_sample_idx=sample_idx)
 
         inst, sample = sample_idx
         name = sample or inst
@@ -710,7 +807,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, group: BuiltinSampleGroup, checked: bool
     ) -> None:
         if checked:
-            self.settings = replace(self.settings, builtin_sample_group=group)
+            self._update_settings(builtin_sample_group=group)
             self.update_status(f"Builtin group set to {group}")
 
     ###########################################################################
@@ -720,7 +817,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ) -> None:
         sources = self.settings.builtin_sample_sources.copy()
         sources[idx] = source
-        self.settings = replace(self.settings, builtin_sample_sources=sources)
+        self._update_settings(builtin_sample_sources=sources)
         self.update_status(f"Builtin sample {idx:02x} set to {source}")
 
     ###########################################################################
@@ -736,7 +833,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_select_adsr_mode_selected(self, state: bool) -> None:
-        self._update_envelope_state(adsr_mode=state)
+        self._update_envelope(adsr_mode=state)
         self.update_status(
             f"Envelope mode set to {'ADSR' if state else 'Gain'}"
         )
@@ -778,7 +875,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     sample, solo=solo, mute=mute
                 )
 
-        self.settings = replace(self.settings, instruments=instruments)
+        self._update_settings(instruments=instruments)
 
         self.update_status(f"{msg} {field} {endis(state)}")
 
@@ -792,9 +889,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 # enumeration doesn't account for
                 section_idx = idx + 1
 
-        self.state = replace(
-            self.state, start_measure=value, start_section_idx=section_idx
-        )
+        self._update_state(start_measure=value, start_section_idx=section_idx)
         self.update_status(f"Start measure set to {value}")
 
     ###########################################################################
@@ -808,8 +903,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             measures = list(self.song.rehearsal_marks.values())
             measure = measures[section_idx - 1]
 
-        self.state = replace(
-            self.state, start_measure=measure, start_section_idx=section_idx
+        self._update_state(
+            start_measure=measure, start_section_idx=section_idx
         )
         self.update_status(f"Start section set to {name}")
 
@@ -823,21 +918,21 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_superloop_analysis_changed(self, enabled: bool) -> None:
-        self.settings = replace(self.settings, superloop_analysis=enabled)
+        self._update_settings(superloop_analysis=enabled)
         self.update_status(f"Superloop analysis {endis(enabled)}")
 
     ###########################################################################
 
     def on_sus_level_changed(self, val: int | str) -> None:
         setting = parse_setting(val, limits.ADSR_SUS_LEVEL)
-        self._update_envelope_state(sus_level_setting=setting, adsr_mode=True)
+        self._update_envelope(sus_level_setting=setting, adsr_mode=True)
         self.update_status(f"Sustain level set to {setting}")
 
     ###########################################################################
 
     def on_sus_rate_changed(self, val: int | str) -> None:
         setting = parse_setting(val, limits.ADSR_SUS_RATE)
-        self._update_envelope_state(sus_rate_setting=setting, adsr_mode=True)
+        self._update_envelope(sus_rate_setting=setting, adsr_mode=True)
         self.update_status(f"Decay rate set to {setting}")
 
     ###########################################################################
@@ -1149,7 +1244,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     with suppress(KeyError):
                         instruments[k] = self.settings.instruments[k]
 
-            self.settings = replace(self.settings, instruments=instruments)
+            self._update_settings(instruments=instruments)
 
             self.songinfo_changed.emit("TODO")
 
@@ -1249,9 +1344,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # TODO: Review
         settings = replace(self.settings, instruments=instruments)
         project = replace(self.project, settings=settings)
-        self.state = replace(
-            self.state, _project=project, _sample_idx=(inst, name)
-        )
+        self._update_state(_project=project, _sample_idx=(inst, name))
         if new:
             msg = f"Added multisample {name} to {inst}"
         else:
@@ -1334,7 +1427,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         assert mode != GainMode.DIRECT
 
         if state:
-            kwargs: dict[str, GainMode | int | bool] = {
+            kwargs: _EnvelopeT = {
                 "gain_mode": mode,
                 "adsr_mode": False,
             }
@@ -1343,8 +1436,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                     limits.GAIN, self.state.sample.envelope.gain_setting
                 )
 
-            # TODO: address this mypy error
-            self._update_envelope_state(**kwargs)
+            self._update_envelope(**kwargs)
             self.update_status(f"{caption} envelope selected")
 
     ###########################################################################
@@ -1394,9 +1486,13 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
-    def _update_envelope_state(self, **kwargs: bool | int | GainMode) -> None:
-        # TODO: remove ignore
-        new_env = replace(self.state.sample.envelope, **kwargs)  # type: ignore
+    def _update_echo(self, **kwargs: Unpack[_EchoT]) -> None:
+        self.echo = replace(self.echo, **kwargs)
+
+    ###########################################################################
+
+    def _update_envelope(self, **kwargs: Unpack[_EnvelopeT]) -> None:
+        new_env = replace(self.state.sample.envelope, **kwargs)
         self._update_sample_state(envelope=new_env)
 
     ###########################################################################
@@ -1408,38 +1504,30 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_sample_state(
-        self,
-        force_update: bool = False,
-        **kwargs: str
-        | int
-        | dict[Dynamics, int]
-        | dict[Artic, ArticSetting]
-        | set[Dynamics]
-        | bool
-        | SampleSource
-        | tuple[str, Path]
-        | tuple[bool, bool]
-        | Path
-        | Tuning
-        | Envelope,
+        self, force_update: bool = False, **kwargs: Unpack[_SampleT]
     ) -> None:
-        return
-        # TODO
+        with suppress(NoSample):
+            old_sample = self.state.sample
+            new_sample = replace(old_sample, **kwargs)
 
-    #         with suppress(NoSample):
-    #             old_sample = self.state.sample
-    #             new_sample = replace(old_sample)
-    #             for key, val in kwargs.items():
-    #                 setattr(new_sample, key, val)
-    #
-    #             if (new_sample != old_sample) or force_update:
-    #                 self._rollback_undo()
-    #
-    #                 new_state = deepcopy(self.state)
-    #                 new_state.sample = new_sample
-    #
-    #                 self._history.append(new_state)
-    #                 self._signal_state_change()
+            if (new_sample != old_sample) or force_update:
+                self._rollback_undo()
+
+                new_state = deepcopy(self.state)
+                new_state.sample = new_sample
+
+                self._history.append(new_state)
+                self._signal_state_change()
+
+    ###########################################################################
+
+    def _update_settings(self, **kwargs: Unpack[_SettingsT]) -> None:
+        self.settings = replace(self.settings, **kwargs)
+
+    ###########################################################################
+
+    def _update_state(self, **kwargs: Unpack[_StateT]) -> None:
+        self.state = replace(self.state, **kwargs)
 
     ###########################################################################
     # API property definitions
@@ -1453,7 +1541,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @echo.setter
     def echo(self, val: EchoConfig) -> None:
-        self.settings = replace(self.settings, echo=val)
+        self._update_settings(echo=val)
 
     ###########################################################################
 
@@ -1487,7 +1575,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         if val != self.project:
             self.saved = False
 
-        self.state = replace(self.state, _project=val)
+        self._update_state(_project=val)
 
     ###########################################################################
 
