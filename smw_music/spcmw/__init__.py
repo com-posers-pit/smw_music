@@ -5,7 +5,7 @@
 
 """Dashboard preferences."""
 
-from . import amk
+from . import advanced, amk
 from .instrument import (
     Artic,
     ArticSetting,
@@ -40,6 +40,7 @@ from .spcmw import (
 ###############################################################################
 
 __all__ = [
+    "advanced",
     "amk",
     "Artic",
     "ArticSetting",
