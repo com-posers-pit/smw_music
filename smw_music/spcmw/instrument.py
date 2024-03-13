@@ -12,7 +12,7 @@
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import cast
+from typing import TypedDict, Unpack, cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -31,6 +31,20 @@ from smw_music.song import (
 )
 from smw_music.spc700 import SAMPLE_FREQ, Envelope
 from smw_music.utils import hexb
+
+###############################################################################
+# Private class definitions
+###############################################################################
+
+
+class _InstrumentConfigT(TypedDict, total=False):
+    transpose: int
+    dynamics_present: set[Dynamics]
+    mute: bool
+    solo: bool
+    multisamples: dict[str, "InstrumentSample"]
+    sample: "InstrumentSample"
+
 
 ###############################################################################
 # Private function definitions
@@ -318,7 +332,7 @@ class InstrumentConfig:
 
     @classmethod
     def from_name(
-        cls, name: str, **kwargs: int | set[Dynamics] | bool
+        cls, name: str, **kwargs: Unpack[_InstrumentConfigT]
     ) -> "InstrumentConfig":
         name = name.lower()
 
@@ -339,8 +353,7 @@ class InstrumentConfig:
                 "electricguitar": 17,
             }
 
-            # TODO: address this mypy error
-            inst = cls(**kwargs)  # type: ignore
+            inst = cls(**kwargs)
             inst.sample.builtin_sample_index = inst_map.get(name, 0)
 
         return inst
@@ -349,7 +362,7 @@ class InstrumentConfig:
 
     @classmethod
     def make_percussion(
-        cls, name: str, **kwargs: int | set[Dynamics] | bool
+        cls, name: str, **kwargs: Unpack[_InstrumentConfigT]
     ) -> "InstrumentConfig":
         # Weinberg:
         # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
@@ -368,7 +381,8 @@ class InstrumentConfig:
             ("KD", Pitch("F4"), NoteHead.NORMAL, 21),
         ]
 
-        multisamples = {
+        kwargs = kwargs.copy()
+        kwargs["multisamples"] = {
             name: InstrumentSample(
                 llim=pitch,
                 ulim=pitch,
@@ -379,8 +393,7 @@ class InstrumentConfig:
             for name, pitch, notehead, idx in sample_defs
         }
 
-        # TODO: address this mypy error
-        return cls(multisamples=multisamples, **kwargs)  # type: ignore
+        return cls(**kwargs)
 
     ###########################################################################
     # API method definitions
