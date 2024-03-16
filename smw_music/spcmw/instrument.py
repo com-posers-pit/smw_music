@@ -12,7 +12,7 @@
 from dataclasses import dataclass, field
 from enum import IntEnum, auto
 from pathlib import Path
-from typing import TypedDict, Unpack, cast
+from typing import TypedDict, Union, Unpack, cast
 
 # Library imports
 from music21.pitch import Pitch
@@ -52,7 +52,7 @@ class _InstrumentConfigT(TypedDict, total=False):
 
 
 def _unmapped_notes(
-    tokens: list[Token], inst_name: str, inst: "InstrumentConfig" | None
+    tokens: list[Token], inst_name: str, inst: Union["InstrumentConfig", None]
 ) -> list[tuple[Pitch, NoteHead]]:
     last_inst = ""
     notes = list()
