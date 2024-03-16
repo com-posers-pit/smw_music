@@ -36,6 +36,7 @@ from smw_music.ext_tools.amk import (
     BuiltinSampleGroup,
     BuiltinSampleSource,
     Utilization,
+    default_utilization,
 )
 from smw_music.song import NoteHead, Song, SongException
 from smw_music.spc700 import (
@@ -73,7 +74,7 @@ from smw_music.utils import brr_size_b, newest_release, version_tuple
 
 from .quotes import quotes
 from .sample_packs import SamplePackWatcher
-from .state import NoSample, State
+from .state import NoProject, NoSample, State
 from .utils import endis, parse_setting
 
 ###############################################################################
@@ -228,8 +229,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self.preferences = get_preferences()
         self.saved = True
         self._check_amk = False
-        self._reset_state()
         self._reset_song()
+        self._reset_state()
         self._sample_packs: dict[str, SamplePack] = {}
         self._sample_player = SamplePlayer()
 
@@ -1093,7 +1094,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _get_tune(self, state: State) -> tuple[float, tuple[int, float]]:
         brr: Brr | None = None
-        with suppress(NoSample):
+        with suppress(NoProject, NoSample):
             sample = state.sample
             match sample.sample_source:
                 case SampleSource.SAMPLEPACK:
@@ -1153,24 +1154,32 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _get_updated_util(self, state: State) -> tuple[Utilization, int]:
-        # Update the echo bytes in the utilization
-        delay = state.project.settings.echo.delay
-        echo, echo_pad = echo_bytes(delay)
+        util = default_utilization()
+        sample_bytes = 0
 
-        # TODO: Verify this logic, I don't think it's right
-        # Update the sample size, add the new sample length and remove whatever
-        # the previous amount was.
-        samples = (
-            self.state.aram_util.samples
-            + self.sample_bytes  # TODO: fix this
-            - self.state.aram_custom_sample_b
-        )
+        with suppress(NoProject):
+            # Update the echo bytes in the utilization
+            delay = state.project.settings.echo.delay
+            echo, echo_pad = echo_bytes(delay)
 
-        util = replace(
-            self.state.aram_util, samples=samples, echo=echo, echo_pad=echo_pad
-        )
+            # TODO: Verify this logic, I don't think it's right
+            # Update the sample size, add the new sample length and remove
+            # whatever the previous amount was.
+            samples = (
+                self.state.aram_util.samples
+                + self.sample_bytes  # TODO: fix this
+                - self.state.aram_custom_sample_b
+            )
 
-        return (util, self.sample_bytes)  # TODO: fix this
+            util = replace(
+                self.state.aram_util,
+                samples=samples,
+                echo=echo,
+                echo_pad=echo_pad,
+            )
+            sample_bytes = self.sample_bytes  # TODO: fix this
+
+        return (util, sample_bytes)
 
     ###########################################################################
 
@@ -1418,7 +1427,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _save_backup(self) -> None:
-        self.project.save(backup=True)
+        with suppress(NoProject):
+            self.project.save(backup=True)
 
     ###########################################################################
 
