@@ -641,6 +641,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    def on_make_drumset_clicked(self) -> None:
+        # TODO
+        pass
+
+    ###########################################################################
+
     def on_measure_numbers_changed(self, enabled: bool) -> None:
         self._update_settings(measure_numbers=enabled)
         self.update_status(f"Measure # reporting {endis(enabled)}")

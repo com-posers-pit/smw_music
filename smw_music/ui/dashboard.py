@@ -669,6 +669,7 @@ class Dashboard(QWidget):
             (v.pan_setting, m.on_pan_setting_changed),
             (v.pan_l_invert, partial(m.on_pan_invert_changed, True)),
             (v.pan_r_invert, partial(m.on_pan_invert_changed, False)),
+            (v.multisample_make_drumset, m.on_mke_drumset_clicked),
             (v.multisample_sample_add, self.on_multisample_sample_add_clicked),
             (
                 v.multisample_sample_remove,

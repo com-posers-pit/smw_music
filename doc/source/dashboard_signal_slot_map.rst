@@ -188,6 +188,7 @@ Multisample
 .. mermaid::
 
    flowchart LR
+      view.multisample_make_drumset.released --> model.on_make_drumset_clicked
       view.multisample_sample_add.released --> dashboard.on_multisample_add_clicked --> model.on_multisample_add_clicked
       view.multisample_sample_remove.released --> model.multisample_sample_remove_clicked
       view.multisample_sample_name.editingFinished --> dashboard.multisample_sample_hanged --> model.on_multisample_changed
