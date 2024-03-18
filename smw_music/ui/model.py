@@ -1409,7 +1409,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _reset_state(self, project: Project | None = None) -> None:
-        self._history: list[State] = []
+        self._history: list[State] = [State()]
         self._undo_level = 0
         self.state = State(project)
 
