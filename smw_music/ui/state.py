@@ -65,14 +65,14 @@ class State:
         instruments = self.project.settings.instruments.copy()
         inst = instruments[inst_name]
 
-        if sample_name is None:
-            # Top-level instrument
-            inst = replace(inst, sample=sample)
-        else:
+        if sample_name:
             # Multisample
             multisamples = inst.multisamples.copy()
             multisamples[sample_name] = sample
             instrument = replace(inst, multisamples=multisamples)
+        else:
+            # Top-level instrument
+            instrument = replace(inst, sample=sample)
 
         instruments[inst_name] = instrument
         settings = replace(self.project.settings, instruments=instruments)
