@@ -841,6 +841,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     ###########################################################################
 
+    # TODO: Look at this
     def on_solomute_changed(
         self, sample_idx: tuple[str, str], solo_sel: bool, state: bool
     ) -> None:
@@ -1502,8 +1503,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def _update_envelope(self, **kwargs: Unpack[_EnvelopeT]) -> None:
-        new_env = replace(self.state.sample.envelope, **kwargs)
-        self._update_sample_state(envelope=new_env)
+        with suppress(NoSample):
+            new_env = replace(self.state.sample.envelope, **kwargs)
+            self._update_sample_state(envelope=new_env)
 
     ###########################################################################
 
