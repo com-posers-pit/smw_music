@@ -1517,17 +1517,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         self, force_update: bool = False, **kwargs: Unpack[_SampleT]
     ) -> None:
         with suppress(NoSample):
-            old_sample = self.state.sample
+            state = self.state
+            old_sample = state.sample
             new_sample = replace(old_sample, **kwargs)
 
             if (new_sample != old_sample) or force_update:
-                self._rollback_undo()
-
-                new_state = deepcopy(self.state)
-                new_state.sample = new_sample
-
-                self._history.append(new_state)
-                self._signal_state_change()
+                self.state = state.replace_sample(new_sample)
 
     ###########################################################################
 

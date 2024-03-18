@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from functools import cached_property
 from typing import cast
 
@@ -54,6 +54,30 @@ class State:
     section_names: list[str] = field(default_factory=list)
 
     _sample_idx: tuple[str, str] | None = None
+
+    ###########################################################################
+    # API function definitions
+    ###########################################################################
+
+    def replace_sample(self, sample: InstrumentSample) -> "State":
+        inst_name, sample_name = self.sample_idx
+
+        instruments = self.project.settings.instruments.copy()
+        inst = instruments[inst_name]
+
+        if sample_name is None:
+            # Top-level instrument
+            inst = replace(inst, sample=sample)
+        else:
+            # Multisample
+            multisamples = inst.multisamples.copy()
+            multisamples[sample_name] = sample
+            instrument = replace(inst, multisamples=multisamples)
+
+        instruments[inst_name] = instrument
+        settings = replace(self.project.settings, instruments=instruments)
+        project = replace(self.project, settings=settings)
+        return replace(self, _project=project)
 
     ###########################################################################
     # Property definitions
