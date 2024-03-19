@@ -337,7 +337,7 @@ class InstrumentConfig:
         name = name.lower()
 
         if name == "drumset":
-            inst = cls.make_percussion(name, **kwargs)
+            inst = cls.make_percussion(**kwargs)
         else:
             # Default instrument mapping, from Wakana's tutorial
             inst_map = {
@@ -362,7 +362,7 @@ class InstrumentConfig:
 
     @classmethod
     def make_percussion(
-        cls, name: str, **kwargs: Unpack[_InstrumentConfigT]
+        cls, **kwargs: Unpack[_InstrumentConfigT]
     ) -> "InstrumentConfig":
         # Weinberg:
         # http://www.normanweinberg.com/uploads/8/1/6/4/81640608/940506pn_guildines_for_drumset.pdf
