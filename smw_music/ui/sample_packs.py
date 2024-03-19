@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import Callable
 
 # Library imports
-from watchdog import events, observers
+from watchdog import events
 
 ###############################################################################
 # API Class Definitions

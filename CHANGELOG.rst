@@ -97,7 +97,7 @@ Affected Issues
 
 - `#248 Update pyinstaller version`_
 
-- `#225 Default and inferred dynamics (via hairpins) are not captured in the slider window`_
+- `#225 Default and inferred dynamics (via hairpins) are not captured`_
 
 - `#219 Support for removing rarely-used builtin samples`_
 
@@ -1541,7 +1541,7 @@ Affected Issues
 .. _#231 Multisample broken with enharmonic equivalence: http://github.com/com-posers-pit/smw_music/issues/231
 .. _#230 Add option in multisample to track articulations and dynamics: http://github.com/com-posers-pit/smw_music/issues/230
 .. _#229 Not all notehead detection is correct: http://github.com/com-posers-pit/smw_music/issues/229
-.. _#225 Default and inferred dynamics (via hairpins) are not captured in the slider window: http://github.com/com-posers-pit/smw_music/issues/225
+.. _#225 Default and inferred dynamics (via hairpins) are not captured: http://github.com/com-posers-pit/smw_music/issues/225
 .. _#222 Duplicate unused samples show up in multisample list: http://github.com/com-posers-pit/smw_music/issues/222
 .. _#220 Non-looping samples that are auto-tuned break playback: http://github.com/com-posers-pit/smw_music/issues/220
 .. _#219 Support for removing rarely-used builtin samples: http://github.com/com-posers-pit/smw_music/issues/219
