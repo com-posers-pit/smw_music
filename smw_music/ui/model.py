@@ -14,7 +14,7 @@ import os
 import threading
 from contextlib import suppress
 from copy import deepcopy
-from dataclasses import replace
+from dataclasses import fields, replace
 from glob import glob
 from pathlib import Path
 from random import choice
@@ -642,8 +642,12 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_make_drumset_clicked(self) -> None:
-        # TODO
-        pass
+        inst = self.state.instrument
+        instrument = InstrumentConfig.make_percussion(
+            **{k.name: getattr(inst, k.name) for k in fields(inst)}
+        )
+        self.state = self.state.replace_instrument(instrument)
+        self.update_status(f"Converted {self.state.sample_idx[0]} to drumset")
 
     ###########################################################################
 

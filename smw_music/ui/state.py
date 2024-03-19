@@ -59,11 +59,22 @@ class State:
     # API function definitions
     ###########################################################################
 
+    def replace_instrument(self, instrument: InstrumentConfig) -> "State":
+        inst_name, _ = self.sample_idx
+
+        instruments = self.project.settings.instruments.copy()
+        instruments[inst_name] = instrument
+
+        settings = replace(self.project.settings, instruments=instruments)
+        project = replace(self.project, settings=settings)
+        return replace(self, _project=project)
+
+    ###########################################################################
+
     def replace_sample(self, sample: InstrumentSample) -> "State":
         inst_name, sample_name = self.sample_idx
 
-        instruments = self.project.settings.instruments.copy()
-        inst = instruments[inst_name]
+        inst = self.project.settings.instruments[inst_name]
 
         if sample_name:
             # Multisample
@@ -74,10 +85,7 @@ class State:
             # Top-level instrument
             instrument = replace(inst, sample=sample)
 
-        instruments[inst_name] = instrument
-        settings = replace(self.project.settings, instruments=instruments)
-        project = replace(self.project, settings=settings)
-        return replace(self, _project=project)
+        return self.replace_instrument(instrument)
 
     ###########################################################################
     # Property definitions
