@@ -370,32 +370,32 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_audition_start(self, audition_note: str) -> None:
-        sample = self.state.sample
-        tune = 256 * sample.tune_setting + sample.subtune_setting
-        note = midi_to_nspc(Pitch(audition_note).midi)
+        with suppress(NoSample):
+            sample = self.state.sample
+            tune = 256 * sample.tune_setting + sample.subtune_setting
+            note = midi_to_nspc(Pitch(audition_note).midi)
 
-        sample = self.state.sample
-        play = False
-        target: Callable[[bytes, Envelope, int, int, int], None] | Callable[
-            [Path, Envelope, int, int, int], None
-        ]
-        arg: bytes | Path
-        match sample.sample_source:
-            case SampleSource.SAMPLEPACK:
-                play = True
-                pack, path = sample.pack_sample
-                target = self._sample_player.play_bin
-                arg = self._sample_packs[pack][path].data
-            case SampleSource.BRR:
-                play = True
-                target = self._sample_player.play_file
-                arg = sample.brr_fname
+            play = False
+            target: Callable[
+                [bytes, Envelope, int, int, int], None
+            ] | Callable[[Path, Envelope, int, int, int], None]
+            arg: bytes | Path
+            match sample.sample_source:
+                case SampleSource.SAMPLEPACK:
+                    play = True
+                    pack, path = sample.pack_sample
+                    target = self._sample_player.play_bin
+                    arg = self._sample_packs[pack][path].data
+                case SampleSource.BRR:
+                    play = True
+                    target = self._sample_player.play_file
+                    arg = sample.brr_fname
 
-        if play:
-            self._sample_player_th = threading.Thread(
-                target=target, args=(arg, sample.envelope, tune, note, 0)
-            )
-            self._sample_player_th.start()
+            if play:
+                self._sample_player_th = threading.Thread(
+                    target=target, args=(arg, sample.envelope, tune, note, 0)
+                )
+                self._sample_player_th.start()
 
     ###########################################################################
 
