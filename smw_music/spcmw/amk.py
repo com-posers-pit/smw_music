@@ -165,9 +165,10 @@ def render_zip(project: Project) -> Path:
 
     # Turn off the preview features
     sets.start_measure = 1
-    for sample in sets.samples.values():
-        sample.mute = False
-        sample.solo = False
+    # TODO
+    #    for sample in sets.samples.values():
+    #        sample.mute = False
+    #        sample.solo = False
 
     mml = mml_fname(project)
     spc = spc_fname(project)

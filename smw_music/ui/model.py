@@ -61,6 +61,7 @@ from smw_music.spcmw import (
     ProjectInfo,
     ProjectSettings,
     SamplePack,
+    SampleParams,
     SampleSource,
     TuneSource,
     Tuning,
@@ -114,6 +115,15 @@ class _ProjectT(TypedDict, total=False):
 ###############################################################################
 
 
+class _SampleParamsT(TypedDict, total=False):
+    envelope: Envelope
+    tuning: int
+    subtuning: int
+
+
+###############################################################################
+
+
 class _SampleT(TypedDict, total=False):
     default_octave: int
     octave_shift: int
@@ -127,9 +137,7 @@ class _SampleT(TypedDict, total=False):
     builtin_sample_index: int
     pack_sample: tuple[str, Path]
     brr_fname: Path
-    envelope: Envelope
-    tune_setting: int
-    subtune_setting: int
+    params: SampleParams
     mute: bool
     solo: bool
     llim: Pitch
@@ -339,7 +347,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_apply_suggested_tune_clicked(self) -> None:
         setting = self.state.calculated_tune[1][0]
         tune, subtune = divmod(setting, 256)
-        self._update_sample_state(tune_setting=tune, subtune_setting=subtune)
+        self._update_sample_params_state(tuning=tune, subtuning=subtune)
         self.update_status(f"Tune setting set to {tune}.{subtune}")
 
     ###########################################################################
@@ -372,7 +380,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     def on_audition_start(self, audition_note: str) -> None:
         with suppress(NoSample):
             sample = self.state.sample
-            tune = 256 * sample.tune_setting + sample.subtune_setting
+            params = sample.params
+            tune = 256 * params.tuning + params.subtuning
             note = midi_to_nspc(Pitch(audition_note).midi)
 
             play = False
@@ -393,7 +402,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             if play:
                 self._sample_player_th = threading.Thread(
-                    target=target, args=(arg, sample.envelope, tune, note, 0)
+                    target=target, args=(arg, params.envelope, tune, note, 0)
                 )
                 self._sample_player_th.start()
 
@@ -545,7 +554,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_gain_changed(self, val: int | str) -> None:
         with suppress(NoSample):
-            mode = self.state.sample.envelope.gain_mode
+            mode = self.state.sample.params.envelope.gain_mode
             lim = (
                 limits.DIRECT_GAIN if mode == GainMode.DIRECT else limits.GAIN
             )
@@ -924,7 +933,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_subtune_changed(self, val: int | str) -> None:
         setting = parse_setting(val)
-        self._update_sample_state(subtune_setting=setting)
+        self._update_sample_params_state(subtuning=setting)
         self.update_status(f"Subtune set to {setting}")
 
     ###########################################################################
@@ -951,7 +960,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_tune_changed(self, val: int | str) -> None:
         setting = parse_setting(val)
-        self._update_sample_state(tune_setting=setting)
+        self._update_sample_params_state(tuning=setting)
         self.update_status(f"Tune set to {setting}")
 
     ###########################################################################
@@ -1295,11 +1304,10 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         pack, sample_path = item_id
         params = self._sample_packs[pack][sample_path].params
 
-        # TODO
-        self._update_sample_state(
+        self._update_sample_params_state(
             envelope=params.envelope,
-            tune_setting=params.tuning,
-            subtune_setting=params.subtuning,
+            tuning=params.tuning,
+            subtuning=params.subtuning,
         )
 
     ###########################################################################
@@ -1454,7 +1462,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             }
             with suppress(NoSample):
                 kwargs["gain_setting"] = min(
-                    limits.GAIN, self.state.sample.envelope.gain_setting
+                    limits.GAIN, self.state.sample.params.envelope.gain_setting
                 )
 
             self._update_envelope(**kwargs)
@@ -1514,14 +1522,23 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _update_envelope(self, **kwargs: Unpack[_EnvelopeT]) -> None:
         with suppress(NoSample):
-            new_env = replace(self.state.sample.envelope, **kwargs)
-            self._update_sample_state(envelope=new_env)
+            new_env = replace(self.state.sample.params.envelope, **kwargs)
+            self._update_sample_params_state(envelope=new_env)
 
     ###########################################################################
 
     def _update_sample_packs(self, msg: str) -> None:
         self.update_status(msg)
         self.update_sample_packs()
+
+    ###########################################################################
+
+    def _update_sample_params_state(
+        self, **kwargs: Unpack[_SampleParamsT]
+    ) -> None:
+        with suppress(NoSample):
+            params = replace(self.state.sample.params, **kwargs)
+            self._update_sample_state(params=params)
 
     ###########################################################################
 

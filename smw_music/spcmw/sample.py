@@ -113,7 +113,7 @@ class SamplePack:
 ###############################################################################
 
 
-@dataclass
+@dataclass(frozen=True)
 class SampleParams:
     envelope: Envelope = field(default_factory=Envelope)
     tuning: int = 0
@@ -194,3 +194,15 @@ class SampleParams:
                 patterns.append(cls.from_pattern(line))
 
         return patterns
+
+    ###########################################################################
+
+    @property
+    def brr_setting(self) -> tuple[int, int, int, int, int]:
+        return (
+            self.envelope.adsr1_reg,
+            self.envelope.adsr2_reg,
+            self.envelope.gain_reg,
+            self.tuning,
+            self.subtuning,
+        )

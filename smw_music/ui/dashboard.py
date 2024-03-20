@@ -1300,7 +1300,8 @@ class Dashboard(QWidget):
 
         sel_inst = settings.instruments[sample_idx[0]]
         sel_sample = settings.samples[sample_idx]
-        env = sel_sample.envelope
+        params = sel_sample.params
+        env = params.envelope
 
         v.interpolate.setChecked(sel_sample.dyn_interpolate)
 
@@ -1398,10 +1399,10 @@ class Dashboard(QWidget):
         slider.setValue(_slider_inv(slider, env.sus_rate_setting))
         v.sus_rate_setting.setText(hexb(env.sus_rate_setting))
 
-        v.tune_slider.setValue(sel_sample.tune_setting)
-        v.tune_setting.setText(hexb(sel_sample.tune_setting))
-        v.subtune_slider.setValue(sel_sample.subtune_setting)
-        v.subtune_setting.setText(hexb(sel_sample.subtune_setting))
+        v.tune_slider.setValue(params.tuning)
+        v.tune_setting.setText(hexb(params.tuning))
+        v.subtune_slider.setValue(params.subtuning)
+        v.subtune_setting.setText(hexb(params.subtuning))
 
         v.brr_setting.setText(sel_sample.brr_str)
 
@@ -1411,8 +1412,8 @@ class Dashboard(QWidget):
         v.instrument_dynamics_tab.setEnabled(not sel_sample.track)
 
         # Apply the more interesting UI updates
-        self._update_gain_limits(env.gain_mode == GainMode.DIRECT)
-        self._update_envelope(sel_sample.envelope)
+        self._update_gain_limits(params.envelope.gain_mode == GainMode.DIRECT)
+        self._update_envelope(params.envelope)
 
     ###########################################################################
 

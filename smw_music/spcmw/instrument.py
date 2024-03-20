@@ -9,7 +9,7 @@
 ###############################################################################
 
 # Standard library imports
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from enum import IntEnum, auto
 from pathlib import Path
 from typing import TypedDict, Union, Unpack, cast
@@ -29,8 +29,10 @@ from smw_music.song import (
     dynamics,
     transpose,
 )
-from smw_music.spc700 import SAMPLE_FREQ, Envelope
+from smw_music.spc700 import SAMPLE_FREQ
 from smw_music.utils import hexb
+
+from .sample import SampleParams
 
 ###############################################################################
 # Private class definitions
@@ -134,7 +136,7 @@ class Tuning:
 ###############################################################################
 
 
-@dataclass
+@dataclass(frozen=True)
 class InstrumentSample:
     default_octave: int = 3
     octave_shift: int = 0
@@ -168,9 +170,7 @@ class InstrumentSample:
     builtin_sample_index: int = 0
     pack_sample: tuple[str, Path] = ("", Path())
     brr_fname: Path = field(default_factory=Path)
-    envelope: Envelope = field(default_factory=Envelope)
-    tune_setting: int = 0
-    subtune_setting: int = 0
+    params: SampleParams = field(default_factory=SampleParams)
     mute: bool = False
     solo: bool = False
     llim: Pitch = field(default_factory=lambda: Pitch("A", octave=0))
@@ -211,13 +211,16 @@ class InstrumentSample:
     ###########################################################################
 
     def track_settings(self, other: "InstrumentSample") -> None:
-        if self.track:
-            self.dynamics = other.dynamics.copy()
-            self.dyn_interpolate = other.dyn_interpolate
-            self.artics = other.artics.copy()
-            self.pan_enabled = other.pan_enabled
-            self.pan_setting = other.pan_setting
-            self.pan_invert = other.pan_invert
+        # TODO
+        return
+
+    #        if self.track:
+    #            self.dynamics = other.dynamics.copy()
+    #            self.dyn_interpolate = other.dyn_interpolate
+    #            self.artics = other.artics.copy()
+    #            self.pan_enabled = other.pan_enabled
+    #            self.pan_setting = other.pan_setting
+    #            self.pan_invert = other.pan_invert
 
     ###########################################################################
     # Property definitions
@@ -225,25 +228,7 @@ class InstrumentSample:
 
     @property
     def brr_setting(self) -> tuple[int, int, int, int, int]:
-        return (
-            self.envelope.adsr1_reg,
-            self.envelope.adsr2_reg,
-            self.envelope.gain_reg,
-            self.tune_setting,
-            self.subtune_setting,
-        )
-
-    ###########################################################################
-
-    @brr_setting.setter
-    def brr_setting(self, val: str) -> None:
-        val = val.strip()
-        # The [1:] drops the initial '$'
-        regs = [int(x[1:], 16) for x in val.split(" ")]
-
-        self.envelope = Envelope.from_regs(*regs[:3])
-        self.tune_setting = regs[3]
-        self.subtune_setting = regs[4]
+        return self.params.brr_setting
 
     ###########################################################################
 
@@ -261,10 +246,11 @@ class InstrumentSample:
 
     ###########################################################################
 
-    @instrument_idx.setter
-    def instrument_idx(self, idx: int) -> None:
-        if self.sample_source != SampleSource.BUILTIN:
-            self._instrument_idx = idx
+    # TODO
+    #    @instrument_idx.setter
+    #    def instrument_idx(self, idx: int) -> None:
+    #        if self.sample_source != SampleSource.BUILTIN:
+    #            self._instrument_idx = idx
 
     ###########################################################################
 
@@ -353,8 +339,11 @@ class InstrumentConfig:
                 "electricguitar": 17,
             }
 
+            idx = inst_map.get(name, 0)
             inst = cls(**kwargs)
-            inst.sample.builtin_sample_index = inst_map.get(name, 0)
+            inst = replace(
+                inst, sample=replace(inst.sample, builtin_sample_index=idx)
+            )
 
         return inst
 
