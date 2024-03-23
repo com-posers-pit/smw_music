@@ -1607,8 +1607,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     @project.setter
     def project(self, val: Project) -> None:
         # Any time we get a new project object, mark unsaved
-        if val != self.project:
-            self.saved = False
 
         self._update_state(_project=val)
 
@@ -1678,9 +1676,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     @state.setter
     def state(self, val: State) -> None:
-        do_update = (self._history == []) or (val != self.state)
+        if val != self.state:
+            with suppress(NoProject):
+                if val.project != self.state.project:
+                    self.saved = False
 
-        if do_update:
             self._rollback_undo()
             self._update_derived_state(val)
             self._save_backup()
