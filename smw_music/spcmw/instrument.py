@@ -35,6 +35,12 @@ from smw_music.utils import hexb
 from .sample import SampleParams
 
 ###############################################################################
+# API constant definitions
+###############################################################################
+
+INST_KEY = ""
+
+###############################################################################
 # Private class definitions
 ###############################################################################
 
@@ -56,7 +62,7 @@ class _InstrumentConfigT(TypedDict, total=False):
 def _unmapped_notes(
     tokens: list[Token], inst_name: str, inst: Union["InstrumentConfig", None]
 ) -> list[tuple[Pitch, NoteHead]]:
-    last_inst = ""
+    last_inst = INST_KEY
     notes = list()
     for token in tokens:
         match token:
@@ -298,7 +304,7 @@ class InstrumentSample:
 ###############################################################################
 
 
-@dataclass
+@dataclass(frozen=True)
 class InstrumentConfig:
     transpose: int = 0
     dynamics_present: set[Dynamics] = field(
@@ -399,7 +405,7 @@ class InstrumentConfig:
 
         # Parent instrument is guaranteed to have the pitch
         pitch = cast(Pitch, self.sample.emit(note.pitch, None))
-        return (pitch, "")
+        return (pitch, INST_KEY)
 
     ###########################################################################
     # API property definitions
@@ -413,16 +419,9 @@ class InstrumentConfig:
 
     @property
     def samples(self) -> dict[str, InstrumentSample]:
-        samples = {"": self.sample}
+        samples = {INST_KEY: self.sample}
         samples.update(self.multisamples)
         return samples
-
-    ###########################################################################
-
-    @samples.setter
-    def samples(self, value: dict[str, InstrumentSample]) -> None:
-        self.multisamples = dict(value)
-        self.sample = self.multisamples.pop("")
 
 
 ###############################################################################

@@ -48,6 +48,7 @@ from .advanced import (
 )
 from .common import SpcmwException
 from .instrument import (
+    INST_KEY,
     Artic,
     ArticSetting,
     InstrumentConfig,
@@ -149,10 +150,15 @@ def _load_echo(echo: EchoDict) -> EchoConfig:
 
 
 def _load_instrument(inst: InstrumentDict) -> InstrumentConfig:
-    rv = InstrumentConfig(mute=inst["mute"], solo=inst["solo"])
-    # This is a property setter, not a field in the dataclass, so it has to be
-    # set ex post facto
-    rv.samples = {k: _load_sample(v) for k, v in inst["samples"].items()}
+    multisamples = {k: _load_sample(v) for k, v in inst["samples"].items()}
+    sample = multisamples.pop(INST_KEY)
+
+    rv = InstrumentConfig(
+        mute=inst["mute"],
+        solo=inst["solo"],
+        sample=sample,
+        multisamples=multisamples,
+    )
 
     return rv
 

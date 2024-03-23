@@ -7,6 +7,7 @@
 
 from . import advanced, amk
 from .instrument import (
+    INST_KEY,
     Artic,
     ArticSetting,
     Dynamics,
@@ -42,6 +43,7 @@ from .spcmw import (
 __all__ = [
     "advanced",
     "amk",
+    "INST_KEY",
     "Artic",
     "ArticSetting",
     "Dynamics",

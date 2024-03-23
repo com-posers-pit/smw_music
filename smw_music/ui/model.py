@@ -864,25 +864,32 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
             field = "mute"
             mute = state
 
+        multisamples = inst.multisamples
+
         if sample_name:
             msg = f"{inst_name}.{sample_name}"
-            inst.multisamples[sample_name] = replace(
+            multisamples[sample_name] = replace(
                 inst.multisamples[sample_name], solo=solo, mute=mute
             )
             # If a sample's solo/mute is being disabled, disable it in the
             # instrument as well
             if not state:
-                inst.sample = replace(inst.sample, solo=solo, mute=mute)
+                sample = replace(inst.sample, solo=solo, mute=mute)
+            else:
+                sample = inst.sample
 
         else:
             # Apply an instrument mute/solo to all samples
             msg = f"{inst_name}"
-            inst.sample = replace(inst.sample, solo=solo, mute=mute)
+            sample = replace(inst.sample, solo=solo, mute=mute)
             for sample_name, sample in inst.multisamples.items():
-                inst.multisamples[sample_name] = replace(
+                multisamples[sample_name] = replace(
                     sample, solo=solo, mute=mute
                 )
 
+        instruments[inst_name] = replace(
+            inst, sample=sample, multisamples=multisamples
+        )
         msg = f"{msg} {field} {endis(state)}"
         self._update_settings(msg, instruments=instruments)
 
