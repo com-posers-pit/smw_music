@@ -196,6 +196,8 @@ class SampleParams:
         return patterns
 
     ###########################################################################
+    # API property definitions
+    ###########################################################################
 
     @property
     def brr_setting(self) -> tuple[int, int, int, int, int]:

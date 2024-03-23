@@ -429,10 +429,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_brr_setting_changed(self, val: str) -> None:
-        pass
-        # TODO: Implement this
-        # self._update_sample_state(brr_setting=val)
-        # self.update_status(f"BRR setting changed to {val}")
+        # Spoof the expected pattern format
+        val = f'""{val}'
+        _, params = SampleParams.from_pattern(val)
+        self._update_sample_state(params=params)
+        self.update_status(f"BRR setting changed to {val}")
 
     ###########################################################################
 
