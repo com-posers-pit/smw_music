@@ -41,6 +41,7 @@ class Preferences:
     release_check: bool = True
     confirm_render: bool = True
     convert_timeout: int = 10
+    convert_on_load: bool = True
 
     ###########################################################################
 
@@ -71,6 +72,8 @@ class Preferences:
             preferences.confirm_render = prefs["confirm_render"]
         with suppress(KeyError):
             preferences.convert_timeout = prefs["convert_timeout"]
+        with suppress(KeyError):
+            preferences.convert_on_load = prefs["convert_on_load"]
 
         return preferences
 
@@ -87,6 +90,7 @@ class Preferences:
             "release_check": self.release_check,
             "confirm_render": self.confirm_render,
             "convert_timeout": self.convert_timeout,
+            "convert_on_load": self.convert_on_load,
             "version": _CURRENT_PREFS_VERSION,
         }
 

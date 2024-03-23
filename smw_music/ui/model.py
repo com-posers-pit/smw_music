@@ -197,13 +197,12 @@ class NoSong(SmwMusicException):
 class Model(QObject):  # pylint: disable=too-many-public-methods
     state_changed = pyqtSignal()
     preferences_changed = pyqtSignal(
-        (bool, bool, bool, bool, bool),
+        (bool, bool, bool, bool),
         arguments=[
             "advanced_enable",
             "amk_valid",
             "spcplayer_valid",
             "dark_mode",
-            "confirm_render",
         ],  # type: ignore[call-arg]
     )
     recent_projects_updated = pyqtSignal(
@@ -1267,9 +1266,9 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
             self.songinfo_changed.emit("TODO")
 
-            # TODO: Re-add this
-            # if self._on_generate_mml_clicked(False):
-            #     self._on_generate_spc_clicked(False)
+            if self.preferences.convert_on_load:
+                if self._on_generate_mml_clicked(False):
+                    self._on_generate_spc_clicked(False)
 
     ###########################################################################
 
@@ -1278,13 +1277,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         self._start_watcher()
 
-        # TODO: Update this
         self.preferences_changed.emit(
             self.preferences.advanced_mode,
             bool(self.preferences.amk_fname.name),
             bool(self.preferences.spcplay_fname.name),
             self.preferences.dark_mode,
-            self.preferences.confirm_render,
         )
         self.reinforce_state()
 

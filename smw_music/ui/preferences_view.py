@@ -27,6 +27,8 @@ class PreferencesView(QDialog):
     buttonBox: QDialogButtonBox
     confirm_render: QCheckBox
     confirm_render_label: QLabel
+    convert_on_load: QCheckBox
+    convert_on_load_label: QLabel
     convert_timeout: QSpinBox
     convert_timeout_label: QLabel
     dark_mode: QCheckBox
