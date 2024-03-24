@@ -51,8 +51,6 @@ class EchoDict(TypedDict):
 
 
 class InstrumentDict(TypedDict):
-    mute: bool
-    solo: bool
     samples: dict[str, "SampleDict"]
 
 

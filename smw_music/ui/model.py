@@ -51,6 +51,7 @@ from smw_music.spc700 import (
     midi_to_nspc,
 )
 from smw_music.spcmw import (
+    INST_KEY,
     Artic,
     ArticSetting,
     Dynamics,
@@ -855,8 +856,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         instruments = deepcopy(self.settings.instruments)
         inst = instruments[inst_name]
 
-        solo = inst.solo
-        mute = inst.mute
+        solo = inst.sample.solo
+        mute = inst.sample.mute
         if solo_sel:
             field = "solo"
             solo = state
@@ -866,7 +867,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
         multisamples = inst.multisamples
 
-        if sample_name:
+        if sample_name != INST_KEY:
             msg = f"{inst_name}.{sample_name}"
             multisamples[sample_name] = replace(
                 inst.multisamples[sample_name], solo=solo, mute=mute

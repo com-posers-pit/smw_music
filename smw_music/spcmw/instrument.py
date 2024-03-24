@@ -48,8 +48,6 @@ INST_KEY = ""
 class _InstrumentConfigT(TypedDict, total=False):
     transpose: int
     dynamics_present: set[Dynamics]
-    mute: bool
-    solo: bool
     multisamples: dict[str, "InstrumentSample"]
     sample: "InstrumentSample"
 
@@ -310,8 +308,6 @@ class InstrumentConfig:
     dynamics_present: set[Dynamics] = field(
         default_factory=lambda: set(Dynamics)
     )
-    mute: bool = False
-    solo: bool = False
     multisamples: dict[str, InstrumentSample] = field(
         default_factory=lambda: {}
     )

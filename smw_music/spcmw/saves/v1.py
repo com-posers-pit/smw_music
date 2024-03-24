@@ -137,8 +137,6 @@ def _load_echo(echo: EchoDict) -> v2.EchoDict:
 
 def _load_instrument(inst: InstrumentDict) -> v2.InstrumentDict:
     rv: v2.InstrumentDict = {
-        "mute": inst["mute"],
-        "solo": inst["solo"],
         "samples": {k: _load_sample(v) for k, v in inst["samples"].items()},
     }
 

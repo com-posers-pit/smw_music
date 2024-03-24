@@ -154,8 +154,6 @@ def _load_instrument(inst: InstrumentDict) -> InstrumentConfig:
     sample = multisamples.pop(INST_KEY)
 
     rv = InstrumentConfig(
-        mute=inst["mute"],
-        solo=inst["solo"],
         sample=sample,
         multisamples=multisamples,
     )
@@ -261,8 +259,6 @@ def _save_echo(echo: EchoConfig) -> EchoDict:
 
 def _save_instrument(inst: InstrumentConfig) -> InstrumentDict:
     return {
-        "mute": inst.mute,
-        "solo": inst.solo,
         "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
     }
 
