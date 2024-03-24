@@ -136,9 +136,10 @@ def _load_echo(echo: EchoDict) -> v2.EchoDict:
 
 
 def _load_instrument(inst: InstrumentDict) -> v2.InstrumentDict:
-    rv: v2.InstrumentDict = {
-        "samples": {k: _load_sample(v) for k, v in inst["samples"].items()},
-    }
+    inst_sample_key = ""
+    multisamples = {k: _load_sample(v) for k, v in inst["samples"].items()}
+    sample = multisamples.pop(inst_sample_key)
+    rv: v2.InstrumentDict = {"sample": sample, "multisamples": multisamples}
 
     return rv
 

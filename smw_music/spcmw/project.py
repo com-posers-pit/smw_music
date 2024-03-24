@@ -150,8 +150,10 @@ def _load_echo(echo: EchoDict) -> EchoConfig:
 
 
 def _load_instrument(inst: InstrumentDict) -> InstrumentConfig:
-    multisamples = {k: _load_sample(v) for k, v in inst["samples"].items()}
-    sample = multisamples.pop(INST_KEY)
+    sample = _load_sample(inst["sample"])
+    multisamples = {
+        k: _load_sample(v) for k, v in inst["multisamples"].items()
+    }
 
     rv = InstrumentConfig(
         sample=sample,
@@ -259,7 +261,10 @@ def _save_echo(echo: EchoConfig) -> EchoDict:
 
 def _save_instrument(inst: InstrumentConfig) -> InstrumentDict:
     return {
-        "samples": {k: _save_sample(v) for k, v in inst.samples.items()},
+        "sample": _save_sample(inst.sample),
+        "multisamples": {
+            k: _save_sample(v) for k, v in inst.multisamples.items()
+        },
     }
 
 

@@ -51,7 +51,8 @@ class EchoDict(TypedDict):
 
 
 class InstrumentDict(TypedDict):
-    samples: dict[str, "SampleDict"]
+    sample: "SampleDict"
+    multisamples: dict[str, "SampleDict"]
 
 
 ###############################################################################
