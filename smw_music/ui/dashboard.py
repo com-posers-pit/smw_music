@@ -220,7 +220,7 @@ class Dashboard(QWidget):
         self._model = Model()
         self._sample_pack_items: dict[tuple[str, Path], QTreeWidgetItem] = {}
         self._samples: dict[tuple[str, str | None], QTreeWidgetItem] = {}
-        self._last_samples: dict[tuple[str, str], InstrumentSample] = {}
+        self._last_samples: list[tuple[str, str]] = []
 
         self._confirm_render = True
 
@@ -485,8 +485,9 @@ class Dashboard(QWidget):
         if not self._loaded:
             return
 
-        update_instruments = self._last_samples != self._state.samples
-        self._last_samples = self._state.samples
+        samples = list(self._state.samples.keys())
+        update_instruments = self._last_samples != samples
+        self._last_samples = samples
 
         v = self._view
 
