@@ -411,106 +411,103 @@ class MmlExporter(Exporter):
                         break
                 channel[:] = tokens
 
-        # TODO: Finish this
-        return ""
+        _validate()
+        channels = [
+            x.generate_mml(self.instruments, sets.measure_numbers)
+            for x in channels
+        ]
 
-    #         _validate()
-    #         channels = [
-    #             x.generate_mml(self.instruments, sets.measure_numbers)
-    #             for x in channels
-    #         ]
-    #
-    #         build_dt = ""
-    #         if include_dt:
-    #             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
-    #
-    #         instruments = deepcopy(self.instruments)
-    #         inst_samples: dict[str, InstrumentSample] = {}
-    #
-    #         for inst_name, inst in instruments.items():
-    #             if inst.multisample:
-    #                 inst_samples.update(inst.multisamples)
-    #             else:
-    #                 inst_samples[inst_name] = inst.samples[""]
-    #
-    #         samples: list[tuple[str, str, int]] = []
-    #         sample_id = 30
-    #
-    #         for sample in inst_samples.values():
-    #             if sample.sample_source == SampleSource.SAMPLEPACK:
-    #                 fname = str(
-    #                     PurePosixPath(sample.pack_sample[0])
-    #                     / sample.pack_sample[1]
-    #                 )
-    #                 samples.append((fname, sample.brr_str, sample_id))
-    #                 sample.instrument_idx = sample_id
-    #                 sample_id += 1
-    #             if sample.sample_source == SampleSource.BRR:
-    #                 fname = sample.brr_fname.name
-    #                 samples.append((fname, sample.brr_str, sample_id))
-    #                 sample.instrument_idx = sample_id
-    #                 sample_id += 1
-    #
-    #         # Overwrite muted/soloed instrument sample numbers
-    #         solo = any(sample.solo for sample in inst_samples.values())
-    #         mute = any(sample.mute for sample in inst_samples.values())
-    #         solo |= any(inst.solo for inst in instruments.values())
-    #         mute |= any(inst.mute for inst in instruments.values())
-    #
-    #         if solo or mute:
-    #             samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
-    #
-    #             for inst_sample in inst_samples.values():
-    #                 if inst_sample.mute or (solo and not inst_sample.solo):
-    #                     inst_sample.sample_source = SampleSource.OVERRIDE
-    #                     inst_sample.instrument_idx = sample_id
-    #
-    #             # Not necessary, but we keep it for consistency's sake
-    #             sample_id += 1
-    #
-    #         tmpl = Template(filename=str(RESOURCES / "mml.txt"))  # nosec B702
-    #
-    #         # TODO Move this into the to_mml_file
-    #         sample_group = "optimized"
-    #         match sets.builtin_sample_group:
-    #             case BuiltinSampleGroup.DEFAULT:
-    #                 sample_group = "default"
-    #             case BuiltinSampleGroup.OPTIMIZED:
-    #                 sample_group = "optimized"
-    #             case BuiltinSampleGroup.REDUX1:
-    #                 sample_group = "redux1"
-    #             case BuiltinSampleGroup.REDUX2:
-    #                 sample_group = "redux2"
-    #             case BuiltinSampleGroup.CUSTOM:
-    #                 sample_group = "custom"
-    #
-    #         rv: str = tmpl.render(
-    #             version=__version__,
-    #             global_legato=sets.global_legato,
-    #             song=self,
-    #             channels=channels,
-    #             datetime=build_dt,
-    #             echo_config=sets.echo,
-    #             inst_samples=inst_samples,
-    #             custom_samples=samples,
-    #             dynamics=list(Dynamics),
-    #             sample_path=str(samples_dir(self.project)),
-    #             sample_groups=sample_group,
-    #         )
-    #
-    #         rv = rv.replace(" ^", "^")
-    #         rv = rv.replace(" ]", "]")
-    #
-    #         # This last bit removes any empty lines at the end (these don't
-    #         # normally show up, but can if the last section in the last staff is
-    #         # empty.
-    #         rv = str(rv).rstrip() + "\n"
-    #
-    #         if fname is not None:
-    #             with open(fname, "w", newline="\r\n") as fobj:
-    #                 fobj.write(rv)
-    #
-    #         return rv
+        build_dt = ""
+        if include_dt:
+            build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
+
+        instruments = deepcopy(self.instruments)
+        inst_samples: dict[str, InstrumentSample] = {}
+
+        for inst_name, inst in instruments.items():
+            if inst.multisample:
+                inst_samples.update(inst.multisamples)
+            else:
+                inst_samples[inst_name] = inst.sample
+
+        samples: list[tuple[str, str, int]] = []
+        sample_id = 30
+
+        for sample in inst_samples.values():
+            if sample.sample_source == SampleSource.SAMPLEPACK:
+                fname = str(
+                    PurePosixPath(sample.pack_sample[0])
+                    / sample.pack_sample[1]
+                )
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
+                sample_id += 1
+            if sample.sample_source == SampleSource.BRR:
+                fname = sample.brr_fname.name
+                samples.append((fname, sample.brr_str, sample_id))
+                sample.instrument_idx = sample_id
+                sample_id += 1
+
+        # Overwrite muted/soloed instrument sample numbers
+        solo = any(sample.solo for sample in inst_samples.values())
+        mute = any(sample.mute for sample in inst_samples.values())
+        solo |= any(inst.solo for inst in instruments.values())
+        mute |= any(inst.mute for inst in instruments.values())
+
+        if solo or mute:
+            samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
+
+            for inst_sample in inst_samples.values():
+                if inst_sample.mute or (solo and not inst_sample.solo):
+                    inst_sample.sample_source = SampleSource.OVERRIDE
+                    inst_sample.instrument_idx = sample_id
+
+            # Not necessary, but we keep it for consistency's sake
+            sample_id += 1
+
+        tmpl = Template(filename=str(RESOURCES / "mml.txt"))  # nosec B702
+
+        # TODO Move this into the to_mml_file
+        sample_group = "optimized"
+        match sets.builtin_sample_group:
+            case BuiltinSampleGroup.DEFAULT:
+                sample_group = "default"
+            case BuiltinSampleGroup.OPTIMIZED:
+                sample_group = "optimized"
+            case BuiltinSampleGroup.REDUX1:
+                sample_group = "redux1"
+            case BuiltinSampleGroup.REDUX2:
+                sample_group = "redux2"
+            case BuiltinSampleGroup.CUSTOM:
+                sample_group = "custom"
+
+        rv: str = tmpl.render(
+            version=__version__,
+            global_legato=sets.global_legato,
+            song=self,
+            channels=channels,
+            datetime=build_dt,
+            echo_config=sets.echo,
+            inst_samples=inst_samples,
+            custom_samples=samples,
+            dynamics=list(Dynamics),
+            sample_path=str(samples_dir(self.project)),
+            sample_groups=sample_group,
+        )
+
+        rv = rv.replace(" ^", "^")
+        rv = rv.replace(" ]", "]")
+
+        # This last bit removes any empty lines at the end (these don't
+        # normally show up, but can if the last section in the last staff is
+        # empty.
+        rv = str(rv).rstrip() + "\n"
+
+        if fname is not None:
+            with open(fname, "w", newline="\r\n") as fobj:
+                fobj.write(rv)
+
+        return rv
 
     ###########################################################################
 
@@ -629,190 +626,189 @@ class MmlExporter(Exporter):
             self._append(directive)
 
 
-# TODO: finish this
-# # Standard library imports
-# from collections import Counter
-# from dataclasses import dataclass, field
-# from itertools import takewhile
-# from typing import Iterable, Iterator, TypeVar, cast
-#
-# # Library imports
-# from music21.pitch import Pitch
-#
-# # Package imports
-# from smw_music.song import (
-#     Clef,
-#     Error,
-#     Instrument,
-#     Note,
-#     Playable,
-#     RehearsalMark,
-#     Token,
-#     flatten,
-# )
-# from smw_music.spcmw.instrument import InstrumentConfig, NoteHead, dedupe_notes
-# from smw_music.song import dedupe_notes
-#
-# from .common import CRLF, notelen_str
-# from .mml import MmlExporter
-#
-# ###############################################################################
-# # Private variable/constant definitions
-# ###############################################################################
-#
-# # Generic type variable
-# _T = TypeVar("_T")
-#
-# ###############################################################################
-# # Private function definitions
-# ###############################################################################
-#
-#
-# def _default_notelen(tokens: list[Token], section: bool = True) -> int:
-#     if section:
-#         tokens = list(
-#             takewhile(lambda x: not isinstance(x, RehearsalMark), tokens)
-#         )
-#     playable = [x for x in flatten(tokens) if isinstance(x, Playable)]
-#
-#     notelen = _most_common([x.duration for x in playable]) if playable else 0
-#
-#     return notelen
-#
-#
-# ###############################################################################
-#
-#
-# def _most_common(container: Iterable[_T]) -> _T:
-#     return Counter(container).most_common(1)[0][0]
-#
-# ###############################################################################
-# # API class definitions
-# ###############################################################################
-#
-#
-# @dataclass
-# class Channel:  # pylint: disable=too-many-instance-attributes
-#     """
-#     Single music channel.
-#
-#     Parameters
-#     ----------
-#     tokens: list
-#         A list of valid channel tokens
-#
-#     Attributes
-#     ----------
-#     tokens: list
-#         A list of elements in this tokens
-#
-#     Todo
-#     ----
-#     Parameterize grace note length?
-#     """
-#
-#     tokens: list[Token]
-#     _directives: list[str] = field(init=False, repr=False, compare=False)
-#     _exporter: MmlExporter = field(init=False, repr=False, compare=False)
-#
-#     ###########################################################################
-#     # Data model method definitions
-#     ###########################################################################
-#
-#     def __getitem__(self, n: int) -> Token:
-#         return self.tokens[n]
-#
-#     ###########################################################################
-#
-#     def __iter__(self) -> Iterator[Token]:
-#         return iter(self.tokens)
-#
-#     ###########################################################################
-#     # Private method definitions
-#     ###########################################################################
-#
-#     def _reset_state(self, instruments: dict[str, InstrumentConfig]) -> None:
-#         self._exporter = MmlExporter(instruments)
-#
-#         notelen = _default_notelen(flatten(self.tokens))
-#         self._update_state_defaults(notelen)
-#
-#         if notelen:
-#             self._exporter.directives = [_notelen_str(notelen), CRLF]
-#
-#     ###########################################################################
-#
-#     def _update_state_defaults(self, notelen: int) -> None:
-#         self._exporter.default_note_len = notelen
-#
-#     ###########################################################################
-#     # API method definitions
-#     ###########################################################################
-#
-#     def check(self, instruments: dict[str, InstrumentConfig]) -> list[str]:
-#         """
-#         Confirm that the channel's notes are acceptable.
-#
-#         Raises
-#         ------
-#         MusicXmlException :
-#             Whenever an invalid percussion note is used, or when a musical note
-#             outside octaves 1-6  is used.
-#         """
-#         msgs = []
-#         tokens = flatten(self.tokens)
-#         percussion = False
-#
-#         for token in filter(lambda x: isinstance(x, Error), tokens):
-#             msgs.append(cast(Error, token).msg)
-#         for token in filter(
-#             lambda x: isinstance(x, (Clef, Instrument, Note)), tokens
-#         ):
-#             if isinstance(token, Clef):
-#                 percussion = token.percussion
-#             elif isinstance(token, Instrument):
-#                 inst = instruments[token.name]
-#             else:
-#                 note = cast(Note, token)
-#                 _, sample = inst.emit_note(note)
-#                 octave_shift = (
-#                     0 if percussion else inst.samples[sample].octave_shift
-#                 )
-#                 msgs.extend(note.check(octave_shift))
-#         for token in filter(lambda x: isinstance(x, Playable), tokens):
-#             msgs.extend(cast(Playable, token).duration_check())
-#         return msgs
-#
-#     ###########################################################################
-#
-#     def generate_mml(
-#         self,
-#         instruments: dict[str, InstrumentConfig],
-#         measure_numbers: bool = True,
-#     ) -> str:
-#         """
-#         Generate this channel's AddMusicK MML text.
-#
-#         Parameters
-#         ----------
-#         measure_numbers: bool
-#             True iff measure numbers should be included in MML
-#
-#         Return
-#         ------
-#         str
-#             The MML text for this channel
-#         """
-#         self._reset_state(instruments)
-#         self._exporter.measure_numbers = measure_numbers
-#
-#         for n, token in enumerate(self.tokens):
-#             if isinstance(token, RehearsalMark):
-#                 self._update_state_defaults(
-#                     _default_notelen(flatten(self.tokens[n + 1 :]))
-#                 )
-#             self._exporter.emit(token)
-#
-#         lines = " ".join(self._exporter.directives).splitlines()
-#         return CRLF.join(x.strip() for x in lines)
-#
+# Standard library imports
+from collections import Counter
+from dataclasses import dataclass, field
+from itertools import takewhile
+from typing import Iterable, Iterator, TypeVar, cast
+
+# Library imports
+from music21.pitch import Pitch
+
+# Package imports
+from smw_music.song import (
+    Clef,
+    Error,
+    Instrument,
+    Note,
+    Playable,
+    RehearsalMark,
+    Token,
+    dedupe_notes,
+    flatten,
+)
+from smw_music.spcmw.instrument import InstrumentConfig, NoteHead, dedupe_notes
+
+from .common import CRLF, notelen_str
+from .mml import MmlExporter
+
+###############################################################################
+# Private variable/constant definitions
+###############################################################################
+
+# Generic type variable
+_T = TypeVar("_T")
+
+###############################################################################
+# Private function definitions
+###############################################################################
+
+
+def _default_notelen(tokens: list[Token], section: bool = True) -> int:
+    if section:
+        tokens = list(
+            takewhile(lambda x: not isinstance(x, RehearsalMark), tokens)
+        )
+    playable = [x for x in flatten(tokens) if isinstance(x, Playable)]
+
+    notelen = _most_common([x.duration for x in playable]) if playable else 0
+
+    return notelen
+
+
+###############################################################################
+
+
+def _most_common(container: Iterable[_T]) -> _T:
+    return Counter(container).most_common(1)[0][0]
+
+
+###############################################################################
+# API class definitions
+###############################################################################
+
+
+@dataclass
+class Channel:  # pylint: disable=too-many-instance-attributes
+    """
+    Single music channel.
+
+    Parameters
+    ----------
+    tokens: list
+        A list of valid channel tokens
+
+    Attributes
+    ----------
+    tokens: list
+        A list of elements in this tokens
+
+    Todo
+    ----
+    Parameterize grace note length?
+    """
+
+    tokens: list[Token]
+    _directives: list[str] = field(init=False, repr=False, compare=False)
+    _exporter: MmlExporter = field(init=False, repr=False, compare=False)
+
+    ###########################################################################
+    # Data model method definitions
+    ###########################################################################
+
+    def __getitem__(self, n: int) -> Token:
+        return self.tokens[n]
+
+    ###########################################################################
+
+    def __iter__(self) -> Iterator[Token]:
+        return iter(self.tokens)
+
+    ###########################################################################
+    # Private method definitions
+    ###########################################################################
+
+    def _reset_state(self, instruments: dict[str, InstrumentConfig]) -> None:
+        self._exporter = MmlExporter(instruments)
+
+        notelen = _default_notelen(flatten(self.tokens))
+        self._update_state_defaults(notelen)
+
+        if notelen:
+            self._exporter.directives = [_notelen_str(notelen), CRLF]
+
+    ###########################################################################
+
+    def _update_state_defaults(self, notelen: int) -> None:
+        self._exporter.default_note_len = notelen
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
+
+    def check(self, instruments: dict[str, InstrumentConfig]) -> list[str]:
+        """
+        Confirm that the channel's notes are acceptable.
+
+        Raises
+        ------
+        MusicXmlException :
+            Whenever an invalid percussion note is used, or when a musical note
+            outside octaves 1-6  is used.
+        """
+        msgs = []
+        tokens = flatten(self.tokens)
+        percussion = False
+
+        for token in filter(lambda x: isinstance(x, Error), tokens):
+            msgs.append(cast(Error, token).msg)
+        for token in filter(
+            lambda x: isinstance(x, (Clef, Instrument, Note)), tokens
+        ):
+            if isinstance(token, Clef):
+                percussion = token.percussion
+            elif isinstance(token, Instrument):
+                inst = instruments[token.name]
+            else:
+                note = cast(Note, token)
+                _, sample = inst.emit_note(note)
+                octave_shift = (
+                    0 if percussion else inst.samples[sample].octave_shift
+                )
+                msgs.extend(note.check(octave_shift))
+        for token in filter(lambda x: isinstance(x, Playable), tokens):
+            msgs.extend(cast(Playable, token).duration_check())
+        return msgs
+
+    ###########################################################################
+
+    def generate_mml(
+        self,
+        instruments: dict[str, InstrumentConfig],
+        measure_numbers: bool = True,
+    ) -> str:
+        """
+        Generate this channel's AddMusicK MML text.
+
+        Parameters
+        ----------
+        measure_numbers: bool
+            True iff measure numbers should be included in MML
+
+        Return
+        ------
+        str
+            The MML text for this channel
+        """
+        self._reset_state(instruments)
+        self._exporter.measure_numbers = measure_numbers
+
+        for n, token in enumerate(self.tokens):
+            if isinstance(token, RehearsalMark):
+                self._update_state_defaults(
+                    _default_notelen(flatten(self.tokens[n + 1 :]))
+                )
+            self._exporter.emit(token)
+
+        lines = " ".join(self._exporter.directives).splitlines()
+        return CRLF.join(x.strip() for x in lines)
