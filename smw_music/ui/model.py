@@ -856,8 +856,8 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         instruments = deepcopy(self.settings.instruments)
         inst = instruments[inst_name]
 
-        solo = inst.sample.solo
-        mute = inst.sample.mute
+        solo = inst.samples[sample_name].solo
+        mute = inst.samples[sample_name].mute
         if solo_sel:
             field = "solo"
             solo = state
