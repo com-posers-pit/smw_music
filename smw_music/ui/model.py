@@ -850,36 +850,23 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     # TODO: Look at this
     def on_solomute_changed(
-        self, sample_idx: tuple[str, str], solo_sel: bool, state: bool
+        self, sample_idx: tuple[str, str], solo_sel: bool, enable: bool
     ) -> None:
         inst_name, sample_name = sample_idx
         instruments = deepcopy(self.settings.instruments)
         inst = instruments[inst_name]
+        multisamples = deepcopy(inst.multisamples)
 
-        solo = inst.samples[sample_name].solo
-        mute = inst.samples[sample_name].mute
         if solo_sel:
             field = "solo"
-            solo = state
+            solo = enable
+            mute = inst.samples[sample_name].mute
         else:
             field = "mute"
-            mute = state
+            solo = inst.samples[sample_name].solo
+            mute = enable
 
-        multisamples = inst.multisamples
-
-        if sample_name != INST_KEY:
-            msg = f"{inst_name}.{sample_name}"
-            multisamples[sample_name] = replace(
-                inst.multisamples[sample_name], solo=solo, mute=mute
-            )
-            # If a sample's solo/mute is being disabled, disable it in the
-            # instrument as well
-            if not state:
-                sample = replace(inst.sample, solo=solo, mute=mute)
-            else:
-                sample = inst.sample
-
-        else:
+        if sample_name == INST_KEY:
             # Apply an instrument mute/solo to all samples
             msg = f"{inst_name}"
             sample = replace(inst.sample, solo=solo, mute=mute)
@@ -887,11 +874,22 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 multisamples[sample_name] = replace(
                     sample, solo=solo, mute=mute
                 )
+        else:
+            msg = f"{inst_name}.{sample_name}"
+            multisamples[sample_name] = replace(
+                inst.multisamples[sample_name], solo=solo, mute=mute
+            )
+            # If a sample's solo/mute is being disabled, disable it in the
+            # instrument as well
+            if not enable:
+                sample = replace(inst.sample, solo=solo, mute=mute)
+            else:
+                sample = inst.sample
 
         instruments[inst_name] = replace(
             inst, sample=sample, multisamples=multisamples
         )
-        msg = f"{msg} {field} {endis(state)}"
+        msg = f"{msg} {field} {endis(enable)}"
         self._update_settings(msg, instruments=instruments)
 
     ###########################################################################
