@@ -64,12 +64,13 @@ class Exporter:
 
     ###########################################################################
 
-    def generate(self, tokens: list[Token] | None = None) -> None:
-        if tokens is None:
-            tokens = self.song.tokens
+    def generate(self, channels: list[list[Token]] | None = None) -> None:
+        if channels is None:
+            channels = self.song.channels
 
-        for token in tokens:
-            self.emit(token)
+        for channel in channels:
+            for token in channels:
+                self.emit(token)
 
     ###########################################################################
 

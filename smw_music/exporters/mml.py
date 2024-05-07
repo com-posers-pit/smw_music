@@ -12,11 +12,15 @@
 # Standard library imports
 import os
 import shutil
+from collections import Counter
 from copy import deepcopy
+from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
 from functools import singledispatchmethod
+from itertools import takewhile
 from pathlib import PurePosixPath
+from typing import Iterable, Iterator, TypeVar, cast
 
 # Library imports
 from mako.template import Template  # type: ignore
@@ -31,17 +35,20 @@ from smw_music.ext_tools.amk import (
 from smw_music.song import (
     Annotation,
     Artic,
+    ChannelDelim,
     Clef,
     CrescDelim,
     Crescendo,
     Dynamic,
     Dynamics,
+    Error,
     Instrument,
     Loop,
     LoopDelim,
     LoopRef,
     Measure,
     Note,
+    Playable,
     RehearsalMark,
     Repeat,
     Rest,
@@ -50,6 +57,7 @@ from smw_music.song import (
     Tempo,
     Token,
     Triplet,
+    flatten,
     reduce,
 )
 from smw_music.spcmw import (
@@ -108,20 +116,40 @@ def _validate() -> None:
 
 
 ###############################################################################
-# API class definitions
+# Private class definitions
 ###############################################################################
 
 
-class SlurState(Enum):
+class _SlurState(Enum):
     SLUR_IDLE = auto()
     SLUR_ACTIVE = auto()
     SLUR_END = auto()
 
 
 ###############################################################################
+# API class definitions
+###############################################################################
 
 
 class MmlExporter(Exporter):
+    instruments: dict[str, InstrumentConfig]
+    octave: int
+    default_note_len: int
+    grace: bool
+    measure_numbers: bool
+    slur: _SlurState
+    tie: bool
+    legato: bool
+    articulation: Artic
+    last_percussion: str
+    directives: list[str]
+
+    _instrument: InstrumentConfig
+    _active_sample_name: str
+    _active_sample: InstrumentSample
+    _in_loop: bool
+    _in_triplet: bool
+
     ###########################################################################
     # Constructor definitions
     ###########################################################################
@@ -129,28 +157,26 @@ class MmlExporter(Exporter):
     def __init__(self, project: Project, song: Song | None = None) -> None:
         super().__init__(project, song)
 
-        self.instruments: dict[str, InstrumentConfig]
-        self.octave: int = 4
-        self.default_note_len: int = 8
-        self.grace: bool = False
-        self.measure_numbers: bool = False
-        self.slur: SlurState = SlurState.SLUR_IDLE
-        self.tie: bool = False
-        self.legato: bool = False
-        self.articulation: Artic = Artic.NORMAL
-        self.last_percussion: str = ""
-        self.directives: list[str] = []
-
-        self._instrument: InstrumentConfig
-        self._active_sample_name: str
-        self._active_sample: InstrumentSample
-        self._in_loop: bool
-        self._in_triplet: bool
+        self._init_state()
+        self.directives = []
 
     ###########################################################################
 
     def _append(self, directive: str = "\n") -> None:
         self.directives.append(directive)
+
+    ###########################################################################
+
+    def _init_state(self) -> None:
+        self.octave = 4
+        self.default_note_len = 8
+        self.grace = False
+        self.measure_numbers = False
+        self.slur = _SlurState.SLUR_IDLE
+        self.tie = False
+        self.legato = False
+        self.articulation = Artic.NORMAL
+        self.last_percussion = ""
 
     ###########################################################################
 
@@ -163,6 +189,12 @@ class MmlExporter(Exporter):
     @emit.register
     def _(self, token: Annotation) -> None:
         self._append(token.text)
+
+    ###########################################################################
+
+    @emit.register
+    def _(self, token: ChannelDelim) -> None:
+        self._init_state()
 
     ###########################################################################
 
@@ -284,7 +316,7 @@ class MmlExporter(Exporter):
     @emit.register
     def _(self, token: Slur) -> None:
         self.slur = (
-            SlurState.SLUR_ACTIVE if token.start else SlurState.SLUR_END
+            _SlurState.SLUR_ACTIVE if token.start else _SlurState.SLUR_END
         )
 
     ###########################################################################
@@ -382,22 +414,24 @@ class MmlExporter(Exporter):
     ###########################################################################
 
     def do_export(self, include_dt: bool = True) -> str:
-        sets = self.project.settings
+        settings = self.project.settings
 
         # If starting after the first measure, disable loop analysis because
         # things might be badly broken
-        if sets.start_measure != 1:
-            sets.loop_analysis = False
-            sets.superloop_analysis = False
+        if settings.start_measure != 1:
+            settings.loop_analysis = False
+            settings.superloop_analysis = False
 
         channels = _reduce(
-            self.song.channels, sets.loop_analysis, sets.superloop_analysis
+            self.song.channels,
+            settings.loop_analysis,
+            settings.superloop_analysis,
         )
 
         # TODO: A bit of a hack to allow starting at a later measure
-        if sets.start_measure != 1:
+        if settings.start_measure != 1:
             for channel in channels:
-                to_drop = sets.start_measure - 1
+                to_drop = settings.start_measure - 1
                 tokens: list[Token] = []
                 for n, token in enumerate(channel):
                     if isinstance(
@@ -413,7 +447,7 @@ class MmlExporter(Exporter):
 
         _validate()
         channels = [
-            x.generate_mml(self.instruments, sets.measure_numbers)
+            x.generate_mml(self.instruments, settings.measure_numbers)
             for x in channels
         ]
 
@@ -469,7 +503,7 @@ class MmlExporter(Exporter):
 
         # TODO Move this into the to_mml_file
         sample_group = "optimized"
-        match sets.builtin_sample_group:
+        match settings.builtin_sample_group:
             case BuiltinSampleGroup.DEFAULT:
                 sample_group = "default"
             case BuiltinSampleGroup.OPTIMIZED:
@@ -483,11 +517,11 @@ class MmlExporter(Exporter):
 
         rv: str = tmpl.render(
             version=__version__,
-            global_legato=sets.global_legato,
+            global_legato=settings.global_legato,
             song=self,
             channels=channels,
             datetime=build_dt,
-            echo_config=sets.echo,
+            echo_config=settings.echo,
             inst_samples=inst_samples,
             custom_samples=samples,
             dynamics=list(Dynamics),
@@ -546,7 +580,7 @@ class MmlExporter(Exporter):
 
     def _start_legato(self) -> None:
         if not self.legato:
-            if (self.slur == SlurState.SLUR_ACTIVE) or self.grace:
+            if (self.slur == _SlurState.SLUR_ACTIVE) or self.grace:
                 self.legato = True
                 self._append("LEGATO_ON")
 
@@ -555,7 +589,7 @@ class MmlExporter(Exporter):
     def _stop_legato(self) -> None:
         if self.legato:
             if not (
-                self.grace or (self.slur == SlurState.SLUR_ACTIVE) or self.tie
+                self.grace or (self.slur == _SlurState.SLUR_ACTIVE) or self.tie
             ):
                 self.legato = False
                 self._append("LEGATO_OFF")
@@ -566,8 +600,8 @@ class MmlExporter(Exporter):
         grace_length = 8
         note_length = ""
 
-        if self.slur == SlurState.SLUR_END:
-            self.slur = SlurState.SLUR_IDLE
+        if self.slur == _SlurState.SLUR_END:
+            self.slur = _SlurState.SLUR_IDLE
             duration = 192 // token.duration
             duration = int(duration * (2 - 0.5**token.dots))
             self.legato = False
@@ -625,32 +659,6 @@ class MmlExporter(Exporter):
         if directive:
             self._append(directive)
 
-
-# Standard library imports
-from collections import Counter
-from dataclasses import dataclass, field
-from itertools import takewhile
-from typing import Iterable, Iterator, TypeVar, cast
-
-# Library imports
-from music21.pitch import Pitch
-
-# Package imports
-from smw_music.song import (
-    Clef,
-    Error,
-    Instrument,
-    Note,
-    Playable,
-    RehearsalMark,
-    Token,
-    dedupe_notes,
-    flatten,
-)
-from smw_music.spcmw.instrument import InstrumentConfig, NoteHead, dedupe_notes
-
-from .common import CRLF, notelen_str
-from .mml import MmlExporter
 
 ###############################################################################
 # Private variable/constant definitions
@@ -735,7 +743,7 @@ class Channel:  # pylint: disable=too-many-instance-attributes
         self._update_state_defaults(notelen)
 
         if notelen:
-            self._exporter.directives = [_notelen_str(notelen), CRLF]
+            self._exporter.directives = [_notelen_str(notelen), "\r\n"]
 
     ###########################################################################
 
@@ -811,4 +819,4 @@ class Channel:  # pylint: disable=too-many-instance-attributes
             self._exporter.emit(token)
 
         lines = " ".join(self._exporter.directives).splitlines()
-        return CRLF.join(x.strip() for x in lines)
+        return "\r\n".join(x.strip() for x in lines)
