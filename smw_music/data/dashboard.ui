@@ -2002,7 +2002,7 @@
                  <item row="8" column="1">
                   <widget class="QLabel" name="multisample_sample_output_label">
                    <property name="text">
-                    <string>Ouput</string>
+                    <string>Output</string>
                    </property>
                   </widget>
                  </item>
