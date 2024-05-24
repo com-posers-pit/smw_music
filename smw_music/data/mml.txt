@@ -14,6 +14,9 @@
     #title   "${song.title}"
     #game    "${song.game}"
     #comment "Ported by: ${song.porter}"
+%if project.duration:
+    #length ${project.duration}
+%endif
 }
 %if custom_samples:
 

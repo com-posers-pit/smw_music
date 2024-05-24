@@ -21,6 +21,8 @@ class ProjectSettingsView(QDialog):
     composer: QLineEdit
     composer_label: QLabel
     control_widget: QWidget
+    duration: QLineEdit
+    duration_label: QLabel
     game_name: QLineEdit
     game_name_label: QLabel
     musicxml_fname: QLineEdit

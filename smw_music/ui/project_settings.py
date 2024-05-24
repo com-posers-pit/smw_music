@@ -69,6 +69,7 @@ class ProjectSettingsDlg:
         d.musicxml_fname.setText(musicxml)
         d.porter_name.setText(info.porter)
         d.title.setText(info.title)
+        d.duration.setText(info.duration)
 
         if self._dialog.exec():
             musicxml = d.musicxml_fname.text()
@@ -84,6 +85,7 @@ class ProjectSettingsDlg:
                 title=d.title.text(),
                 porter=d.porter_name.text(),
                 game=d.game_name.text(),
+                duration=d.duration.text(),
             )
 
         return None

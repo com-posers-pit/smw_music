@@ -361,6 +361,7 @@ class ProjectInfo:
     title: str = ""
     porter: str = ""
     game: str = ""
+    duration: str = ""
 
     ###########################################################################
 
@@ -498,6 +499,7 @@ class Project:
                 contents["title"],
                 contents["porter"],
                 contents["game"],
+                contents["duration"],
             ),
             ProjectSettings(
                 contents["amk_settings"]["loop_analysis"],
@@ -552,6 +554,7 @@ class Project:
             "title": info.title,
             "porter": info.porter,
             "game": info.game,
+            "duration": info.duration,
             # ProjectSettings
             "global_echo": settings.global_echo,
             "echo": _save_echo(settings.echo),

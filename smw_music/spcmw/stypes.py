@@ -102,6 +102,7 @@ class ProjectDict(TypedDict):
     title: str
     porter: str
     game: str
+    duration: str
     global_echo: bool
     echo: EchoDict
     instruments: dict[str, InstrumentDict]

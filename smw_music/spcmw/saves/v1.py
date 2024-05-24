@@ -222,6 +222,7 @@ def to_v2(fname: Path, contents: SaveDict) -> v2.ProjectDict:
         "title": "",
         "porter": sdict["porter"],
         "game": sdict["game"],
+        "duration": "",
         "global_echo": sdict["global_echo_enable"],
         "echo": _load_echo(sdict["echo"]),
         "instruments": {
