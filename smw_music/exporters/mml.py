@@ -412,6 +412,16 @@ class MmlExporter(Exporter):
         self._in_loop = False
 
     ###########################################################################
+    # API property definitions
+    ###########################################################################
+
+    @property
+    def mml_fname(self) -> str:
+        return mml_fname(self.project)
+
+    ###########################################################################
+    # API method definitions
+    ###########################################################################
 
     def do_export(self, include_dt: bool = True) -> str:
         settings = self.project.settings
