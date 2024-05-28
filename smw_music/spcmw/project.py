@@ -48,7 +48,6 @@ from .advanced import (
 )
 from .common import SpcmwException
 from .instrument import (
-    INST_KEY,
     Artic,
     ArticSetting,
     InstrumentConfig,
