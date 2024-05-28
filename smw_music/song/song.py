@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from functools import cached_property
+from dataclasses import dataclass
 from pathlib import Path
 
 # Library imports
@@ -279,6 +279,7 @@ def _parse_part(
 ###############################################################################
 
 
+@dataclass
 class Song:
     """
     A complete song.
@@ -305,24 +306,14 @@ class Song:
         A list of instrument names for each detected instrument
     """
 
+    channels: list[list[Token]]
+    title: str = ("",)
+    composer: str = ("",)
+    porter: str = ("",)
+    game: str = ("",)
+
     ###########################################################################
     # API constructor definitions
-    ###########################################################################
-
-    def __init__(
-        self,
-        channels: list[list[Token]],
-        title: str = "",
-        composer: str = "",
-        porter: str = "",
-        game: str = "",
-    ):
-        self.title = title
-        self.composer = composer
-        self.porter = porter
-        self.game = game
-        self.channels = channels[:8]
-
     ###########################################################################
 
     @classmethod
@@ -371,7 +362,7 @@ class Song:
     # API property definitions
     ###########################################################################
 
-    @cached_property
+    @property
     def instruments(self) -> list[str]:
         instruments = set()
         for channel in self.channels:
@@ -382,7 +373,7 @@ class Song:
 
     ###########################################################################
 
-    @cached_property
+    @property
     def rehearsal_marks(self) -> dict[str, int]:
         """A dictionary mapping rehearsal marks to measure numbers"""
 
@@ -397,7 +388,7 @@ class Song:
 
     ###########################################################################
 
-    @cached_property
+    @property
     def tokens(self) -> list[Token]:
         tokens: list[Token] = []
 
