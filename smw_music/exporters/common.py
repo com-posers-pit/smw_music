@@ -13,7 +13,15 @@ from functools import singledispatchmethod
 
 # Package imports
 from smw_music.common import SmwMusicException
-from smw_music.song import Song, Token
+from smw_music.song import (
+    Dynamic,
+    Instrument,
+    Measure,
+    Repeat,
+    Song,
+    Tempo,
+    Token,
+)
 from smw_music.spcmw import Project
 
 ###############################################################################
@@ -39,10 +47,7 @@ class Exporter:
     ###########################################################################
 
     def export(self) -> None:
-        self.reduce()
-        self.prepare()
-        self.generate()
-        self.finalize()
+        pass
 
     ###########################################################################
 
@@ -52,32 +57,36 @@ class Exporter:
 
     ###########################################################################
 
-    def finalize(self) -> None:
-        pass
-
-    ###########################################################################
-
     # This needs to be included to keep mypy from complaining in subclasses
     @singledispatchmethod
     def emit(self, token: Token) -> None:
         raise NotImplementedError
 
     ###########################################################################
-
-    def generate(self, channels: list[list[Token]] | None = None) -> None:
-        if channels is None:
-            channels = self.song.channels
-
-        for channel in channels:
-            for token in channels:
-                self.emit(token)
-
+    # Private function definitions
     ###########################################################################
 
-    def prepare(self) -> None:
-        pass
+    def _late_start(self) -> None:
+        settings = self.project.settings
+        start_measure = settings.start_measure
 
-    ###########################################################################
+        if start_measure != 1:
+            # If starting after the first measure, disable loop analysis
+            # because things might be badly broken
+            settings.loop_analysis = False
+            settings.superloop_analysis = False
 
-    def reduce(self) -> None:
-        pass
+            for channel in self.song.channels:
+                to_drop = start_measure - 1
+                tokens: list[Token] = []
+                for n, token in enumerate(channel):
+                    if isinstance(
+                        token, (Dynamic, Instrument, Measure, Tempo, Repeat)
+                    ):
+                        tokens.append(token)
+                        if isinstance(token, Measure):
+                            to_drop -= 1
+                    if to_drop == 0:
+                        tokens.extend(channel[n + 1 :])
+                        break
+                channel[:] = tokens
