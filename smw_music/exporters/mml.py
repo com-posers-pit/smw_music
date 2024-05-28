@@ -563,7 +563,7 @@ class MmlExporter(Exporter):
         fname = mml_fname(project)
 
         update_sample_groups_file(
-            project.project_fname,
+            project.project_dir,
             project.settings.builtin_sample_group,
             project.settings.builtin_sample_sources,
         )
