@@ -14,6 +14,7 @@
 # Standard library imports
 import argparse
 import sys
+from pathlib import Path
 
 # Package imports
 from smw_music.common import __version__
@@ -30,7 +31,7 @@ def main(arg_list: list[str] | None = None) -> None:
     if arg_list is None:
         arg_list = sys.argv[1:]
     parser = argparse.ArgumentParser(description=f"SPCMW CLI v{__version__}")
-    parser.add_argument("spcmw", type=str, help="SPCMW Project File")
+    parser.add_argument("spcmw", type=Path, help="SPCMW Project File")
 
     args = parser.parse_args(arg_list)
 
