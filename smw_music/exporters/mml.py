@@ -423,37 +423,18 @@ class MmlExporter(Exporter):
     # API method definitions
     ###########################################################################
 
-    def do_export(self, include_dt: bool = True) -> str:
+    def export(self, include_dt: bool = True) -> None:
+        self._prepare()
+
         settings = self.project.settings
 
-        # If starting after the first measure, disable loop analysis because
-        # things might be badly broken
-        if settings.start_measure != 1:
-            settings.loop_analysis = False
-            settings.superloop_analysis = False
+        self._late_start()
 
         channels = _reduce(
             self.song.channels,
             settings.loop_analysis,
             settings.superloop_analysis,
         )
-
-        # TODO: A bit of a hack to allow starting at a later measure
-        if settings.start_measure != 1:
-            for channel in channels:
-                to_drop = settings.start_measure - 1
-                tokens: list[Token] = []
-                for n, token in enumerate(channel):
-                    if isinstance(
-                        token, (Dynamic, Instrument, Measure, Tempo, Repeat)
-                    ):
-                        tokens.append(token)
-                        if isinstance(token, Measure):
-                            to_drop -= 1
-                    if to_drop == 0:
-                        tokens.extend(channel[n + 1 :])
-                        break
-                channel[:] = tokens
 
         _validate()
         channels = [
@@ -511,7 +492,6 @@ class MmlExporter(Exporter):
 
         tmpl = Template(filename=str(RESOURCES / "mml.txt"))  # nosec B702
 
-        # TODO Move this into the to_mml_file
         sample_group = "optimized"
         match settings.builtin_sample_group:
             case BuiltinSampleGroup.DEFAULT:
@@ -547,15 +527,16 @@ class MmlExporter(Exporter):
         # empty.
         rv = str(rv).rstrip() + "\n"
 
-        if fname is not None:
-            with open(fname, "w", newline="\r\n") as fobj:
-                fobj.write(rv)
+        with open(self.mml_fname, "w", newline="\r\n") as fobj:
+            fobj.write(rv)
 
-        return rv
+        self._finalize()
 
     ###########################################################################
+    # Private method definitions
+    ###########################################################################
 
-    def finalize(self) -> None:
+    def _finalize(self) -> None:
         bad_samples = self._check_bad_tune()
         if bad_samples:
             msg = "\n".join(
@@ -568,9 +549,9 @@ class MmlExporter(Exporter):
 
     ###########################################################################
 
-    def prepare(self) -> None:
+    def _prepare(self) -> None:
         project = self.project
-        fname = mml_fname(project)
+        fname = self.mml_fname
 
         update_sample_groups_file(
             project.project_dir,
@@ -582,10 +563,7 @@ class MmlExporter(Exporter):
             shutil.copy2(fname, f"{fname}.bak")
 
         # TODO: Feed sample group back into export logic
-        self.do_export()
 
-    ###########################################################################
-    # Private method definitions
     ###########################################################################
 
     def _start_legato(self) -> None:
