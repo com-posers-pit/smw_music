@@ -75,6 +75,19 @@ from .common import Exporter
 ###############################################################################
 
 
+def _get_sample_group(group: BuiltinSampleGroup):
+    return {
+        BuiltinSampleGroup.DEFAULT: "default",
+        BuiltinSampleGroup.OPTIMIZED: "optimized",
+        BuiltinSampleGroup.REDUX1: "redux1",
+        BuiltinSampleGroup.REDUX2: "redux2",
+        BuiltinSampleGroup.CUSTOM: "custom",
+    }[group]
+
+
+###############################################################################
+
+
 def _notelen_str(notelen: int) -> str:
     rv = f"l{notelen}"
     return rv
@@ -492,18 +505,7 @@ class MmlExporter(Exporter):
 
         tmpl = Template(filename=str(RESOURCES / "mml.txt"))  # nosec B702
 
-        sample_group = "optimized"
-        match settings.builtin_sample_group:
-            case BuiltinSampleGroup.DEFAULT:
-                sample_group = "default"
-            case BuiltinSampleGroup.OPTIMIZED:
-                sample_group = "optimized"
-            case BuiltinSampleGroup.REDUX1:
-                sample_group = "redux1"
-            case BuiltinSampleGroup.REDUX2:
-                sample_group = "redux2"
-            case BuiltinSampleGroup.CUSTOM:
-                sample_group = "custom"
+        sample_group = _get_sample_group(settings.builtin_sample_group)
 
         rv: str = tmpl.render(
             version=__version__,
