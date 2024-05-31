@@ -9,7 +9,7 @@
 # Imports
 ###############################################################################
 
-from . import exporters, ext_tools, song, spc700, spcmw, ui, utils
+from . import export, ext_tools, song, spc700, spcmw, ui, utils
 from .common import COPYRIGHT_YEAR, RESOURCES, SmwMusicException, __version__
 
 ###############################################################################
@@ -21,7 +21,7 @@ __all__ = [
     "COPYRIGHT_YEAR",
     "RESOURCES",
     "SmwMusicException",
-    "exporters",
+    "export",
     "ext_tools",
     "song",
     "spc700",
