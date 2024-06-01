@@ -522,7 +522,7 @@ class MmlExporter(Exporter):
             custom_samples=samples,
             dynamics=list(Dynamics),
             sample_path=str(samples_dir(self.project)),
-            sample_groups=sample_group,
+            sample_group=sample_group,
         )
 
         rv = rv.replace(" ^", "^")

@@ -23,7 +23,7 @@
 #path "${sample_path}"
 
 #samples {
-    #${sample_groups}
+    #${sample_group}
 %for sample in set(x[0] for x in custom_samples):
     "${sample}"
 %endfor
@@ -37,7 +37,7 @@
 %else:
 
 #samples {
-    #${sample_groups}
+    #${sample_group}
 }
 %endif
 
