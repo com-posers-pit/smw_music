@@ -75,6 +75,55 @@ from .common import Exporter
 ###############################################################################
 
 
+def _collect_samples(instruments: dict[str, InstrumentConfig]) -> None:
+    inst_samples: dict[str, InstrumentSample] = {}
+
+    for inst_name, inst in instruments.items():
+        if inst.multisample:
+            inst_samples.update(inst.multisamples)
+        else:
+            inst_samples[inst_name] = inst.sample
+
+    samples: list[tuple[str, str, int]] = []
+    sample_id = 30
+
+    for sample in inst_samples.values():
+        if sample.sample_source == SampleSource.SAMPLEPACK:
+            fname = str(
+                PurePosixPath(sample.pack_sample[0]) / sample.pack_sample[1]
+            )
+            samples.append((fname, sample.brr_str, sample_id))
+            sample.instrument_idx = sample_id
+            sample_id += 1
+        if sample.sample_source == SampleSource.BRR:
+            fname = sample.brr_fname.name
+            samples.append((fname, sample.brr_str, sample_id))
+            sample.instrument_idx = sample_id
+            sample_id += 1
+
+    # Overwrite muted/soloed instrument sample numbers
+    solo = any(sample.solo for sample in inst_samples.values())
+    mute = any(sample.mute for sample in inst_samples.values())
+    solo |= any(inst.sample.solo for inst in instruments.values())
+    mute |= any(inst.sample.mute for inst in instruments.values())
+
+    if solo or mute:
+        samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
+
+        for inst_sample in inst_samples.values():
+            if inst_sample.mute or (solo and not inst_sample.solo):
+                inst_sample.sample_source = SampleSource.OVERRIDE
+                inst_sample.instrument_idx = sample_id
+
+        # Not necessary, but we keep it for consistency's sake
+        sample_id += 1
+
+    return inst_samples, samples
+
+
+###############################################################################
+
+
 def _get_sample_group(group: BuiltinSampleGroup):
     return {
         BuiltinSampleGroup.DEFAULT: "default",
@@ -459,50 +508,7 @@ class MmlExporter(Exporter):
         if include_dt:
             build_dt = datetime.utcnow().isoformat(" ", "seconds") + " UTC"
 
-        instruments = deepcopy(self.instruments)
-        inst_samples: dict[str, InstrumentSample] = {}
-
-        for inst_name, inst in instruments.items():
-            if inst.multisample:
-                inst_samples.update(inst.multisamples)
-            else:
-                inst_samples[inst_name] = inst.sample
-
-        samples: list[tuple[str, str, int]] = []
-        sample_id = 30
-
-        for sample in inst_samples.values():
-            if sample.sample_source == SampleSource.SAMPLEPACK:
-                fname = str(
-                    PurePosixPath(sample.pack_sample[0])
-                    / sample.pack_sample[1]
-                )
-                samples.append((fname, sample.brr_str, sample_id))
-                sample.instrument_idx = sample_id
-                sample_id += 1
-            if sample.sample_source == SampleSource.BRR:
-                fname = sample.brr_fname.name
-                samples.append((fname, sample.brr_str, sample_id))
-                sample.instrument_idx = sample_id
-                sample_id += 1
-
-        # Overwrite muted/soloed instrument sample numbers
-        solo = any(sample.solo for sample in inst_samples.values())
-        mute = any(sample.mute for sample in inst_samples.values())
-        solo |= any(inst.solo for inst in instruments.values())
-        mute |= any(inst.mute for inst in instruments.values())
-
-        if solo or mute:
-            samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
-
-            for inst_sample in inst_samples.values():
-                if inst_sample.mute or (solo and not inst_sample.solo):
-                    inst_sample.sample_source = SampleSource.OVERRIDE
-                    inst_sample.instrument_idx = sample_id
-
-            # Not necessary, but we keep it for consistency's sake
-            sample_id += 1
-
+        inst_samples, samples = _collect_samples(self.instruments)
         tmpl = Template(filename=str(RESOURCES / "mml.txt"))  # nosec B702
 
         sample_group = _get_sample_group(settings.builtin_sample_group)
