@@ -218,6 +218,7 @@ class MmlExporter(Exporter):
 
     def __init__(self, project: Project, song: Song | None = None) -> None:
         super().__init__(project, song)
+        self.instruments = deepcopy(project.settings.instruments)
 
         self._init_state()
         self.directives = []
@@ -514,10 +515,13 @@ class MmlExporter(Exporter):
         rv: str = tmpl.render(
             version=__version__,
             global_legato=settings.global_legato,
-            song=self,
+            info=self.project.info,
+            settings=self.project.settings,
+            song=self.song,
             channels=channels,
             datetime=build_dt,
             echo_config=settings.echo,
+            echo_init=0,  # Temporary
             inst_samples=inst_samples,
             custom_samples=samples,
             dynamics=list(Dynamics),

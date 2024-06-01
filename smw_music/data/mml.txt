@@ -14,11 +14,11 @@
     #title   "${song.title}"
     #game    "${song.game}"
     #comment "Ported by: ${song.porter}"
-%if project.duration:
-    #length ${project.duration}
+%if info.duration:
+    #length ${info.duration}
 %endif
 }
-%if custom_samples:
+%if custom_samples or sample_group != "default":
 
 #path "${sample_path}"
 
@@ -30,8 +30,8 @@
 }
 
 #instruments {
-%for sample, settings, idx in custom_samples:
-    "${sample}"${' '*(max(len(x[0]) for x in custom_samples) - len(sample))}          ${settings} ; @${idx}
+%for sample, sample_settings, idx in custom_samples:
+    "${sample}"${' '*(max(len(x[0]) for x in custom_samples) - len(sample))}          ${sample_settings} ; @${idx}
 %endfor
 }
 %else:
@@ -42,7 +42,7 @@
 %endif
 
 ; PORTER: GLOBAL VOLUME HERE
-w${song.volume}
+w${settings.global_volume}
 
 %if inst_samples:
 ; PORTER: INSTRUMENT DEFINITIONS HERE
@@ -112,7 +112,7 @@ w${song.volume}
 %if echo_config:
 ; Echo settings
 
-${f'$EF${echo_config.channel_reg:02X}${echo_config.left_vol_reg:02X}${echo_config.right_vol_reg:02X}'}
+${f'$EF${echo_init:02X}${echo_config.left_vol_reg:02X}${echo_config.right_vol_reg:02X}'}
 ${f'$F1${echo_config.delay:02X}${echo_config.fb_reg:02X}${echo_config.fir_filt:02X}'}
 
 %endif
