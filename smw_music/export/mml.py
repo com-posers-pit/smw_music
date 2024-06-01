@@ -499,10 +499,8 @@ class MmlExporter(Exporter):
         )
 
         _validate()
-        channels = [
-            x.generate_mml(self.instruments, settings.measure_numbers)
-            for x in channels
-        ]
+        channels = []
+        # [ x.generate_mml(self.instruments, settings.measure_numbers) for x in channels ]
 
         build_dt = ""
         if include_dt:
