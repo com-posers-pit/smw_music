@@ -1632,7 +1632,6 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         total_size = 0
         # TODO: Unify sample size calcs
         for sample in self.settings.samples.values():
-            size = 0
             match sample.source:
                 case SamplePackSample(pack, path):
                     is_pack = True
@@ -1640,8 +1639,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 case BrrSample(path):
                     is_pack = False
                     pack = ""
+                    size = 0
                     with suppress(FileNotFoundError):
                         size = brr_size_b(os.stat(path).st_size)
+                case _:
+                    continue
 
             key = (is_pack, pack, path)
             if key not in handled:
