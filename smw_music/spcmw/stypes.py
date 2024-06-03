@@ -83,7 +83,7 @@ class SampleDict(TypedDict):
     pan_setting: int
     pan_l_invert: bool
     pan_r_invert: bool
-    source: BrrSampleDict | BuiltinSampleDict | "SamplePackSampleDict"
+    source: "BrrSampleDict | BuiltinSampleDict | SamplePackSampleDict"
     adsr_mode: bool
     attack_setting: int
     decay_setting: int
