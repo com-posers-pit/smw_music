@@ -341,8 +341,6 @@ class Dashboard(QWidget):
         index = self._view.builtin_sample.currentIndex()
         self._model.on_builtin_sample_selected(state, index)
 
-    ###########################################################################
-
     def on_mml_generated(self, mml: str) -> None:
         self._view.mml_view.setText(mml)
 
@@ -375,11 +373,14 @@ class Dashboard(QWidget):
     ###########################################################################
 
     def on_pack_sample_changed(self) -> None:
-        items = self._view.sample_pack_list.selectedItems()
-        if items:
-            self._model.on_pack_sample_changed(
-                items[0].data(0, Qt.ItemDataRole.UserRole)
-            )
+        item = self._sample_pack_item
+        if item[0]:
+            self._model.on_pack_sample_changed(item)
+
+    ###########################################################################
+
+    def on_pack_sample_selected(self, state: bool) -> None:
+        self._model.on_pack_sample_selected(state, self._sample_pack_item)
 
     ###########################################################################
 
@@ -700,7 +701,7 @@ class Dashboard(QWidget):
             # Instrument sample
             (v.select_builtin_sample, self.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
-            (v.select_pack_sample, m.on_pack_sample_selected),
+            (v.select_pack_sample, self.on_pack_sample_selected),
             (v.select_brr_sample, self.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.select_multisample_sample, m.on_multisample_sample_selected),
@@ -1549,6 +1550,18 @@ class Dashboard(QWidget):
     @property
     def _proj_settings(self) -> ProjectSettings:
         return self._state.project.settings
+
+    ###########################################################################
+
+    @property
+    def _sample_pack_item(self) -> tuple[str, Path]:
+        rv = ("", Path(""))
+
+        items = self._view.sample_pack_list.selectedItems()
+        with suppress(IndexError):
+            rv = items[0].data(0, Qt.ItemDataRole.UserRole)
+
+        return rv
 
     ###########################################################################
 
