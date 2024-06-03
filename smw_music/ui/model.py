@@ -1104,7 +1104,7 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def _get_tune(self, state: State) -> tuple[float, tuple[int, float]]:
         brr: Brr | None = None
-        with suppress(NoProject, NoSample):
+        with suppress(NoProject, NoSample, KeyError):
             sample = state.sample
             match sample.source:
                 case SamplePackSample(pack, path):
@@ -1632,14 +1632,17 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         total_size = 0
         # TODO: Unify sample size calcs
         for sample in self.settings.samples.values():
+            size = 0
             match sample.source:
                 case SamplePackSample(pack, path):
                     is_pack = True
-                    size = brr_size_b(len(self._sample_packs[pack][path].data))
+                    with suppress(KeyError):
+                        size = brr_size_b(
+                            len(self._sample_packs[pack][path].data)
+                        )
                 case BrrSample(path):
                     is_pack = False
                     pack = ""
-                    size = 0
                     with suppress(FileNotFoundError):
                         size = brr_size_b(os.stat(path).st_size)
                 case _:
