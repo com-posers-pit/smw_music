@@ -14,7 +14,6 @@ from .instrument import (
     InstrumentConfig,
     InstrumentSample,
     NoteHead,
-    SampleSource,
     TuneSource,
     Tuning,
     extract_instruments,
@@ -28,7 +27,15 @@ from .project import (
     ProjectInfo,
     ProjectSettings,
 )
-from .sample import Sample, SamplePack, SampleParams
+from .sample import (
+    BrrSample,
+    BuiltinSample,
+    Sample,
+    SamplePack,
+    SamplePackSample,
+    SampleParams,
+    SampleSource,
+)
 from .spcmw import (
     create_project,
     first_use,
@@ -50,7 +57,6 @@ __all__ = [
     "InstrumentConfig",
     "InstrumentSample",
     "NoteHead",
-    "SampleSource",
     "TuneSource",
     "Tuning",
     "extract_instruments",
@@ -61,9 +67,13 @@ __all__ = [
     "Project",
     "EXTENSION",
     "OLD_EXTENSION",
+    "BrrSample",
+    "BuiltinSample",
     "Sample",
     "SamplePack",
+    "SamplePackSample",
     "SampleParams",
+    "SampleSource",
     "create_project",
     "first_use",
     "get_preferences",

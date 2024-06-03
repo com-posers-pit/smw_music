@@ -149,11 +149,11 @@ Sample
 .. mermaid::
 
    flowchart LR
-      view.select_builtin_sample.toggled --> model.on_builtin_sample_selected
+      view.select_builtin_sample.toggled --> dashboard.on_builtin_sample_selected --> model.on_builtin_sample_selected
       view.builtin_sample.currentIndexChanged --> model.on_builtin_sample_changed
       view.select_pack_sample.toggled --> model.on_pack_sample_selected
       view.sample_pack_list.itemSelectionChanged --> model.on_pack_sample_changed
-      view.select_brr_sample.toggled --> model.on_brr_sample_selected
+      view.select_brr_sample.toggled --> dashboard.on_brr_sample_selected --> model.on_brr_sample_selected
       view.select_brr_fname.released --> dashboard.on_brr_clicked
       view.brr_fname.editingFinished --> model.on_brr_fname_changed
       view.select_multisample_sample.toggled --> model.on_multisample_sample_selected

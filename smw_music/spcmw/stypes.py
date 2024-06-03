@@ -10,7 +10,7 @@
 ###############################################################################
 
 # Standard library imports
-from typing import TypedDict
+from typing import Literal, TypedDict
 
 ###############################################################################
 # API type definitions
@@ -33,6 +33,22 @@ class AmkSettings(TypedDict):
     global_legato: bool
     builtin_sample_group: int
     builtin_sample_sources: list[int]
+
+
+###############################################################################
+
+
+class BrrSampleDict(TypedDict):
+    type: Literal["brr"]
+    path: str
+
+
+###############################################################################
+
+
+class BuiltinSampleDict(TypedDict):
+    type: Literal["builtin"]
+    idx: int
 
 
 ###############################################################################
@@ -67,10 +83,7 @@ class SampleDict(TypedDict):
     pan_setting: int
     pan_l_invert: bool
     pan_r_invert: bool
-    sample_source: int
-    builtin_sample_index: int
-    pack_sample: list[str]
-    brr_fname: str
+    source: BrrSampleDict | BuiltinSampleDict | "SamplePackSampleDict"
     adsr_mode: bool
     attack_setting: int
     decay_setting: int
@@ -108,3 +121,12 @@ class ProjectDict(TypedDict):
     instruments: dict[str, InstrumentDict]
     adv_settings: dict[str, AdvDict]
     amk_settings: AmkSettings
+
+
+###############################################################################
+
+
+class SamplePackSampleDict(TypedDict):
+    type: Literal["pack"]
+    pack: str
+    sample: str

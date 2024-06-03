@@ -24,6 +24,7 @@ from smw_music.ext_tools.amk import (
 )
 
 from .. import stypes as v2
+from ..common import SpcmwException
 
 ###############################################################################
 # API type definitions
@@ -168,10 +169,7 @@ def _load_sample(sample: SampleDict) -> v2.SampleDict:
         "pan_setting": sample["pan_setting"],
         "pan_l_invert": sample.get("pan_l_invert", False),
         "pan_r_invert": sample.get("pan_r_invert", False),
-        "sample_source": sample["sample_source"],
-        "builtin_sample_index": sample["builtin_sample_index"],
-        "pack_sample": sample["pack_sample"],
-        "brr_fname": sample["brr_fname"],
+        "source": _load_sample_source(sample),
         "adsr_mode": sample["adsr_mode"],
         "attack_setting": sample["attack_setting"],
         "decay_setting": sample["decay_setting"],
@@ -191,6 +189,24 @@ def _load_sample(sample: SampleDict) -> v2.SampleDict:
     }
 
     return rv
+
+
+###############################################################################
+
+
+def _load_sample_source(
+    sample: SampleDict,
+) -> v2.BrrSampleDict | v2.BuiltinSampleDict | v2.SamplePackSampleDict:
+    match sample["sample_source"]:
+        case 0:
+            return {"type": "builtin", "idx": sample["builtin_sample_index"]}
+        case 1:
+            pack, path, *_ = sample["pack_sample"]
+            return {"type": "pack", "pack": pack, "sample": path}
+        case 2:  # Brr
+            return {"type": "brr", "path": sample["brr_fname"]}
+        case _:
+            raise SpcmwException("Loading invalid sample type")
 
 
 ###############################################################################

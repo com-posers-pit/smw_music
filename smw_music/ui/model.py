@@ -54,6 +54,8 @@ from smw_music.spcmw import (
     INST_KEY,
     Artic,
     ArticSetting,
+    BrrSample,
+    BuiltinSample,
     Dynamics,
     InstrumentConfig,
     InstrumentSample,
@@ -62,6 +64,7 @@ from smw_music.spcmw import (
     ProjectInfo,
     ProjectSettings,
     SamplePack,
+    SamplePackSample,
     SampleParams,
     SampleSource,
     TuneSource,
@@ -134,10 +137,7 @@ class _SampleT(TypedDict, total=False):
     pan_enabled: bool
     pan_setting: int
     pan_invert: tuple[bool, bool]
-    sample_source: SampleSource
-    builtin_sample_index: int
-    pack_sample: tuple[str, Path]
-    brr_fname: Path
+    source: SampleSource
     params: SampleParams
     mute: bool
     solo: bool
@@ -388,16 +388,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
                 [bytes, Envelope, int, int, int], None
             ] | Callable[[Path, Envelope, int, int, int], None]
             arg: bytes | Path
-            match sample.sample_source:
-                case SampleSource.SAMPLEPACK:
+            match sample.source:
+                case SamplePackSample(pack, path):
                     play = True
-                    pack, path = sample.pack_sample
                     target = self._sample_player.play_bin
                     arg = self._sample_packs[pack][path].data
-                case SampleSource.BRR:
+                case BrrSample(path):
                     play = True
                     target = self._sample_player.play_file
-                    arg = sample.brr_fname
+                    arg = path
 
             if play:
                 self._sample_player_th = threading.Thread(
@@ -414,16 +413,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_brr_fname_changed(self, fname: str) -> None:
         msg = f"BRR set to {fname}"
-        self._update_sample_state(
-            msg, brr_fname=Path(fname), sample_source=SampleSource.BRR
-        )
+        self._update_sample_state(msg, source=BrrSample(Path(fname)))
 
     ###########################################################################
 
-    def on_brr_sample_selected(self, state: bool) -> None:
+    def on_brr_sample_selected(self, state: bool, fname: str) -> None:
         if state:
             msg = "Sample source set to BRR"
-            self._update_sample_state(msg, sample_source=SampleSource.BRR)
+            self._update_sample_state(msg, source=BrrSample(Path(fname)))
 
     ###########################################################################
 
@@ -438,16 +435,14 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
 
     def on_builtin_sample_changed(self, index: int) -> None:
         msg = f"Builtin sample {index} selected"
-        self._update_sample_state(
-            msg, builtin_sample_index=index, sample_source=SampleSource.BUILTIN
-        )
+        self._update_sample_state(msg, source=BuiltinSample(index))
 
     ###########################################################################
 
-    def on_builtin_sample_selected(self, state: bool) -> None:
+    def on_builtin_sample_selected(self, state: bool, index: int) -> None:
         if state:
             msg = "Sample source set to builtin"
-            self._update_sample_state(msg, sample_source=SampleSource.BUILTIN)
+            self._update_sample_state(msg, source=BuiltinSample(index))
 
     ###########################################################################
 
@@ -718,24 +713,26 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
     ###########################################################################
 
     def on_pack_sample_changed(self, item_id: tuple[str, Path]) -> None:
-        msg = f"Sample pack {item_id[0]}:{str(item_id[1])} selected"
-        self._update_sample_state(
-            msg, pack_sample=item_id, sample_source=SampleSource.SAMPLEPACK
-        )
+        pack, path = item_id
+        msg = f"Sample pack {pack}:{str(path)} selected"
+        self._update_sample_state(msg, source=SamplePackSample(pack, path))
+        # TODO: Why is this here?
         self._load_sample_settings(item_id)
 
     ###########################################################################
 
-    def on_pack_sample_selected(self, state: bool) -> None:
+    def on_pack_sample_selected(
+        self, state: bool, item_id: tuple[str, Path]
+    ) -> None:
+        pack, path = item_id
         with suppress(NoSample):
             if state:
                 msg = "Sample source set to sample pack"
                 self._update_sample_state(
-                    msg, sample_source=SampleSource.SAMPLEPACK
+                    msg, source=SamplePackSample(pack, path)
                 )
-                sample = self.state.sample.pack_sample
-                if sample[0]:
-                    self._load_sample_settings(sample)
+                if pack:
+                    self._load_sample_settings(item_id)
 
     ###########################################################################
 
@@ -1109,13 +1106,11 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         brr: Brr | None = None
         with suppress(NoProject, NoSample):
             sample = state.sample
-            match sample.sample_source:
-                case SampleSource.SAMPLEPACK:
-                    pack, path = sample.pack_sample
+            match sample.source:
+                case SamplePackSample(pack, path):
                     brr = self._sample_packs[pack][path].brr
-                case SampleSource.BRR:
-                    with suppress(FileNotFoundError):
-                        brr = Brr.from_file(sample.brr_fname)
+                case BrrSample(path):
+                    brr = Brr.from_file(path)
 
         calculated_tune = (0.0, (0, 0.0))
         if brr is not None:
@@ -1638,17 +1633,15 @@ class Model(QObject):  # pylint: disable=too-many-public-methods
         # TODO: Unify sample size calcs
         for sample in self.settings.samples.values():
             size = 0
-            if sample.sample_source == SampleSource.SAMPLEPACK:
-                is_pack = True
-                pack, path = sample.pack_sample
-                if pack:
+            match sample.source:
+                case SamplePackSample(pack, path):
+                    is_pack = True
                     size = brr_size_b(len(self._sample_packs[pack][path].data))
-            else:
-                is_pack = False
-                pack = ""
-                path = sample.brr_fname
-                with suppress(FileNotFoundError):
-                    size = brr_size_b(os.stat(path).st_size)
+                case BrrSample(path):
+                    is_pack = False
+                    pack = ""
+                    with suppress(FileNotFoundError):
+                        size = brr_size_b(os.stat(path).st_size)
 
             key = (is_pack, pack, path)
             if key not in handled:

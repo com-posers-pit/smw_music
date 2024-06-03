@@ -307,10 +307,10 @@ class Song:
     """
 
     channels: list[list[Token]]
-    title: str = ("",)
-    composer: str = ("",)
-    porter: str = ("",)
-    game: str = ("",)
+    title: str = ""
+    composer: str = ""
+    porter: str = ""
+    game: str = ""
 
     ###########################################################################
     # API constructor definitions

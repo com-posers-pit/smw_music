@@ -15,6 +15,7 @@ from contextlib import suppress
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
+from typing import cast
 
 # Library imports
 import yaml
@@ -53,11 +54,25 @@ from .instrument import (
     InstrumentConfig,
     InstrumentSample,
     Pitch,
+)
+from .sample import (
+    BrrSample,
+    BuiltinSample,
+    SamplePackSample,
+    SampleParams,
     SampleSource,
 )
-from .sample import SampleParams
 from .saves import v0, v1
-from .stypes import AdvDict, EchoDict, InstrumentDict, ProjectDict, SampleDict
+from .stypes import (
+    AdvDict,
+    BrrSampleDict,
+    BuiltinSampleDict,
+    EchoDict,
+    InstrumentDict,
+    ProjectDict,
+    SampleDict,
+    SamplePackSampleDict,
+)
 
 ###############################################################################
 # API constant definitions
@@ -180,10 +195,7 @@ def _load_sample(inst: SampleDict) -> InstrumentSample:
             inst.get("pan_l_invert", False),
             inst.get("pan_r_invert", False),
         ),
-        sample_source=SampleSource(inst["sample_source"]),
-        builtin_sample_index=inst["builtin_sample_index"],
-        pack_sample=(inst["pack_sample"][0], Path(inst["pack_sample"][1])),
-        brr_fname=Path(inst["brr_fname"]),
+        source=_load_sample_source(inst),
         params=SampleParams(
             envelope=Envelope(
                 adsr_mode=inst["adsr_mode"],
@@ -205,6 +217,27 @@ def _load_sample(inst: SampleDict) -> InstrumentSample:
         start=Pitch(inst["start"]),
         track=bool(inst.get("track", False)),
     )
+
+
+###############################################################################
+
+
+def _load_sample_source(
+    sample: SampleDict,
+) -> SampleSource:
+    source = sample["source"]
+    match source["type"]:
+        case "brr":
+            source = cast(BrrSampleDict, source)
+            return BrrSample(Path(source["path"]))
+        case "builtin":
+            source = cast(BuiltinSampleDict, source)
+            return BuiltinSample(source["idx"])
+        case "pack":
+            source = cast(SamplePackSampleDict, source)
+            return SamplePackSample(source["pack"], Path(source["sample"]))
+        case _:
+            raise SpcmwException("Loading invalid sample type")
 
 
 ###############################################################################
@@ -282,10 +315,7 @@ def _save_sample(sample: InstrumentSample) -> SampleDict:
         "pan_setting": sample.pan_setting,
         "pan_l_invert": sample.pan_invert[0],
         "pan_r_invert": sample.pan_invert[1],
-        "sample_source": sample.sample_source.value,
-        "builtin_sample_index": sample.builtin_sample_index,
-        "pack_sample": [sample.pack_sample[0], str(sample.pack_sample[1])],
-        "brr_fname": str(sample.brr_fname),
+        "source": _save_sample_source(sample.source),
         "adsr_mode": sample.params.envelope.adsr_mode,
         "attack_setting": sample.params.envelope.attack_setting,
         "decay_setting": sample.params.envelope.decay_setting,
@@ -303,6 +333,23 @@ def _save_sample(sample: InstrumentSample) -> SampleDict:
         "start": str(sample.start),
         "track": bool(sample.track),
     }
+
+
+###############################################################################
+
+
+def _save_sample_source(
+    source: SampleSource,
+) -> BrrSampleDict | BuiltinSampleDict | SamplePackSampleDict:
+    match source:
+        case BrrSample(path):
+            return {"type": "brr", "path": str(path)}
+        case BuiltinSample(idx):
+            return {"type": "builtin", "idx": idx}
+        case SamplePackSample(pack, sample):
+            return {"type": "pack", "pack": pack, "sample": str(sample)}
+        case _:
+            raise SpcmwException("Saving invalid sample source")
 
 
 ###############################################################################

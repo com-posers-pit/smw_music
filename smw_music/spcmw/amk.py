@@ -30,9 +30,8 @@ from smw_music.ext_tools import amk
 from smw_music.utils import append_suffix
 
 from .common import SpcmwException
-from .instrument import SampleSource
 from .project import Project
-from .sample import SamplePack
+from .sample import BrrSample, BuiltinSample, SamplePack, SamplePackSample
 
 ###############################################################################
 # Private function definitions
@@ -61,17 +60,17 @@ def _copy_samples(project: Project, packs: dict[str, SamplePack]) -> None:
     msg = ""
     for inst in project.settings.instruments.values():
         for sample in inst.samples.values():
-            if sample.sample_source == SampleSource.BRR:
-                shutil.copy2(sample.brr_fname, samples_path)
-            if sample.sample_source == SampleSource.SAMPLEPACK:
-                pack_name, pack_path = sample.pack_sample
-                target = samples_path / pack_name / pack_path
-                os.makedirs(target.parents[0], exist_ok=True)
-                with open(target, "wb") as fobj:
-                    try:
-                        fobj.write(packs[pack_name][pack_path].data)
-                    except KeyError:
-                        msg += f"Could not find sample pack {pack_name}\n"
+            match sample.source:
+                case BrrSample(path):
+                    shutil.copy2(path, samples_path)
+                case SamplePackSample(pack_name, pack_path):
+                    target = samples_path / pack_name / pack_path
+                    os.makedirs(target.parents[0], exist_ok=True)
+                    with open(target, "wb") as fobj:
+                        try:
+                            fobj.write(packs[pack_name][pack_path].data)
+                        except KeyError:
+                            msg += f"Could not find sample pack {pack_name}\n"
 
     if msg:
         raise SpcmwException(msg)

@@ -53,14 +53,15 @@ from smw_music.ext_tools.amk import (
     BuiltinSampleSource,
 )
 from smw_music.spc700 import Envelope, GainMode
-from smw_music.spcmw import EXTENSION, OLD_EXTENSION, Artic
-from smw_music.spcmw import Dynamics as Dyn
 from smw_music.spcmw import (
-    InstrumentSample,
-    SamplePack,
-    SampleSource,
-    TuneSource,
+    EXTENSION,
+    OLD_EXTENSION,
+    Artic,
+    BrrSample,
+    BuiltinSample,
 )
+from smw_music.spcmw import Dynamics as Dyn
+from smw_music.spcmw import SamplePack, SamplePackSample, TuneSource
 from smw_music.spcmw.project import ProjectInfo, ProjectSettings
 from smw_music.utils import brr_size, codename, hexb, pct
 
@@ -330,6 +331,18 @@ class Dashboard(QWidget):
 
     ###########################################################################
 
+    def on_brr_sample_selected(self, state: bool) -> None:
+        fname = self._view.brr_fname.text()
+        self._model.on_brr_sample_selected(state, fname)
+
+    ###########################################################################
+
+    def on_builtin_sample_selected(self, state: bool) -> None:
+        index = self._view.builtin_sample.currentIndex()
+        self._model.on_builtin_sample_selected(state, index)
+
+    ###########################################################################
+
     def on_mml_generated(self, mml: str) -> None:
         self._view.mml_view.setText(mml)
 
@@ -522,7 +535,7 @@ class Dashboard(QWidget):
             self._update_multisample(state)
 
             with suppress(NoSample):
-                if state.sample.sample_source == SampleSource.BUILTIN:
+                if isinstance(state.sample.source, BuiltinSample):
                     v.sample_pack_list.clearSelection()
                 tuning = state.sample.tuning
                 v.tuning_use_auto_freq.setChecked(
@@ -685,10 +698,10 @@ class Dashboard(QWidget):
             (v.multisample_sample_output, self.on_multisample_sample_changed),
             (v.multisample_sample_track, self.on_multisample_sample_changed),
             # Instrument sample
-            (v.select_builtin_sample, m.on_builtin_sample_selected),
+            (v.select_builtin_sample, self.on_builtin_sample_selected),
             (v.builtin_sample, m.on_builtin_sample_changed),
             (v.select_pack_sample, m.on_pack_sample_selected),
-            (v.select_brr_sample, m.on_brr_sample_selected),
+            (v.select_brr_sample, self.on_brr_sample_selected),
             (v.select_brr_fname, self.on_brr_clicked),
             (v.select_multisample_sample, m.on_multisample_sample_selected),
             (v.brr_fname, m.on_brr_fname_changed),
@@ -1342,37 +1355,42 @@ class Dashboard(QWidget):
         v.pan_r_invert.setChecked(sel_sample.pan_invert[1])
 
         # Instrument sample
-        v.select_builtin_sample.setChecked(
-            sel_sample.sample_source == SampleSource.BUILTIN
-        )
-        v.builtin_sample.setCurrentIndex(sel_sample.builtin_sample_index)
+        source = sel_sample.source
+        if isinstance(source, BuiltinSample):
+            checked = True
+            idx = source.idx
+        else:
+            checked = False
+            idx = 0
+        v.select_builtin_sample.setChecked(checked)
+        v.builtin_sample.setCurrentIndex(idx)
 
-        samplepack = sel_sample.sample_source == SampleSource.SAMPLEPACK
-        v.select_pack_sample.setChecked(samplepack)
-        if samplepack:
+        if isinstance(source, SamplePackSample):
+            checked = True
             with suppress(KeyError):
                 v.sample_pack_list.setCurrentItem(
-                    self._sample_pack_items[sel_sample.pack_sample]
+                    self._sample_pack_items[(source.pack, source.sample)]
                 )
         else:
+            checked = False
             v.sample_pack_list.clearSelection()
+        v.select_pack_sample.setChecked(checked)
 
-        v.sample_settings_box.setEnabled(
-            sel_sample.sample_source != SampleSource.BUILTIN
-        )
+        v.sample_settings_box.setEnabled(not isinstance(source, BuiltinSample))
 
-        v.select_brr_sample.setChecked(
-            sel_sample.sample_source == SampleSource.BRR
-        )
-
-        v.brr_fname.setText("")
-        v.brr_size.setText("")
-        if fname := sel_sample.brr_fname.name:
-            v.brr_fname.setText(str(fname))
+        size = ""
+        if isinstance(source, BrrSample):
+            checked = True
+            fname = str(source.path)
             with suppress(FileNotFoundError):
-                v.brr_size.setText(
-                    brr_size(stat(sel_sample.brr_fname).st_size) + " KB"
-                )
+                size = brr_size(stat(source.path).st_size) + " KB"
+        else:
+            checked = False
+            fname = ""
+
+        v.select_brr_sample.setChecked(checked)
+        v.brr_fname.setText(fname)
+        v.brr_size.setText(size)
 
         v.octave_shift.setValue(sel_sample.octave_shift)
 

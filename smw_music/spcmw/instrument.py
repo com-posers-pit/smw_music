@@ -11,7 +11,6 @@
 # Standard library imports
 from dataclasses import dataclass, field, replace
 from enum import IntEnum, auto
-from pathlib import Path
 from typing import TypedDict, Union, Unpack, cast
 
 # Library imports
@@ -32,7 +31,7 @@ from smw_music.song import (
 from smw_music.spc700 import SAMPLE_FREQ
 from smw_music.utils import hexb
 
-from .sample import SampleParams
+from .sample import BuiltinSample, SampleParams, SampleSource
 
 ###############################################################################
 # API constant definitions
@@ -108,16 +107,6 @@ class ArticSetting:
 ###############################################################################
 
 
-class SampleSource(IntEnum):
-    BUILTIN = auto()
-    SAMPLEPACK = auto()
-    BRR = auto()
-    OVERRIDE = auto()
-
-
-###############################################################################
-
-
 class TuneSource(IntEnum):
     AUTO = auto()
     MANUAL_NOTE = auto()
@@ -170,10 +159,7 @@ class InstrumentSample:
     pan_enabled: bool = False
     pan_setting: int = 10
     pan_invert: tuple[bool, bool] = (False, False)
-    sample_source: SampleSource = SampleSource.BUILTIN
-    builtin_sample_index: int = 0
-    pack_sample: tuple[str, Path] = ("", Path())
-    brr_fname: Path = field(default_factory=Path)
+    source: SampleSource = field(default_factory=lambda: BuiltinSample(0))
     params: SampleParams = field(default_factory=SampleParams)
     mute: bool = False
     solo: bool = False
@@ -184,8 +170,6 @@ class InstrumentSample:
     tuning: Tuning = field(default_factory=Tuning)
     track: bool = False
     echo: bool = False
-
-    _instrument_idx: int = field(default=0, init=False)
 
     ###########################################################################
     # API method definitions
@@ -239,22 +223,6 @@ class InstrumentSample:
     @property
     def brr_str(self) -> str:
         return " ".join(map(hexb, self.brr_setting))
-
-    ###########################################################################
-
-    @property
-    def instrument_idx(self) -> int:
-        if self.sample_source == SampleSource.BUILTIN:
-            return self.builtin_sample_index
-        return self._instrument_idx
-
-    ###########################################################################
-
-    # TODO
-    #    @instrument_idx.setter
-    #    def instrument_idx(self, idx: int) -> None:
-    #        if self.sample_source != SampleSource.BUILTIN:
-    #            self._instrument_idx = idx
 
     ###########################################################################
 
@@ -324,6 +292,7 @@ class InstrumentConfig:
     ) -> "InstrumentConfig":
         name = name.lower()
 
+        # TODO: This should be in an N-SPC or SMW-specific module
         if name == "drumset":
             inst = cls.make_percussion(**kwargs)
         else:
@@ -341,11 +310,9 @@ class InstrumentConfig:
                 "electricguitar": 17,
             }
 
-            idx = inst_map.get(name, 0)
+            source = BuiltinSample(inst_map.get(name, 0))
             inst = cls(**kwargs)
-            inst = replace(
-                inst, sample=replace(inst.sample, builtin_sample_index=idx)
-            )
+            inst = replace(inst, sample=replace(inst.sample, source=source))
 
         return inst
 
@@ -379,7 +346,7 @@ class InstrumentConfig:
                 ulim=pitch,
                 start=pitch,
                 notehead=notehead,
-                builtin_sample_index=idx,
+                source=BuiltinSample(idx),
             )
             for name, pitch, notehead, idx in sample_defs
         }

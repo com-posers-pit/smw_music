@@ -26,6 +26,29 @@ from smw_music.spc700 import Brr, Envelope, GainMode
 ###############################################################################
 
 
+class SampleSource:
+    pass
+
+
+###############################################################################
+
+
+@dataclass
+class BrrSample(SampleSource):
+    path: Path
+
+
+###############################################################################
+
+
+@dataclass
+class BuiltinSample(SampleSource):
+    idx: int
+
+
+###############################################################################
+
+
 @dataclass
 class Sample:
     path: Path
@@ -108,6 +131,15 @@ class SamplePack:
                     samples[path] = Sample(path, default_params, data)
 
         self._samples = samples
+
+
+###############################################################################
+
+
+@dataclass
+class SamplePackSample(SampleSource):
+    pack: str
+    sample: Path
 
 
 ###############################################################################
