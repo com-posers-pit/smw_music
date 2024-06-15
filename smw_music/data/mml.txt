@@ -30,8 +30,8 @@
 }
 
 #instruments {
-%for sample, sample_settings, idx in custom_samples:
-    "${sample}"${' '*(max(len(x[0]) for x in custom_samples) - len(sample))}          ${sample_settings} ; @${idx}
+%for idx, config in custom_samples.items():
+    "${config.path}"${' '*(max(len(x[0]) for x in custom_samples) - len(config.path))}          ${config.settings} ; @${idx}
 %endfor
 }
 %else:

@@ -17,9 +17,9 @@ from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum, auto
-from functools import singledispatchmethod
+from functools import cached_property, singledispatchmethod
 from itertools import takewhile
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import Iterable, Iterator, TypeVar, cast
 
 # Library imports
@@ -61,14 +61,22 @@ from smw_music.song import (
     reduce,
 )
 from smw_music.spcmw import (
+    BrrSample,
+    BuiltinSample,
     InstrumentConfig,
     InstrumentSample,
     Project,
-    SampleSource,
+    SamplePackSample,
 )
 from smw_music.spcmw.amk import mml_fname, samples_dir
 
 from .common import Exporter
+
+###############################################################################
+# Private constant definitions
+###############################################################################
+
+CUSTOM_SAMPLE_START = 30
 
 ###############################################################################
 # Private function definitions
@@ -135,9 +143,8 @@ def _validate() -> None:
 
 @dataclass
 class _SampleConfig:
-    path: PurePosixPath
-    tune: str
-    idx: int
+    path: Path
+    settings: str
 
 
 ###############################################################################
@@ -169,6 +176,7 @@ class MmlExporter(Exporter):
 
     _instrument: InstrumentConfig
     _inst_idx: dict[str, int]
+    _custom_samples: dict[int, _SampleConfig]
 
     _active_sample_name: str
     _active_sample: InstrumentSample
@@ -186,6 +194,7 @@ class MmlExporter(Exporter):
         self._init_state()
         self.directives = []
         self._inst_idx = {}
+        self._custom_samples = {}
 
     ###########################################################################
 
@@ -195,51 +204,17 @@ class MmlExporter(Exporter):
     ###########################################################################
 
     def _collect_samples(self) -> None:
-        instruments = self.instruments
-        inst_samples: dict[str, InstrumentSample] = {}
+        for name, sample in self._inst_samples.items():
+            match sample.source:
+                case BrrSample(path):
+                    self._new_custom_sample(name, path, sample.brr_str)
+                case BuiltinSample(idx):
+                    self._inst_idx[name] = idx
+                case SamplePackSample(pack, sample):
+                    path = PurePosixPath(pack) / sample
+                    self._new_custom_sample(name, path, sample.brr_str)
 
-        # Collect instruments and multisamples into a single dictionary
-        for inst_name, inst in instruments.items():
-            if inst.multisample:
-                inst_samples.update(inst.multisamples)
-            else:
-                inst_samples[inst_name] = inst.sample
-
-        samples: list[tuple[str, str, int]] = []
-        sample_id = 30
-
-        for name, sample in inst_samples.items():
-            if sample.sample_source == SampleSource.BUILTIN:
-                self._inst_idx[name] = sample.builtin_sample_index
-            if sample.sample_source == SampleSource.SAMPLEPACK:
-                fname = str(
-                    PurePosixPath(sample.pack_sample[0])
-                    / sample.pack_sample[1]
-                )
-                samples.append((fname, sample.brr_str, sample_id))
-                self._inst_idx[name] = sample_id
-                sample_id += 1
-            if sample.sample_source == SampleSource.BRR:
-                fname = sample.brr_fname.name
-                samples.append((fname, sample.brr_str, sample_id))
-                self._inst_idx[name] = sample_id
-                sample_id += 1
-
-        # Overwrite muted/soloed instrument sample numbers
-        solo = any(sample.solo for sample in inst_samples.values())
-        mute = any(sample.mute for sample in inst_samples.values())
-        solo |= any(inst.sample.solo for inst in instruments.values())
-        mute |= any(inst.sample.mute for inst in instruments.values())
-
-        if solo or mute:
-            samples.append(("../EMPTY.brr", "$00 $00 $00 $00 $00", sample_id))
-
-            for name, inst_sample in inst_samples.items():
-                if inst_sample.mute or (solo and not inst_sample.solo):
-                    inst_sample.sample_source = SampleSource.OVERRIDE
-                    self._inst_idx[name] = sample_id
-
-        return inst_samples, samples
+        self._mutify()
 
     ###########################################################################
 
@@ -253,6 +228,35 @@ class MmlExporter(Exporter):
         self.legato = False
         self.articulation = Artic.NORMAL
         self.last_percussion = ""
+
+    ###########################################################################
+
+    def _mutify(self) -> None:
+        instruments = self.instruments
+        inst_samples = self._inst_samples
+
+        # Overwrite muted/soloed instrument sample numbers
+        solo = any(sample.solo for sample in inst_samples.values())
+        mute = any(sample.mute for sample in inst_samples.values())
+        solo |= any(inst.sample.solo for inst in instruments.values())
+        mute |= any(inst.sample.mute for inst in instruments.values())
+
+        if solo or mute:
+            empty_idx = CUSTOM_SAMPLE_START + len(self._custom_samples)
+            self._custom_samples[empty_idx] = _SampleConfig(
+                "../Empty.brr", "$00 $00 $00 $00 $00"
+            )
+
+            for name, inst_sample in inst_samples.items():
+                if inst_sample.mute or (solo and not inst_sample.solo):
+                    self._inst_idx[name] = empty_idx
+
+    ###########################################################################
+
+    def _new_custom_sample(self, name: str, path: Path, settings: str) -> None:
+        sample_idx = CUSTOM_SAMPLE_START + len(self._custom_samples)
+        self._inst_idx[name] = sample_idx
+        self._custom_samples[sample_idx] = _SampleConfig(path, settings)
 
     ###########################################################################
 
@@ -496,6 +500,23 @@ class MmlExporter(Exporter):
         return mml_fname(self.project)
 
     ###########################################################################
+    # Private property definitions
+    ###########################################################################
+
+    @cached_property
+    def _inst_samples(self) -> dict[str, InstrumentSample]:
+        rv: dict[str, InstrumentSample] = {}
+
+        # Collect instruments and multisamples into a single dictionary
+        for inst_name, inst in self.instruments.items():
+            if inst.multisample:
+                rv.update(inst.multisamples)
+            else:
+                rv[inst_name] = inst.sample
+
+        return rv
+
+    ###########################################################################
     # API method definitions
     ###########################################################################
 
@@ -535,8 +556,8 @@ class MmlExporter(Exporter):
             datetime=build_dt,
             echo_config=settings.echo,
             echo_init=0,  # Temporary
-            inst_samples=inst_samples,
-            custom_samples=samples,
+            inst_samples=self._inst_idx,
+            custom_samples=self._custom_samples,
             dynamics=list(Dynamics),
             sample_path=str(samples_dir(self.project)),
             sample_group=sample_group,
