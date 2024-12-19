@@ -41,7 +41,7 @@ classifiers = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10,<3.12"
+python = "^3.10"
 music21 = "^8.1.0"
 Mako = "^1.1.6"
 PyQt6 = "^6.2.3"
