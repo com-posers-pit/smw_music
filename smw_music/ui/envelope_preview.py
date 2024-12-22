@@ -31,15 +31,18 @@ class _Rect(pg.BarGraphItem):  # type: ignore
     ###########################################################################
 
     def __init__(
-        self, x0: float, x1: float, height: float, color: Color
+        self, x0: float, x1: float, width: float, height: float, color: Color
     ) -> None:
-        super().__init__(brush=QBrush(color.value))
-        self.move(x0, x1, height)
+        super().__init__(
+            x0=x0, x1=x1, width=width, height=height, brush=QBrush(color.value)
+        )
 
     ###########################################################################
 
-    def move(self, x0: float, x1: float, height: float = 1) -> None:
-        self.setOpts(x0=[x0], x1=[x1], height=[height])
+    def move(
+        self, x0: float, x1: float, width: float = 1, height: float = 1
+    ) -> None:
+        self.setOpts(x0=[x0], x1=[x1], height=[height], width=[width])
 
 
 ###############################################################################
@@ -56,9 +59,9 @@ class EnvelopePreview(QWidget):
         self._graph = pg.PlotWidget()
         self._graph.setBackground("w")
 
-        self._attack = _Rect(0, 0, 0, Color.GOLD)
-        self._decay = _Rect(0, 0, 0, Color.BLUE_GROTTO)
-        self._release = _Rect(0, 0, 0, Color.CHILI_PEPPER)
+        self._attack = _Rect(0, 0, 0, 0, Color.GOLD)
+        self._decay = _Rect(0, 0, 0, 0, Color.BLUE_GROTTO)
+        self._release = _Rect(0, 0, 0, 0, Color.CHILI_PEPPER)
         self._graph.addItem(self._attack)
         self._graph.addItem(self._decay)
         self._graph.addItem(self._release)
