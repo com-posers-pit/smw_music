@@ -427,9 +427,7 @@ class ProjectSettings:
     superloop_analysis: bool = False
     measure_numbers: bool = True
     start_measure: int = 1
-    instruments: dict[str, InstrumentConfig] = field(
-        default_factory=lambda: {}
-    )
+    instruments: dict[str, InstrumentConfig] = field(default_factory=dict)
     global_volume: int = 128
     global_legato: bool = True
     global_echo: bool = True
